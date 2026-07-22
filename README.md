@@ -10,12 +10,12 @@ Tonalli Memo exists because platform risk became visible after xolosArmy's X acc
 
 The backend may index. The web UI may display. But the public signal should be verifiable on eCash.
 
-Posts are public blockchain transactions. The public feed can be reconstructed from indexed eCash transactions, rather than treated as data that only exists inside one application database.
+Posts are public blockchain transactions. Known transaction IDs can later be revalidated through Chronik instead of treated as data that only exists inside one application database. Complete automatic feed reconstruction still requires a future transaction-discovery mechanism.
 
 ## Core Flow
 
 ```text
-Tonalli Wallet -> OP_RETURN transaction -> Chronik -> Tonalli Memo indexer -> public feed -> TXID verification
+OP_RETURN transaction -> known TXID -> Chronik revalidation -> public verification
 ```
 
 ## MVP Scope
@@ -64,7 +64,7 @@ Alias support may begin with a curated registry before dynamic alias resolution 
 
 ## Wallet Context
 
-Tonalli Wallet already has optional OP_RETURN memo support with visual inspection before signing.
+Wallet clients can support OP_RETURN memo creation with visual inspection before signing.
 
 For the first MVP, Tonalli Memo assumes a conservative 80-byte UTF-8 OP_RETURN payload policy unless the wallet or client policy is later changed after testing and review.
 
@@ -74,7 +74,9 @@ Clients should show the decoded OP_RETURN message before signing and make the tr
 
 Tonalli Memo should treat eCash transactions as the public verification surface.
 
-The indexer can store parsed events, profile mappings, status flags and display metadata, but it should be able to re-verify indexed posts through Chronik.
+Future indexers can store parsed events, profile mappings, status flags and display metadata, but known posts should be re-verifiable through Chronik.
+
+Complete automatic feed reconstruction requires a future discovery mechanism, such as scanning authorized posting addresses or maintaining a canonical TXID list. The current protocol-core work only defines the memo envelope and validation behavior.
 
 A public feed entry should expose its transaction ID and confirmation status. A user should be able to inspect the TXID through an eCash explorer or other compatible verification tool.
 

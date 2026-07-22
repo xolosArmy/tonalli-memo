@@ -1,14 +1,16 @@
 # Tonalli Memo Protocol
 
-Status: Draft v0
+Status: Draft v0 normative core
 
-This protocol defines a compact OP_RETURN envelope for short eCash-native public messages.
+Tonalli Memo defines a compact OP_RETURN envelope for verified official eCash-native project messages.
 
-The human-readable product name is "Tonalli Memo". The on-chain prefix is compact:
+Tonalli Memo is not a Twitter clone, Mastodon replacement or general-purpose social network in v0. The first milestone remains:
 
 ```text
-TM0
+Publish -> verify -> display -> share
 ```
+
+This document specifies the protocol language only. Chronik integration, SQLite, indexing, wallet signing, deployment and UI display are future components and are not implemented by the protocol core package.
 
 ## v0 Envelope
 
@@ -16,99 +18,121 @@ TM0
 TM0|<type>|<profile>|<payload>
 ```
 
+The marker is case-sensitive and must be exactly `TM0`.
+
+Parsers must split only on the first three `|` delimiters. Any later `|` characters are part of the payload and must not be interpreted as structural separators.
+
 ## Fields
-
-### `TM0`
-
-Protocol marker for Tonalli Memo v0.
 
 ### `type`
 
-One-letter event type.
+`type` is exactly one lowercase ASCII letter.
 
-Supported v0 types:
+Active v0 event types:
 
 - `p` = post
-- `l` = link/reference
 - `s` = status/signal
+
+Reserved v0 event types:
+
+- `l` = link/reference
+
+The decoder may recognize reserved type `l`, but the default strict encoder and validator reject it until its exact semantics are defined.
 
 ### `profile`
 
-Short profile code resolved by the Tonalli Memo alias registry.
+`profile` is a lowercase ASCII profile code. Strict validation accepts only known profile codes.
 
-Initial profile codes:
+Initial immutable profile codes:
 
 - `xa` = xolosarmy.xec
 - `ty` = teyolia.xec
 - `tw` = tonalli.xec
 - `em` = ecashmx.xec
 
+The meaning of a profile code must not be reassigned. Authorized posting addresses for a profile may rotate later without changing the profile code.
+
 ### `payload`
 
-UTF-8 text payload.
+`payload` is non-empty UTF-8 text. Implementations must not trim, normalize or silently alter it.
+
+## Byte Policy
+
+The default limit is 80 UTF-8 bytes for the complete envelope, not the payload alone and not JavaScript string length.
+
+An envelope of exactly 80 bytes is valid. An envelope of 81 bytes is invalid under the default policy.
+
+Implementations should measure bytes with `new TextEncoder().encode(value).length` or an equivalent UTF-8 byte measurement.
+
+Clients must show a byte counter before signing and must show the decoded OP_RETURN message before signing.
+
+## Decoding And Validation
+
+Structural decoding and strict protocol validation are separate operations.
+
+Structural decoding:
+
+1. Accepts a string or byte sequence.
+2. Rejects invalid UTF-8 byte sequences.
+3. Requires the marker, type, profile and payload fields to be present.
+4. Requires marker `TM0` exactly.
+5. Reports unknown `TMn` markers as unsupported protocol versions.
+6. Splits only the first three separators.
+7. Returns the raw type, raw profile, raw payload and complete-envelope byte length.
+
+Strict validation:
+
+1. Requires type to be exactly one lowercase ASCII letter.
+2. Rejects unknown event types.
+3. Rejects reserved event types by default.
+4. Requires profile to be lowercase ASCII.
+5. Rejects unknown profile codes by default.
+6. Rejects empty payloads.
+7. Rejects envelopes over the active byte limit.
+
+Deterministic validation errors are part of the protocol core API. Callers should test machine-readable error codes rather than human-readable prose.
 
 ## Examples
 
 ```text
 TM0|p|xa|signal now lives on eCash
 TM0|s|xa|Review first. Capital fourth.
-TM0|l|ty|Review package updated
+TM0|p|xa|Review|verify|publish
 ```
 
-## Byte Policy
+The third example has payload `Review|verify|publish`.
 
-For the MVP, clients SHOULD enforce a conservative 80-byte UTF-8 payload policy for the entire OP_RETURN message unless wallet and relay policy are reviewed and changed.
+## Future Application State
 
-Clients MUST show a byte counter before signing.
+The following fields are future indexer/UI state and are not part of the OP_RETURN envelope.
 
-Clients MUST show the decoded OP_RETURN message before signing.
+```text
+chain_status:
+- unconfirmed
+- confirmed
 
-## Validation Rules
+verification_status:
+- verified
+- unverified
+- invalid
 
-A Tonalli Memo v0 event is valid if:
-
-1. The transaction contains an OP_RETURN output.
-2. The OP_RETURN payload begins with `TM0|`.
-3. The payload can be decoded as UTF-8.
-4. The payload follows the format `TM0|type|profile|payload`.
-5. The type is recognized.
-6. The profile code exists in the local alias registry.
-7. The message length is within the active client policy.
-8. The indexer can associate the transaction with an authorized posting address for that profile, or else marks the event as unverified.
-
-## Statuses
-
-### `unconfirmed`
-
-The transaction has been seen but has not yet reached the required confirmation threshold.
-
-### `confirmed`
-
-The transaction has reached the required confirmation threshold.
-
-### `invalid`
-
-The transaction does not satisfy the active Tonalli Memo v0 parsing or validation rules.
-
-### `unverified`
-
-The transaction is parseable as a Tonalli Memo event, but the indexer cannot associate it with an authorized posting address for the claimed profile.
-
-### `hidden_from_ui`
-
-The event is intentionally not displayed in the default public feed.
-
-Hiding an event from the UI does not delete the on-chain transaction.
+visibility:
+- visible
+- hidden
+- flagged
+```
 
 ## MVP Identity Model
 
-v0 may use a curated alias registry.
+v0 may use a curated alias registry. Dynamic eCash alias resolution can be added later.
 
-Dynamic eCash alias resolution can be added later.
+Official profile verification is a UI/indexer decision derived from known addresses and registry data. Alias/profile claims must not be trusted unless verified against that data.
 
-Official profile verification is a UI/indexer decision derived from known addresses and registry data.
+## Reconstruction Semantics
 
-Alias/profile claims must not be trusted unless verified against the registry.
+The MVP can revalidate known TXIDs through Chronik.
+
+Complete automatic feed reconstruction requires a later transaction-discovery mechanism, such as scanning authorized posting addresses or maintaining a canonical TXID list. Automatic complete reconstruction is not provided by the protocol envelope itself.
 
 ## Security Considerations
 
@@ -117,8 +141,9 @@ Alias/profile claims must not be trusted unless verified against the registry.
 - Clients must display decoded OP_RETURN before signing.
 - Clients must display fees and outputs before signing.
 - The indexer must not treat database entries as source of truth.
-- The indexer should be able to re-verify posts from Chronik.
+- The indexer should be able to re-verify known posts through Chronik.
 - Alias/profile claims must not be trusted unless verified against the registry.
+- Tonalli Memo does not guarantee message availability through any single website, API provider or node.
 
 ## Future Extensions
 

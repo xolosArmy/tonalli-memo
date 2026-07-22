@@ -1,0 +1,49 @@
+{
+  "valid": [
+    {
+      "name": "Genesis memo",
+      "envelope": "TM0|p|xa|signal now lives on eCash",
+      "byteLength": 34
+    },
+    {
+      "name": "Status message",
+      "envelope": "TM0|s|xa|Review first. Capital fourth."
+    },
+    {
+      "name": "Payload containing additional pipes",
+      "envelope": "TM0|p|xa|Review|verify|publish",
+      "payload": "Review|verify|publish"
+    },
+    {
+      "name": "UTF-8 accented text",
+      "envelope": "TM0|p|ty|Señal pública verificada"
+    },
+    {
+      "name": "UTF-8 emoji within byte limit",
+      "envelope": "TM0|s|tw|Signal live ✅"
+    },
+    {
+      "name": "Exactly 80 UTF-8 bytes",
+      "note": "Generated in vectors.test.ts as TM0|p|xa| plus 71 ASCII payload bytes."
+    }
+  ],
+  "invalid": [
+    { "name": "Empty string", "envelope": "", "stage": "decode", "code": "INVALID_FORMAT" },
+    { "name": "Missing fields", "envelope": "TM0|p|xa", "stage": "decode", "code": "INVALID_FORMAT" },
+    { "name": "Lowercase marker", "envelope": "tm0|p|xa|hello", "stage": "decode", "code": "INVALID_MARKER" },
+    { "name": "Unknown version", "envelope": "TM1|p|xa|hello", "stage": "decode", "code": "UNSUPPORTED_VERSION" },
+    { "name": "Unknown type", "envelope": "TM0|r|xa|hello", "stage": "validate", "code": "UNKNOWN_TYPE" },
+    { "name": "Reserved type under default validation", "envelope": "TM0|l|xa|reference later", "stage": "validate", "code": "RESERVED_TYPE" },
+    { "name": "Uppercase type", "envelope": "TM0|P|xa|hello", "stage": "validate", "code": "INVALID_TYPE_FORMAT" },
+    { "name": "Type longer than one character", "envelope": "TM0|pp|xa|hello", "stage": "validate", "code": "INVALID_TYPE_FORMAT" },
+    { "name": "Unknown profile", "envelope": "TM0|p|zz|hello", "stage": "validate", "code": "UNKNOWN_PROFILE" },
+    { "name": "Uppercase profile", "envelope": "TM0|p|XA|hello", "stage": "validate", "code": "INVALID_PROFILE_FORMAT" },
+    { "name": "Empty payload", "envelope": "TM0|p|xa|", "stage": "validate", "code": "EMPTY_PAYLOAD" },
+    { "name": "Envelope of 81 UTF-8 bytes", "note": "Generated in vectors.test.ts as TM0|p|xa| plus 72 ASCII payload bytes.", "stage": "validate", "code": "PAYLOAD_TOO_LARGE" },
+    { "name": "Invalid UTF-8 supplied as Uint8Array", "bytes": [84, 77, 48, 124, 255], "stage": "decode", "code": "INVALID_UTF8" },
+    { "name": "Malformed envelope without enough separators", "envelope": "TM0|p", "stage": "decode", "code": "INVALID_FORMAT" },
+    { "name": "Leading structural space in type", "envelope": "TM0| p|xa|hello", "stage": "validate", "code": "INVALID_TYPE_FORMAT" },
+    { "name": "Trailing structural space in profile", "envelope": "TM0|p|xa |hello", "stage": "validate", "code": "INVALID_PROFILE_FORMAT" },
+    { "name": "Multibyte character count below 80 but UTF-8 bytes exceed 80", "note": "Generated in validate.test.ts using 18 rocket emoji.", "stage": "validate", "code": "PAYLOAD_TOO_LARGE" }
+  ]
+}
