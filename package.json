@@ -10,9 +10,11 @@
     "test": "vitest run",
     "build": "pnpm registry:generate && tsc -b",
     "registry:generate": "node scripts/generate-registry-data.mjs",
-    "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs"
+    "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs",
+    "smoke:compiled-chronik": "node scripts/smoke-compiled-chronik.mjs"
   },
   "devDependencies": {
+    "@tonalli-memo/chronik": "workspace:*",
     "@tonalli-memo/registry": "workspace:*",
     "@eslint/js": "^9.18.0",
     "@types/node": "^24.0.0",
