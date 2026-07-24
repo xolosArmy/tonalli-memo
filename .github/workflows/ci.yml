@@ -41,3 +41,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Compiled registry smoke test
+        run: |
+          pnpm smoke:compiled-registry
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-registry.mjs"
