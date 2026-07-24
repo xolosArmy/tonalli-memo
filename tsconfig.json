@@ -6,6 +6,9 @@
     },
     {
       "path": "./packages/registry"
+    },
+    {
+      "path": "./packages/chronik"
     }
   ]
 }
