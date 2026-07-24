@@ -53,3 +53,9 @@ jobs:
           pnpm smoke:compiled-chronik
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-chronik.mjs"
+
+      - name: Compiled verification smoke test
+        run: |
+          pnpm smoke:compiled-verification
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-verification.mjs"
