@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.5
+      '@tonalli-memo/registry':
+        specifier: workspace:*
+        version: link:packages/registry
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.3
@@ -28,6 +31,12 @@ importers:
         version: 2.1.9(@types/node@24.13.3)
 
   packages/protocol: {}
+
+  packages/registry:
+    dependencies:
+      '@tonalli-memo/protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
 packages:
 

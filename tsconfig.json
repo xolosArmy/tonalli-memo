@@ -1,6 +1,11 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/protocol" }
+    {
+      "path": "./packages/protocol"
+    },
+    {
+      "path": "./packages/registry"
+    }
   ]
 }
