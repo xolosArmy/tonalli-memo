@@ -59,3 +59,9 @@ jobs:
           pnpm smoke:compiled-verification
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-verification.mjs"
+
+      - name: Compiled indexer smoke test
+        run: |
+          pnpm smoke:compiled-indexer
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-indexer.mjs"

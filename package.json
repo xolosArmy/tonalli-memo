@@ -7,18 +7,20 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
-    "test": "vitest run",
+    "test": "pnpm -r test",
     "build": "pnpm registry:generate && tsc -b",
     "registry:generate": "node scripts/generate-registry-data.mjs",
     "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs",
     "smoke:compiled-chronik": "node scripts/smoke-compiled-chronik.mjs",
-    "smoke:compiled-verification": "node scripts/smoke-compiled-verification.mjs"
+    "smoke:compiled-verification": "node scripts/smoke-compiled-verification.mjs",
+    "smoke:compiled-indexer": "node scripts/smoke-compiled-indexer.mjs"
   },
   "devDependencies": {
     "@tonalli-memo/chronik": "workspace:*",
     "@tonalli-memo/protocol": "workspace:*",
     "@tonalli-memo/registry": "workspace:*",
     "@tonalli-memo/verification": "workspace:*",
+    "@tonalli-memo/indexer": "workspace:*",
     "@eslint/js": "^9.18.0",
     "@types/node": "^24.0.0",
     "eslint": "^9.18.0",
