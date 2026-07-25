@@ -1,0 +1,31 @@
+{
+  "name": "@tonalli-memo/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@tonalli-memo/verification": "workspace:*",
+    "@tonalli-memo/chronik": "workspace:*",
+    "better-sqlite3": "12.11.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13"
+  }
+}

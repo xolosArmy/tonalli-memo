@@ -2,6 +2,12 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+apps/indexer/data/*.db
+apps/indexer/data/*.db-wal
+apps/indexer/data/*.db-shm
+apps/indexer/data/*.sqlite
+apps/indexer/data/*.sqlite-wal
+apps/indexer/data/*.sqlite-shm
 
 # Environment and local-only files
 .env
