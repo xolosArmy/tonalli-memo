@@ -18,11 +18,14 @@
     "build": "tsc -b",
     "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "node dist/cli.js"
   },
   "dependencies": {
     "@tonalli-memo/verification": "workspace:*",
     "@tonalli-memo/chronik": "workspace:*",
+    "@fastify/cors": "11.3.0",
+    "fastify": "5.8.5",
     "better-sqlite3": "12.11.1"
   },
   "devDependencies": {

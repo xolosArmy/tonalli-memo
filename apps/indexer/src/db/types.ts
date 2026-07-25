@@ -93,3 +93,9 @@ export interface StoredIndexingAttempt {
   readonly diagnostics: unknown;
   readonly attemptedAt: number;
 }
+
+
+export interface VerifiedFeedRow {
+  readonly transaction: StoredTransactionRow;
+  readonly verification: StoredVerificationRecord;
+}
