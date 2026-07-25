@@ -6,7 +6,8 @@ import type {
   IndexerDatabase,
   StoredIndexingAttempt,
   StoredTransactionRow,
-  StoredVerificationRecord
+  StoredVerificationRecord,
+  VerifiedFeedRow
 } from "./types.js";
 import type { MappedIndexingResult, MappedVerificationRecord } from "../engine/mapper.js";
 
@@ -52,6 +53,11 @@ interface VerificationSqlRow {
   readonly diagnostics_json: string;
   readonly first_indexed_at: number;
   readonly last_verified_at: number;
+}
+
+interface VerifiedFeedSqlRow extends Omit<TransactionSqlRow, "first_indexed_at">, Omit<VerificationSqlRow, "first_indexed_at"> {
+  readonly transaction_first_indexed_at: number;
+  readonly verification_first_indexed_at: number;
 }
 
 interface AttemptSqlRow {
@@ -116,6 +122,55 @@ export class MemoStore {
       .all(txid) as AttemptSqlRow[];
     return rows.map(toAttemptRow);
   }
+
+  listVerifiedFeed(limit: number): readonly VerifiedFeedRow[] {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error("Verified feed limit must be an integer between 1 and 100.");
+    }
+
+    const rows = this.connection
+      .prepare(
+        `
+        SELECT
+          t.txid,
+          t.chain_status,
+          t.is_coinbase,
+          t.is_final,
+          t.block_height,
+          t.block_hash,
+          t.block_timestamp,
+          t.first_seen_at,
+          t.normalized_json,
+          t.first_indexed_at AS transaction_first_indexed_at,
+          t.updated_at,
+          v.verification_status,
+          v.protocol_version,
+          v.event_type,
+          v.profile_code,
+          v.payload,
+          v.byte_length,
+          v.candidate_output_index,
+          v.candidate_push_index,
+          v.authorizing_address,
+          v.authorizing_input_index,
+          v.evaluation_height,
+          v.authorization_context_json,
+          v.authorization_decisions_json,
+          v.diagnostics_json,
+          v.first_indexed_at AS verification_first_indexed_at,
+          v.last_verified_at
+        FROM verification_records v
+        INNER JOIN transactions t ON t.txid = v.txid
+        WHERE v.verification_status = 'VERIFIED'
+        ORDER BY COALESCE(t.block_height, 9223372036854775807) DESC, v.last_verified_at DESC, t.txid ASC
+        LIMIT ?
+        `
+      )
+      .all(limit) as VerifiedFeedSqlRow[];
+
+    return rows.map(toVerifiedFeedRow);
+  }
+
 
   private upsertTransaction(transaction: NormalizedTransaction, nowSeconds: number): void {
     const chainStatus = deriveChainStatus(transaction);
@@ -290,5 +345,43 @@ function toAttemptRow(row: AttemptSqlRow): StoredIndexingAttempt {
     diagnosticsJson: row.diagnostics_json,
     diagnostics: JSON.parse(row.diagnostics_json) as unknown,
     attemptedAt: row.attempted_at
+  };
+}
+
+
+function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
+  return {
+    transaction: toTransactionRow({
+      txid: row.txid,
+      chain_status: row.chain_status,
+      is_coinbase: row.is_coinbase,
+      is_final: row.is_final,
+      block_height: row.block_height,
+      block_hash: row.block_hash,
+      block_timestamp: row.block_timestamp,
+      first_seen_at: row.first_seen_at,
+      normalized_json: row.normalized_json,
+      first_indexed_at: row.transaction_first_indexed_at,
+      updated_at: row.updated_at
+    }),
+    verification: toVerificationRow({
+      txid: row.txid,
+      verification_status: row.verification_status,
+      protocol_version: row.protocol_version,
+      event_type: row.event_type,
+      profile_code: row.profile_code,
+      payload: row.payload,
+      byte_length: row.byte_length,
+      candidate_output_index: row.candidate_output_index,
+      candidate_push_index: row.candidate_push_index,
+      authorizing_address: row.authorizing_address,
+      authorizing_input_index: row.authorizing_input_index,
+      evaluation_height: row.evaluation_height,
+      authorization_context_json: row.authorization_context_json,
+      authorization_decisions_json: row.authorization_decisions_json,
+      diagnostics_json: row.diagnostics_json,
+      first_indexed_at: row.verification_first_indexed_at,
+      last_verified_at: row.last_verified_at
+    })
   };
 }

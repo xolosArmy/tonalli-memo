@@ -65,3 +65,9 @@ jobs:
           pnpm smoke:compiled-indexer
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-indexer.mjs"
+
+      - name: Compiled HTTP API smoke test
+        run: |
+          pnpm smoke:compiled-http-api
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-http-api.mjs"

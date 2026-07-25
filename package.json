@@ -13,14 +13,15 @@
     "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs",
     "smoke:compiled-chronik": "node scripts/smoke-compiled-chronik.mjs",
     "smoke:compiled-verification": "node scripts/smoke-compiled-verification.mjs",
-    "smoke:compiled-indexer": "node scripts/smoke-compiled-indexer.mjs"
+    "smoke:compiled-indexer": "node scripts/smoke-compiled-indexer.mjs",
+    "smoke:compiled-http-api": "node scripts/smoke-compiled-http-api.mjs"
   },
   "devDependencies": {
     "@tonalli-memo/chronik": "workspace:*",
+    "@tonalli-memo/indexer": "workspace:*",
     "@tonalli-memo/protocol": "workspace:*",
     "@tonalli-memo/registry": "workspace:*",
     "@tonalli-memo/verification": "workspace:*",
-    "@tonalli-memo/indexer": "workspace:*",
     "@eslint/js": "^9.18.0",
     "@types/node": "^24.0.0",
     "eslint": "^9.18.0",
