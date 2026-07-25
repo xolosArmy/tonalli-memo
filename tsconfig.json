@@ -9,6 +9,9 @@
     },
     {
       "path": "./packages/chronik"
+    },
+    {
+      "path": "./packages/verification"
     }
   ]
 }

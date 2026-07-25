@@ -14,9 +14,15 @@ importers:
       '@tonalli-memo/chronik':
         specifier: workspace:*
         version: link:packages/chronik
+      '@tonalli-memo/protocol':
+        specifier: workspace:*
+        version: link:packages/protocol
       '@tonalli-memo/registry':
         specifier: workspace:*
         version: link:packages/registry
+      '@tonalli-memo/verification':
+        specifier: workspace:*
+        version: link:packages/verification
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.3
@@ -49,6 +55,18 @@ importers:
       '@tonalli-memo/protocol':
         specifier: workspace:*
         version: link:../protocol
+
+  packages/verification:
+    dependencies:
+      '@tonalli-memo/chronik':
+        specifier: workspace:*
+        version: link:../chronik
+      '@tonalli-memo/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@tonalli-memo/registry':
+        specifier: workspace:*
+        version: link:../registry
 
 packages:
 
