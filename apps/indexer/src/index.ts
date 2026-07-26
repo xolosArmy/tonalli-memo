@@ -4,6 +4,8 @@ export { toStoredNormalizedTransaction, serializeStoredTransaction } from "./db/
 export { MemoStore } from "./db/store.js";
 export { mapVerificationResult } from "./engine/mapper.js";
 export { IndexingEngine } from "./engine/indexer.js";
+export { IndexerDaemon } from "./daemon/daemon.js";
+export { BoundedWorkQueue } from "./daemon/queue.js";
 export { createIndexerApi } from "./api/server.js";
 export { registerApiRoutes } from "./api/routes.js";
 export { parseIndexerCliConfig, ConfigError } from "./cli/config.js";
@@ -19,9 +21,11 @@ export type {
   StoredOpReturnOutput,
   StoredTransactionRow,
   StoredVerificationRecord,
-  VerifiedFeedRow
+  VerifiedFeedRow,
+  TransactionInactiveReason
 } from "./db/types.js";
-export type { PersistIndexingResultInput, PersistIndexingResultOutput } from "./db/store.js";
+export type { MarkTransactionInactiveOutput, PersistIndexingResultInput, PersistIndexingResultOutput } from "./db/store.js";
+export type { IndexerDaemonLogger, IndexerDaemonOptions, IndexerDaemonState, IndexerDaemonStatus } from "./daemon/types.js";
 export type {
   AuthorizationDecisionDto,
   CandidateLocationDto,

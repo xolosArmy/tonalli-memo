@@ -71,3 +71,9 @@ jobs:
           pnpm smoke:compiled-http-api
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-http-api.mjs"
+
+      - name: Compiled daemon smoke test
+        run: |
+          pnpm smoke:compiled-daemon
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-daemon.mjs"

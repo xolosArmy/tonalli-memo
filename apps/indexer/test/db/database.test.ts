@@ -12,13 +12,13 @@ import { mapVerificationResult } from "../../src/engine/mapper.js";
 import { verifiedResult, TXID } from "../fixtures.js";
 
 describe("indexer database", () => {
-  it("sets schema version 1 and reopens idempotently", () => {
+  it("sets current schema version and reopens idempotently", () => {
     const database = openIndexerDatabase({ filename: ":memory:" });
     expect(database.connection.pragma("user_version", { simple: true })).toBe(CURRENT_SCHEMA_VERSION);
     database.close();
 
     const reopened = openIndexerDatabase({ filename: ":memory:" });
-    expect(reopened.connection.pragma("user_version", { simple: true })).toBe(1);
+    expect(reopened.connection.pragma("user_version", { simple: true })).toBe(CURRENT_SCHEMA_VERSION);
     reopened.close();
   });
 
@@ -51,7 +51,7 @@ describe("indexer database", () => {
     const filename = join(directory, "newer.sqlite");
     try {
       const database = openIndexerDatabase({ filename });
-      database.connection.pragma("user_version = 2");
+      database.connection.pragma("user_version = 3");
       database.close();
 
       expect(() => openIndexerDatabase({ filename })).toThrow(UnsupportedSchemaVersionError);

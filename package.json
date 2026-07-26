@@ -14,7 +14,8 @@
     "smoke:compiled-chronik": "node scripts/smoke-compiled-chronik.mjs",
     "smoke:compiled-verification": "node scripts/smoke-compiled-verification.mjs",
     "smoke:compiled-indexer": "node scripts/smoke-compiled-indexer.mjs",
-    "smoke:compiled-http-api": "node scripts/smoke-compiled-http-api.mjs"
+    "smoke:compiled-http-api": "node scripts/smoke-compiled-http-api.mjs",
+    "smoke:compiled-daemon": "node scripts/smoke-compiled-daemon.mjs"
   },
   "devDependencies": {
     "@tonalli-memo/chronik": "workspace:*",
