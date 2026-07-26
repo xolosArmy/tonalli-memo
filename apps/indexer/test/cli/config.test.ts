@@ -27,7 +27,13 @@ describe("indexer CLI configuration", () => {
   it("parses DAEMON_ENABLED true and false exactly", () => {
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "false" }).daemonEnabled).toBe(false);
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "true", CHRONIK_URLS: "https://chronik.example" }).daemonEnabled).toBe(true);
-    expect(() => parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "TRUE", CHRONIK_URLS: "https://chronik.example" })).toThrow(ConfigError);
+    expect(() =>
+      parseIndexerCliConfig({
+        DB_PATH: ":memory:",
+        DAEMON_ENABLED: "TRUE",
+        CHRONIK_URLS: "https://chronik.example"
+      })
+    ).toThrow("DAEMON_ENABLED must be true or false.");
   });
 
   it("requires DB_PATH and validates PORT", () => {

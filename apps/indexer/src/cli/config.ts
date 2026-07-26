@@ -52,7 +52,7 @@ function parseBoolean(value: string | undefined, name: string, defaultValue: boo
   if (raw === "false") {
     return false;
   }
-  throw new ConfigError(` must be true or false.`);
+  throw new ConfigError(`${name} must be true or false.`);
 }
 
 function parsePort(value: string | undefined): number {
