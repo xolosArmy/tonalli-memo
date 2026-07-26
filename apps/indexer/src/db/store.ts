@@ -6,6 +6,7 @@ import type {
   IndexerDatabase,
   StoredIndexingAttempt,
   StoredTransactionRow,
+  TransactionInactiveReason,
   StoredVerificationRecord,
   VerifiedFeedRow
 } from "./types.js";
@@ -21,6 +22,11 @@ export interface PersistIndexingResultOutput {
   readonly persistedRecord: boolean;
 }
 
+export interface MarkTransactionInactiveOutput {
+  readonly txid: string;
+  readonly changed: boolean;
+}
+
 interface TransactionSqlRow {
   readonly txid: string;
   readonly chain_status: ChainStatus;
@@ -33,6 +39,8 @@ interface TransactionSqlRow {
   readonly normalized_json: string;
   readonly first_indexed_at: number;
   readonly updated_at: number;
+  readonly is_active: 0 | 1;
+  readonly inactive_reason: TransactionInactiveReason | null;
 }
 
 interface VerificationSqlRow {
@@ -143,6 +151,8 @@ export class MemoStore {
           t.normalized_json,
           t.first_indexed_at AS transaction_first_indexed_at,
           t.updated_at,
+          t.is_active,
+          t.inactive_reason,
           v.verification_status,
           v.protocol_version,
           v.event_type,
@@ -161,7 +171,7 @@ export class MemoStore {
           v.last_verified_at
         FROM verification_records v
         INNER JOIN transactions t ON t.txid = v.txid
-        WHERE v.verification_status = 'VERIFIED'
+        WHERE v.verification_status = 'VERIFIED' AND t.is_active = 1
         ORDER BY COALESCE(t.block_height, 9223372036854775807) DESC, v.last_verified_at DESC, t.txid ASC
         LIMIT ?
         `
@@ -172,6 +182,54 @@ export class MemoStore {
   }
 
 
+  markTransactionInactive(txid: string, reason: TransactionInactiveReason): MarkTransactionInactiveOutput {
+    validateInactiveReason(reason);
+    const result = this.connection
+      .prepare(
+        `
+        UPDATE transactions
+        SET is_active = 0, inactive_reason = ?
+        WHERE txid = ? AND (is_active = 1 OR inactive_reason IS NOT ?)
+        `
+      )
+      .run(reason, txid, reason);
+    return { txid, changed: result.changes > 0 };
+  }
+
+  listActiveUnconfirmedTxids(limit: number): readonly string[] {
+    validateListLimit(limit);
+    const rows = this.connection
+      .prepare(
+        `
+        SELECT txid
+        FROM transactions
+        WHERE is_active = 1 AND chain_status = 'unconfirmed'
+        ORDER BY updated_at ASC, txid ASC
+        LIMIT ?
+        `
+      )
+      .all(limit) as { readonly txid: string }[];
+    return rows.map((row) => row.txid);
+  }
+
+  listActiveConfirmedTxidsAtOrAbove(height: number, limit: number): readonly string[] {
+    validateBlockHeight(height);
+    validateListLimit(limit);
+    const rows = this.connection
+      .prepare(
+        `
+        SELECT txid
+        FROM transactions
+        WHERE is_active = 1 AND chain_status = 'confirmed' AND block_height >= ?
+        ORDER BY block_height ASC, updated_at ASC, txid ASC
+        LIMIT ?
+        `
+      )
+      .all(height, limit) as { readonly txid: string }[];
+    return rows.map((row) => row.txid);
+  }
+
+
   private upsertTransaction(transaction: NormalizedTransaction, nowSeconds: number): void {
     const chainStatus = deriveChainStatus(transaction);
     this.connection
@@ -179,10 +237,10 @@ export class MemoStore {
         `
         INSERT INTO transactions (
           txid, chain_status, is_coinbase, is_final, block_height, block_hash, block_timestamp, first_seen_at,
-          normalized_json, first_indexed_at, updated_at
+          normalized_json, first_indexed_at, updated_at, is_active, inactive_reason
         )
         VALUES (@txid, @chainStatus, @isCoinbase, @isFinal, @blockHeight, @blockHash, @blockTimestamp, @firstSeenAt,
-          @normalizedJson, @nowSeconds, @nowSeconds)
+          @normalizedJson, @nowSeconds, @nowSeconds, 1, NULL)
         ON CONFLICT(txid) DO UPDATE SET
           chain_status = excluded.chain_status,
           is_coinbase = excluded.is_coinbase,
@@ -192,7 +250,9 @@ export class MemoStore {
           block_timestamp = excluded.block_timestamp,
           first_seen_at = excluded.first_seen_at,
           normalized_json = excluded.normalized_json,
-          updated_at = excluded.updated_at
+          updated_at = excluded.updated_at,
+          is_active = 1,
+          inactive_reason = NULL
         `
       )
       .run({
@@ -305,7 +365,9 @@ function toTransactionRow(row: TransactionSqlRow): StoredTransactionRow {
     normalizedJson: row.normalized_json,
     normalizedTransaction: JSON.parse(row.normalized_json) as StoredTransactionRow["normalizedTransaction"],
     firstIndexedAt: row.first_indexed_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
+    isActive: row.is_active === 1,
+    inactiveReason: row.inactive_reason
   };
 }
 
@@ -362,7 +424,9 @@ function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
       first_seen_at: row.first_seen_at,
       normalized_json: row.normalized_json,
       first_indexed_at: row.transaction_first_indexed_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
+      is_active: row.is_active,
+      inactive_reason: row.inactive_reason
     }),
     verification: toVerificationRow({
       txid: row.txid,
@@ -384,4 +448,22 @@ function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
       last_verified_at: row.last_verified_at
     })
   };
+}
+
+function validateListLimit(limit: number): void {
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) {
+    throw new Error("Store query limit must be an integer between 1 and 1000.");
+  }
+}
+
+function validateBlockHeight(height: number): void {
+  if (!Number.isSafeInteger(height) || height < 0) {
+    throw new Error("Block height must be a non-negative safe integer.");
+  }
+}
+
+function validateInactiveReason(reason: TransactionInactiveReason): void {
+  if (reason !== "REMOVED_FROM_MEMPOOL" && reason !== "INVALIDATED") {
+    throw new Error("Transaction inactive reason must be REMOVED_FROM_MEMPOOL or INVALIDATED.");
+  }
 }

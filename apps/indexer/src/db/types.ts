@@ -34,6 +34,7 @@ export interface StoredNormalizedTransactionV1 {
 
 export type ChainStatus = "confirmed" | "unconfirmed";
 export type DurableVerificationStatus = "VERIFIED" | "UNAUTHORIZED" | "NO_MEMO" | "INVALID_MEMO" | "MULTIPLE_MEMOS";
+export type TransactionInactiveReason = "REMOVED_FROM_MEMPOOL" | "INVALIDATED";
 
 export interface OpenIndexerDatabaseOptions {
   readonly filename: string;
@@ -57,6 +58,8 @@ export interface StoredTransactionRow {
   readonly normalizedTransaction: StoredNormalizedTransactionV1;
   readonly firstIndexedAt: number;
   readonly updatedAt: number;
+  readonly isActive: boolean;
+  readonly inactiveReason: TransactionInactiveReason | null;
 }
 
 export interface StoredVerificationRecord {

@@ -1,4 +1,4 @@
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export interface Migration {
   readonly version: number;
@@ -78,6 +78,21 @@ export const MIGRATIONS: readonly Migration[] = [
       CREATE INDEX idx_transactions_block_height ON transactions(block_height);
       CREATE INDEX idx_indexing_attempts_result_status ON indexing_attempts(result_status);
       CREATE INDEX idx_indexing_attempts_attempted_at ON indexing_attempts(attempted_at);
+    `
+  },
+  {
+    version: 2,
+    sql: `
+      ALTER TABLE transactions
+        ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1));
+
+      ALTER TABLE transactions
+        ADD COLUMN inactive_reason TEXT CHECK (
+          inactive_reason IS NULL OR inactive_reason IN ('REMOVED_FROM_MEMPOOL', 'INVALIDATED')
+        );
+
+      CREATE INDEX idx_transactions_active_chain_status ON transactions(is_active, chain_status);
+      CREATE INDEX idx_transactions_active_block_height ON transactions(is_active, block_height);
     `
   }
 ];

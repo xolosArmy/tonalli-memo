@@ -5,6 +5,7 @@ export interface IndexerCliConfig {
   readonly chronikUrls: readonly string[];
   readonly corsOrigins: readonly string[];
   readonly indexApiToken?: string;
+  readonly daemonEnabled: boolean;
 }
 
 export class ConfigError extends Error {
@@ -23,9 +24,10 @@ export function parseIndexerCliConfig(env: NodeJS.ProcessEnv): IndexerCliConfig 
   }
 
   const indexApiToken = nonEmpty(env.INDEX_API_TOKEN);
+  const daemonEnabled = parseBoolean(env.DAEMON_ENABLED, "DAEMON_ENABLED", false);
   const chronikUrls = parseList(env.CHRONIK_URLS, "CHRONIK_URLS");
-  if (indexApiToken !== undefined && chronikUrls.length === 0) {
-    throw new ConfigError("CHRONIK_URLS is required when INDEX_API_TOKEN enables administrative indexing.");
+  if ((indexApiToken !== undefined || daemonEnabled) && chronikUrls.length === 0) {
+    throw new ConfigError("CHRONIK_URLS is required when administrative indexing or the daemon is enabled.");
   }
 
   return {
@@ -34,8 +36,23 @@ export function parseIndexerCliConfig(env: NodeJS.ProcessEnv): IndexerCliConfig 
     dbPath,
     chronikUrls,
     corsOrigins: parseList(env.CORS_ORIGINS, "CORS_ORIGINS"),
+    daemonEnabled,
     ...(indexApiToken === undefined ? {} : { indexApiToken })
   };
+}
+
+function parseBoolean(value: string | undefined, name: string, defaultValue: boolean): boolean {
+  const raw = nonEmpty(value);
+  if (raw === undefined) {
+    return defaultValue;
+  }
+  if (raw === "true") {
+    return true;
+  }
+  if (raw === "false") {
+    return false;
+  }
+  throw new ConfigError(` must be true or false.`);
 }
 
 function parsePort(value: string | undefined): number {
