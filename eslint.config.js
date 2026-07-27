@@ -13,5 +13,24 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-imports": "error"
     }
+  },
+  {
+    files: ["apps/web/**/*.{ts,tsx}"],
+    languageOptions: {
+      globals: {
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        DOMException: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        Request: "readonly",
+        Response: "readonly",
+        window: "readonly"
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/consistent-type-imports": "error"
+    }
   }
 );
