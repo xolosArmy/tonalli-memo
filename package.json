@@ -8,14 +8,15 @@
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "build": "pnpm registry:generate && tsc -b",
+    "build": "pnpm registry:generate && tsc -b && pnpm --filter @tonalli-memo/web build:bundle",
     "registry:generate": "node scripts/generate-registry-data.mjs",
     "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs",
     "smoke:compiled-chronik": "node scripts/smoke-compiled-chronik.mjs",
     "smoke:compiled-verification": "node scripts/smoke-compiled-verification.mjs",
     "smoke:compiled-indexer": "node scripts/smoke-compiled-indexer.mjs",
     "smoke:compiled-http-api": "node scripts/smoke-compiled-http-api.mjs",
-    "smoke:compiled-daemon": "node scripts/smoke-compiled-daemon.mjs"
+    "smoke:compiled-daemon": "node scripts/smoke-compiled-daemon.mjs",
+    "smoke:compiled-web": "node scripts/smoke-compiled-web.mjs"
   },
   "devDependencies": {
     "@tonalli-memo/chronik": "workspace:*",
@@ -28,6 +29,7 @@
     "eslint": "^9.18.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "@tonalli-memo/web": "workspace:*"
   }
 }

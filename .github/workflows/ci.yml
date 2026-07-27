@@ -77,3 +77,9 @@ jobs:
           pnpm smoke:compiled-daemon
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-daemon.mjs"
+
+      - name: Compiled web smoke test
+        run: |
+          pnpm smoke:compiled-web
+          cd /tmp
+          node "$GITHUB_WORKSPACE/scripts/smoke-compiled-web.mjs"
