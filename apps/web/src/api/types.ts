@@ -25,9 +25,11 @@ export interface CandidateLocation {
   readonly pushIndex: number;
 }
 
+export type VerificationStatus = "VERIFIED" | "UNAUTHORIZED" | "NO_MEMO" | "INVALID_MEMO" | "MULTIPLE_MEMOS";
+
 export interface StoredVerification {
   readonly txid: string;
-  readonly status: string;
+  readonly status: VerificationStatus;
   readonly protocolVersion: number | null;
   readonly eventType: string | null;
   readonly profileCode: string | null;

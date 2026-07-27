@@ -1,6 +1,7 @@
-import type { ApiErrorDto, CandidateLocation, FeedItem, FeedResponse, StoredVerification, TransactionSummary, TxResponse } from "./types";
+import type { ApiErrorDto, CandidateLocation, FeedItem, FeedResponse, StoredVerification, TransactionSummary, TxResponse, VerificationStatus } from "./types";
 
 const TXID_PATTERN = /^[0-9a-f]{64}$/u;
+const VERIFICATION_STATUSES = new Set<VerificationStatus>(["VERIFIED", "UNAUTHORIZED", "NO_MEMO", "INVALID_MEMO", "MULTIPLE_MEMOS"]);
 
 export function isApiErrorDto(value: unknown): value is ApiErrorDto {
   if (!isRecord(value) || !isRecord(value.error)) {
@@ -10,7 +11,7 @@ export function isApiErrorDto(value: unknown): value is ApiErrorDto {
 }
 
 export function isFeedResponse(value: unknown): value is FeedResponse {
-  if (!isRecord(value) || !Array.isArray(value.items) || !isSafeInteger(value.limit)) {
+  if (!isRecord(value) || !Array.isArray(value.items) || !isIntegerInRange(value.limit, 1, 100)) {
     return false;
   }
   return value.items.every(isFeedItem);
@@ -20,11 +21,14 @@ export function isTxResponse(value: unknown): value is TxResponse {
   if (!isRecord(value) || !isTransactionSummary(value.transaction)) {
     return false;
   }
-  return value.verification === null || isStoredVerification(value.verification);
+  return value.verification === null || (isStoredVerification(value.verification) && value.verification.txid === value.transaction.txid);
 }
 
 function isFeedItem(value: unknown): value is FeedItem {
-  return isRecord(value) && isTransactionSummary(value.transaction) && isStoredVerification(value.verification);
+  if (!isRecord(value) || !isTransactionSummary(value.transaction) || !isStoredVerification(value.verification)) {
+    return false;
+  }
+  return value.verification.status === "VERIFIED" && value.verification.txid === value.transaction.txid;
 }
 
 function isTransactionSummary(value: unknown): value is TransactionSummary {
@@ -53,7 +57,7 @@ function isStoredVerification(value: unknown): value is StoredVerification {
   return (
     typeof value.txid === "string" &&
     TXID_PATTERN.test(value.txid) &&
-    typeof value.status === "string" &&
+    isVerificationStatus(value.status) &&
     isNullableSafeInteger(value.protocolVersion) &&
     isNullableString(value.eventType) &&
     isNullableString(value.profileCode) &&
@@ -82,6 +86,14 @@ function isNullableSafeInteger(value: unknown): value is number | null {
 
 function isSafeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+function isIntegerInRange(value: unknown, min: number, max: number): value is number {
+  return isSafeInteger(value) && value >= min && value <= max;
+}
+
+function isVerificationStatus(value: unknown): value is VerificationStatus {
+  return typeof value === "string" && VERIFICATION_STATUSES.has(value as VerificationStatus);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

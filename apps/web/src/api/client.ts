@@ -34,9 +34,7 @@ export class TonalliApiClient {
   }
 
   async getFeed(options: { readonly limit?: number; readonly signal?: AbortSignal } = {}): Promise<FeedResponse> {
-    const url = new URL(`${this.baseUrl}/feed`, window.location.origin);
-    url.searchParams.set("limit", String(options.limit ?? 25));
-    const value = await this.requestUnknown(pathFromUrl(url), options.signal);
+    const value = await this.requestUnknown(buildApiUrl(this.baseUrl, "feed", { limit: String(options.limit ?? 25) }), options.signal);
     if (!isFeedResponse(value)) {
       throw new AppApiError("La respuesta del feed no tiene el formato esperado.", { code: "INVALID_RESPONSE" });
     }
@@ -44,7 +42,7 @@ export class TonalliApiClient {
   }
 
   async getTransaction(txid: string, options: { readonly signal?: AbortSignal } = {}): Promise<TxResponse> {
-    const value = await this.requestUnknown(`${this.baseUrl}/tx/${encodeURIComponent(txid)}`, options.signal);
+    const value = await this.requestUnknown(buildApiUrl(this.baseUrl, `tx/${encodeURIComponent(txid)}`), options.signal);
     if (!isTxResponse(value)) {
       throw new AppApiError("La respuesta de la transaccion no tiene el formato esperado.", { code: "INVALID_RESPONSE" });
     }
@@ -70,8 +68,8 @@ export class TonalliApiClient {
       throw new AppApiError("No se pudo conectar con la API publica.", { code: "NETWORK_ERROR" });
     }
 
-    const body = await parseJson(response);
     if (!response.ok) {
+      const body = await parseErrorBody(response);
       if (isApiErrorDto(body)) {
         throw new AppApiError(messageForStatus(response.status), {
           code: "HTTP_ERROR",
@@ -81,7 +79,7 @@ export class TonalliApiClient {
       }
       throw new AppApiError(messageForStatus(response.status), { code: "HTTP_ERROR", status: response.status });
     }
-    return body;
+    return parseJson(response);
   }
 }
 
@@ -96,11 +94,26 @@ async function parseJson(response: Response): Promise<unknown> {
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.replace(/\/+$/u, "");
+  const trimmed = baseUrl.trim();
+  return (trimmed === "" ? DEFAULT_API_BASE_URL : trimmed).replace(/\/+$/u, "");
 }
 
-function pathFromUrl(url: URL): string {
-  return `${url.pathname}${url.search}`;
+function buildApiUrl(baseUrl: string, path: string, query: Record<string, string> = {}): string {
+  const suffix = path.replace(/^\/+/u, "");
+  const search = new URLSearchParams(query).toString();
+  return `${baseUrl}/${suffix}${search === "" ? "" : `?${search}`}`;
+}
+
+async function parseErrorBody(response: Response): Promise<unknown> {
+  const body = await response.text();
+  if (body.trim() === "") {
+    return null;
+  }
+  try {
+    return JSON.parse(body) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 function messageForStatus(status: number): string {
