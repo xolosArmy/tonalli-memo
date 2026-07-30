@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "protocol": "TM1",
+  "specDraft": "0.2",
+  "lokadIdHex": "544d4d00",
+  "valid": [
+    {
+      "name": "1 byte event_data",
+      "scriptHex": "6a04544d4d000401010061",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 1,
+      "eventDataUtf8": "a"
+    },
+    {
+      "name": "72 byte event_data uses direct push",
+      "scriptHex": "6a04544d4d004b010100616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 72,
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "73 byte event_data uses OP_PUSHDATA1",
+      "scriptHex": "6a04544d4d004c4c01010061616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 73,
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "212 byte maximum event_data",
+      "scriptHex": "6a04544d4d004cd70101006161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 212,
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "UTF-8 multibyte text",
+      "scriptHex": "6a04544d4d000f0101005365c3b1616c20636166c3a9",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 12,
+      "eventDataUtf8": "Señal café"
+    },
+    {
+      "name": "UTF-8 emoji",
+      "scriptHex": "6a04544d4d000a010100544d3120e29c85",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 7,
+      "eventDataUtf8": "TM1 ✅"
+    },
+    {
+      "name": "NFC accented character",
+      "scriptHex": "6a04544d4d0005010100c3a9",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 2,
+      "eventDataUtf8": "é",
+      "unicodeNormalization": "NFC"
+    },
+    {
+      "name": "NFD accented character",
+      "scriptHex": "6a04544d4d000601010065cc81",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 3,
+      "eventDataUtf8": "é",
+      "unicodeNormalization": "NFD"
+    },
+    {
+      "name": "Leading and trailing spaces",
+      "scriptHex": "6a04544d4d000d01010020207061646465642020",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 0,
+      "eventDataByteLength": 10,
+      "eventDataUtf8": "  padded  "
+    },
+    {
+      "name": "Non-zero author input index",
+      "scriptHex": "6a04544d4d0013010102617574686f7220696e7075742074776f",
+      "version": 1,
+      "eventType": "POST",
+      "eventTypeHex": "01",
+      "authorInputIndex": 2,
+      "eventDataByteLength": 16,
+      "eventDataUtf8": "author input two"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "213 byte event_data exceeds maximum",
+      "scriptHex": "6a04544d4d004cd8010100616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "expected": {
+        "errorCode": "PAYLOAD_TOO_LARGE"
+      }
+    },
+    {
+      "name": "Unknown version",
+      "scriptHex": "6a04544d4d000802010068656c6c6f",
+      "expected": {
+        "errorCode": "UNSUPPORTED_VERSION"
+      }
+    },
+    {
+      "name": "Reserved REPLY event type",
+      "scriptHex": "6a04544d4d000e0102007265706c79206c61746572",
+      "expected": {
+        "errorCode": "UNSUPPORTED_EVENT_TYPE"
+      }
+    },
+    {
+      "name": "Empty event_data",
+      "scriptHex": "6a04544d4d0003010100",
+      "expected": {
+        "errorCode": "EMPTY_EVENT_DATA"
+      }
+    },
+    {
+      "name": "Invalid UTF-8 event_data",
+      "scriptHex": "6a04544d4d0004010100ff",
+      "expected": {
+        "errorCode": "INVALID_UTF8"
+      }
+    },
+    {
+      "name": "Non-minimal OP_PUSHDATA1 for short envelope",
+      "scriptHex": "6a04544d4d004c0801010068656c6c6f",
+      "expected": {
+        "errorCode": "INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "Truncated envelope",
+      "scriptHex": "6a04544d4d00020101",
+      "expected": {
+        "errorCode": "INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "Additional third push",
+      "scriptHex": "6a04544d4d000801010068656c6c6f0100",
+      "expected": {
+        "errorCode": "INVALID_FORMAT"
+      }
+    },
+    {
+      "name": "Additional non-push opcode",
+      "scriptHex": "6a04544d4d000801010068656c6c6f51",
+      "expected": {
+        "errorCode": "INVALID_FORMAT"
+      }
+    }
+  ]
+}

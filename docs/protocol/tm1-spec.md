@@ -1,8 +1,8 @@
 # TM1 Protocol Specification
 
-- **Status:** Draft 0.1
+- **Status:** Draft 0.2
 - **Protocol name:** Tonalli Memo
-- **LOKAD ID:** TBD — fixed 4-byte identifier
+- **LOKAD ID:** `544d4d00` (`TMM\0`)
 - **Version:** `0x01`
 
 TM1 is an application-layer protocol for publishing authenticated UTF-8
@@ -13,18 +13,18 @@ include a textual address or a secondary message signature inside the
 `OP_RETURN` payload.
 
 This draft is non-final. Implementations MUST NOT emit production TM1
-transactions until the LOKAD ID and canonical test vectors are finalized.
+transactions until this draft is finalized.
 
 ## 1. Scope
 
-Draft 0.1 defines:
+Draft 0.2 defines:
 
 - one active event type: `POST`;
 - authorship through a designated standard P2PKH input;
 - exact UTF-8 byte preservation;
 - a maximum script size compatible with the default eCash relay policy.
 
-Draft 0.1 does not define:
+Draft 0.2 does not define:
 
 - replies or threads;
 - P2SH or multisig authorship;
@@ -67,7 +67,7 @@ The first push MUST contain exactly four bytes:
 
     LOKAD_ID
 
-The final LOKAD ID is not assigned in Draft 0.1.
+The Draft 0.2 LOKAD ID is `544d4d00` (`TMM\0`).
 
 ### 3.2 Second push
 
@@ -124,13 +124,13 @@ At maximum size:
 `event_data` is limited by bytes, not Unicode characters.
 
 Client applications MAY impose a smaller product-level limit. Tonalli
-Wallet Draft 0.1 SHOULD initially limit `event_data` to 80 UTF-8 bytes.
+Wallet Draft 0.2 SHOULD initially limit `event_data` to 80 UTF-8 bytes.
 
 ## 5. Event types
 
 ### `0x01` — POST
 
-`POST` is the only active event type in Draft 0.1.
+`POST` is the only active event type in Draft 0.2.
 
 Its `event_data` field contains the complete top-level publication text.
 
@@ -138,7 +138,7 @@ Its `event_data` field contains the complete top-level publication text.
 
 `REPLY` is reserved.
 
-Draft 0.1 parsers MUST reject it with `UNSUPPORTED_EVENT_TYPE`.
+Draft 0.2 parsers MUST reject it with `UNSUPPORTED_EVENT_TYPE`.
 
 It MUST NOT become active until the following are standardized:
 
@@ -210,14 +210,14 @@ Failure to obtain the previous output prevents authorship verification.
 The selected previous output MUST use a standard P2PKH locking script.
 
 P2SH, multisig, covenant and unknown locking scripts are unsupported in
-Draft 0.1.
+Draft 0.2.
 
 ### 8.4 Unlocking script
 
 The selected input unlocking script MUST expose a standard P2PKH
 signature and public key.
 
-A canonical Draft 0.1 implementation SHOULD require exactly two minimal
+A canonical Draft 0.2 implementation SHOULD require exactly two minimal
 data pushes:
 
     <signature_with_hashtype> <public_key>
@@ -298,13 +298,12 @@ address matching an external registry.
 
 ## 11. Finalization requirements
 
-Draft 0.1 MUST NOT be marked final until:
+Draft 0.2 MUST NOT be marked final until:
 
-1. a collision-checked four-byte LOKAD ID is selected;
-2. canonical valid and invalid script vectors are committed;
-3. vectors cover `0x41`, `0xc1` and rejected sighash values;
-4. vectors cover malformed and duplicate candidate outputs;
-5. the Chronik adapter exposes `inputScriptHex`;
-6. independent encoder and decoder implementations agree;
-7. no TM1 production transaction has been emitted using an unresolved
-   draft identifier.
+1. canonical valid and invalid script vectors are committed;
+2. vectors cover `0x41`, `0xc1` and rejected sighash values;
+3. vectors cover malformed and duplicate candidate outputs;
+4. the Chronik adapter exposes `inputScriptHex`;
+5. independent encoder and decoder implementations agree;
+6. no TM1 production transaction has been emitted before Draft 0.2
+   review and fixture publication.

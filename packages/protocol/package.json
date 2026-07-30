@@ -13,7 +13,8 @@
   },
   "files": [
     "dist",
-    "test-vectors.json"
+    "test-vectors.json",
+    "tm1-test-vectors.json"
   ],
   "scripts": {
     "build": "tsc -b",
