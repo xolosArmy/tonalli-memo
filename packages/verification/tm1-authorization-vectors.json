@@ -1,0 +1,1215 @@
+{
+  "schemaVersion": 1,
+  "protocol": "TM1",
+  "specDraft": "0.2",
+  "generator": {
+    "library": "ecash-lib",
+    "version": "4.13.0"
+  },
+  "validationOrder": [
+    "author-index",
+    "prevout-availability",
+    "prevout-script-type",
+    "scriptsig-structure",
+    "pubkey-hash-match",
+    "sighash-policy",
+    "cryptographic-signature"
+  ],
+  "testKeys": {
+    "authorA": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3"
+    },
+    "authorB": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486",
+      "publicKeyHashHex": "8030268a04488647a9bc64a8f5bf1cc6db27d300"
+    },
+    "observer": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59",
+      "publicKeyHashHex": "eddbb9fb072abd539d36829cb11211a85e25479e"
+    }
+  },
+  "valid": [
+    {
+      "id": "valid-p2pkh-author0-schnorr-all-forkid",
+      "description": "P2PKH author input 0 signed with Schnorr and SIGHASH_ALL | SIGHASH_FORKID (0x41).",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2040fb1652462bc8bde2dd0fe8acf8e5fe7961c1466ddcec6bf5297d86c885a5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000f049872d7c36b31587eaa19f53df3a3fcdbb52802607da8c4af2cdb719c0c9d43bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650441868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff38c99ee839464efb2e69af55b16ffbcc95dad30baa5a3ce1949676a5dcbce5490000000041000000",
+      "sighashDigestHex": "227737a5578df2a5458c78048569af45675ebed61ba7a3aee740581c5463dcc7",
+      "expected": {
+        "valid": true,
+        "stage": "cryptographic-signature",
+        "errorCode": null
+      }
+    },
+    {
+      "id": "valid-p2pkh-author2-schnorr-all-forkid",
+      "description": "P2PKH author input index greater than zero signed with Schnorr and 0x41.",
+      "authorInputIndex": 2,
+      "rawTransactionHex": "020000000350e86c08663586a7e9942e749de0db9b9db4731d99852c778cdbc3743b673ba7000000006441a5fa1fe482244657b1365fecb85c4df52fd7458ab31ca67faff620442d624268f027fc2b9d479a5e933e0f0a9c2d3b53da378cc44a520368794889015b4b280d4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffe6f0cd4b42840584124c6031185797d0722e425d8784eeaa91c3d66a4dd96d2f0000000064415c44ae656f021419127e3a27978b33331e0f5b521ac625492fecd331a18b31cb3c1a4a45ad60d01f903b408fa9536bba0f0cb9fcd5a7a7efff914a3e76814ae04121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff7808a7f75702c915ebf58592dc853790436f93c36794bddbd63268cb587e9ed3000000006441be43acda78b0d5e7e4ed9e465bf92bd0f59391b4b0ae2b760bb1fd5b8ccb67985e65af6ff684e1de7dfcb6fd2a23028a8870d40424705840769be79f90b959c74121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000236a04544d4d000101010101021676616c696420617574686f7220696e6465782074776f30750000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3eabf1c748531cfdabb83dd6d0d201155c44df7e3c3eedd073a60903f5baa368",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a73b673b74c3db8c772c85991d73b49d9bdbe09d742e94e9a7863566086ce850",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "2f6dd94d6ad6c391aaee84875d422e72d097571831604c12840584424bcdf0e6",
+            "outIdx": 0
+          },
+          "prevoutSats": "11000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "d39e7e58cb6832d6dbbd9467c3936f43903785dc9285f5eb15c90257f7a70878",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101021676616c696420617574686f7220696e6465782074776f"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "30000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "d39e7e58cb6832d6dbbd9467c3936f43903785dc9285f5eb15c90257f7a70878",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "be43acda78b0d5e7e4ed9e465bf92bd0f59391b4b0ae2b760bb1fd5b8ccb67985e65af6ff684e1de7dfcb6fd2a23028a8870d40424705840769be79f90b959c7",
+      "signatureWithHashTypeHex": "be43acda78b0d5e7e4ed9e465bf92bd0f59391b4b0ae2b760bb1fd5b8ccb67985e65af6ff684e1de7dfcb6fd2a23028a8870d40424705840769be79f90b959c741",
+      "inputScriptHex": "41be43acda78b0d5e7e4ed9e465bf92bd0f59391b4b0ae2b760bb1fd5b8ccb67985e65af6ff684e1de7dfcb6fd2a23028a8870d40424705840769be79f90b959c74121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000a9ff52fad0c4d1ad03606759692892c3e0f209352e01ce28d6a3c6e8fb4dd56e82a7d5bb59fc957ff7f737ca0b8be713c705d6173783ad5edb067819bed70be87808a7f75702c915ebf58592dc853790436f93c36794bddbd63268cb587e9ed3000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff45a0e09e2d5871344a7ac6f999d1a4ea8866d25ffabf214bcb8b5fd9e031efa30000000041000000",
+      "sighashDigestHex": "6304a83f4747ad3dcf68eab194b0efde77fdd7d96ebabdeecd06b6ce18439971",
+      "expected": {
+        "valid": true,
+        "stage": "cryptographic-signature",
+        "errorCode": null
+      }
+    },
+    {
+      "id": "valid-p2pkh-author0-schnorr-all-anyonecanpay-forkid",
+      "description": "P2PKH author input 0 signed with Schnorr and SIGHASH_ALL | SIGHASH_ANYONECANPAY | SIGHASH_FORKID (0xc1).",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000019d2450465eb149a7313f50f66fa80d943921797c274a6f51cb7256d364f7d8ca000000006441f99d3d194f7a5c4007ca521ac39775c403c6b5e29c4686688c5f474e30b5d7339d7c2303a44b978fb0e2ed81f82aadb68e33a500aedbba474ae9c0e5e3c193acc121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000001c6a04544d4d000101010101000f76616c696420633120617574686f7228230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "52072ca06811faf04728bd507d1881764bd8feb9a14743e8461302b541685285",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cad8f764d35672cb516f4a277c792139940da86ff6503f31a749b15e4650249d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101000f76616c696420633120617574686f72"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "cad8f764d35672cb516f4a277c792139940da86ff6503f31a749b15e4650249d",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "f99d3d194f7a5c4007ca521ac39775c403c6b5e29c4686688c5f474e30b5d7339d7c2303a44b978fb0e2ed81f82aadb68e33a500aedbba474ae9c0e5e3c193ac",
+      "signatureWithHashTypeHex": "f99d3d194f7a5c4007ca521ac39775c403c6b5e29c4686688c5f474e30b5d7339d7c2303a44b978fb0e2ed81f82aadb68e33a500aedbba474ae9c0e5e3c193acc1",
+      "inputScriptHex": "41f99d3d194f7a5c4007ca521ac39775c403c6b5e29c4686688c5f474e30b5d7339d7c2303a44b978fb0e2ed81f82aadb68e33a500aedbba474ae9c0e5e3c193acc121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "c1",
+      "sighashUint32LeHex": "c1000000",
+      "sighashPreimageHex": "02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009d2450465eb149a7313f50f66fa80d943921797c274a6f51cb7256d364f7d8ca000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff5321434ae11a2150dab044667967cba99ef6baf2d2f8ea87d92c99ccb08b9e0400000000c1000000",
+      "sighashDigestHex": "9dd9f8dda23eeb089b1ff747973249a504cb4eea0038c5e7290633ebd6aae7e1",
+      "expected": {
+        "valid": true,
+        "stage": "cryptographic-signature",
+        "errorCode": null
+      }
+    },
+    {
+      "id": "valid-designated-input-determines-authorship",
+      "description": "Additional inputs are present; only the designated input determines TM1 authorship.",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "0200000003454728054239f8eeb61eec5583670c9f1eb0eb0a2b003cef8e6c6732a63f931b00000000644162e172b4d8b3125cbb87a93ae23161f5fd50b8829484687eed14f92d5400241621e30c6bf342158124f65ca45d13cda94a66fb4a26b98c8d0910e861cd9695194121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffd9e14768d45bc54b147b9fc25b658a3806d02ce7cfa91d4825a59c25fc4498e500000000644126285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff1e9ad7001086c178f56a440d1c2207e634961c09f0add9fb74096331108bcdd6000000006441936ae2bc2b02f1f3b30eaf0150a8385b2321e1e662fc78e2995511d2788255d8f4edf614d771460b7bd0e0e7f81530081c2514675d39021eb25fd27d77449fc24121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000226a04544d4d000101010101011564657369676e6174656420696e707574206f6e6c7918790000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3eddcf96701e2562a88c5b54a0fc49d7996dcc8feddd9a7a7d64b5df942c7845",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1b933fa632676c8eef3c002b0aebb01e9f0c678355ec1eb6eef8394205284745",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "e59844fc259ca525481da9cfe72cd006388a655bc29f7b144bc55bd46847e1d9",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "d6cd8b1031630974fbd9adf0091c9634e607221c0d446af578c1861000d79a1e",
+            "outIdx": 0
+          },
+          "prevoutSats": "11000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101011564657369676e6174656420696e707574206f6e6c79"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "31000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "e59844fc259ca525481da9cfe72cd006388a655bc29f7b144bc55bd46847e1d9",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "26285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b8",
+      "signatureWithHashTypeHex": "26285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b841",
+      "inputScriptHex": "4126285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000ffd271c64fc40d46b4615189f53b99ea5a3ec7944356394595ec1d65efc4e5fb82a7d5bb59fc957ff7f737ca0b8be713c705d6173783ad5edb067819bed70be8d9e14768d45bc54b147b9fc25b658a3806d02ce7cfa91d4825a59c25fc4498e5000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000fffffffff47b8e37c6801c46b2f8daae03a9c03eba1853331f3e0327bf91cf1d2d1f3ccf0000000041000000",
+      "sighashDigestHex": "e5e8ef7e27dd715d9b6fb4c35feda8140b2dc8f027e727f5b79ee2b2acdef89a",
+      "expected": {
+        "valid": true,
+        "stage": "cryptographic-signature",
+        "errorCode": null
+      }
+    },
+    {
+      "id": "valid-c1-commits-all-outputs-including-tm1",
+      "description": "0xc1 commits to every output, including the TM1 OP_RETURN output.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000025ea43084679a1c6837e2a0476572dc42dd70ec0f789f832371f27fbb37d51ff200000000644100658893914d38b4dc2faf86d4aaa91a7b27cdc8aaa95ade24596fbce3cfa452875c78202266e27860c4e97b1bde2ac4a3012601fe2ef737bcb4f0a6458e5a93c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffc4621cb9de69c10a8fa11b8006f30f28c80ede17bccf004854939ee5226eb210000000006441f6833553e7814d8d631788d220d5eba9a9a248049dee14108e981f7074f064745a22a012078589a8658b525625810f4a8eb6105fd3c76bc74cf5b8b44088ab0d4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff030000000000000000226a04544d4d0001010101010015633120636f6d6d69747320746d31206f757470757422020000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ace64f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "dafd674207f74d14a6b9de8f6b84c70e7e977f912f3c0dada4a90ae83de247d2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f21fd537bb7ff27123839f780fec70dd42dc726547a0e237681c9a678430a45e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "10b26e22e59e93544800cfbc17de0ec8280ff306801ba18f0ac169deb91c62c4",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d0001010101010015633120636f6d6d69747320746d31206f7574707574"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "546",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac"
+        },
+        {
+          "outputIndex": 2,
+          "sats": "20454",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "f21fd537bb7ff27123839f780fec70dd42dc726547a0e237681c9a678430a45e",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "00658893914d38b4dc2faf86d4aaa91a7b27cdc8aaa95ade24596fbce3cfa452875c78202266e27860c4e97b1bde2ac4a3012601fe2ef737bcb4f0a6458e5a93",
+      "signatureWithHashTypeHex": "00658893914d38b4dc2faf86d4aaa91a7b27cdc8aaa95ade24596fbce3cfa452875c78202266e27860c4e97b1bde2ac4a3012601fe2ef737bcb4f0a6458e5a93c1",
+      "inputScriptHex": "4100658893914d38b4dc2faf86d4aaa91a7b27cdc8aaa95ade24596fbce3cfa452875c78202266e27860c4e97b1bde2ac4a3012601fe2ef737bcb4f0a6458e5a93c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "c1",
+      "sighashUint32LeHex": "c1000000",
+      "sighashPreimageHex": "02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005ea43084679a1c6837e2a0476572dc42dd70ec0f789f832371f27fbb37d51ff2000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff571845dc5a435e616982ecaaa520524efb39e62ed5888ae80326893b52cc8ba200000000c1000000",
+      "sighashDigestHex": "e23dd8474bd94fd727f6bb79a10c6ee525061ed559fb8f53b753b22124efc32e",
+      "expected": {
+        "valid": true,
+        "stage": "cryptographic-signature",
+        "errorCode": null
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "id": "invalid-author-input-out-of-range",
+      "description": "The declared author input index is outside vin.",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2040fb1652462bc8bde2dd0fe8acf8e5fe7961c1466ddcec6bf5297d86c885a5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": null,
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": null,
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "",
+      "signatureWithHashTypeHex": "",
+      "inputScriptHex": "",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "author-index",
+        "errorCode": "AUTHOR_INPUT_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "invalid-prevout-unavailable",
+      "description": "The designated input has no available prevout metadata.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2040fb1652462bc8bde2dd0fe8acf8e5fe7961c1466ddcec6bf5297d86c885a5",
+      "inputs": [],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": null,
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": null,
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "prevout-availability",
+        "errorCode": "PREVOUT_UNAVAILABLE"
+      }
+    },
+    {
+      "id": "invalid-unsupported-author-script-p2sh",
+      "description": "The designated prevout is P2SH, which TM1 Draft 0.2 does not authorize.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2040fb1652462bc8bde2dd0fe8acf8e5fe7961c1466ddcec6bf5297d86c885a5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "a914ecd2cbd8262d2c361b93bf89c4f0a78d76a16e7087",
+          "scriptType": "p2sh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "a914ecd2cbd8262d2c361b93bf89c4f0a78d76a16e7087",
+        "scriptType": "p2sh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "prevout-script-type",
+        "errorCode": "UNSUPPORTED_AUTHOR_SCRIPT"
+      }
+    },
+    {
+      "id": "invalid-unsupported-author-script-bare-multisig",
+      "description": "The designated prevout is bare multisig, which TM1 Draft 0.2 does not authorize.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2040fb1652462bc8bde2dd0fe8acf8e5fe7961c1466ddcec6bf5297d86c885a5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "5121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e221025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce148652ae",
+          "scriptType": "bare-multisig"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "5121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e221025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce148652ae",
+        "scriptType": "bare-multisig"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "prevout-script-type",
+        "errorCode": "UNSUPPORTED_AUTHOR_SCRIPT"
+      }
+    },
+    {
+      "id": "invalid-scriptsig-zero-pushes",
+      "description": "The designated P2PKH scriptSig has zero pushes.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e0000000000ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "752855dd84597988f40cea8e9b566af7189c6e2fe2c765586eedb0db0ffa92f0",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "",
+      "signatureWithHashTypeHex": "",
+      "inputScriptHex": "",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "scriptsig-structure",
+        "errorCode": "INVALID_AUTHOR_SCRIPT_SIG"
+      }
+    },
+    {
+      "id": "invalid-scriptsig-one-push",
+      "description": "The designated P2PKH scriptSig has only the signature push.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000004241a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "cfff6dc35a2c57d64d404d9bb9a358824920d0ba9b45a1d3ba0618fc9ceaefe8",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "scriptsig-structure",
+        "errorCode": "INVALID_AUTHOR_SCRIPT_SIG"
+      }
+    },
+    {
+      "id": "invalid-scriptsig-three-pushes",
+      "description": "The designated P2PKH scriptSig has more than two pushes.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006641a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e20101ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "72386b3aede536c0608a590bd04c546742ad74c7f6804f4c07a085cdd4c7066e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e20101",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "scriptsig-structure",
+        "errorCode": "INVALID_AUTHOR_SCRIPT_SIG"
+      }
+    },
+    {
+      "id": "invalid-scriptsig-non-minimal-push",
+      "description": "The signature push uses OP_PUSHDATA1 even though the 65-byte signature fits in a direct push.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e00000000654c41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "dcca0b7408d85bdfd98a8a503fd919bbc2c4638231d84ab3da8cf438eea87b60",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "4c41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "scriptsig-structure",
+        "errorCode": "INVALID_AUTHOR_SCRIPT_SIG"
+      }
+    },
+    {
+      "id": "invalid-pubkey-hash-mismatch",
+      "description": "The scriptSig pubkey does not hash to the designated P2PKH prevout hash.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "faa362c9b4d8a7965028fc34339df162ae281749d54e54c35e0eacf6d0e6464e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "pubkey-hash-match",
+        "errorCode": "INVALID_AUTHOR_SIGNATURE"
+      }
+    },
+    {
+      "id": "invalid-unsupported-sighash-no-forkid",
+      "description": "The signature declares SIGHASH_ALL without SIGHASH_FORKID.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e90121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "bb1b2e3bbd4a80a4a3f0c77a584433f88caa784f5ff9815b8588469664dcb78f",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e901",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e90121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "01",
+      "sighashUint32LeHex": "01000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "sighash-policy",
+        "errorCode": "UNSUPPORTED_SIGHASH"
+      }
+    },
+    {
+      "id": "invalid-unsupported-sighash-none-forkid",
+      "description": "SIGHASH_NONE | SIGHASH_FORKID is structurally signed but rejected by TM1 policy.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011060560d6af62de6cbdd30cd2491b027c073e5692dc33cfd1e7f3fccc741591a000000006441e3fef0d909ec5375cd654596af4978e0c3efeb62f1161fea4f381159300113ed7b3c49156f8bacdbba71ff61982ac8490ef931ddb261053db060123604be7e4c4221036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000186a04544d4d000101010101000b6e6f6e6520666f726b696428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "68396f8647e865c86f60fd771a4d67a501d764991fc2032fe41a56ebcf889aa4",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1a5941c7cc3f7f1efd3cc32d69e573c027b09124cd30ddcbe62df66a0d566010",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101000b6e6f6e6520666f726b6964"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "1a5941c7cc3f7f1efd3cc32d69e573c027b09124cd30ddcbe62df66a0d566010",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "e3fef0d909ec5375cd654596af4978e0c3efeb62f1161fea4f381159300113ed7b3c49156f8bacdbba71ff61982ac8490ef931ddb261053db060123604be7e4c",
+      "signatureWithHashTypeHex": "e3fef0d909ec5375cd654596af4978e0c3efeb62f1161fea4f381159300113ed7b3c49156f8bacdbba71ff61982ac8490ef931ddb261053db060123604be7e4c42",
+      "inputScriptHex": "41e3fef0d909ec5375cd654596af4978e0c3efeb62f1161fea4f381159300113ed7b3c49156f8bacdbba71ff61982ac8490ef931ddb261053db060123604be7e4c4221036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "42",
+      "sighashUint32LeHex": "42000000",
+      "sighashPreimageHex": "02000000578cf15b3790bccb73217d7a8d37bcb7a839329405c6dc7a76937bb26261350f00000000000000000000000000000000000000000000000000000000000000001060560d6af62de6cbdd30cd2491b027c073e5692dc33cfd1e7f3fccc741591a000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff00000000000000000000000000000000000000000000000000000000000000000000000042000000",
+      "sighashDigestHex": "295398b79b970fbbdb0da8bb030f4e6cf3839e95a4a26b59f353bd7fbadd9bbc",
+      "expected": {
+        "valid": false,
+        "stage": "sighash-policy",
+        "errorCode": "UNSUPPORTED_SIGHASH"
+      }
+    },
+    {
+      "id": "invalid-unsupported-sighash-single-forkid",
+      "description": "SIGHASH_SINGLE | SIGHASH_FORKID is structurally signed but rejected by TM1 policy.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001a238f031f3d2014c71fe4fe81d0511702e6f176e076329f61d17518030f7bca000000000644139f707e4bafd12a9007545b20f6f801f2e7fd3e59aa20e39784239566f96787237940339342595e6810ee877735fa8396794eded7619aeb53616de5a19d8a3be4321036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000001a6a04544d4d000101010101000d73696e676c6520666f726b696428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fe04552ff9db6a041b02f2ec4043ad2b87c6d69071f7ce55a4f116eaa6084fe9",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a0bcf7308051171df62963076e176f2e7011051de84ffe714c01d2f331f038a2",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101000d73696e676c6520666f726b6964"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "a0bcf7308051171df62963076e176f2e7011051de84ffe714c01d2f331f038a2",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "39f707e4bafd12a9007545b20f6f801f2e7fd3e59aa20e39784239566f96787237940339342595e6810ee877735fa8396794eded7619aeb53616de5a19d8a3be",
+      "signatureWithHashTypeHex": "39f707e4bafd12a9007545b20f6f801f2e7fd3e59aa20e39784239566f96787237940339342595e6810ee877735fa8396794eded7619aeb53616de5a19d8a3be43",
+      "inputScriptHex": "4139f707e4bafd12a9007545b20f6f801f2e7fd3e59aa20e39784239566f96787237940339342595e6810ee877735fa8396794eded7619aeb53616de5a19d8a3be4321036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "43",
+      "sighashUint32LeHex": "43000000",
+      "sighashPreimageHex": "020000003bd207022c8eb2475965858d827c984c4eb47e9de2aedcaba8ac538cf119f9c20000000000000000000000000000000000000000000000000000000000000000a238f031f3d2014c71fe4fe81d0511702e6f176e076329f61d17518030f7bca0000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff5d66d6d7709124ebfa87819608d0bfce44bc13e09f43a84fb32ee851af44b1f30000000043000000",
+      "sighashDigestHex": "2c414f3ebf9ecd38b268ec8265d6e08ebe410d4585b6654fc2a2a56c0305af6a",
+      "expected": {
+        "valid": false,
+        "stage": "sighash-policy",
+        "errorCode": "UNSUPPORTED_SIGHASH"
+      }
+    },
+    {
+      "id": "invalid-unsupported-sighash-unknown-combination",
+      "description": "The signature declares an unknown sighash combination.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94521036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "8665a0f5e12a3834c5d37df8d4164b37343a6c246f8ce5f7d3280b19be28799e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e945",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94521036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "45",
+      "sighashUint32LeHex": "45000000",
+      "sighashPreimageHex": "",
+      "sighashDigestHex": "5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
+      "expected": {
+        "valid": false,
+        "stage": "sighash-policy",
+        "errorCode": "UNSUPPORTED_SIGHASH"
+      }
+    },
+    {
+      "id": "invalid-schnorr-signature-bit-flipped",
+      "description": "The Schnorr signature is altered while the transaction and key remain unchanged.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddbc2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2b17359bd0eba342c03f22c5c0318ed8e1d3a25980cc71005a39a82da47c6e3d",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddbc2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddbc2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddbc2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000f049872d7c36b31587eaa19f53df3a3fcdbb52802607da8c4af2cdb719c0c9d43bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650441868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff38c99ee839464efb2e69af55b16ffbcc95dad30baa5a3ce1949676a5dcbce5490000000041000000",
+      "sighashDigestHex": "227737a5578df2a5458c78048569af45675ebed61ba7a3aee740581c5463dcc7",
+      "expected": {
+        "valid": false,
+        "stage": "cryptographic-signature",
+        "errorCode": "INVALID_AUTHOR_SIGNATURE"
+      }
+    },
+    {
+      "id": "invalid-transaction-altered-after-signing",
+      "description": "An output is altered after signing, changing the digest committed by 0x41.",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000011868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000006441a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000226a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c27230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "05cdf4e4be088508e0f9b8d86874a1919d1fd811fef0fe959c539cc9148866db",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101001576616c696420617574686f72207a65726f20616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "8999",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "8e475bf7809e91c59f6a11aa8ee14e5b03eecd949975068cbb89ede392f96818",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e9",
+      "signatureWithHashTypeHex": "a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e941",
+      "inputScriptHex": "41a6e23efbf6399f32a7ba4b5ddac2c5a895ce2b426c521a67e16a8a346de542fa85af4f387f5aa7a398d9e2564db7647eca6edd3c9e27579df3c8a0fc0deea0e94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000f049872d7c36b31587eaa19f53df3a3fcdbb52802607da8c4af2cdb719c0c9d43bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650441868f992e3ed89bb8c06759994cdee035b4ee18eaa116a9fc5919e80f75b478e000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff042372605d9d975ee502e5b9f317fc22cd3b242fc1ca4c2bf54f431b256c53840000000041000000",
+      "sighashDigestHex": "b9e16d04688da146684d7004f7f9dcea7810a5a9320827e055145f6d8b95d5a3",
+      "expected": {
+        "valid": false,
+        "stage": "cryptographic-signature",
+        "errorCode": "INVALID_AUTHOR_SIGNATURE"
+      }
+    },
+    {
+      "id": "invalid-designated-input-fails-nondesignated-valid",
+      "description": "A non-designated input is authorized, but the designated input has an invalid signature and must be rejected.",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "0200000003454728054239f8eeb61eec5583670c9f1eb0eb0a2b003cef8e6c6732a63f931b00000000644162e172b4d8b3125cbb87a93ae23161f5fd50b8829484687eed14f92d5400241621e30c6bf342158124f65ca45d13cda94a66fb4a26b98c8d0910e861cd9695194121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffd9e14768d45bc54b147b9fc25b658a3806d02ce7cfa91d4825a59c25fc4498e500000000644127285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff1e9ad7001086c178f56a440d1c2207e634961c09f0add9fb74096331108bcdd6000000006441936ae2bc2b02f1f3b30eaf0150a8385b2321e1e662fc78e2995511d2788255d8f4edf614d771460b7bd0e0e7f81530081c2514675d39021eb25fd27d77449fc24121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000226a04544d4d000101010101011564657369676e6174656420696e707574206f6e6c7918790000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "bac97a07869f1c56f2910c4737c3191cbd237c746a5e2ab67193133fe9193740",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1b933fa632676c8eef3c002b0aebb01e9f0c678355ec1eb6eef8394205284745",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "e59844fc259ca525481da9cfe72cd006388a655bc29f7b144bc55bd46847e1d9",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "d6cd8b1031630974fbd9adf0091c9634e607221c0d446af578c1861000d79a1e",
+            "outIdx": 0
+          },
+          "prevoutSats": "11000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101011564657369676e6174656420696e707574206f6e6c79"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "31000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "designatedInput": {
+        "prevOut": {
+          "txid": "e59844fc259ca525481da9cfe72cd006388a655bc29f7b144bc55bd46847e1d9",
+          "outIdx": 0
+        },
+        "prevoutSats": "10000",
+        "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+        "scriptType": "p2pkh"
+      },
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "signatureAlgorithm": "schnorr",
+      "signatureHex": "27285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b8",
+      "signatureWithHashTypeHex": "27285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b841",
+      "inputScriptHex": "4127285179fe5f4769a864143b88fc43857d11c54893e7880a0e070db200176d19f7552673ff803e094881f06b9e0cbb7794d8457f9875477a4de88ddbd73fd9b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "sighashByteHex": "41",
+      "sighashUint32LeHex": "41000000",
+      "sighashPreimageHex": "02000000ffd271c64fc40d46b4615189f53b99ea5a3ec7944356394595ec1d65efc4e5fb82a7d5bb59fc957ff7f737ca0b8be713c705d6173783ad5edb067819bed70be8d9e14768d45bc54b147b9fc25b658a3806d02ce7cfa91d4825a59c25fc4498e5000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000fffffffff47b8e37c6801c46b2f8daae03a9c03eba1853331f3e0327bf91cf1d2d1f3ccf0000000041000000",
+      "sighashDigestHex": "e5e8ef7e27dd715d9b6fb4c35feda8140b2dc8f027e727f5b79ee2b2acdef89a",
+      "expected": {
+        "valid": false,
+        "stage": "cryptographic-signature",
+        "errorCode": "INVALID_AUTHOR_SIGNATURE"
+      }
+    }
+  ]
+}

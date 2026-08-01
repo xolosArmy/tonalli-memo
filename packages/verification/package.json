@@ -12,17 +12,23 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "tm1-authorization-vectors.json"
   ],
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "vectors:generate": "node scripts/generate-authorization-vectors.mjs",
+    "vectors:check": "node scripts/generate-authorization-vectors.mjs --check"
   },
   "dependencies": {
+    "@tonalli-memo/chronik": "workspace:*",
     "@tonalli-memo/protocol": "workspace:*",
-    "@tonalli-memo/registry": "workspace:*",
-    "@tonalli-memo/chronik": "workspace:*"
+    "@tonalli-memo/registry": "workspace:*"
+  },
+  "devDependencies": {
+    "ecash-lib": "4.13.0"
   }
 }
