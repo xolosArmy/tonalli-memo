@@ -138,6 +138,10 @@ importers:
       '@tonalli-memo/registry':
         specifier: workspace:*
         version: link:../registry
+    devDependencies:
+      ecash-lib:
+        specifier: 4.13.0
+        version: 4.13.0
 
 packages:
 
