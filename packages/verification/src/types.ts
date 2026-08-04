@@ -21,9 +21,11 @@ import type { Tm1AuthorInputErrorCode } from "./verify-tm1-designated-input.js";
 
 export type VerificationStatus =
   | "VERIFIED"
+  | "VERIFIED_TM1"
   | "UNAUTHORIZED"
   | "NO_MEMO"
   | "INVALID_MEMO"
+  | "INVALID_TM1"
   | "MULTIPLE_MEMOS"
   | "MEMPOOL_TIP_REQUIRED"
   | "INVALID_VERIFICATION_CONTEXT"
@@ -59,9 +61,8 @@ export interface VerificationBase {
   readonly txid: string;
 }
 
-export interface Tm0VerifiedResult extends VerificationBase {
+export interface VerifiedResult extends VerificationBase {
   readonly status: "VERIFIED";
-  readonly protocol: "TM0";
   readonly transaction: NormalizedTransaction;
   readonly memo: ValidatedMemo;
   readonly candidate: Tm0MemoCandidateLocation;
@@ -74,7 +75,7 @@ export interface Tm0VerifiedResult extends VerificationBase {
 }
 
 export interface Tm1VerifiedResult extends VerificationBase {
-  readonly status: "VERIFIED";
+  readonly status: "VERIFIED_TM1";
   readonly protocol: "TM1";
   readonly transaction: NormalizedTransaction;
   readonly memo: ParsedTm1Post;
@@ -88,11 +89,8 @@ export interface Tm1VerifiedResult extends VerificationBase {
   readonly trustModel: "trusted-chronik";
 }
 
-export type VerifiedResult = Tm0VerifiedResult | Tm1VerifiedResult;
-
 export interface UnauthorizedResult extends VerificationBase {
   readonly status: "UNAUTHORIZED";
-  readonly protocol: "TM0";
   readonly transaction: NormalizedTransaction;
   readonly memo: ValidatedMemo;
   readonly candidate: Tm0MemoCandidateLocation;
@@ -107,16 +105,15 @@ export interface NoMemoResult extends VerificationBase {
   readonly transaction: NormalizedTransaction;
 }
 
-export interface Tm0InvalidMemoResult extends VerificationBase {
+export interface InvalidMemoResult extends VerificationBase {
   readonly status: "INVALID_MEMO";
-  readonly protocol: "TM0";
   readonly transaction: NormalizedTransaction;
   readonly candidate: Tm0MemoCandidateLocation;
   readonly protocolError: MemoProtocolFailure;
 }
 
 export interface Tm1InvalidMemoResult extends VerificationBase {
-  readonly status: "INVALID_MEMO";
+  readonly status: "INVALID_TM1";
   readonly protocol: "TM1";
   readonly transaction: NormalizedTransaction;
   readonly candidate: Tm1MemoCandidateLocation;
@@ -126,8 +123,6 @@ export interface Tm1InvalidMemoResult extends VerificationBase {
   };
 }
 
-export type InvalidMemoResult = Tm0InvalidMemoResult | Tm1InvalidMemoResult;
-
 export interface MultipleMemosResult extends VerificationBase {
   readonly status: "MULTIPLE_MEMOS";
   readonly transaction: NormalizedTransaction;
@@ -136,7 +131,6 @@ export interface MultipleMemosResult extends VerificationBase {
 
 export interface MempoolTipRequiredResult extends VerificationBase {
   readonly status: "MEMPOOL_TIP_REQUIRED";
-  readonly protocol: "TM0";
   readonly transaction: NormalizedTransaction;
   readonly memo: ValidatedMemo;
   readonly candidate: Tm0MemoCandidateLocation;
@@ -145,7 +139,6 @@ export interface MempoolTipRequiredResult extends VerificationBase {
 
 export interface InvalidVerificationContextResult extends VerificationBase {
   readonly status: "INVALID_VERIFICATION_CONTEXT";
-  readonly protocol: "TM0";
   readonly transaction: NormalizedTransaction;
   readonly memo: ValidatedMemo;
   readonly candidate: Tm0MemoCandidateLocation;
@@ -161,9 +154,11 @@ export interface ChronikFailureResult extends VerificationBase {
 
 export type NormalizedVerificationResult =
   | VerifiedResult
+  | Tm1VerifiedResult
   | UnauthorizedResult
   | NoMemoResult
   | InvalidMemoResult
+  | Tm1InvalidMemoResult
   | MultipleMemosResult
   | MempoolTipRequiredResult
   | InvalidVerificationContextResult;
