@@ -1,5 +1,5 @@
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
-import type { MemoCandidate, MemoCandidateLocation, VerificationResult } from "@tonalli-memo/verification";
+import type { MemoCandidate, VerificationResult } from "@tonalli-memo/verification";
 import type { DurableVerificationStatus, StoredMemoProtocol } from "../db/types.js";
 
 export interface CandidateLocationDto {
@@ -144,7 +144,7 @@ export function mapVerificationResult(
               code: result.protocolError.code,
               message: result.protocolError.message
             },
-            candidate: location(result.candidate)
+            candidate: locationFromResult(result.protocol, result.candidate)
           }
         },
         attemptDiagnostics: {}
@@ -158,7 +158,7 @@ export function mapVerificationResult(
         verificationRecord: {
           ...emptyRecord(result.status),
           diagnostics: {
-            candidates: result.candidates.map((candidate) => location(candidate.location))
+            candidates: result.candidates.map(locationFromCandidate)
           }
         },
         attemptDiagnostics: {}
@@ -171,7 +171,7 @@ export function mapVerificationResult(
         tipHeight,
         verificationRecord: null,
         attemptDiagnostics: {
-          candidate: location(result.candidate),
+          candidate: locationFromResult("TM0", result.candidate),
           memo: tm0MemoDiagnostic(result)
         }
       };
@@ -188,7 +188,7 @@ export function mapVerificationResult(
             message: result.contextError.message
           },
           authorizationContext: result.authorizationContext,
-          candidate: location(result.candidate),
+          candidate: locationFromResult("TM0", result.candidate),
           memo: tm0MemoDiagnostic(result)
         }
       };
@@ -274,17 +274,28 @@ function emptyRecord(
   };
 }
 
-function location(candidate: MemoCandidateLocation): CandidateLocationDto {
-  return candidate.protocol === "TM0"
-    ? {
-        protocol: "TM0",
-        outputIndex: candidate.outputIndex,
-        pushIndex: candidate.pushIndex
-      }
-    : {
-        protocol: "TM1",
-        outputIndex: candidate.outputIndex
-      };
+function locationFromCandidate(candidate: MemoCandidate): CandidateLocationDto {
+  return locationFromResult(candidate.protocol, candidate.location);
+}
+
+function locationFromResult(
+  protocol: StoredMemoProtocol,
+  candidate: { readonly outputIndex: number; readonly pushIndex?: number }
+): CandidateLocationDto {
+  if (protocol === "TM1") {
+    return {
+      protocol: "TM1",
+      outputIndex: candidate.outputIndex
+    };
+  }
+  if (candidate.pushIndex === undefined) {
+    throw new Error("TM0 candidate location requires pushIndex.");
+  }
+  return {
+    protocol: "TM0",
+    outputIndex: candidate.outputIndex,
+    pushIndex: candidate.pushIndex
+  };
 }
 
 function authorizationDecisions(
@@ -302,5 +313,3 @@ function authorizationDecisions(
 function assertNever(value: never): never {
   throw new Error(`Unhandled verification status: ${JSON.stringify(value)}`);
 }
-
-void (null as unknown as MemoCandidate);
