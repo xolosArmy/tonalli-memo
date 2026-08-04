@@ -1,5 +1,12 @@
 import { type NormalizedTransaction } from "@tonalli-memo/chronik";
-import { decodeMemo, isMemoProtocolError, validateMemo, type ValidatedMemo } from "@tonalli-memo/protocol";
+import {
+  decodeMemo,
+  isMemoProtocolError,
+  isTm1ProtocolError,
+  parseTm1Output,
+  validateMemo,
+  type ValidatedMemo
+} from "@tonalli-memo/protocol";
 import {
   DEFAULT_REGISTRY,
   authorizeAddress,
@@ -10,19 +17,19 @@ import {
 } from "@tonalli-memo/registry";
 
 import { findMemoCandidates } from "./candidates.js";
-import type { MemoCandidateLocation } from "./candidates.js";
+import type { Tm0MemoCandidateLocation } from "./candidates.js";
 import { VerificationInvariantError } from "./errors.js";
 import type {
   InputAuthorizationDecision,
   NormalizedVerificationResult,
   VerifyNormalizedTransactionOptions
 } from "./types.js";
+import { verifyTm1DesignatedInput } from "./verify-tm1-designated-input.js";
 
 export function verifyNormalizedTransaction(
   transaction: NormalizedTransaction,
   options: VerifyNormalizedTransactionOptions = {}
 ): NormalizedVerificationResult {
-  const registry = options.registry ?? DEFAULT_REGISTRY;
   const candidates = findMemoCandidates(transaction);
 
   if (candidates.length === 0) {
@@ -47,16 +54,90 @@ export function verifyNormalizedTransaction(
     throw new VerificationInvariantError("PROFILE_NOT_FOUND", "Candidate cardinality check failed.");
   }
 
+  if (candidate.protocol === "TM1") {
+    return verifyTm1Candidate(transaction, candidate);
+  }
+
+  return verifyTm0Candidate(transaction, candidate.location, candidate.bytes, options);
+}
+
+function verifyTm1Candidate(
+  transaction: NormalizedTransaction,
+  candidate: Extract<ReturnType<typeof findMemoCandidates>[number], { protocol: "TM1" }>
+): NormalizedVerificationResult {
   let memo;
   try {
-    memo = validateMemo(decodeMemo(candidate.bytes));
+    memo = parseTm1Output({
+      valueSats: candidate.output.valueSats,
+      script: Uint8Array.from(Buffer.from(candidate.output.outputScriptHex, "hex"))
+    });
+  } catch (error) {
+    if (isTm1ProtocolError(error)) {
+      return {
+        status: "INVALID_MEMO",
+        protocol: "TM1",
+        txid: transaction.txid,
+        transaction,
+        candidate: candidate.location,
+        protocolError: {
+          code: error.code,
+          message: error.message
+        }
+      };
+    }
+    throw error;
+  }
+
+  const author = verifyTm1DesignatedInput(transaction, memo.authorInputIndex);
+  if (!author.valid) {
+    return {
+      status: "INVALID_MEMO",
+      protocol: "TM1",
+      txid: transaction.txid,
+      transaction,
+      candidate: candidate.location,
+      protocolError: {
+        code: author.errorCode,
+        message: author.message
+      }
+    };
+  }
+
+  return {
+    status: "VERIFIED",
+    protocol: "TM1",
+    txid: transaction.txid,
+    transaction,
+    memo,
+    candidate: candidate.location,
+    authorizingAddress: author.input.address,
+    authorizingInputIndex: author.authorInputIndex,
+    publicKeyHex: author.publicKeyHex,
+    publicKeyHashHex: author.publicKeyHashHex,
+    signatureWithHashTypeHex: author.signatureWithHashTypeHex,
+    sighashByte: author.sighashByte,
+    trustModel: "trusted-chronik"
+  };
+}
+
+function verifyTm0Candidate(
+  transaction: NormalizedTransaction,
+  candidate: Tm0MemoCandidateLocation,
+  candidateBytes: Uint8Array,
+  options: VerifyNormalizedTransactionOptions
+): NormalizedVerificationResult {
+  const registry = options.registry ?? DEFAULT_REGISTRY;
+  let memo;
+  try {
+    memo = validateMemo(decodeMemo(candidateBytes));
   } catch (error) {
     if (isMemoProtocolError(error)) {
       return {
         status: "INVALID_MEMO",
+        protocol: "TM0",
         txid: transaction.txid,
         transaction,
-        candidate: candidate.location,
+        candidate,
         protocolError: {
           code: error.code,
           message: error.message
@@ -78,20 +159,21 @@ export function verifyNormalizedTransaction(
     if (options.tipHeight === undefined) {
       return {
         status: "MEMPOOL_TIP_REQUIRED",
+        protocol: "TM0",
         txid: transaction.txid,
         transaction,
         memo,
-        candidate: candidate.location,
+        candidate,
         profile
       };
     }
-    return evaluateAuthorization(transaction, memo, candidate.location, profile, {
+    return evaluateAuthorization(transaction, memo, candidate, profile, {
       chainStatus: "unconfirmed",
       tipHeight: options.tipHeight
     });
   }
 
-  return evaluateAuthorization(transaction, memo, candidate.location, profile, {
+  return evaluateAuthorization(transaction, memo, candidate, profile, {
     chainStatus: "confirmed",
     blockHeight: transaction.blockHeight
   });
@@ -100,7 +182,7 @@ export function verifyNormalizedTransaction(
 function evaluateAuthorization(
   transaction: NormalizedTransaction,
   memo: ValidatedMemo,
-  candidate: MemoCandidateLocation,
+  candidate: Tm0MemoCandidateLocation,
   profile: ProfileRegistryEntry,
   authorizationContext: AuthorizationContext
 ): NormalizedVerificationResult {
@@ -134,6 +216,7 @@ function evaluateAuthorization(
     if (authorizationContext.chainStatus === "unconfirmed" && isRegistryError(error) && error.code === "INVALID_HEIGHT") {
       return {
         status: "INVALID_VERIFICATION_CONTEXT",
+        protocol: "TM0",
         txid: transaction.txid,
         transaction,
         memo,
@@ -160,6 +243,7 @@ function evaluateAuthorization(
   if (authorizingAddress !== null && authorizingInputIndex !== null) {
     return {
       status: "VERIFIED",
+      protocol: "TM0",
       txid: transaction.txid,
       transaction,
       memo,
@@ -175,6 +259,7 @@ function evaluateAuthorization(
 
   return {
     status: "UNAUTHORIZED",
+    protocol: "TM0",
     txid: transaction.txid,
     transaction,
     memo,
@@ -189,7 +274,7 @@ function evaluateAuthorization(
 function evaluateHeightFromContext(
   transaction: NormalizedTransaction,
   memo: ValidatedMemo,
-  candidate: MemoCandidateLocation,
+  candidate: Tm0MemoCandidateLocation,
   profile: ProfileRegistryEntry,
   authorizationContext: AuthorizationContext
 ): number | NormalizedVerificationResult {
@@ -200,6 +285,7 @@ function evaluateHeightFromContext(
     if (authorizationContext.chainStatus === "unconfirmed" && isRegistryError(error) && error.code === "INVALID_HEIGHT") {
       return {
         status: "INVALID_VERIFICATION_CONTEXT",
+        protocol: "TM0",
         txid: transaction.txid,
         transaction,
         memo,
