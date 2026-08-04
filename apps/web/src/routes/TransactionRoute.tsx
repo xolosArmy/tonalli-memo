@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiClient, AppApiError } from "../api/client";
-import type { TxResponse } from "../api/types";
+import type { CandidateLocation, TxResponse } from "../api/types";
 import { ErrorState, LoadingState } from "../components/AsyncState";
 import { MetadataList } from "../components/MetadataList";
 import { copy } from "../copy";
@@ -79,6 +79,7 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
       <MetadataList
         items={[
           { label: "Estado de verificacion", value: statusLabel(verification?.status ?? "No disponible") },
+          { label: "Protocolo", value: <code>{displayValue(verification?.protocol)}</code> },
           { label: "Alias de perfil", value: profileAlias(verification?.profileCode ?? null) },
           { label: "Codigo de perfil", value: <code>{displayValue(verification?.profileCode)}</code> },
           { label: "Tipo de evento", value: <code>{displayValue(verification?.eventType)}</code> },
@@ -95,13 +96,17 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
           { label: "Indice de input autorizante", value: displayValue(verification?.authorizingInputIndex) },
           { label: "Altura de evaluacion", value: displayValue(verification?.evaluationHeight) },
           { label: "Indice de output candidato", value: displayValue(verification?.candidate?.outputIndex) },
-          { label: "Indice de push candidato", value: displayValue(verification?.candidate?.pushIndex) },
+          { label: "Indice de push candidato", value: displayValue(candidatePushIndex(verification?.candidate)) },
           { label: "Primer indexado", value: formatUnixSeconds(verification?.firstIndexedAt ?? transaction.firstIndexedAt) },
           { label: "Ultima verificacion", value: formatUnixSeconds(verification?.lastVerifiedAt ?? null) }
         ]}
       />
     </article>
   );
+}
+
+function candidatePushIndex(candidate: CandidateLocation | null | undefined): number | null {
+  return candidate?.protocol === "TM0" ? candidate.pushIndex : null;
 }
 
 function messageForError(error: unknown): string {
