@@ -1,4 +1,5 @@
 const txidPattern = "^[0-9a-f]{64}$";
+const hash160Pattern = "^[0-9a-f]{40}$";
 
 const errorResponse = {
   type: "object",
@@ -46,27 +47,74 @@ const transactionSummary = {
   }
 } as const;
 
-const candidate = {
+const tm0Candidate = {
   type: "object",
   additionalProperties: false,
-  required: ["outputIndex", "pushIndex"],
+  required: ["protocol", "outputIndex", "pushIndex"],
   properties: {
+    protocol: { type: "string", const: "TM0" },
     outputIndex: { type: "integer", minimum: 0 },
     pushIndex: { type: "integer", minimum: 0 }
   }
 } as const;
 
-const memo = {
+const tm1Candidate = {
   type: "object",
   additionalProperties: false,
-  required: ["protocolVersion", "eventType", "profileCode", "payload", "byteLength"],
+  required: ["protocol", "outputIndex"],
   properties: {
-    protocolVersion: { type: "integer", minimum: 0 },
+    protocol: { type: "string", const: "TM1" },
+    outputIndex: { type: "integer", minimum: 0 }
+  }
+} as const;
+
+const candidate = {
+  anyOf: [tm0Candidate, tm1Candidate]
+} as const;
+
+const tm0Memo = {
+  type: "object",
+  additionalProperties: false,
+  required: ["protocol", "version", "eventType", "profileCode", "payload", "byteLength"],
+  properties: {
+    protocol: { type: "string", const: "TM0" },
+    version: { type: "integer", const: 0 },
     eventType: { type: "string" },
     profileCode: { type: "string" },
     payload: { type: "string" },
     byteLength: { type: "integer", minimum: 0 }
   }
+} as const;
+
+const tm1Memo = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "protocol",
+    "version",
+    "eventType",
+    "profileCode",
+    "payload",
+    "byteLength",
+    "publicKeyHashHex",
+    "sighashByte",
+    "trustModel"
+  ],
+  properties: {
+    protocol: { type: "string", const: "TM1" },
+    version: { type: "integer", const: 1 },
+    eventType: { type: "string", const: "POST" },
+    profileCode: { type: "null" },
+    payload: { type: "string" },
+    byteLength: { type: "integer", minimum: 0 },
+    publicKeyHashHex: { type: "string", pattern: hash160Pattern },
+    sighashByte: { type: "integer", enum: [65, 193] },
+    trustModel: { type: "string", const: "trusted-chronik" }
+  }
+} as const;
+
+const memo = {
+  anyOf: [tm0Memo, tm1Memo]
 } as const;
 
 const storedVerification = {
@@ -75,6 +123,7 @@ const storedVerification = {
   required: [
     "txid",
     "status",
+    "protocol",
     "protocolVersion",
     "eventType",
     "profileCode",
@@ -90,6 +139,7 @@ const storedVerification = {
   properties: {
     txid: { type: "string", pattern: txidPattern },
     status: { type: "string", enum: ["VERIFIED", "UNAUTHORIZED", "NO_MEMO", "INVALID_MEMO", "MULTIPLE_MEMOS"] },
+    protocol: { type: "string", enum: ["TM0", "TM1"] },
     protocolVersion: { type: ["integer", "null"], minimum: 0 },
     eventType: { type: ["string", "null"] },
     profileCode: { type: ["string", "null"] },
@@ -126,11 +176,12 @@ const verificationResult = {
       ]
     },
     txid: { type: "string" },
+    protocol: { type: "string", enum: ["TM0", "TM1"] },
     transaction: transactionSummary,
     memo,
     candidate,
     candidates: { type: "array", items: candidate },
-    authorizingAddress: { type: "string" },
+    authorizingAddress: { type: ["string", "null"] },
     authorizingInputIndex: { type: "integer", minimum: 0 },
     evaluationHeight: { type: "integer", minimum: 0 },
     error: {
