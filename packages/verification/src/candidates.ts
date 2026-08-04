@@ -15,7 +15,7 @@ export interface Tm1MemoCandidateLocation {
 export type MemoCandidateLocation = Tm0MemoCandidateLocation | Tm1MemoCandidateLocation;
 
 export interface Tm0MemoCandidate {
-  readonly protocol: "TM0";
+  readonly protocol?: "TM0";
   readonly location: Tm0MemoCandidateLocation;
   readonly bytes: Uint8Array;
 }
@@ -95,7 +95,7 @@ export function findMemoCandidates(transaction: NormalizedTransaction): readonly
     if (outputOrder !== 0) {
       return outputOrder;
     }
-    if (left.protocol === "TM0" && right.protocol === "TM0") {
+    if (left.protocol !== "TM1" && right.protocol !== "TM1") {
       return left.location.pushIndex - right.location.pushIndex;
     }
     return left.protocol === "TM1" ? -1 : 1;
