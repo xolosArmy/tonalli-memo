@@ -36,6 +36,13 @@ const requireSafeNonNegativeInteger = (value: unknown, txid: string, field: stri
   return value;
 };
 
+const requireNonNegativeBigInt = (value: unknown, txid: string, field: string): bigint => {
+  if (typeof value !== "bigint" || value < 0n) {
+    throw invalidChronikResponse(`Chronik response field ${field} must be a non-negative bigint.`, txid);
+  }
+  return value;
+};
+
 const requireLowercaseScriptHex = (value: unknown, txid: string, field: string): string => {
   if (!isLowercaseEvenHex(value)) {
     throw invalidChronikResponse(`Chronik response field ${field} must be lowercase even-length hexadecimal.`, txid);
@@ -96,7 +103,8 @@ const normalizeOutput = (output: unknown, index: number, requestedTxid: string):
   if (!isOpReturnScriptHex(outputScriptHex)) {
     return null;
   }
-  return normalizeOpReturnOutput(index, outputScriptHex);
+  const valueSats = requireNonNegativeBigInt(outputRecord.sats, requestedTxid, `outputs[${index}].sats`);
+  return normalizeOpReturnOutput(index, valueSats, outputScriptHex);
 };
 
 const normalizeBlock = (
