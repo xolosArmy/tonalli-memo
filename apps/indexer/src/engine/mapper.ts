@@ -50,39 +50,6 @@ export function mapVerificationResult(
 ): MappedIndexingResult {
   switch (result.status) {
     case "VERIFIED":
-      if (result.protocol === "TM1") {
-        return {
-          requestedTxid,
-          resultStatus: result.status,
-          transaction: result.transaction,
-          tipHeight,
-          verificationRecord: {
-            status: result.status,
-            protocol: "TM1",
-            protocolVersion: result.memo.version,
-            eventType: result.memo.eventType,
-            profileCode: null,
-            payload: result.memo.eventData,
-            byteLength: result.memo.eventDataByteLength,
-            candidateOutputIndex: result.candidate.outputIndex,
-            candidatePushIndex: null,
-            authorizingAddress: result.authorizingAddress,
-            authorizingInputIndex: result.authorizingInputIndex,
-            evaluationHeight: null,
-            authorizationContext: null,
-            authorizationDecisions: [],
-            diagnostics: {
-              publicKeyHex: result.publicKeyHex,
-              publicKeyHashHex: result.publicKeyHashHex,
-              signatureWithHashTypeHex: result.signatureWithHashTypeHex,
-              sighashByte: result.sighashByte,
-              trustModel: result.trustModel
-            }
-          },
-          attemptDiagnostics: {}
-        };
-      }
-
       return {
         requestedTxid,
         resultStatus: result.status,
@@ -97,6 +64,37 @@ export function mapVerificationResult(
           authorizationContext: result.authorizationContext,
           authorizationDecisions: authorizationDecisions(result.authorizationDecisions),
           diagnostics: {}
+        },
+        attemptDiagnostics: {}
+      };
+    case "VERIFIED_TM1":
+      return {
+        requestedTxid,
+        resultStatus: result.status,
+        transaction: result.transaction,
+        tipHeight,
+        verificationRecord: {
+          status: "VERIFIED",
+          protocol: "TM1",
+          protocolVersion: result.memo.version,
+          eventType: result.memo.eventType,
+          profileCode: null,
+          payload: result.memo.eventData,
+          byteLength: result.memo.eventDataByteLength,
+          candidateOutputIndex: result.candidate.outputIndex,
+          candidatePushIndex: null,
+          authorizingAddress: result.authorizingAddress,
+          authorizingInputIndex: result.authorizingInputIndex,
+          evaluationHeight: null,
+          authorizationContext: null,
+          authorizationDecisions: [],
+          diagnostics: {
+            publicKeyHex: result.publicKeyHex,
+            publicKeyHashHex: result.publicKeyHashHex,
+            signatureWithHashTypeHex: result.signatureWithHashTypeHex,
+            sighashByte: result.sighashByte,
+            trustModel: result.trustModel
+          }
         },
         attemptDiagnostics: {}
       };
@@ -136,15 +134,35 @@ export function mapVerificationResult(
         transaction: result.transaction,
         tipHeight,
         verificationRecord: {
-          ...emptyRecord(result.status, result.protocol),
+          ...emptyRecord(result.status),
           candidateOutputIndex: result.candidate.outputIndex,
-          candidatePushIndex: result.protocol === "TM0" ? result.candidate.pushIndex : null,
+          candidatePushIndex: result.candidate.pushIndex,
           diagnostics: {
             protocolError: {
               code: result.protocolError.code,
               message: result.protocolError.message
             },
-            candidate: locationFromResult(result.protocol, result.candidate)
+            candidate: locationFromResult("TM0", result.candidate)
+          }
+        },
+        attemptDiagnostics: {}
+      };
+    case "INVALID_TM1":
+      return {
+        requestedTxid,
+        resultStatus: result.status,
+        transaction: result.transaction,
+        tipHeight,
+        verificationRecord: {
+          ...emptyRecord("INVALID_MEMO", "TM1"),
+          candidateOutputIndex: result.candidate.outputIndex,
+          candidatePushIndex: null,
+          diagnostics: {
+            protocolError: {
+              code: result.protocolError.code,
+              message: result.protocolError.message
+            },
+            candidate: locationFromResult("TM1", result.candidate)
           }
         },
         attemptDiagnostics: {}
@@ -215,7 +233,7 @@ export function mapVerificationResult(
 }
 
 function tm0MemoColumns(
-  result: Extract<VerificationResult, { status: "VERIFIED" | "UNAUTHORIZED"; protocol: "TM0" }>
+  result: Extract<VerificationResult, { status: "VERIFIED" | "UNAUTHORIZED" }>
 ): Omit<
   MappedVerificationRecord,
   | "status"
@@ -238,9 +256,7 @@ function tm0MemoColumns(
   };
 }
 
-function tm0MemoDiagnostic(
-  result: Extract<VerificationResult, { memo: unknown; protocol: "TM0" }>
-): unknown {
+function tm0MemoDiagnostic(result: Extract<VerificationResult, { memo: unknown; status: "MEMPOOL_TIP_REQUIRED" | "INVALID_VERIFICATION_CONTEXT" }>): unknown {
   return {
     protocol: "TM0",
     protocolVersion: result.memo.version,
@@ -299,7 +315,7 @@ function locationFromResult(
 }
 
 function authorizationDecisions(
-  decisions: readonly Extract<VerificationResult, { status: "VERIFIED" | "UNAUTHORIZED"; protocol: "TM0" }>["authorizationDecisions"][number][]
+  decisions: readonly Extract<VerificationResult, { status: "VERIFIED" | "UNAUTHORIZED" }>["authorizationDecisions"][number][]
 ): readonly AuthorizationDecisionDto[] {
   return decisions.map((decision) => ({
     inputIndex: decision.inputIndex,
