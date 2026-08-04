@@ -1,6 +1,13 @@
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
-import type { MemoCandidate, VerificationResult } from "@tonalli-memo/verification";
-import type { FeedItemDto, PublicVerificationResultDto, StoredVerificationDto, TransactionSummaryDto } from "./dto.js";
+import type { MemoCandidateLocation, VerificationResult } from "@tonalli-memo/verification";
+import type {
+  CandidateLocationDto,
+  FeedItemDto,
+  PublicMemoDto,
+  PublicVerificationResultDto,
+  StoredVerificationDto,
+  TransactionSummaryDto
+} from "./dto.js";
 import type { StoredTransactionRow, StoredVerificationRecord, VerifiedFeedRow } from "../db/types.js";
 
 export function mapTransactionSummary(row: StoredTransactionRow): TransactionSummaryDto {
@@ -22,15 +29,13 @@ export function mapStoredVerification(row: StoredVerificationRecord): StoredVeri
   return {
     txid: row.txid,
     status: row.verificationStatus,
+    protocol: row.protocol,
     protocolVersion: row.protocolVersion,
     eventType: row.eventType,
     profileCode: row.profileCode,
     payload: row.payload,
     byteLength: row.byteLength,
-    candidate:
-      row.candidateOutputIndex === null || row.candidatePushIndex === null
-        ? null
-        : { outputIndex: row.candidateOutputIndex, pushIndex: row.candidatePushIndex },
+    candidate: storedCandidate(row),
     authorizingAddress: row.authorizingAddress,
     authorizingInputIndex: row.authorizingInputIndex,
     evaluationHeight: row.evaluationHeight,
@@ -54,10 +59,22 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
 
   switch (result.status) {
     case "VERIFIED":
+      if (result.protocol === "TM1") {
+        return {
+          ...base,
+          protocol: "TM1",
+          transaction: mapNormalizedTransaction(result.transaction),
+          memo: publicTm1Memo(result),
+          candidate: location(result.candidate),
+          authorizingAddress: result.authorizingAddress,
+          authorizingInputIndex: result.authorizingInputIndex
+        };
+      }
       return {
         ...base,
+        protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
-        memo: publicMemo(result),
+        memo: publicTm0Memo(result),
         candidate: location(result.candidate),
         authorizingAddress: result.authorizingAddress,
         authorizingInputIndex: result.authorizingInputIndex,
@@ -66,8 +83,9 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
     case "UNAUTHORIZED":
       return {
         ...base,
+        protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
-        memo: publicMemo(result),
+        memo: publicTm0Memo(result),
         candidate: location(result.candidate),
         evaluationHeight: result.evaluationHeight
       };
@@ -79,6 +97,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
     case "INVALID_MEMO":
       return {
         ...base,
+        protocol: result.protocol,
         transaction: mapNormalizedTransaction(result.transaction),
         candidate: location(result.candidate),
         error: {
@@ -95,15 +114,17 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
     case "MEMPOOL_TIP_REQUIRED":
       return {
         ...base,
+        protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
-        memo: publicMemo(result),
+        memo: publicTm0Memo(result),
         candidate: location(result.candidate)
       };
     case "INVALID_VERIFICATION_CONTEXT":
       return {
         ...base,
+        protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
-        memo: publicMemo(result),
+        memo: publicTm0Memo(result),
         candidate: location(result.candidate),
         error: {
           code: result.contextError.code,
@@ -141,9 +162,12 @@ function mapNormalizedTransaction(transaction: NormalizedTransaction): Transacti
   };
 }
 
-function publicMemo(result: Extract<VerificationResult, { memo: unknown }>): NonNullable<PublicVerificationResultDto["memo"]> {
+function publicTm0Memo(
+  result: Extract<VerificationResult, { memo: unknown; protocol: "TM0" }>
+): Extract<PublicMemoDto, { protocol: "TM0" }> {
   return {
-    protocolVersion: result.memo.version,
+    protocol: "TM0",
+    version: result.memo.version,
     eventType: result.memo.type,
     profileCode: result.memo.profile,
     payload: result.memo.payload,
@@ -151,10 +175,52 @@ function publicMemo(result: Extract<VerificationResult, { memo: unknown }>): Non
   };
 }
 
-function location(candidate: MemoCandidate["location"]): { readonly outputIndex: number; readonly pushIndex: number } {
+function publicTm1Memo(
+  result: Extract<VerificationResult, { status: "VERIFIED"; protocol: "TM1" }>
+): Extract<PublicMemoDto, { protocol: "TM1" }> {
   return {
-    outputIndex: candidate.outputIndex,
-    pushIndex: candidate.pushIndex
+    protocol: "TM1",
+    version: result.memo.version,
+    eventType: result.memo.eventType,
+    profileCode: null,
+    payload: result.memo.eventData,
+    byteLength: result.memo.eventDataByteLength,
+    publicKeyHashHex: result.publicKeyHashHex,
+    sighashByte: result.sighashByte,
+    trustModel: result.trustModel
+  };
+}
+
+function location(candidate: MemoCandidateLocation): CandidateLocationDto {
+  return candidate.protocol === "TM0"
+    ? {
+        protocol: "TM0",
+        outputIndex: candidate.outputIndex,
+        pushIndex: candidate.pushIndex
+      }
+    : {
+        protocol: "TM1",
+        outputIndex: candidate.outputIndex
+      };
+}
+
+function storedCandidate(row: StoredVerificationRecord): CandidateLocationDto | null {
+  if (row.candidateOutputIndex === null) {
+    return null;
+  }
+  if (row.protocol === "TM1") {
+    return {
+      protocol: "TM1",
+      outputIndex: row.candidateOutputIndex
+    };
+  }
+  if (row.candidatePushIndex === null) {
+    return null;
+  }
+  return {
+    protocol: "TM0",
+    outputIndex: row.candidateOutputIndex,
+    pushIndex: row.candidatePushIndex
   };
 }
 
