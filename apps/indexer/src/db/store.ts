@@ -5,6 +5,7 @@ import type {
   ChainStatus,
   IndexerDatabase,
   StoredIndexingAttempt,
+  StoredMemoProtocol,
   StoredTransactionRow,
   TransactionInactiveReason,
   StoredVerificationRecord,
@@ -46,6 +47,7 @@ interface TransactionSqlRow {
 interface VerificationSqlRow {
   readonly txid: string;
   readonly verification_status: StoredVerificationRecord["verificationStatus"];
+  readonly protocol: StoredMemoProtocol;
   readonly protocol_version: number | null;
   readonly event_type: string | null;
   readonly profile_code: string | null;
@@ -154,6 +156,7 @@ export class MemoStore {
           t.is_active,
           t.inactive_reason,
           v.verification_status,
+          v.protocol,
           v.protocol_version,
           v.event_type,
           v.profile_code,
@@ -180,7 +183,6 @@ export class MemoStore {
 
     return rows.map(toVerifiedFeedRow);
   }
-
 
   markTransactionInactive(txid: string, reason: TransactionInactiveReason): MarkTransactionInactiveOutput {
     validateInactiveReason(reason);
@@ -229,7 +231,6 @@ export class MemoStore {
     return rows.map((row) => row.txid);
   }
 
-
   private upsertTransaction(transaction: NormalizedTransaction, nowSeconds: number): void {
     const chainStatus = deriveChainStatus(transaction);
     this.connection
@@ -274,17 +275,18 @@ export class MemoStore {
       .prepare(
         `
         INSERT INTO verification_records (
-          txid, verification_status, protocol_version, event_type, profile_code, payload, byte_length,
+          txid, verification_status, protocol, protocol_version, event_type, profile_code, payload, byte_length,
           candidate_output_index, candidate_push_index, authorizing_address, authorizing_input_index, evaluation_height,
           authorization_context_json, authorization_decisions_json, diagnostics_json, first_indexed_at, last_verified_at
         )
         VALUES (
-          @txid, @verificationStatus, @protocolVersion, @eventType, @profileCode, @payload, @byteLength,
+          @txid, @verificationStatus, @protocol, @protocolVersion, @eventType, @profileCode, @payload, @byteLength,
           @candidateOutputIndex, @candidatePushIndex, @authorizingAddress, @authorizingInputIndex, @evaluationHeight,
           @authorizationContextJson, @authorizationDecisionsJson, @diagnosticsJson, @nowSeconds, @nowSeconds
         )
         ON CONFLICT(txid) DO UPDATE SET
           verification_status = excluded.verification_status,
+          protocol = excluded.protocol,
           protocol_version = excluded.protocol_version,
           event_type = excluded.event_type,
           profile_code = excluded.profile_code,
@@ -304,6 +306,7 @@ export class MemoStore {
       .run({
         txid,
         verificationStatus: record.status,
+        protocol: record.protocol,
         protocolVersion: record.protocolVersion,
         eventType: record.eventType,
         profileCode: record.profileCode,
@@ -375,6 +378,7 @@ function toVerificationRow(row: VerificationSqlRow): StoredVerificationRecord {
   return {
     txid: row.txid,
     verificationStatus: row.verification_status,
+    protocol: row.protocol,
     protocolVersion: row.protocol_version,
     eventType: row.event_type,
     profileCode: row.profile_code,
@@ -410,7 +414,6 @@ function toAttemptRow(row: AttemptSqlRow): StoredIndexingAttempt {
   };
 }
 
-
 function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
   return {
     transaction: toTransactionRow({
@@ -431,6 +434,7 @@ function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
     verification: toVerificationRow({
       txid: row.txid,
       verification_status: row.verification_status,
+      protocol: row.protocol,
       protocol_version: row.protocol_version,
       event_type: row.event_type,
       profile_code: row.profile_code,
