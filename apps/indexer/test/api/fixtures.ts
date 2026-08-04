@@ -26,6 +26,7 @@ export const normalizedTx = (overrides: Partial<NormalizedTransaction> = {}): No
   opReturnOutputs: [
     {
       outputIndex: 0,
+      valueSats: 0n,
       outputScriptHex: "6a",
       pushes: [utf8Bytes("TM0|p|xa|signal now lives on eCash")],
       parseStatus: "parsed"
