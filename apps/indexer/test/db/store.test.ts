@@ -209,5 +209,62 @@ describe("MemoStore transaction lifecycle", () => {
     persist(store, verifiedResult({ txid: TXID_2, transaction: normalizedTx({ txid: TXID_2, blockHeight: 900010 }) }), 200);
     expect(store.listActiveUnconfirmedTxids(1)).toEqual([TXID]);
     expect(store.listActiveConfirmedTxidsAtOrAbove(900005, 1)).toEqual([TXID_2]);
+    database.close();
+  });
+
+  it("uses parameterized bounded queries and rejects invalid limits", () => {
+    const { database, store } = openStore();
+    expect(() => store.listActiveUnconfirmedTxids(0)).toThrow("limit");
+    expect(() => store.listActiveUnconfirmedTxids(1001)).toThrow("limit");
+    expect(() => store.listActiveConfirmedTxidsAtOrAbove(-1, 1)).toThrow("Block height");
+    expect(() => store.listActiveConfirmedTxidsAtOrAbove(0, 0)).toThrow("limit");
+    database.close();
+  });
+
+  it("markTransactionInactive reports unchanged for unknown txids", () => {
+    const { database, store } = openStore();
+    expect(store.markTransactionInactive(TXID, "INVALIDATED")).toEqual({ txid: TXID, changed: false });
+    database.close();
+  });
+
+  it("markTransactionInactive reports changed for active rows marked removed from mempool", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult(), 100);
+    expect(store.markTransactionInactive(TXID, "REMOVED_FROM_MEMPOOL")).toEqual({ txid: TXID, changed: true });
+    expect(store.getTransaction(TXID)).toMatchObject({ isActive: false, inactiveReason: "REMOVED_FROM_MEMPOOL" });
+    database.close();
+  });
+
+  it("markTransactionInactive reports changed for active rows marked invalidated", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult(), 100);
+    expect(store.markTransactionInactive(TXID, "INVALIDATED")).toEqual({ txid: TXID, changed: true });
+    expect(store.getTransaction(TXID)).toMatchObject({ isActive: false, inactiveReason: "INVALIDATED" });
+    database.close();
+  });
+
+  it("markTransactionInactive reports unchanged for inactive rows with the same reason", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult(), 100);
+    expect(store.markTransactionInactive(TXID, "INVALIDATED")).toEqual({ txid: TXID, changed: true });
+    expect(store.markTransactionInactive(TXID, "INVALIDATED")).toEqual({ txid: TXID, changed: false });
+    expect(store.getTransaction(TXID)).toMatchObject({ isActive: false, inactiveReason: "INVALIDATED" });
+    database.close();
+  });
+
+  it("markTransactionInactive reports changed when inactive reason changes", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult(), 100);
+    expect(store.markTransactionInactive(TXID, "REMOVED_FROM_MEMPOOL")).toEqual({ txid: TXID, changed: true });
+    expect(store.markTransactionInactive(TXID, "INVALIDATED")).toEqual({ txid: TXID, changed: true });
+    expect(store.getTransaction(TXID)).toMatchObject({ isActive: false, inactiveReason: "INVALIDATED" });
+    database.close();
+  });
+
+  it("markTransactionInactive rejects invalid inactive reasons at the API boundary", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult(), 100);
+    expect(() => store.markTransactionInactive(TXID, "STALE" as never)).toThrow("Transaction inactive reason");
+    database.close();
   });
 });
