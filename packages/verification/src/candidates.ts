@@ -4,13 +4,11 @@ import { isTm1CandidateScript } from "@tonalli-memo/protocol";
 export type MemoProtocol = "TM0" | "TM1";
 
 export interface Tm0MemoCandidateLocation {
-  readonly protocol: "TM0";
   readonly outputIndex: number;
   readonly pushIndex: number;
 }
 
 export interface Tm1MemoCandidateLocation {
-  readonly protocol: "TM1";
   readonly outputIndex: number;
 }
 
@@ -43,7 +41,6 @@ export function findTm1Candidates(transaction: NormalizedTransaction): readonly 
     .map((output) => ({
       protocol: "TM1" as const,
       location: {
-        protocol: "TM1" as const,
         outputIndex: output.outputIndex
       },
       output
@@ -67,7 +64,6 @@ export function findTm0Candidates(
         candidates.push({
           protocol: "TM0",
           location: {
-            protocol: "TM0",
             outputIndex: output.outputIndex,
             pushIndex
           },
@@ -93,10 +89,8 @@ export function findMemoCandidates(transaction: NormalizedTransaction): readonly
     if (outputOrder !== 0) {
       return outputOrder;
     }
-    if (left.protocol === right.protocol) {
-      return left.protocol === "TM0" && right.protocol === "TM0"
-        ? left.location.pushIndex - right.location.pushIndex
-        : 0;
+    if (left.protocol === "TM0" && right.protocol === "TM0") {
+      return left.location.pushIndex - right.location.pushIndex;
     }
     return left.protocol === "TM1" ? -1 : 1;
   });
