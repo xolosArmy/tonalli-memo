@@ -23,6 +23,7 @@ export interface Tm0MemoCandidate {
 export interface Tm1MemoCandidate {
   readonly protocol: "TM1";
   readonly location: Tm1MemoCandidateLocation;
+  readonly bytes: Uint8Array;
   readonly output: NormalizedOpReturnOutput;
 }
 
@@ -37,12 +38,17 @@ export function isTonalliMemoCandidate(push: Uint8Array): boolean {
 
 export function findTm1Candidates(transaction: NormalizedTransaction): readonly Tm1MemoCandidate[] {
   return transaction.opReturnOutputs
-    .filter((output) => isTm1CandidateScript(Uint8Array.from(Buffer.from(output.outputScriptHex, "hex"))))
     .map((output) => ({
+      output,
+      script: Uint8Array.from(Buffer.from(output.outputScriptHex, "hex"))
+    }))
+    .filter(({ script }) => isTm1CandidateScript(script))
+    .map(({ output, script }) => ({
       protocol: "TM1" as const,
       location: {
         outputIndex: output.outputIndex
       },
+      bytes: new Uint8Array(script),
       output
     }))
     .sort((left, right) => left.location.outputIndex - right.location.outputIndex);
