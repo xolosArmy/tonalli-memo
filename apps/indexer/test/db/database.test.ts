@@ -51,7 +51,7 @@ describe("indexer database", () => {
     const filename = join(directory, "newer.sqlite");
     try {
       const database = openIndexerDatabase({ filename });
-      database.connection.pragma("user_version = 3");
+      database.connection.pragma(`user_version = ${CURRENT_SCHEMA_VERSION + 1}`);
       database.close();
 
       expect(() => openIndexerDatabase({ filename })).toThrow(UnsupportedSchemaVersionError);
