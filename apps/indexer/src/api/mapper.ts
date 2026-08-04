@@ -202,7 +202,7 @@ function publicTm1Memo(
 }
 
 function locationFromCandidate(candidate: MemoCandidate): CandidateLocationDto {
-  return locationFromResult(candidate.protocol, candidate.location);
+  return locationFromResult(candidate.protocol === "TM1" ? "TM1" : "TM0", candidate.location);
 }
 
 function locationFromResult(
