@@ -18,6 +18,7 @@ export const input = (index: number, address: string | null = TEST_ADDRESS): Nor
     txid: PREV_TXID,
     outIdx: index
   },
+  inputScriptHex: "00",
   outputScriptHex: address === null ? null : "76A914ABCDEF88AC",
   address
 });
