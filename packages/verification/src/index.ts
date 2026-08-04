@@ -44,8 +44,6 @@ export type {
   NoMemoResult,
   NormalizedVerificationResult,
   ProtocolMemoCandidateLocation,
-  Tm0InvalidMemoResult,
-  Tm0VerifiedResult,
   Tm1InvalidMemoResult,
   Tm1VerifiedResult,
   UnauthorizedResult,
