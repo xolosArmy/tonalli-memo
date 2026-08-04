@@ -15,6 +15,7 @@ export type OpReturnParseStatus = "parsed" | "malformed";
 
 export interface NormalizedOpReturnOutput {
   outputIndex: number;
+  valueSats: bigint;
   outputScriptHex: string;
   pushes: readonly Uint8Array[];
   parseStatus: OpReturnParseStatus;
