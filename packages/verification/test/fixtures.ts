@@ -9,6 +9,7 @@ export const opReturnOutput = (
   parseStatus: "parsed" | "malformed" = "parsed"
 ): NormalizedOpReturnOutput => ({
   outputIndex,
+  valueSats: 0n,
   outputScriptHex: "6a",
   pushes,
   parseStatus,
