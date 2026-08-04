@@ -59,17 +59,6 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
 
   switch (result.status) {
     case "VERIFIED":
-      if (result.protocol === "TM1") {
-        return {
-          ...base,
-          protocol: "TM1",
-          transaction: mapNormalizedTransaction(result.transaction),
-          memo: publicTm1Memo(result),
-          candidate: locationFromResult("TM1", result.candidate),
-          authorizingAddress: result.authorizingAddress,
-          authorizingInputIndex: result.authorizingInputIndex
-        };
-      }
       return {
         ...base,
         protocol: "TM0",
@@ -79,6 +68,16 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         authorizingAddress: result.authorizingAddress,
         authorizingInputIndex: result.authorizingInputIndex,
         evaluationHeight: result.evaluationHeight
+      };
+    case "VERIFIED_TM1":
+      return {
+        ...base,
+        protocol: "TM1",
+        transaction: mapNormalizedTransaction(result.transaction),
+        memo: publicTm1Memo(result),
+        candidate: locationFromResult("TM1", result.candidate),
+        authorizingAddress: result.authorizingAddress,
+        authorizingInputIndex: result.authorizingInputIndex
       };
     case "UNAUTHORIZED":
       return {
@@ -97,9 +96,20 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
     case "INVALID_MEMO":
       return {
         ...base,
-        protocol: result.protocol,
+        protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
-        candidate: locationFromResult(result.protocol, result.candidate),
+        candidate: locationFromResult("TM0", result.candidate),
+        error: {
+          code: result.protocolError.code,
+          message: result.protocolError.message
+        }
+      };
+    case "INVALID_TM1":
+      return {
+        ...base,
+        protocol: "TM1",
+        transaction: mapNormalizedTransaction(result.transaction),
+        candidate: locationFromResult("TM1", result.candidate),
         error: {
           code: result.protocolError.code,
           message: result.protocolError.message
@@ -163,7 +173,7 @@ function mapNormalizedTransaction(transaction: NormalizedTransaction): Transacti
 }
 
 function publicTm0Memo(
-  result: Extract<VerificationResult, { memo: unknown; protocol: "TM0" }>
+  result: Extract<VerificationResult, { memo: unknown; status: "VERIFIED" | "UNAUTHORIZED" | "MEMPOOL_TIP_REQUIRED" | "INVALID_VERIFICATION_CONTEXT" }>
 ): Extract<PublicMemoDto, { protocol: "TM0" }> {
   return {
     protocol: "TM0",
@@ -176,7 +186,7 @@ function publicTm0Memo(
 }
 
 function publicTm1Memo(
-  result: Extract<VerificationResult, { status: "VERIFIED"; protocol: "TM1" }>
+  result: Extract<VerificationResult, { status: "VERIFIED_TM1" }>
 ): Extract<PublicMemoDto, { protocol: "TM1" }> {
   return {
     protocol: "TM1",
