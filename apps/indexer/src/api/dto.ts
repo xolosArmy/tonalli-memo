@@ -1,5 +1,5 @@
 import type { VerificationStatus } from "@tonalli-memo/verification";
-import type { ChainStatus, DurableVerificationStatus } from "../db/types.js";
+import type { ChainStatus, DurableVerificationStatus, StoredMemoProtocol } from "../db/types.js";
 
 export interface ApiErrorDto {
   readonly error: {
@@ -26,14 +26,21 @@ export interface TransactionSummaryDto {
   readonly updatedAt: number;
 }
 
-export interface CandidateLocationDto {
-  readonly outputIndex: number;
-  readonly pushIndex: number;
-}
+export type CandidateLocationDto =
+  | {
+      readonly protocol: "TM0";
+      readonly outputIndex: number;
+      readonly pushIndex: number;
+    }
+  | {
+      readonly protocol: "TM1";
+      readonly outputIndex: number;
+    };
 
 export interface StoredVerificationDto {
   readonly txid: string;
   readonly status: DurableVerificationStatus;
+  readonly protocol: StoredMemoProtocol;
   readonly protocolVersion: number | null;
   readonly eventType: string | null;
   readonly profileCode: string | null;
@@ -62,20 +69,36 @@ export interface FeedResponseDto {
   readonly limit: number;
 }
 
+export type PublicMemoDto =
+  | {
+      readonly protocol: "TM0";
+      readonly version: 0;
+      readonly eventType: string;
+      readonly profileCode: string;
+      readonly payload: string;
+      readonly byteLength: number;
+    }
+  | {
+      readonly protocol: "TM1";
+      readonly version: 1;
+      readonly eventType: "POST";
+      readonly profileCode: null;
+      readonly payload: string;
+      readonly byteLength: number;
+      readonly publicKeyHashHex: string;
+      readonly sighashByte: 0x41 | 0xc1;
+      readonly trustModel: "trusted-chronik";
+    };
+
 export interface PublicVerificationResultDto {
   readonly status: VerificationStatus;
   readonly txid: string;
+  readonly protocol?: StoredMemoProtocol;
   readonly transaction?: TransactionSummaryDto;
-  readonly memo?: {
-    readonly protocolVersion: number;
-    readonly eventType: string;
-    readonly profileCode: string;
-    readonly payload: string;
-    readonly byteLength: number;
-  };
+  readonly memo?: PublicMemoDto;
   readonly candidate?: CandidateLocationDto;
   readonly candidates?: readonly CandidateLocationDto[];
-  readonly authorizingAddress?: string;
+  readonly authorizingAddress?: string | null;
   readonly authorizingInputIndex?: number;
   readonly evaluationHeight?: number;
   readonly error?: {
