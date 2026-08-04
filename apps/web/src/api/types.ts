@@ -1,4 +1,5 @@
 export type ChainStatus = "confirmed" | "unconfirmed";
+export type StoredMemoProtocol = "TM0" | "TM1";
 
 export interface ApiErrorDto {
   readonly error: {
@@ -20,16 +21,23 @@ export interface TransactionSummary {
   readonly updatedAt: number;
 }
 
-export interface CandidateLocation {
-  readonly outputIndex: number;
-  readonly pushIndex: number;
-}
+export type CandidateLocation =
+  | {
+      readonly protocol: "TM0";
+      readonly outputIndex: number;
+      readonly pushIndex: number;
+    }
+  | {
+      readonly protocol: "TM1";
+      readonly outputIndex: number;
+    };
 
 export type VerificationStatus = "VERIFIED" | "UNAUTHORIZED" | "NO_MEMO" | "INVALID_MEMO" | "MULTIPLE_MEMOS";
 
 export interface StoredVerification {
   readonly txid: string;
   readonly status: VerificationStatus;
+  readonly protocol: StoredMemoProtocol;
   readonly protocolVersion: number | null;
   readonly eventType: string | null;
   readonly profileCode: string | null;
