@@ -21,6 +21,7 @@ export const input = (index: number, address: string | null): NormalizedInput =>
     txid: PREV_TXID,
     outIdx: index
   },
+  inputScriptHex: "00",
   outputScriptHex: address === null ? null : "76a914000000000000000000000000000000000000000088ac",
   address
 });

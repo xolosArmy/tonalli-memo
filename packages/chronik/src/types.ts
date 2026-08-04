@@ -6,6 +6,7 @@ export interface NormalizedOutPoint {
 export interface NormalizedInput {
   index: number;
   prevOut: NormalizedOutPoint;
+  inputScriptHex: string;
   outputScriptHex: string | null;
   address: string | null;
 }

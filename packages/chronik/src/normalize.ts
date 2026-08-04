@@ -68,11 +68,13 @@ const normalizeInput = (
   const prevOut = requireRecord(inputRecord.prevOut, requestedTxid, `inputs[${index}].prevOut`);
   const prevOutTxid = requireCanonicalTxid(prevOut.txid, requestedTxid, `inputs[${index}].prevOut.txid`);
   const outIdx = requireSafeNonNegativeInteger(prevOut.outIdx, requestedTxid, `inputs[${index}].prevOut.outIdx`);
+  const inputScriptHex = requireLowercaseScriptHex(inputRecord.inputScript, requestedTxid, `inputs[${index}].inputScript`);
 
   if (isCoinbase || inputRecord.outputScript === undefined) {
     return {
       index,
       prevOut: { txid: prevOutTxid, outIdx },
+      inputScriptHex,
       outputScriptHex: null,
       address: null
     };
@@ -82,6 +84,7 @@ const normalizeInput = (
   return {
     index,
     prevOut: { txid: prevOutTxid, outIdx },
+    inputScriptHex,
     outputScriptHex,
     address: deriveAddressFromOutputScriptHex(outputScriptHex, addressPrefix)
   };
