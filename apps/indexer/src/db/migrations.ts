@@ -1,4 +1,4 @@
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 export interface Migration {
   readonly version: number;
@@ -93,6 +93,16 @@ export const MIGRATIONS: readonly Migration[] = [
 
       CREATE INDEX idx_transactions_active_chain_status ON transactions(is_active, chain_status);
       CREATE INDEX idx_transactions_active_block_height ON transactions(is_active, block_height);
+    `
+  },
+  {
+    version: 3,
+    sql: `
+      ALTER TABLE verification_records
+        ADD COLUMN protocol TEXT NOT NULL DEFAULT 'TM0'
+        CHECK (protocol IN ('TM0', 'TM1'));
+
+      CREATE INDEX idx_verification_records_protocol ON verification_records(protocol);
     `
   }
 ];

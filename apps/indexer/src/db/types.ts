@@ -1,5 +1,7 @@
 import type Database from "better-sqlite3";
 
+export type StoredMemoProtocol = "TM0" | "TM1";
+
 export interface StoredInput {
   readonly index: number;
   readonly prevOut: {
@@ -65,6 +67,7 @@ export interface StoredTransactionRow {
 export interface StoredVerificationRecord {
   readonly txid: string;
   readonly verificationStatus: DurableVerificationStatus;
+  readonly protocol: StoredMemoProtocol;
   readonly protocolVersion: number | null;
   readonly eventType: string | null;
   readonly profileCode: string | null;
@@ -96,7 +99,6 @@ export interface StoredIndexingAttempt {
   readonly diagnostics: unknown;
   readonly attemptedAt: number;
 }
-
 
 export interface VerifiedFeedRow {
   readonly transaction: StoredTransactionRow;

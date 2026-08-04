@@ -1,4 +1,9 @@
-export { findMemoCandidates, isTonalliMemoCandidate } from "./candidates.js";
+export {
+  findMemoCandidates,
+  findTm0Candidates,
+  findTm1Candidates,
+  isTonalliMemoCandidate
+} from "./candidates.js";
 export { VerificationInvariantError } from "./errors.js";
 export { MemoVerificationService, createMemoVerificationService } from "./service.js";
 export {
@@ -6,7 +11,15 @@ export {
   verifyTm1DesignatedInput
 } from "./verify-tm1-designated-input.js";
 export { verifyNormalizedTransaction } from "./verify-normalized.js";
-export type { MemoCandidate, MemoCandidateLocation } from "./candidates.js";
+export type {
+  MemoCandidate,
+  MemoCandidateLocation,
+  MemoProtocol,
+  Tm0MemoCandidate,
+  Tm0MemoCandidateLocation,
+  Tm1MemoCandidate,
+  Tm1MemoCandidateLocation
+} from "./candidates.js";
 export type {
   MemoProtocolFailure,
   VerificationContextFailure,
@@ -30,6 +43,9 @@ export type {
   MultipleMemosResult,
   NoMemoResult,
   NormalizedVerificationResult,
+  ProtocolMemoCandidateLocation,
+  Tm1InvalidMemoResult,
+  Tm1VerifiedResult,
   UnauthorizedResult,
   VerificationBase,
   VerificationResult,

@@ -176,7 +176,7 @@ describe("MemoStore transaction lifecycle", () => {
   it("migrates existing version 1 rows as active", () => {
     const { database, store } = openStore();
     persist(store, verifiedResult(), 100);
-    expect(database.connection.prepare("PRAGMA user_version").get()).toEqual({ user_version: 2 });
+    expect(database.connection.prepare("PRAGMA user_version").get()).toEqual({ user_version: 3 });
     expect(store.getTransaction(TXID)).toMatchObject({ isActive: true, inactiveReason: null });
     database.close();
   });
