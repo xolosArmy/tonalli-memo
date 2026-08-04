@@ -17,6 +17,7 @@ export const normalizedTx = (overrides: Partial<NormalizedTransaction> = {}): No
         txid: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         outIdx: 0
       },
+      inputScriptHex: "00",
       outputScriptHex: "76a914abcdef88ac",
       address: TEST_ADDRESS
     }
