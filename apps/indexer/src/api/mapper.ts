@@ -1,5 +1,5 @@
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
-import type { MemoCandidateLocation, VerificationResult } from "@tonalli-memo/verification";
+import type { MemoCandidate, VerificationResult } from "@tonalli-memo/verification";
 import type {
   CandidateLocationDto,
   FeedItemDto,
@@ -65,7 +65,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
           protocol: "TM1",
           transaction: mapNormalizedTransaction(result.transaction),
           memo: publicTm1Memo(result),
-          candidate: location(result.candidate),
+          candidate: locationFromResult("TM1", result.candidate),
           authorizingAddress: result.authorizingAddress,
           authorizingInputIndex: result.authorizingInputIndex
         };
@@ -75,7 +75,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
         memo: publicTm0Memo(result),
-        candidate: location(result.candidate),
+        candidate: locationFromResult("TM0", result.candidate),
         authorizingAddress: result.authorizingAddress,
         authorizingInputIndex: result.authorizingInputIndex,
         evaluationHeight: result.evaluationHeight
@@ -86,7 +86,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
         memo: publicTm0Memo(result),
-        candidate: location(result.candidate),
+        candidate: locationFromResult("TM0", result.candidate),
         evaluationHeight: result.evaluationHeight
       };
     case "NO_MEMO":
@@ -99,7 +99,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         ...base,
         protocol: result.protocol,
         transaction: mapNormalizedTransaction(result.transaction),
-        candidate: location(result.candidate),
+        candidate: locationFromResult(result.protocol, result.candidate),
         error: {
           code: result.protocolError.code,
           message: result.protocolError.message
@@ -109,7 +109,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
       return {
         ...base,
         transaction: mapNormalizedTransaction(result.transaction),
-        candidates: result.candidates.map((candidate) => location(candidate.location))
+        candidates: result.candidates.map(locationFromCandidate)
       };
     case "MEMPOOL_TIP_REQUIRED":
       return {
@@ -117,7 +117,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
         memo: publicTm0Memo(result),
-        candidate: location(result.candidate)
+        candidate: locationFromResult("TM0", result.candidate)
       };
     case "INVALID_VERIFICATION_CONTEXT":
       return {
@@ -125,7 +125,7 @@ export function mapVerificationResult(result: VerificationResult): PublicVerific
         protocol: "TM0",
         transaction: mapNormalizedTransaction(result.transaction),
         memo: publicTm0Memo(result),
-        candidate: location(result.candidate),
+        candidate: locationFromResult("TM0", result.candidate),
         error: {
           code: result.contextError.code,
           message: result.contextError.message
@@ -191,17 +191,28 @@ function publicTm1Memo(
   };
 }
 
-function location(candidate: MemoCandidateLocation): CandidateLocationDto {
-  return candidate.protocol === "TM0"
-    ? {
-        protocol: "TM0",
-        outputIndex: candidate.outputIndex,
-        pushIndex: candidate.pushIndex
-      }
-    : {
-        protocol: "TM1",
-        outputIndex: candidate.outputIndex
-      };
+function locationFromCandidate(candidate: MemoCandidate): CandidateLocationDto {
+  return locationFromResult(candidate.protocol, candidate.location);
+}
+
+function locationFromResult(
+  protocol: "TM0" | "TM1",
+  candidate: { readonly outputIndex: number; readonly pushIndex?: number }
+): CandidateLocationDto {
+  if (protocol === "TM1") {
+    return {
+      protocol: "TM1",
+      outputIndex: candidate.outputIndex
+    };
+  }
+  if (candidate.pushIndex === undefined) {
+    throw new Error("TM0 candidate location requires pushIndex.");
+  }
+  return {
+    protocol: "TM0",
+    outputIndex: candidate.outputIndex,
+    pushIndex: candidate.pushIndex
+  };
 }
 
 function storedCandidate(row: StoredVerificationRecord): CandidateLocationDto | null {
