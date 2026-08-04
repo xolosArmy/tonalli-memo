@@ -15,6 +15,7 @@ describe("verification result mapper", () => {
     const mapped = mapVerificationResult(verifiedResult(), TXID, 900100);
     expect(mapped.verificationRecord).toMatchObject({
       status: "VERIFIED",
+      protocol: "TM0",
       protocolVersion: 0,
       eventType: "p",
       profileCode: "xa",
@@ -45,6 +46,7 @@ describe("verification result mapper", () => {
         message: "Payload must not be empty."
       },
       candidate: {
+        protocol: "TM0",
         outputIndex: 0,
         pushIndex: 0
       }
@@ -55,8 +57,8 @@ describe("verification result mapper", () => {
     const mapped = mapVerificationResult(multipleMemosResult(), TXID, null);
     expect(mapped.verificationRecord?.diagnostics).toEqual({
       candidates: [
-        { outputIndex: 0, pushIndex: 0 },
-        { outputIndex: 2, pushIndex: 1 }
+        { protocol: "TM0", outputIndex: 0, pushIndex: 0 },
+        { protocol: "TM0", outputIndex: 2, pushIndex: 1 }
       ]
     });
   });
