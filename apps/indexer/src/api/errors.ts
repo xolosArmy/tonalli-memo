@@ -22,9 +22,11 @@ export const notFoundError = (): HttpApiError =>
 export const httpStatusForVerificationStatus = (status: string): number => {
   switch (status) {
     case "VERIFIED":
+    case "VERIFIED_TM1":
     case "UNAUTHORIZED":
     case "NO_MEMO":
     case "INVALID_MEMO":
+    case "INVALID_TM1":
     case "MULTIPLE_MEMOS":
       return 200;
     case "MEMPOOL_TIP_REQUIRED":
