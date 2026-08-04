@@ -163,9 +163,11 @@ const verificationResult = {
       type: "string",
       enum: [
         "VERIFIED",
+        "VERIFIED_TM1",
         "UNAUTHORIZED",
         "NO_MEMO",
         "INVALID_MEMO",
+        "INVALID_TM1",
         "MULTIPLE_MEMOS",
         "MEMPOOL_TIP_REQUIRED",
         "INVALID_VERIFICATION_CONTEXT",
