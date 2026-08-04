@@ -1,4 +1,14 @@
-import type { ApiErrorDto, CandidateLocation, FeedItem, FeedResponse, StoredVerification, TransactionSummary, TxResponse, VerificationStatus } from "./types";
+import type {
+  ApiErrorDto,
+  CandidateLocation,
+  FeedItem,
+  FeedResponse,
+  StoredMemoProtocol,
+  StoredVerification,
+  TransactionSummary,
+  TxResponse,
+  VerificationStatus
+} from "./types";
 
 const TXID_PATTERN = /^[0-9a-f]{64}$/u;
 const VERIFICATION_STATUSES = new Set<VerificationStatus>(["VERIFIED", "UNAUTHORIZED", "NO_MEMO", "INVALID_MEMO", "MULTIPLE_MEMOS"]);
@@ -51,9 +61,12 @@ function isTransactionSummary(value: unknown): value is TransactionSummary {
 }
 
 function isStoredVerification(value: unknown): value is StoredVerification {
-  if (!isRecord(value)) {
+  if (!isRecord(value) || !isStoredMemoProtocol(value.protocol)) {
     return false;
   }
+
+  const candidateValid = value.candidate === null || isCandidateLocation(value.candidate, value.protocol);
+
   return (
     typeof value.txid === "string" &&
     TXID_PATTERN.test(value.txid) &&
@@ -63,7 +76,7 @@ function isStoredVerification(value: unknown): value is StoredVerification {
     isNullableString(value.profileCode) &&
     isNullableString(value.payload) &&
     isNullableSafeInteger(value.byteLength) &&
-    (value.candidate === null || isCandidateLocation(value.candidate)) &&
+    candidateValid &&
     isNullableString(value.authorizingAddress) &&
     isNullableSafeInteger(value.authorizingInputIndex) &&
     isNullableSafeInteger(value.evaluationHeight) &&
@@ -72,8 +85,18 @@ function isStoredVerification(value: unknown): value is StoredVerification {
   );
 }
 
-function isCandidateLocation(value: unknown): value is CandidateLocation {
-  return isRecord(value) && isSafeInteger(value.outputIndex) && isSafeInteger(value.pushIndex);
+function isCandidateLocation(value: unknown, protocol: StoredMemoProtocol): value is CandidateLocation {
+  if (!isRecord(value) || value.protocol !== protocol || !isSafeInteger(value.outputIndex)) {
+    return false;
+  }
+  if (protocol === "TM0") {
+    return isSafeInteger(value.pushIndex);
+  }
+  return !("pushIndex" in value);
+}
+
+function isStoredMemoProtocol(value: unknown): value is StoredMemoProtocol {
+  return value === "TM0" || value === "TM1";
 }
 
 function isNullableString(value: unknown): value is string | null {
