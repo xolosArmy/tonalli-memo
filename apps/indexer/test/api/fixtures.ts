@@ -52,6 +52,18 @@ const memo = {
   byteLength: 35
 } as const;
 
+const tm1Memo = {
+  protocol: "TM1",
+  version: 1,
+  eventType: "POST",
+  eventTypeCode: 1,
+  authorInputIndex: 0,
+  eventData: "signal now lives on eCash",
+  eventDataBytes: utf8Bytes("signal now lives on eCash"),
+  eventDataByteLength: 29,
+  scriptByteLength: 38
+} as const;
+
 const profile = {
   code: "xa",
   alias: "xolos-army",
@@ -95,6 +107,22 @@ export const verificationResultForStatus = (status: VerificationResult["status"]
   switch (status) {
     case "VERIFIED":
       return verifiedResult({ txid, transaction });
+    case "VERIFIED_TM1":
+      return {
+        status,
+        protocol: "TM1",
+        txid,
+        transaction,
+        memo: tm1Memo,
+        candidate: { outputIndex: 0 },
+        authorizingAddress: TEST_ADDRESS,
+        authorizingInputIndex: 0,
+        publicKeyHex: `02${"11".repeat(32)}`,
+        publicKeyHashHex: "22".repeat(20),
+        signatureWithHashTypeHex: `${"33".repeat(64)}41`,
+        sighashByte: 0x41,
+        trustModel: "trusted-chronik"
+      };
     case "UNAUTHORIZED":
       return {
         status,
@@ -116,6 +144,15 @@ export const verificationResultForStatus = (status: VerificationResult["status"]
         transaction,
         candidate: { outputIndex: 0, pushIndex: 0 },
         protocolError: { code: "EMPTY_PAYLOAD", message: "raw protocol detail" }
+      };
+    case "INVALID_TM1":
+      return {
+        status,
+        protocol: "TM1",
+        txid,
+        transaction,
+        candidate: { outputIndex: 0 },
+        protocolError: { code: "UNSUPPORTED_SIGHASH", message: "raw TM1 detail" }
       };
     case "MULTIPLE_MEMOS":
       return {
