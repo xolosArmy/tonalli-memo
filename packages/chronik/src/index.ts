@@ -5,7 +5,13 @@ export { validateTxid, isCanonicalTxid } from "./txid.js";
 export { deriveAddressFromOutputScriptHex, isLowercaseEvenHex } from "./scripts.js";
 export { isOpReturnScriptHex, normalizeOpReturnOutput } from "./op-return.js";
 export { createChronikLiveSource } from "./live/client.js";
-export { TONALLI_MEMO_LOKAD_ID, mapChronikLiveMessage } from "./live/mapper.js";
+export {
+  TM0_LOKAD_ID,
+  TM1_DRAFT_02_LOKAD_ID,
+  TONALLI_DISCOVERY_LOKAD_IDS,
+  TONALLI_MEMO_LOKAD_ID,
+  mapChronikLiveMessage
+} from "./live/mapper.js";
 export type { ChronikAdapterErrorCode } from "./errors.js";
 export type {
   ChronikAdapterOptions,
