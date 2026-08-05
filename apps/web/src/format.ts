@@ -3,9 +3,19 @@ import type { FeedItem, StoredVerification, TransactionSummary } from "./api/typ
 
 const TXID_PREFIX_LENGTH = 10;
 const TXID_SUFFIX_LENGTH = 8;
+const HASH160_PREFIX_LENGTH = 8;
+const HASH160_SUFFIX_LENGTH = 8;
 
 export function abbreviateTxid(txid: string): string {
   return `${txid.slice(0, TXID_PREFIX_LENGTH)}...${txid.slice(-TXID_SUFFIX_LENGTH)}`;
+}
+
+export function abbreviateHash160(hashHex: string): string {
+  return `${hashHex.slice(0, HASH160_PREFIX_LENGTH)}…${hashHex.slice(-HASH160_SUFFIX_LENGTH)}`;
+}
+
+export function sighashLabel(value: 65 | 193): string {
+  return `0x${value.toString(16).padStart(2, "0")} (${value})`;
 }
 
 export function profileAlias(profileCode: string | null): string {
