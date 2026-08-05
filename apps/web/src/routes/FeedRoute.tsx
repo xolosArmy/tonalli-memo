@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import type { FeedResponse } from "../api/types";
 import { apiClient, AppApiError } from "../api/client";
 import { ErrorState, LoadingState } from "../components/AsyncState";
+import { MemoIdentity } from "../components/MemoIdentity";
 import { copy } from "../copy";
-import { abbreviateTxid, chainStatusLabel, formatUnixSeconds, profileAlias, timestampForFeedItem } from "../format";
+import { abbreviateTxid, chainStatusLabel, formatUnixSeconds, timestampForFeedItem } from "../format";
 
 type FeedState =
   | { readonly kind: "loading" }
@@ -53,13 +54,7 @@ export function FeedRoute(): React.JSX.Element {
           {state.feed.items.map((item) => (
             <article className="memo-card" key={item.transaction.txid}>
               <div className="memo-card__header">
-                <div>
-                  <p className="memo-card__profile">{profileAlias(item.verification.profileCode)}</p>
-                  <p className="memo-card__codes">
-                    <code>{item.verification.profileCode ?? "sin-perfil"}</code>
-                    <code>{item.verification.eventType ?? "sin-evento"}</code>
-                  </p>
-                </div>
+                <MemoIdentity verification={item.verification} />
                 <span className={`chain-pill chain-pill--${item.transaction.chainStatus}`}>
                   {chainStatusLabel(item.transaction.chainStatus)}
                 </span>

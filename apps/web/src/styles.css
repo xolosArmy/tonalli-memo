@@ -167,6 +167,61 @@ p {
   font-weight: 800;
 }
 
+.memo-identity {
+  min-width: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.memo-identity__heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.memo-identity__label {
+  color: #203326;
+  font-weight: 800;
+}
+
+.memo-identity__hash {
+  display: inline-block;
+  max-width: 100%;
+  font-weight: 700;
+}
+
+.memo-identity__fallback {
+  color: #6b5b45;
+}
+
+.protocol-pill,
+.trust-pill {
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.5rem;
+}
+
+.protocol-pill--tm0 {
+  background: #eef0d2;
+  color: #4a541a;
+}
+
+.protocol-pill--tm1 {
+  background: #dce9f3;
+  color: #244f70;
+}
+
+.trust-pill {
+  border: 1px solid #b9cfda;
+  color: #365c6e;
+}
+
 .memo-card__codes {
   display: flex;
   flex-wrap: wrap;
@@ -233,6 +288,12 @@ p {
 .trust-notice {
   border-left: 4px solid #d2a33f;
   padding-left: 0.9rem;
+}
+
+.trust-notice--tm1 {
+  border-left-color: #4b809d;
+  background: #eef6fa;
+  padding: 0.75rem 0.9rem;
 }
 
 .txid-full {

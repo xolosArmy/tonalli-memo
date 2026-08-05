@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiClient, AppApiError } from "../api/client";
-import type { CandidateLocation, TxResponse } from "../api/types";
+import type { CandidateLocation, StoredVerification, TxResponse } from "../api/types";
 import { ErrorState, LoadingState } from "../components/AsyncState";
 import { MetadataList } from "../components/MetadataList";
+import { ProtocolBadge } from "../components/ProtocolBadge";
 import { copy } from "../copy";
-import { chainStatusLabel, displayValue, formatUnixSeconds, payloadText, profileAlias, statusLabel } from "../format";
+import { chainStatusLabel, displayValue, formatUnixSeconds, payloadText, profileAlias, sighashLabel, statusLabel } from "../format";
 
 const TXID_PATTERN = /^[0-9a-f]{64}$/u;
 
@@ -71,6 +72,7 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
   return (
     <article className="tx-detail">
       <p className="trust-notice">{copy.trustNotice}</p>
+      {verification?.protocol === "TM1" ? <p className="trust-notice trust-notice--tm1">{copy.tm1TrustNotice}</p> : null}
       {verification === null ? <p className="state-message">{copy.nullVerification}</p> : null}
       <p className="txid-full">
         <span>TXID completo</span>
@@ -79,9 +81,8 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
       <MetadataList
         items={[
           { label: "Estado de verificacion", value: statusLabel(verification?.status ?? "No disponible") },
-          { label: "Protocolo", value: <code>{displayValue(verification?.protocol)}</code> },
-          { label: "Alias de perfil", value: profileAlias(verification?.profileCode ?? null) },
-          { label: "Codigo de perfil", value: <code>{displayValue(verification?.profileCode)}</code> },
+          { label: "Protocolo", value: verification === null ? "No disponible" : <ProtocolBadge protocol={verification.protocol} /> },
+          ...identityMetadata(verification),
           { label: "Tipo de evento", value: <code>{displayValue(verification?.eventType)}</code> },
           { label: "Memo", value: <span className="memo-payload memo-payload--inline">{payloadText(verification)}</span> },
           { label: "Longitud en bytes", value: displayValue(verification?.byteLength) },
@@ -96,7 +97,7 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
           { label: "Indice de input autorizante", value: displayValue(verification?.authorizingInputIndex) },
           { label: "Altura de evaluacion", value: displayValue(verification?.evaluationHeight) },
           { label: "Indice de output candidato", value: displayValue(verification?.candidate?.outputIndex) },
-          { label: "Indice de push candidato", value: displayValue(candidatePushIndex(verification?.candidate)) },
+          ...candidatePushMetadata(verification?.candidate),
           { label: "Primer indexado", value: formatUnixSeconds(verification?.firstIndexedAt ?? transaction.firstIndexedAt) },
           { label: "Ultima verificacion", value: formatUnixSeconds(verification?.lastVerifiedAt ?? null) }
         ]}
@@ -105,8 +106,26 @@ function TransactionDetail({ tx }: { readonly tx: TxResponse }): React.JSX.Eleme
   );
 }
 
-function candidatePushIndex(candidate: CandidateLocation | null | undefined): number | null {
-  return candidate?.protocol === "TM0" ? candidate.pushIndex : null;
+function identityMetadata(verification: StoredVerification | null): readonly { readonly label: string; readonly value: React.ReactNode }[] {
+  if (verification?.protocol === "TM1") {
+    const authorship = verification.tm1Authorship;
+    return [
+      { label: "Identificador de autoría TM1", value: <code>{displayValue(authorship?.publicKeyHashHex)}</code> },
+      { label: "Sighash permitido", value: authorship === null ? "No disponible" : <code>{sighashLabel(authorship.sighashByte)}</code> },
+      { label: "Modelo de confianza", value: <code>{displayValue(authorship?.trustModel)}</code> },
+      { label: "Alcance de verificacion", value: "Estructural; no matemática independiente" }
+    ];
+  }
+  return [
+    { label: "Alias de perfil", value: profileAlias(verification?.profileCode ?? null) },
+    { label: "Codigo de perfil", value: <code>{displayValue(verification?.profileCode)}</code> }
+  ];
+}
+
+function candidatePushMetadata(candidate: CandidateLocation | null | undefined): readonly { readonly label: string; readonly value: React.ReactNode }[] {
+  return candidate?.protocol === "TM0"
+    ? [{ label: "Indice de push candidato", value: displayValue(candidate.pushIndex) }]
+    : [];
 }
 
 function messageForError(error: unknown): string {
