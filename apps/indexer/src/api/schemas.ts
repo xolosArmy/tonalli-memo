@@ -72,6 +72,17 @@ const candidate = {
   anyOf: [tm0Candidate, tm1Candidate]
 } as const;
 
+const tm1Authorship = {
+  type: "object",
+  additionalProperties: false,
+  required: ["publicKeyHashHex", "sighashByte", "trustModel"],
+  properties: {
+    publicKeyHashHex: { type: "string", pattern: hash160Pattern },
+    sighashByte: { type: "integer", enum: [65, 193] },
+    trustModel: { type: "string", const: "trusted-chronik" }
+  }
+} as const;
+
 const tm0Memo = {
   type: "object",
   additionalProperties: false,
@@ -133,6 +144,7 @@ const storedVerification = {
     "authorizingAddress",
     "authorizingInputIndex",
     "evaluationHeight",
+    "tm1Authorship",
     "firstIndexedAt",
     "lastVerifiedAt"
   ],
@@ -149,6 +161,7 @@ const storedVerification = {
     authorizingAddress: { type: ["string", "null"] },
     authorizingInputIndex: { type: ["integer", "null"], minimum: 0 },
     evaluationHeight: { type: ["integer", "null"], minimum: 0 },
+    tm1Authorship: { anyOf: [tm1Authorship, { type: "null" }] },
     firstIndexedAt: { type: "integer", minimum: 0 },
     lastVerifiedAt: { type: "integer", minimum: 0 }
   }
