@@ -1,6 +1,11 @@
 import type { ChronikLiveBlockEvent, ChronikLiveEvent, ChronikLiveTransactionEvent } from "./types.js";
 
-export const TONALLI_MEMO_LOKAD_ID = "544d307c";
+export const TM0_LOKAD_ID = "544d307c";
+export const TM1_DRAFT_02_LOKAD_ID = "544d4d00";
+export const TONALLI_DISCOVERY_LOKAD_IDS = [TM0_LOKAD_ID, TM1_DRAFT_02_LOKAD_ID] as const;
+
+/** @deprecated Prefer TM0_LOKAD_ID for protocol-specific use. */
+export const TONALLI_MEMO_LOKAD_ID = TM0_LOKAD_ID;
 
 export function mapChronikLiveMessage(message: unknown): ChronikLiveEvent | null {
   if (!isRecord(message) || typeof message.type !== "string") {
