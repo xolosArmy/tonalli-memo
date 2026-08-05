@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
-import type { MemoVerificationService, VerificationResult, VerifyTransactionContext } from "@tonalli-memo/verification";
+import type { MemoVerificationService, VerificationResult } from "@tonalli-memo/verification";
 import { IndexingEngine, MemoStore, openIndexerDatabase, type IndexerDatabase } from "../../src/index.js";
 import { createIndexerApi } from "../../src/api/server.js";
 import { TXID, verificationResultForStatus } from "./fixtures.js";
 
 class Tm1VerificationService {
-  async verifyTransaction(_txid: string, _context: VerifyTransactionContext = {}): Promise<VerificationResult> {
+  async verifyTransaction(_txid: string): Promise<VerificationResult> {
     return verificationResultForStatus("VERIFIED_TM1");
   }
 }
