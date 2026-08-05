@@ -6,7 +6,7 @@ import { createIndexerApi } from "../../src/api/server.js";
 import { TXID, verificationResultForStatus } from "./fixtures.js";
 
 class Tm1VerificationService {
-  async verifyTransaction(_txid: string): Promise<VerificationResult> {
+  async verifyTransaction(): Promise<VerificationResult> {
     return verificationResultForStatus("VERIFIED_TM1");
   }
 }
