@@ -18,6 +18,9 @@ export function MemoIdentity({ verification }: { readonly verification: StoredVe
             {abbreviateHash160(authorship.publicKeyHashHex)}
           </code>
         )}
+        <p className="memo-card__codes">
+          <code>{verification.eventType ?? "sin-evento"}</code>
+        </p>
         <span className="trust-pill">Fuente Chronik confiable</span>
       </div>
     );
