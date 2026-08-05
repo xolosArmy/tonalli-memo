@@ -8,9 +8,14 @@ Chronik WebSocket events are candidate discovery only. They are never proof that
 
 ## Chronik Subscriptions
 
-The canonical Tonalli Memo envelope starts with UTF-8 `TM0|`, whose LOKAD ID is `544d307c`.
+The live adapter subscribes to two protocol discovery identifiers and to block events:
 
-The live adapter subscribes only to Chronik's native LOKAD ID subscription for `544d307c` and to block events. It does not subscribe to all transactions, registry addresses, arbitrary scripts, or wildcard script prefixes.
+- TM0 uses LOKAD ID `544d307c`, derived from UTF-8 `TM0|`.
+- TM1 Draft 0.2 uses candidate LOKAD ID `544d4d00` (`TMM\0`).
+
+The TM1 identifier remains explicitly draft. The live-discovery implementation does not finalize or universally reserve it, and it does not authorize production TM1 emission.
+
+The adapter does not subscribe to all transactions, registry addresses, arbitrary scripts, or wildcard script prefixes. Discovery events only provide TXIDs for the ordinary indexing and verification pipeline.
 
 ## Event Mapping
 
@@ -48,9 +53,13 @@ The adapter uses chronik-client `autoReconnect: true`; the daemon does not imple
 On initial connection and reconnect, the daemon:
 
 1. Fetches the current Chronik tip height.
-2. Queries unconfirmed Tonalli Memo TXIDs through the Chronik LOKAD ID endpoint.
-3. Enqueues those TXIDs with the fetched tip height.
-4. Reconciles a bounded number of active unconfirmed rows already stored in SQLite.
+2. Queries unconfirmed TXIDs from both the TM0 and TM1 Draft 0.2 LOKAD endpoints.
+3. Fails the reconciliation attempt if either protocol query fails, rather than presenting a partial protocol view as complete.
+4. Deduplicates the combined TXIDs and orders them deterministically.
+5. Enqueues those TXIDs with the fetched tip height.
+6. Reconciles a bounded number of active unconfirmed rows already stored in SQLite.
+
+A TXID returned by both discovery endpoints is enqueued only once. The daemon remains protocol-agnostic: it does not trust the discovery source to classify or validate the transaction.
 
 Block `connected` reconciles a bounded batch of active unconfirmed rows using one shared current tip height. Block `disconnected` and `invalidated` reconcile active confirmed rows whose stored block height is at or above the affected height. Block `finalized` is logged; transaction-level finalization events refresh individual rows.
 
