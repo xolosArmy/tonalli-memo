@@ -13,5 +13,6 @@ export const copy = {
   invalidTxidBody: "El TXID debe tener exactamente 64 caracteres hexadecimales en minusculas.",
   nullVerification: "Esta transaccion existe en el indice, pero no tiene un registro de verificacion guardado.",
   trustNotice: "VERIFIED significa verificacion Tonalli Memo por politica de registro sobre hechos normalizados de Chronik. No es verificacion independiente de consenso ni de firmas.",
+  tm1TrustNotice: "Autoría estructural TM1 validada con datos de una fuente Chronik confiable. Esta interfaz no verifica matemáticamente la firma de forma independiente.",
   readOnlyFooter: "Interfaz de solo lectura para publicaciones en blockchain. No publica, firma ni conecta wallets."
 } as const;
