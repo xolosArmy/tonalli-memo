@@ -32,6 +32,12 @@ export type CandidateLocation =
       readonly outputIndex: number;
     };
 
+export interface Tm1Authorship {
+  readonly publicKeyHashHex: string;
+  readonly sighashByte: 65 | 193;
+  readonly trustModel: "trusted-chronik";
+}
+
 export type VerificationStatus = "VERIFIED" | "UNAUTHORIZED" | "NO_MEMO" | "INVALID_MEMO" | "MULTIPLE_MEMOS";
 
 export interface StoredVerification {
@@ -47,6 +53,7 @@ export interface StoredVerification {
   readonly authorizingAddress: string | null;
   readonly authorizingInputIndex: number | null;
   readonly evaluationHeight: number | null;
+  readonly tm1Authorship: Tm1Authorship | null;
   readonly firstIndexedAt: number;
   readonly lastVerifiedAt: number;
 }
