@@ -27,7 +27,7 @@ describe("stored TM1 public read model", () => {
     const store = new MemoStore(database);
     const service = new Tm1VerificationService();
     const engine = new IndexingEngine({
-      verificationService: service as MemoVerificationService,
+      verificationService: service as unknown as MemoVerificationService,
       store,
       clock: { nowSeconds: () => 1234567890 }
     });
