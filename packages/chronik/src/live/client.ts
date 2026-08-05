@@ -1,5 +1,5 @@
 import { ChronikClient } from "chronik-client";
-import { TONALLI_MEMO_LOKAD_ID, mapChronikLiveMessage } from "./mapper.js";
+import { TONALLI_DISCOVERY_LOKAD_IDS, mapChronikLiveMessage } from "./mapper.js";
 import type {
   ChronikLiveConnection,
   ChronikLiveHandlers,
@@ -35,8 +35,10 @@ class ChronikClientLiveSource implements ChronikLiveSource {
   }
 
   async listTonalliUnconfirmedTxids(): Promise<readonly string[]> {
-    const page = await this.source.lokadId(TONALLI_MEMO_LOKAD_ID).unconfirmedTxs();
-    return page.txs.map((tx) => tx.txid);
+    const pages = await Promise.all(
+      TONALLI_DISCOVERY_LOKAD_IDS.map(async (lokadId) => this.source.lokadId(lokadId).unconfirmedTxs())
+    );
+    return [...new Set(pages.flatMap((page) => page.txs.map((tx) => tx.txid)))].sort();
   }
 }
 
@@ -76,7 +78,9 @@ class ChronikClientLiveConnection implements ChronikLiveConnection {
     });
     this.endpoint = endpoint;
     await endpoint.waitForOpen();
-    endpoint.subscribeToLokadId(TONALLI_MEMO_LOKAD_ID);
+    for (const lokadId of TONALLI_DISCOVERY_LOKAD_IDS) {
+      endpoint.subscribeToLokadId(lokadId);
+    }
     endpoint.subscribeToBlocks();
   }
 
