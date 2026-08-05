@@ -5,12 +5,14 @@ import type {
   FeedResponse,
   StoredMemoProtocol,
   StoredVerification,
+  Tm1Authorship,
   TransactionSummary,
   TxResponse,
   VerificationStatus
 } from "./types";
 
 const TXID_PATTERN = /^[0-9a-f]{64}$/u;
+const HASH160_PATTERN = /^[0-9a-f]{40}$/u;
 const VERIFICATION_STATUSES = new Set<VerificationStatus>(["VERIFIED", "UNAUTHORIZED", "NO_MEMO", "INVALID_MEMO", "MULTIPLE_MEMOS"]);
 
 export function isApiErrorDto(value: unknown): value is ApiErrorDto {
@@ -61,16 +63,19 @@ function isTransactionSummary(value: unknown): value is TransactionSummary {
 }
 
 function isStoredVerification(value: unknown): value is StoredVerification {
-  if (!isRecord(value) || !isStoredMemoProtocol(value.protocol)) {
+  if (!isRecord(value) || !isStoredMemoProtocol(value.protocol) || !isVerificationStatus(value.status)) {
     return false;
   }
 
   const candidateValid = value.candidate === null || isCandidateLocation(value.candidate, value.protocol);
+  const authorshipValid =
+    value.protocol === "TM1" && value.status === "VERIFIED"
+      ? isTm1Authorship(value.tm1Authorship)
+      : value.tm1Authorship === null;
 
   return (
     typeof value.txid === "string" &&
     TXID_PATTERN.test(value.txid) &&
-    isVerificationStatus(value.status) &&
     isNullableSafeInteger(value.protocolVersion) &&
     isNullableString(value.eventType) &&
     isNullableString(value.profileCode) &&
@@ -80,6 +85,7 @@ function isStoredVerification(value: unknown): value is StoredVerification {
     isNullableString(value.authorizingAddress) &&
     isNullableSafeInteger(value.authorizingInputIndex) &&
     isNullableSafeInteger(value.evaluationHeight) &&
+    authorshipValid &&
     isSafeInteger(value.firstIndexedAt) &&
     isSafeInteger(value.lastVerifiedAt)
   );
@@ -93,6 +99,17 @@ function isCandidateLocation(value: unknown, protocol: StoredMemoProtocol): valu
     return isSafeInteger(value.pushIndex);
   }
   return !("pushIndex" in value);
+}
+
+function isTm1Authorship(value: unknown): value is Tm1Authorship {
+  return (
+    isRecord(value) &&
+    Object.keys(value).length === 3 &&
+    typeof value.publicKeyHashHex === "string" &&
+    HASH160_PATTERN.test(value.publicKeyHashHex) &&
+    (value.sighashByte === 65 || value.sighashByte === 193) &&
+    value.trustModel === "trusted-chronik"
+  );
 }
 
 function isStoredMemoProtocol(value: unknown): value is StoredMemoProtocol {

@@ -8,6 +8,7 @@ import type {
   StoredVerificationDto,
   TransactionSummaryDto
 } from "./dto.js";
+import { decodeStoredTm1Authorship } from "./tm1-authorship.js";
 import type { StoredTransactionRow, StoredVerificationRecord, VerifiedFeedRow } from "../db/types.js";
 
 export function mapTransactionSummary(row: StoredTransactionRow): TransactionSummaryDto {
@@ -39,6 +40,10 @@ export function mapStoredVerification(row: StoredVerificationRecord): StoredVeri
     authorizingAddress: row.authorizingAddress,
     authorizingInputIndex: row.authorizingInputIndex,
     evaluationHeight: row.evaluationHeight,
+    tm1Authorship:
+      row.protocol === "TM1" && row.verificationStatus === "VERIFIED"
+        ? decodeStoredTm1Authorship(row.diagnostics)
+        : null,
     firstIndexedAt: row.firstIndexedAt,
     lastVerifiedAt: row.lastVerifiedAt
   };

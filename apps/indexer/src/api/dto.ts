@@ -1,5 +1,6 @@
 import type { VerificationStatus } from "@tonalli-memo/verification";
 import type { ChainStatus, DurableVerificationStatus, StoredMemoProtocol } from "../db/types.js";
+import type { Tm1AuthorshipReadModel } from "./tm1-authorship.js";
 
 export interface ApiErrorDto {
   readonly error: {
@@ -50,6 +51,7 @@ export interface StoredVerificationDto {
   readonly authorizingAddress: string | null;
   readonly authorizingInputIndex: number | null;
   readonly evaluationHeight: number | null;
+  readonly tm1Authorship: Tm1AuthorshipReadModel | null;
   readonly firstIndexedAt: number;
   readonly lastVerifiedAt: number;
 }

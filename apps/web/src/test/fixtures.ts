@@ -34,6 +34,7 @@ export const verifiedTxResponse: TxResponse = {
     authorizingAddress: "ecash:qptestaddress0000000000000000000000000000000",
     authorizingInputIndex: 0,
     evaluationHeight: 900001,
+    tm1Authorship: null,
     firstIndexedAt: 1710000100,
     lastVerifiedAt: 1710000300
   }
@@ -62,6 +63,11 @@ export const tm1TxResponse: TxResponse = {
     authorizingAddress: "ecash:qptm1author00000000000000000000000000000000",
     authorizingInputIndex: 1,
     evaluationHeight: null,
+    tm1Authorship: {
+      publicKeyHashHex: "22".repeat(20),
+      sighashByte: 65,
+      trustModel: "trusted-chronik"
+    },
     firstIndexedAt: 1710000350,
     lastVerifiedAt: 1710000450
   }
