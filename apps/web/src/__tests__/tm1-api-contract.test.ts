@@ -79,7 +79,10 @@ describe("TM1 API contract", () => {
       extra: true
     }
   ])("rejects invalid TM1 authorship metadata", async (tm1Authorship) => {
-    const response = clone(tm1TxResponse) as unknown as Record<string, any>;
+    const response = clone(tm1TxResponse) as unknown as {
+      transaction: { txid: string };
+      verification: { tm1Authorship: unknown };
+    };
     response.verification.tm1Authorship = tm1Authorship;
     const client = new TonalliApiClient({ fetchImpl: vi.fn(async () => jsonResponse(response)) });
 
@@ -87,7 +90,10 @@ describe("TM1 API contract", () => {
   });
 
   it("rejects TM1 authorship metadata on TM0 records", async () => {
-    const response = clone(verifiedTxResponse) as unknown as Record<string, any>;
+    const response = clone(verifiedTxResponse) as unknown as {
+      transaction: { txid: string };
+      verification: { tm1Authorship: unknown };
+    };
     response.verification.tm1Authorship = clone(tm1TxResponse).verification!.tm1Authorship;
     const client = new TonalliApiClient({ fetchImpl: vi.fn(async () => jsonResponse(response)) });
 
