@@ -21,7 +21,7 @@ Protocol v0 defines these profile codes and aliases:
 | `tw` | `tonalli.xec` | Tonalli Wallet |
 | `em` | `ecashmx.xec` | eCash Magazine México |
 
-The registry reuses the profile codes and aliases exported by `@tonalli-memo/protocol`. It does not redefine protocol profile meaning independently.
+The registry reuses the profile codes and aliases exported by `@xolosarmy/tonalli-memo-protocol`. It does not redefine protocol profile meaning independently.
 
 ## Immutable Code Meaning
 

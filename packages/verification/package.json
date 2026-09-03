@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@tonalli-memo/chronik": "workspace:*",
-    "@tonalli-memo/protocol": "workspace:*",
+    "@xolosarmy/tonalli-memo-protocol": "workspace:*",
     "@tonalli-memo/registry": "workspace:*"
   },
   "devDependencies": {

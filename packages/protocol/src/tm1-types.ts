@@ -32,3 +32,31 @@ export interface ParsedTm1Post {
   readonly eventDataByteLength: number;
   readonly scriptByteLength: number;
 }
+
+/**
+ * Input options for encoding a canonical TM1 Draft 0.2 POST output script.
+ */
+export interface EncodeTm1PostInput {
+  readonly eventData: string | Uint8Array;
+  readonly authorInputIndex?: number;
+}
+
+/**
+ * Canonical TM1 Draft 0.2 POST output script encoding result.
+ */
+export interface EncodedTm1Post {
+  readonly protocol: "TM1";
+  readonly version: 1;
+  readonly eventType: Tm1EventType;
+  readonly eventTypeCode: 1;
+  readonly authorInputIndex: number;
+  readonly eventData: string;
+  readonly eventDataBytes: Uint8Array;
+  readonly eventDataByteLength: number;
+  readonly envelope: Uint8Array;
+  readonly envelopeHex: string;
+  readonly envelopeByteLength: number;
+  readonly script: Uint8Array;
+  readonly scriptHex: string;
+  readonly scriptByteLength: number;
+}

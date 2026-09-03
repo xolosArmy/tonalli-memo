@@ -4,19 +4,18 @@ import type {
   ParseTm1OutputInput
 } from "./tm1-types.js";
 
-const OP_RETURN = 0x6a;
-const OP_PUSHDATA1 = 0x4c;
-const OP_PUSHDATA2 = 0x4d;
-const OP_PUSHDATA4 = 0x4e;
-
-const TM1_VERSION = 0x01;
-const TM1_POST_EVENT_TYPE = 0x01;
-
-const TM1_LOKAD_ID = Uint8Array.of(0x54, 0x4d, 0x4d, 0x00);
-
-const MAX_TM1_SCRIPT_BYTES = 223;
-const MAX_TM1_ENVELOPE_BYTES = 215;
-const MAX_TM1_EVENT_DATA_BYTES = 212;
+import {
+  MAX_TM1_ENVELOPE_BYTES,
+  MAX_TM1_EVENT_DATA_BYTES,
+  MAX_TM1_SCRIPT_BYTES,
+  OP_PUSHDATA1,
+  OP_PUSHDATA2,
+  OP_PUSHDATA4,
+  OP_RETURN,
+  TM1_LOKAD_ID,
+  TM1_POST_EVENT_TYPE,
+  TM1_VERSION
+} from "./tm1-constants.js";
 
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
 

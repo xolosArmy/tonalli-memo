@@ -21,7 +21,7 @@
   "devDependencies": {
     "@tonalli-memo/chronik": "workspace:*",
     "@tonalli-memo/indexer": "workspace:*",
-    "@tonalli-memo/protocol": "workspace:*",
+    "@xolosarmy/tonalli-memo-protocol": "workspace:*",
     "@tonalli-memo/registry": "workspace:*",
     "@tonalli-memo/verification": "workspace:*",
     "@eslint/js": "^9.18.0",

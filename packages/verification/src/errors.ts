@@ -1,5 +1,5 @@
 import type { ChronikAdapterErrorCode } from "@tonalli-memo/chronik";
-import type { MemoErrorCode } from "@tonalli-memo/protocol";
+import type { MemoErrorCode } from "@xolosarmy/tonalli-memo-protocol";
 import type { RegistryErrorCode } from "@tonalli-memo/registry";
 
 export interface MemoProtocolFailure {

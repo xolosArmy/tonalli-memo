@@ -6,7 +6,7 @@ import {
   parseTm1Output,
   validateMemo,
   type ValidatedMemo
-} from "@tonalli-memo/protocol";
+} from "@xolosarmy/tonalli-memo-protocol";
 import {
   DEFAULT_REGISTRY,
   authorizeAddress,
