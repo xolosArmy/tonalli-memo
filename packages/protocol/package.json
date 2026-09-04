@@ -17,6 +17,11 @@
     "test-vectors.json",
     "tm1-test-vectors.json"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xolosArmy/tonalli-memo.git",
+    "directory": "packages/protocol"
+  },
   "scripts": {
     "build": "tsc -b",
     "prepack": "npm run build",
@@ -25,6 +30,6 @@
     "lint": "eslint ."
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   }
 }
