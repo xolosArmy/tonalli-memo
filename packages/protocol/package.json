@@ -22,5 +22,8 @@
     "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
     "test": "vitest run",
     "lint": "eslint ."
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
