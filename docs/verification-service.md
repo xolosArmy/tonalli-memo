@@ -1,6 +1,6 @@
 # Tonalli Memo Verification Service
 
-`@tonalli-memo/verification` is a pure TypeScript package that composes `@tonalli-memo/protocol`, `@tonalli-memo/registry` and the `ChronikTransactionAdapter` interface from `@tonalli-memo/chronik`.
+`@tonalli-memo/verification` is a pure TypeScript package that composes `@xolosarmy/tonalli-memo-protocol`, `@tonalli-memo/registry` and the `ChronikTransactionAdapter` interface from `@tonalli-memo/chronik`.
 
 The package emits a deterministic Tonalli Memo project-policy decision for one normalized transaction. It trusts the normalized transaction returned by the Chronik adapter. It does not independently verify transaction signatures, eCash consensus, transaction discovery, WebSockets, persistence, an HTTP API, a frontend, feeds, Tonalli Wallet behavior or production registry addresses.
 

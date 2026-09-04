@@ -1,7 +1,13 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
-import type { NormalizedInput, NormalizedOpReturnOutput } from "@tonalli-memo/chronik";
+import {
+  isOpReturnScriptHex,
+  normalizeOpReturnOutput,
+  type NormalizedInput,
+  type NormalizedOpReturnOutput
+} from "@tonalli-memo/chronik";
+import tm1Vectors from "@xolosarmy/tonalli-memo-protocol/tm1-test-vectors.json" with { type: "json" };
 import { verifyNormalizedTransaction } from "../src/index.js";
 import { normalizedTx, opReturnOutput, validMemoPush } from "./fixtures.js";
 
@@ -128,5 +134,57 @@ describe("TM1 normalized verification integration", () => {
       throw new Error(`Expected MULTIPLE_MEMOS, got ${result.status}`);
     }
     expect(result.candidates.map((candidate) => candidate.protocol ?? "TM0")).toEqual(["TM1", "TM0"]);
+  });
+
+  it("verifies and rejects normative transaction vectors from @xolosarmy/tonalli-memo-protocol", () => {
+    // 1. Valid transaction vectors
+    for (const validTx of tm1Vectors.transactionVectors.valid) {
+      const inputs = [authorInput(0)];
+      const opReturnOutputs: NormalizedOpReturnOutput[] = validTx.outputs
+        .filter((out) => isOpReturnScriptHex(out.scriptHex))
+        .map((out) => normalizeOpReturnOutput(out.outputIndex, BigInt(out.valueSats), out.scriptHex));
+
+      const result = verifyNormalizedTransaction(
+        normalizedTx({
+          inputs,
+          inputAddresses: inputs[0]?.address ? [inputs[0].address] : [],
+          opReturnOutputs
+        })
+      );
+
+      expect(result.status).toBe("VERIFIED_TM1");
+      if (result.status === "VERIFIED_TM1") {
+        expect(result.candidate.outputIndex).toBe(validTx.expected.candidateOutputIndex);
+        expect(result.memo.eventData).toBe(validTx.expected.eventDataUtf8);
+      }
+    }
+
+    // 2. Invalid transaction vectors (covering duplicate candidate rejection & non-zero value)
+    for (const invalidTx of tm1Vectors.transactionVectors.invalid) {
+      const inputs = [authorInput(0)];
+      const opReturnOutputs: NormalizedOpReturnOutput[] = invalidTx.outputs
+        .filter((out) => isOpReturnScriptHex(out.scriptHex))
+        .map((out) => normalizeOpReturnOutput(out.outputIndex, BigInt(out.valueSats), out.scriptHex));
+
+      const result = verifyNormalizedTransaction(
+        normalizedTx({
+          inputs,
+          inputAddresses: inputs[0]?.address ? [inputs[0].address] : [],
+          opReturnOutputs
+        })
+      );
+
+      if (invalidTx.expected.errorCode === "MULTIPLE_MEMOS") {
+        expect(result.status).toBe("MULTIPLE_MEMOS");
+        if (result.status === "MULTIPLE_MEMOS") {
+          expect(result.candidates.length).toBe(invalidTx.expected.candidateCount);
+        }
+      } else if (invalidTx.expected.errorCode === "INVALID_FORMAT") {
+        expect(result.status).toBe("INVALID_TM1");
+        if (result.status === "INVALID_TM1") {
+          expect(result.protocolError.code).toBe("INVALID_FORMAT");
+        }
+      }
+    }
   });
 });

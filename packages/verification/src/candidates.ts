@@ -1,5 +1,5 @@
 import type { NormalizedOpReturnOutput, NormalizedTransaction } from "@tonalli-memo/chronik";
-import { isTm1CandidateScript } from "@tonalli-memo/protocol";
+import { isTm1CandidateScript } from "@xolosarmy/tonalli-memo-protocol";
 
 export type MemoProtocol = "TM0" | "TM1";
 

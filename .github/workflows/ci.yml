@@ -39,6 +39,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: TM1 Canonical Test Vectors (Anti-Drift Gate)
+        run: pnpm --filter @xolosarmy/tonalli-memo-protocol test
+
       - name: Build
         run: pnpm build
 

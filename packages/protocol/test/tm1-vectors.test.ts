@@ -17,6 +17,7 @@ interface ExpectedError {
 interface Tm1Vector {
   name: string;
   scriptHex: string;
+  outputValueSats?: number;
   version?: number;
   eventType?: string;
   eventTypeHex?: string;
@@ -86,6 +87,7 @@ describe("TM1 test vectors", () => {
     const parsed = readTm1Script(vector.scriptHex);
     const data = eventData(parsed.envelope);
 
+    expect(vector.outputValueSats).toBe(0);
     expect(parsed.lokadIdHex).toBe(vectors.lokadIdHex);
     expect(parsed.rest).toHaveLength(0);
     expect(parsed.envelope).toHaveLength(3 + Number(vector.eventDataByteLength));
@@ -196,5 +198,33 @@ describe("TM1 test vectors", () => {
         "INVALID_FORMAT"
       ])
     );
+  });
+
+  it("validates transaction vectors covering zero output value, non-zero output value rejection, and duplicate candidate rejection", () => {
+    const txVectors = vectors.transactionVectors;
+    expect(txVectors).toBeDefined();
+    expect(txVectors.valid.length).toBeGreaterThan(0);
+    expect(txVectors.invalid.length).toBeGreaterThanOrEqual(4);
+
+    for (const validTx of txVectors.valid) {
+      const output = validTx.outputs[validTx.expected.candidateOutputIndex];
+      expect(output).toBeDefined();
+      expect(output?.valueSats).toBe(0);
+      expect(validTx.expected.candidateCount).toBe(1);
+    }
+
+    for (const invalidTx of txVectors.invalid) {
+      expect(invalidTx.expected.errorCode).toBeDefined();
+      if (invalidTx.name.includes("Duplicate") || invalidTx.name.includes("mixing") || invalidTx.name.includes("alongside")) {
+        expect(invalidTx.expected.errorCode).toBe("MULTIPLE_MEMOS");
+        expect(invalidTx.expected.candidateCount).toBeGreaterThan(1);
+      }
+      if (invalidTx.name.includes("Non-zero")) {
+        expect(invalidTx.expected.errorCode).toBe("INVALID_FORMAT");
+        const output = invalidTx.outputs[0];
+        expect(output).toBeDefined();
+        expect(output?.valueSats).toBeGreaterThan(0);
+      }
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { PROFILE_ALIASES, PROFILE_CODES, type ProfileCode } from "@tonalli-memo/protocol";
+import { PROFILE_ALIASES, PROFILE_CODES, type ProfileCode } from "@xolosarmy/tonalli-memo-protocol";
 import { registryError } from "./errors.js";
 import type { AuthorizedAddress, ProfileRegistryEntry, RegistryDocument } from "./types.js";
 

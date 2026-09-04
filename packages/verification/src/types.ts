@@ -3,7 +3,7 @@ import type {
   ChronikTransactionAdapter,
   NormalizedTransaction
 } from "@tonalli-memo/chronik";
-import type { ParsedTm1Post, Tm1ErrorCode, ValidatedMemo } from "@tonalli-memo/protocol";
+import type { ParsedTm1Post, Tm1ErrorCode, ValidatedMemo } from "@xolosarmy/tonalli-memo-protocol";
 import type {
   AuthorizationContext,
   AuthorizationReason,

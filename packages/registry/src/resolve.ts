@@ -1,4 +1,4 @@
-import { PROFILE_CODES, type ProfileCode } from "@tonalli-memo/protocol";
+import { PROFILE_CODES, type ProfileCode } from "@xolosarmy/tonalli-memo-protocol";
 import { DEFAULT_REGISTRY } from "./default-registry.js";
 import type { ProfileRegistryEntry, RegistryDocument } from "./types.js";
 

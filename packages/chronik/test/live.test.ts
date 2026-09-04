@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { TM1_LOKAD_ID_HEX } from "@xolosarmy/tonalli-memo-protocol";
 import {
   TM0_LOKAD_ID,
   TM1_DRAFT_02_LOKAD_ID,
@@ -70,6 +71,12 @@ describe("Chronik live adapter", () => {
     expect(Buffer.from([0x54, 0x4d, 0x4d, 0x00]).toString("hex")).toBe(TM1_DRAFT_02_LOKAD_ID);
     expect(TONALLI_MEMO_LOKAD_ID).toBe(TM0_LOKAD_ID);
     expect(TONALLI_DISCOVERY_LOKAD_IDS).toEqual([TM0_LOKAD_ID, TM1_DRAFT_02_LOKAD_ID]);
+  });
+
+  it("derives TM1 live discovery directly from the canonical protocol marker", () => {
+    expect(TM1_DRAFT_02_LOKAD_ID).toBe(TM1_LOKAD_ID_HEX);
+    expect(TONALLI_DISCOVERY_LOKAD_IDS).toContain(TM1_LOKAD_ID_HEX);
+    expect(TONALLI_DISCOVERY_LOKAD_IDS[1]).toBe(TM1_LOKAD_ID_HEX);
   });
 
   it("starts with native dual LOKAD and block subscriptions and stops with close", async () => {

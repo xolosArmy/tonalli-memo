@@ -1,4 +1,4 @@
-import { PROFILE_ALIASES, type ProfileCode } from "@tonalli-memo/protocol";
+import { PROFILE_ALIASES, type ProfileCode } from "@xolosarmy/tonalli-memo-protocol";
 import type { FeedItem, StoredVerification, TransactionSummary } from "./api/types";
 
 const TXID_PREFIX_LENGTH = 10;

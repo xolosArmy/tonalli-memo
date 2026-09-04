@@ -1,7 +1,7 @@
 {
-  "name": "@tonalli-memo/protocol",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@xolosarmy/tonalli-memo-protocol",
+  "version": "0.2.0",
+  "description": "Canonical wire protocol specification and implementation for Tonalli Memo (TM0/TM1)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,7 +9,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./tm1-test-vectors.json": "./tm1-test-vectors.json"
   },
   "files": [
     "dist",
@@ -18,8 +19,12 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "prepack": "npm run build",
     "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
     "test": "vitest run",
     "lint": "eslint ."
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

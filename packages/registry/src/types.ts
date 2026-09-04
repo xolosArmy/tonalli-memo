@@ -1,4 +1,4 @@
-import type { ProfileCode } from "@tonalli-memo/protocol";
+import type { ProfileCode } from "@xolosarmy/tonalli-memo-protocol";
 
 export interface AuthorizedAddress {
   readonly address: string;

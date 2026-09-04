@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@tonalli-memo/protocol": "workspace:*",
+    "@xolosarmy/tonalli-memo-protocol": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-router-dom": "7.18.1"
