@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   encodeTm1Post,
+  getTm1LokadId,
+  isTm1ProtocolError,
   parseTm1Output,
-  MAX_TM1_EVENT_DATA_BYTES
+  MAX_TM1_EVENT_DATA_BYTES,
+  TM1_LOKAD_ID
 } from "../src/index.js";
 import vectors from "../tm1-test-vectors.json" with { type: "json" };
 
@@ -101,5 +104,51 @@ describe("encodeTm1Post", () => {
     expect(() =>
       encodeTm1Post({ eventData: "ok", authorInputIndex: 1.5 })
     ).toThrowError(expect.objectContaining({ code: "INVALID_FORMAT" }));
+  });
+
+  it("rejects string with unpaired UTF-16 surrogate (\\uD800)", () => {
+    expect(() => encodeTm1Post({ eventData: "\uD800" })).toThrowError(
+      expect.objectContaining({ code: "INVALID_UTF8" })
+    );
+
+    try {
+      encodeTm1Post({ eventData: "\uD800" });
+      expect.unreachable("encodeTm1Post should have rejected unpaired surrogate \\uD800");
+    } catch (error) {
+      expect(isTm1ProtocolError(error)).toBe(true);
+      if (isTm1ProtocolError(error)) {
+        expect(error.code).toBe("INVALID_UTF8");
+      }
+    }
+  });
+
+  it("protects internal marker against mutation of exposed TM1_LOKAD_ID or getTm1LokadId()", () => {
+    // 1. TM1_LOKAD_ID is immutable against element mutation
+    expect(() => {
+      (TM1_LOKAD_ID as unknown as number[])[0] = 0x99;
+    }).toThrow(TypeError);
+
+    // 2. getTm1LokadId() returns a defensive copy; mutating it does not affect future calls or protocol
+    const defensiveCopy = getTm1LokadId();
+    defensiveCopy[0] = 0x99;
+    expect(getTm1LokadId()[0]).toBe(0x54);
+    expect(TM1_LOKAD_ID[0]).toBe(0x54);
+
+    // 3. Encoder still produces canonical marker bytes
+    const encoded = encodeTm1Post({ eventData: "immutable check" });
+    expect(encoded.script[0]).toBe(0x6a); // OP_RETURN
+    expect(encoded.script[1]).toBe(4);    // push 4 bytes
+    expect(Array.from(encoded.script.subarray(2, 6))).toEqual([0x54, 0x4d, 0x4d, 0x00]);
+
+    // 4. Parser still accepts canonical scripts and rejects mutated marker scripts
+    const parsed = parseTm1Output({ valueSats: 0n, script: encoded.script });
+    expect(parsed.eventData).toBe("immutable check");
+
+    // Mutated marker script is rejected as INVALID_MARKER
+    const mutatedScript = new Uint8Array(encoded.script);
+    mutatedScript[2] = 0x99;
+    expect(() => parseTm1Output({ valueSats: 0n, script: mutatedScript })).toThrowError(
+      expect.objectContaining({ code: "INVALID_MARKER" })
+    );
   });
 });

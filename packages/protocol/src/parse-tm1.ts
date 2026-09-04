@@ -5,6 +5,7 @@ import type {
 } from "./tm1-types.js";
 
 import {
+  INTERNAL_TM1_LOKAD_ID,
   MAX_TM1_ENVELOPE_BYTES,
   MAX_TM1_EVENT_DATA_BYTES,
   MAX_TM1_SCRIPT_BYTES,
@@ -12,7 +13,6 @@ import {
   OP_PUSHDATA2,
   OP_PUSHDATA4,
   OP_RETURN,
-  TM1_LOKAD_ID,
   TM1_POST_EVENT_TYPE,
   TM1_VERSION
 } from "./tm1-constants.js";
@@ -130,7 +130,7 @@ export function isTm1CandidateScript(script: Uint8Array): boolean {
 
   try {
     const firstPush = decodeDataPush(script, 1);
-    return bytesEqual(firstPush.data, TM1_LOKAD_ID);
+    return bytesEqual(firstPush.data, INTERNAL_TM1_LOKAD_ID);
   } catch (error: unknown) {
     if (error instanceof PushDecodeFailure) {
       return false;
@@ -179,7 +179,7 @@ export function parseTm1Output(
     throw error;
   }
 
-  if (!bytesEqual(firstPush.data, TM1_LOKAD_ID)) {
+  if (!bytesEqual(firstPush.data, INTERNAL_TM1_LOKAD_ID)) {
     throw new Tm1ProtocolError(
       "INVALID_MARKER",
       "First data push does not equal the TM1 LOKAD ID."

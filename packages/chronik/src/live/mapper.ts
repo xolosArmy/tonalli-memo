@@ -1,7 +1,8 @@
+import { TM1_LOKAD_ID_HEX } from "@xolosarmy/tonalli-memo-protocol";
 import type { ChronikLiveBlockEvent, ChronikLiveEvent, ChronikLiveTransactionEvent } from "./types.js";
 
 export const TM0_LOKAD_ID = "544d307c";
-export const TM1_DRAFT_02_LOKAD_ID = "544d4d00";
+export const TM1_DRAFT_02_LOKAD_ID = TM1_LOKAD_ID_HEX;
 export const TONALLI_DISCOVERY_LOKAD_IDS = [TM0_LOKAD_ID, TM1_DRAFT_02_LOKAD_ID] as const;
 
 /** @deprecated Prefer TM0_LOKAD_ID for protocol-specific use. */

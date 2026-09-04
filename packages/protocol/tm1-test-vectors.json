@@ -12,7 +12,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 1,
-      "eventDataUtf8": "a"
+      "eventDataUtf8": "a",
+      "outputValueSats": 0
     },
     {
       "name": "72 byte event_data uses direct push",
@@ -22,7 +23,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 72,
-      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "outputValueSats": 0
     },
     {
       "name": "73 byte event_data uses OP_PUSHDATA1",
@@ -32,7 +34,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 73,
-      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "outputValueSats": 0
     },
     {
       "name": "212 byte maximum event_data",
@@ -42,7 +45,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 212,
-      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "eventDataUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "outputValueSats": 0
     },
     {
       "name": "UTF-8 multibyte text",
@@ -52,7 +56,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 12,
-      "eventDataUtf8": "Señal café"
+      "eventDataUtf8": "Señal café",
+      "outputValueSats": 0
     },
     {
       "name": "UTF-8 emoji",
@@ -62,7 +67,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 7,
-      "eventDataUtf8": "TM1 ✅"
+      "eventDataUtf8": "TM1 ✅",
+      "outputValueSats": 0
     },
     {
       "name": "NFC accented character",
@@ -73,7 +79,8 @@
       "authorInputIndex": 0,
       "eventDataByteLength": 2,
       "eventDataUtf8": "é",
-      "unicodeNormalization": "NFC"
+      "unicodeNormalization": "NFC",
+      "outputValueSats": 0
     },
     {
       "name": "NFD accented character",
@@ -84,7 +91,8 @@
       "authorInputIndex": 0,
       "eventDataByteLength": 3,
       "eventDataUtf8": "é",
-      "unicodeNormalization": "NFD"
+      "unicodeNormalization": "NFD",
+      "outputValueSats": 0
     },
     {
       "name": "Leading and trailing spaces",
@@ -94,7 +102,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 0,
       "eventDataByteLength": 10,
-      "eventDataUtf8": "  padded  "
+      "eventDataUtf8": "  padded  ",
+      "outputValueSats": 0
     },
     {
       "name": "Non-zero author input index",
@@ -104,7 +113,8 @@
       "eventTypeHex": "01",
       "authorInputIndex": 2,
       "eventDataByteLength": 16,
-      "eventDataUtf8": "author input two"
+      "eventDataUtf8": "author input two",
+      "outputValueSats": 0
     }
   ],
   "invalid": [
@@ -171,5 +181,174 @@
         "errorCode": "INVALID_FORMAT"
       }
     }
-  ]
+  ],
+  "transactionVectors": {
+    "valid": [
+      {
+        "name": "Single valid zero-valued TM1 candidate output",
+        "description": "Transaction with one OP_RETURN output carrying a valid TM1 payload and zero satoshis value",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          },
+          {
+            "outputIndex": 1,
+            "valueSats": 1000,
+            "scriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+          }
+        ],
+        "expected": {
+          "status": "VALID",
+          "candidateCount": 1,
+          "candidateOutputIndex": 0,
+          "eventDataUtf8": "a"
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "name": "Non-zero output value on TM1 candidate output",
+        "description": "docs/protocol/tm1-spec.md Section 5: TM1 candidate output value must be exactly 0 satoshis. Non-zero value must be rejected as INVALID_FORMAT",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 546,
+            "scriptHex": "6a04544d4d000401010061"
+          }
+        ],
+        "expected": {
+          "status": "INVALID",
+          "errorCode": "INVALID_FORMAT",
+          "candidateCount": 1,
+          "reason": "Non-zero sats value on TM1 candidate output"
+        }
+      },
+      {
+        "name": "Duplicate TM1 candidate outputs in same transaction",
+        "description": "docs/protocol/tm1-spec.md Section 11 item 3: transaction containing more than one TM1 candidate output must be rejected with MULTIPLE_MEMOS",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          },
+          {
+            "outputIndex": 1,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010062"
+          }
+        ],
+        "expected": {
+          "status": "REJECTED_DUPLICATE_CANDIDATE",
+          "candidateCount": 2,
+          "errorCode": "MULTIPLE_MEMOS",
+          "reason": "Multiple TM1 candidate outputs detected in the same transaction"
+        }
+      },
+      {
+        "name": "Duplicate identical TM1 candidate outputs in same transaction",
+        "description": "docs/protocol/tm1-spec.md Section 11 item 3: duplicate candidate outputs even with identical scriptHex must be rejected with MULTIPLE_MEMOS",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          },
+          {
+            "outputIndex": 1,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          }
+        ],
+        "expected": {
+          "status": "REJECTED_DUPLICATE_CANDIDATE",
+          "candidateCount": 2,
+          "errorCode": "MULTIPLE_MEMOS",
+          "reason": "Identical candidate scripts still produce multiple candidates and must fail closed"
+        }
+      },
+      {
+        "name": "Multiple candidate outputs mixing TM0 and TM1",
+        "description": "A transaction with both a TM0 candidate output and a TM1 candidate output must fail closed with MULTIPLE_MEMOS",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 0,
+            "scriptHex": "6a22544d307c707c78617c7369676e616c206e6f77206c69766573206f6e206543617368"
+          },
+          {
+            "outputIndex": 1,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          }
+        ],
+        "expected": {
+          "status": "REJECTED_DUPLICATE_CANDIDATE",
+          "candidateCount": 2,
+          "errorCode": "MULTIPLE_MEMOS",
+          "reason": "Mixing protocol candidates in the same transaction must fail closed"
+        }
+      },
+      {
+        "name": "Candidate output with malformed TM1 envelope alongside another candidate",
+        "description": "An output recognized as TM1 candidate by marker followed by malformed envelope still counts as a candidate and causes MULTIPLE_MEMOS",
+        "inputs": [
+          {
+            "txid": "4444444444444444444444444444444444444444444444444444444444444444",
+            "outIdx": 0
+          }
+        ],
+        "outputs": [
+          {
+            "outputIndex": 0,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d000401010061"
+          },
+          {
+            "outputIndex": 1,
+            "valueSats": 0,
+            "scriptHex": "6a04544d4d00020101"
+          }
+        ],
+        "expected": {
+          "status": "REJECTED_DUPLICATE_CANDIDATE",
+          "candidateCount": 2,
+          "errorCode": "MULTIPLE_MEMOS",
+          "reason": "Malformed candidate still matches marker candidacy and triggers cardinality rejection"
+        }
+      }
+    ]
+  }
 }

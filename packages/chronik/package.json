@@ -21,6 +21,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@xolosarmy/tonalli-memo-protocol": "workspace:*",
     "chronik-client": "^4.3.0",
     "ecash-lib": "^4.13.0"
   }

@@ -21,7 +21,8 @@ export {
   TM1_POST_EVENT_TYPE,
   TM1_POST_EVENT_TYPE_HEX,
   TM1_VERSION,
-  TM1_VERSION_HEX
+  TM1_VERSION_HEX,
+  getTm1LokadId
 } from "./tm1-constants.js";
 export { utf8ByteLength } from "./byte-length.js";
 export { decodeMemo } from "./decode.js";
