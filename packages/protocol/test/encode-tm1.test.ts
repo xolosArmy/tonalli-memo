@@ -5,7 +5,8 @@ import {
   isTm1ProtocolError,
   parseTm1Output,
   MAX_TM1_EVENT_DATA_BYTES,
-  TM1_LOKAD_ID
+  TM1_LOKAD_ID,
+  TM1_LOKAD_ID_HEX
 } from "../src/index.js";
 import vectors from "../tm1-test-vectors.json" with { type: "json" };
 
@@ -193,5 +194,29 @@ describe("encodeTm1Post", () => {
     expect(() => parseTm1Output({ valueSats: 0n, script: mutatedScript })).toThrowError(
       expect.objectContaining({ code: "INVALID_MARKER" })
     );
+  });
+
+  it("derives TM1_LOKAD_ID_HEX from the canonical source and matches TM1_LOKAD_ID and getTm1LokadId() byte-for-byte", () => {
+    // 1. Matches byte-for-byte with TM1_LOKAD_ID tuple
+    const hexFromTuple = Array.from(TM1_LOKAD_ID, (byte) =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+    expect(TM1_LOKAD_ID_HEX).toBe(hexFromTuple);
+
+    // 2. Matches byte-for-byte with getTm1LokadId() Uint8Array
+    const defensiveCopy = getTm1LokadId();
+    const hexFromCopy = Array.from(defensiveCopy, (byte) =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+    expect(TM1_LOKAD_ID_HEX).toBe(hexFromCopy);
+
+    // 3. Decoding TM1_LOKAD_ID_HEX yields identical bytes to TM1_LOKAD_ID and getTm1LokadId()
+    const decodedBytes = Array.from(
+      TM1_LOKAD_ID_HEX.match(/.{1,2}/g) ?? [],
+      (byteHex) => Number.parseInt(byteHex, 16)
+    );
+    expect(decodedBytes).toEqual(Array.from(TM1_LOKAD_ID));
+    expect(new Uint8Array(decodedBytes)).toEqual(defensiveCopy);
+    expect(TM1_LOKAD_ID_HEX).toBe("544d4d00");
   });
 });

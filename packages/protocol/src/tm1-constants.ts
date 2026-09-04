@@ -18,10 +18,16 @@ export function getTm1LokadId(): Uint8Array {
  * Exported as an immutable frozen readonly tuple/array so consumer mutations are impossible.
  */
 export const TM1_LOKAD_ID: readonly [0x54, 0x4d, 0x4d, 0x00] = Object.freeze([
-  0x54, 0x4d, 0x4d, 0x00
+  ...CANONICAL_LOKAD_BYTES
 ] as const);
 
-export const TM1_LOKAD_ID_HEX = "544d4d00";
+/**
+ * Canonical TM1 LOKAD ID in lowercase hexadecimal representation,
+ * derived programmatically from the canonical source bytes.
+ */
+export const TM1_LOKAD_ID_HEX: string = CANONICAL_LOKAD_BYTES.map((byte) =>
+  byte.toString(16).padStart(2, "0")
+).join("");
 
 export const TM1_VERSION = 1;
 export const TM1_VERSION_HEX = "01";
