@@ -140,4 +140,25 @@ describe("ChronikTransactionClient", () => {
     expect(source.calls).toEqual([TXID]);
     expect(tx.rawResponse).toBe(raw);
   });
+
+  it("fetches address utxos from the configured source", async () => {
+    const mockUtxos = { outputScript: "76a914...", utxos: [] };
+    const source = new FakeChronikTxSource(makeConfirmedTx(), mockUtxos);
+    const client = createChronikTransactionAdapter({ source });
+    const result = await client.getAddressUtxos!(P2PKH_ZERO_ADDRESS);
+    expect(result).toBe(mockUtxos);
+    expect(source.addressUtxosCalls).toEqual([P2PKH_ZERO_ADDRESS]);
+  });
+
+  it("rejects invalid address for getAddressUtxos", async () => {
+    const source = new FakeChronikTxSource(makeConfirmedTx());
+    const client = createChronikTransactionAdapter({ source });
+    await expect(client.getAddressUtxos!("")).rejects.toThrow("Address must be a non-empty string.");
+    await expect(client.getAddressUtxos!(null as unknown as string)).rejects.toThrow("Address must be a non-empty string.");
+  });
+
+  it("throws when source does not support addressUtxos", async () => {
+    const client = createChronikTransactionAdapter({ source: { tx: async () => ({}) } });
+    await expect(client.getAddressUtxos!(P2PKH_ZERO_ADDRESS)).rejects.toThrow("Chronik source does not support address UTXO queries.");
+  });
 });

@@ -4,7 +4,7 @@ import { invalidOptions, mapChronikTxError } from "./errors.js";
 import { normalizeTransaction } from "./normalize.js";
 import { validateTxid } from "./txid.js";
 
-import type { ChronikAdapterOptions, ChronikTransactionAdapter, ChronikTxSource, NormalizedTransaction } from "./types.js";
+import type { ChronikAdapterOptions, ChronikTransactionAdapter, ChronikTxSource, NormalizedTransaction, ScriptUtxos } from "./types.js";
 
 const DEFAULT_ADDRESS_PREFIX = "ecash";
 const ADDRESS_PREFIX_PATTERN = /^[a-z0-9-]+$/u;
@@ -18,6 +18,10 @@ class OfficialChronikTxSource implements ChronikTxSource {
 
   tx(txid: string): Promise<unknown> {
     return this.client.tx(txid);
+  }
+
+  async addressUtxos(address: string): Promise<unknown> {
+    return this.client.address(address).utxos();
   }
 }
 
@@ -75,6 +79,17 @@ export class ChronikTransactionClient implements ChronikTransactionAdapter {
       throw mapChronikTxError(error, validatedTxid);
     }
     return normalizeTransaction(validatedTxid, rawResponse, { addressPrefix: this.addressPrefix });
+  }
+
+  async getAddressUtxos(address: string): Promise<ScriptUtxos> {
+    if (typeof address !== "string" || address.length === 0) {
+      throw new Error("Address must be a non-empty string.");
+    }
+    if (this.source.addressUtxos === undefined) {
+      throw new Error("Chronik source does not support address UTXO queries.");
+    }
+    const result = await this.source.addressUtxos(address);
+    return result as ScriptUtxos;
   }
 }
 

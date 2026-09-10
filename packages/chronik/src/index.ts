@@ -21,7 +21,11 @@ export type {
   NormalizedOpReturnOutput,
   NormalizedOutPoint,
   NormalizedTransaction,
-  OpReturnParseStatus
+  OpReturnParseStatus,
+  ScriptUtxo,
+  ScriptUtxos,
+  Token,
+  TokenType
 } from "./types.js";
 export type {
   ChronikLiveBlockEvent,

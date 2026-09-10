@@ -54,8 +54,12 @@ export interface NormalizedTransaction {
   rawResponse: unknown;
 }
 
+export type { ScriptUtxos, ScriptUtxo, Token, TokenType } from "chronik-client";
+import type { ScriptUtxos } from "chronik-client";
+
 export interface ChronikTxSource {
   tx(txid: string): Promise<unknown>;
+  addressUtxos?(address: string): Promise<unknown>;
 }
 
 export interface ChronikAdapterOptions {
@@ -66,4 +70,5 @@ export interface ChronikAdapterOptions {
 
 export interface ChronikTransactionAdapter {
   getTransaction(txid: string): Promise<NormalizedTransaction>;
+  getAddressUtxos?(address: string): Promise<ScriptUtxos>;
 }

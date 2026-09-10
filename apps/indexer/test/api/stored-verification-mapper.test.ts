@@ -27,6 +27,9 @@ function row(overrides: Partial<StoredVerificationRecord> = {}): StoredVerificat
     diagnostics: {},
     firstIndexedAt: 1,
     lastVerifiedAt: 2,
+    attachedTokenId: null,
+    attachmentOwnershipStatus: null,
+    attachmentCheckedAt: null,
     ...overrides
   };
 }
@@ -100,5 +103,74 @@ describe("mapStoredVerification TM1 authorship", () => {
         })
       ).tm1Authorship
     ).toBeNull();
+  });
+});
+
+describe("mapStoredVerification attachments and displayPayload", () => {
+  const tokenId = "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8";
+  const rawPayload = `@nft1:${tokenId}\nHello NFT attachment!`;
+
+  it("maps verified attachment and separates displayPayload from canonical payload", () => {
+    const dto = mapStoredVerification(
+      row({
+        payload: rawPayload,
+        attachedTokenId: tokenId,
+        attachmentOwnershipStatus: "VERIFIED_AT_INDEXING",
+        attachmentCheckedAt: 1234
+      })
+    );
+    expect(dto.payload).toBe(rawPayload);
+    expect(dto.displayPayload).toBe("Hello NFT attachment!");
+    expect(dto.attachment).toEqual({
+      type: "NFT",
+      tokenId,
+      ownership: "VERIFIED_AT_INDEXING"
+    });
+  });
+
+  it("maps unverified attachment and separates displayPayload", () => {
+    const dto = mapStoredVerification(
+      row({
+        payload: rawPayload,
+        attachedTokenId: tokenId,
+        attachmentOwnershipStatus: "UNVERIFIED",
+        attachmentCheckedAt: 1234
+      })
+    );
+    expect(dto.payload).toBe(rawPayload);
+    expect(dto.displayPayload).toBe("Hello NFT attachment!");
+    expect(dto.attachment).toEqual({
+      type: "NFT",
+      tokenId,
+      ownership: "UNVERIFIED"
+    });
+  });
+
+  it("returns displayPayload identical to payload and attachment null when no attachment", () => {
+    const dto = mapStoredVerification(
+      row({
+        payload: "Standard plain memo",
+        attachedTokenId: null,
+        attachmentOwnershipStatus: null,
+        attachmentCheckedAt: null
+      })
+    );
+    expect(dto.payload).toBe("Standard plain memo");
+    expect(dto.displayPayload).toBe("Standard plain memo");
+    expect(dto.attachment).toBeNull();
+  });
+
+  it("returns displayPayload identical to payload and attachment null for pre-v4/migrated records", () => {
+    const dto = mapStoredVerification(
+      row({
+        payload: rawPayload,
+        attachedTokenId: null,
+        attachmentOwnershipStatus: null,
+        attachmentCheckedAt: null
+      })
+    );
+    expect(dto.payload).toBe(rawPayload);
+    expect(dto.displayPayload).toBe(rawPayload);
+    expect(dto.attachment).toBeNull();
   });
 });

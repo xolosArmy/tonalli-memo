@@ -186,3 +186,36 @@ export const sourceFailure = (
     cause: new Error("raw cause")
   }
 }) as Extract<VerificationResult, { status: typeof status }>;
+
+export const verifiedTm1Result = (
+  eventData: string,
+  overrides: Partial<Extract<VerificationResult, { status: "VERIFIED_TM1" }>> = {}
+): Extract<VerificationResult, { status: "VERIFIED_TM1" }> => {
+  const bytes = utf8Bytes(eventData);
+  return {
+    status: "VERIFIED_TM1",
+    protocol: "TM1",
+    txid: TXID,
+    transaction: normalizedTx(),
+    memo: {
+      protocol: "TM1",
+      version: 1,
+      eventType: "POST",
+      eventTypeCode: 1,
+      authorInputIndex: 0,
+      eventData,
+      eventDataBytes: bytes,
+      eventDataByteLength: bytes.length,
+      scriptByteLength: bytes.length + 10
+    },
+    candidate: { outputIndex: 0 },
+    authorizingAddress: TEST_ADDRESS,
+    authorizingInputIndex: 0,
+    publicKeyHex: `02${"11".repeat(32)}`,
+    publicKeyHashHex: "22".repeat(20),
+    signatureWithHashTypeHex: `${"33".repeat(64)}41`,
+    sighashByte: 0x41,
+    trustModel: "trusted-chronik",
+    ...overrides
+  };
+};

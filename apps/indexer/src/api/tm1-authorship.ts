@@ -31,7 +31,7 @@ export class InvalidStoredTm1AuthorshipError extends Error {
  * consistency but deliberately omitted from the returned public read model.
  */
 export function decodeStoredTm1Authorship(value: unknown): Tm1AuthorshipReadModel {
-  if (!isRecord(value) || !hasExactKeys(value, EXPECTED_KEYS)) {
+  if (!isRecord(value) || !hasValidStoredTm1AuthorshipKeys(value)) {
     throw new InvalidStoredTm1AuthorshipError();
   }
 
@@ -65,10 +65,19 @@ function isStructurallyValidPublicKeyHex(value: string): boolean {
   return COMPRESSED_PUBLIC_KEY_PATTERN.test(value) || UNCOMPRESSED_PUBLIC_KEY_PATTERN.test(value);
 }
 
-function hasExactKeys(value: Record<string, unknown>, expected: readonly string[]): boolean {
-  const actual = Object.keys(value).sort();
-  const sortedExpected = [...expected].sort();
-  return actual.length === sortedExpected.length && actual.every((key, index) => key === sortedExpected[index]);
+function hasValidStoredTm1AuthorshipKeys(value: Record<string, unknown>): boolean {
+  const actualKeys = Object.keys(value);
+  for (const expected of EXPECTED_KEYS) {
+    if (!actualKeys.includes(expected)) {
+      return false;
+    }
+  }
+  for (const key of actualKeys) {
+    if (key !== "attachment" && !EXPECTED_KEYS.includes(key as (typeof EXPECTED_KEYS)[number])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

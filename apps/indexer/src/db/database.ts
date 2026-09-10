@@ -35,7 +35,7 @@ export function openIndexerDatabase(options: OpenIndexerDatabaseOptions): Indexe
   };
 }
 
-function runMigrations(connection: BetterSqlite3.Database): void {
+export function runMigrations(connection: BetterSqlite3.Database): void {
   const currentVersion = readUserVersion(connection);
   if (currentVersion > CURRENT_SCHEMA_VERSION) {
     throw new UnsupportedSchemaVersionError(currentVersion, CURRENT_SCHEMA_VERSION);

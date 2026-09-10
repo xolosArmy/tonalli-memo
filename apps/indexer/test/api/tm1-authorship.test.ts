@@ -45,4 +45,17 @@ describe("decodeStoredTm1Authorship", () => {
       })
     ).toMatchObject({ sighashByte: 0xc1 });
   });
+
+  it("accepts diagnostics containing an attachment diagnostic payload", () => {
+    expect(
+      decodeStoredTm1Authorship({
+        ...validDiagnostics,
+        attachment: { tokenId: "11".repeat(32), ownershipStatus: "VERIFIED_AT_INDEXING" }
+      })
+    ).toEqual({
+      publicKeyHashHex: "22".repeat(20),
+      sighashByte: 0x41,
+      trustModel: "trusted-chronik"
+    });
+  });
 });

@@ -1,4 +1,4 @@
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 export interface Migration {
   readonly version: number;
@@ -103,6 +103,23 @@ export const MIGRATIONS: readonly Migration[] = [
         CHECK (protocol IN ('TM0', 'TM1'));
 
       CREATE INDEX idx_verification_records_protocol ON verification_records(protocol);
+    `
+  },
+  {
+    version: 4,
+    sql: `
+      ALTER TABLE verification_records
+        ADD COLUMN attached_token_id TEXT NULL;
+
+      ALTER TABLE verification_records
+        ADD COLUMN attachment_ownership_status TEXT NULL
+        CHECK (attachment_ownership_status IS NULL OR attachment_ownership_status IN ('VERIFIED_AT_INDEXING', 'UNVERIFIED'));
+
+      ALTER TABLE verification_records
+        ADD COLUMN attachment_checked_at INTEGER NULL
+        CHECK (attachment_checked_at IS NULL OR attachment_checked_at >= 0);
+
+      CREATE INDEX idx_verification_records_attached_token_id ON verification_records(attached_token_id);
     `
   }
 ];

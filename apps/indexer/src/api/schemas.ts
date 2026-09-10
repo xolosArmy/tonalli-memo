@@ -128,6 +128,17 @@ const memo = {
   anyOf: [tm0Memo, tm1Memo]
 } as const;
 
+const attachment = {
+  type: "object",
+  additionalProperties: false,
+  required: ["type", "tokenId", "ownership"],
+  properties: {
+    type: { type: "string", const: "NFT" },
+    tokenId: { type: "string", pattern: txidPattern },
+    ownership: { type: "string", enum: ["VERIFIED_AT_INDEXING", "UNVERIFIED"] }
+  }
+} as const;
+
 const storedVerification = {
   type: "object",
   additionalProperties: false,
@@ -139,12 +150,14 @@ const storedVerification = {
     "eventType",
     "profileCode",
     "payload",
+    "displayPayload",
     "byteLength",
     "candidate",
     "authorizingAddress",
     "authorizingInputIndex",
     "evaluationHeight",
     "tm1Authorship",
+    "attachment",
     "firstIndexedAt",
     "lastVerifiedAt"
   ],
@@ -156,12 +169,14 @@ const storedVerification = {
     eventType: { type: ["string", "null"] },
     profileCode: { type: ["string", "null"] },
     payload: { type: ["string", "null"] },
+    displayPayload: { type: ["string", "null"] },
     byteLength: { type: ["integer", "null"], minimum: 0 },
     candidate: { anyOf: [candidate, { type: "null" }] },
     authorizingAddress: { type: ["string", "null"] },
     authorizingInputIndex: { type: ["integer", "null"], minimum: 0 },
     evaluationHeight: { type: ["integer", "null"], minimum: 0 },
     tm1Authorship: { anyOf: [tm1Authorship, { type: "null" }] },
+    attachment: { anyOf: [attachment, { type: "null" }] },
     firstIndexedAt: { type: "integer", minimum: 0 },
     lastVerifiedAt: { type: "integer", minimum: 0 }
   }

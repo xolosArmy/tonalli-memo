@@ -38,6 +38,12 @@ export type CandidateLocationDto =
       readonly outputIndex: number;
     };
 
+export interface AttachmentDto {
+  readonly type: "NFT";
+  readonly tokenId: string;
+  readonly ownership: "VERIFIED_AT_INDEXING" | "UNVERIFIED";
+}
+
 export interface StoredVerificationDto {
   readonly txid: string;
   readonly status: DurableVerificationStatus;
@@ -46,12 +52,14 @@ export interface StoredVerificationDto {
   readonly eventType: string | null;
   readonly profileCode: string | null;
   readonly payload: string | null;
+  readonly displayPayload: string | null;
   readonly byteLength: number | null;
   readonly candidate: CandidateLocationDto | null;
   readonly authorizingAddress: string | null;
   readonly authorizingInputIndex: number | null;
   readonly evaluationHeight: number | null;
   readonly tm1Authorship: Tm1AuthorshipReadModel | null;
+  readonly attachment: AttachmentDto | null;
   readonly firstIndexedAt: number;
   readonly lastVerifiedAt: number;
 }
