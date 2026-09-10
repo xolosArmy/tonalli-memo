@@ -1,5 +1,10 @@
 export { ChronikAdapterError, mapChronikTxError } from "./errors.js";
-export { ChronikTransactionClient, createChronikTransactionAdapter } from "./client.js";
+export {
+  ChronikTransactionClient,
+  createChronikTransactionAdapter,
+  isValidScriptUtxosResponse,
+  isValidUtxoEntry
+} from "./client.js";
 export { normalizeTransaction } from "./normalize.js";
 export { validateTxid, isCanonicalTxid } from "./txid.js";
 export { deriveAddressFromOutputScriptHex, isLowercaseEvenHex } from "./scripts.js";

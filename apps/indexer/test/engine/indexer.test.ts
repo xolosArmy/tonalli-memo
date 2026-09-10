@@ -117,7 +117,7 @@ describe("IndexingEngine", () => {
               isFinal: true,
               token: {
                 tokenId,
-                tokenType: { protocol: "SLP", type: "SLP_TOKEN_TYPE_NFT1_CHILD", number: 65 },
+                tokenType: { protocol: "SLP" as const, type: "SLP_TOKEN_TYPE_NFT1_CHILD" as const, number: 65 },
                 isMintBaton: false,
                 atoms: 1n
               }
@@ -242,15 +242,143 @@ describe("IndexingEngine", () => {
       database.close();
     });
 
-    it("preserves attachment fields when transaction transitions from unconfirmed to confirmed", async () => {
-      const unconfirmedTx = mempoolTx({ txid: TXID });
-      const confirmedTx = { ...unconfirmedTx, blockHeight: 900000, blockHash: "hash", blockTimestamp: 1700000000 };
-
-      const unconfirmedService = new FakeService(verifiedTm1Result(rawPayload, { transaction: unconfirmedTx }));
+    it("Test A: preserves VERIFIED_AT_INDEXING when second indexing finds NFT no longer owned", async () => {
+      let ownsNft = true;
       const chronik = {
-        getAddressUtxos: async () => makeUtxos(true)
+        getAddressUtxos: async () => makeUtxos(ownsNft)
+      };
+      const service = new FakeService(verifiedTm1Result(rawPayload));
+      const database = openIndexerDatabase({ filename: ":memory:" });
+      const store = new MemoStore(database);
+      const engine = new IndexingEngine({
+        verificationService: service as unknown as MemoVerificationService,
+        store,
+        clock: fakeClock([1000, 2000]),
+        chronik
+      });
+
+      // 1st indexing: NFT owned -> VERIFIED_AT_INDEXING
+      await engine.indexTransaction(TXID);
+      const record1 = store.getVerificationRecord(TXID);
+      expect(record1?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record1?.attachmentCheckedAt).toBe(1000);
+      expect(record1?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "VERIFIED_AT_INDEXING",
+          ownershipReason: "token-owned-and-verified-nft1-child",
+          checkedAt: 1000
+        }
+      });
+
+      // 2nd indexing: NFT transferred / no longer owned -> preserve VERIFIED_AT_INDEXING
+      ownsNft = false;
+      await engine.indexTransaction(TXID);
+      const record2 = store.getVerificationRecord(TXID);
+      expect(record2?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record2?.attachmentCheckedAt).toBe(1000);
+      expect(record2?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "VERIFIED_AT_INDEXING",
+          ownershipReason: "token-owned-and-verified-nft1-child",
+          checkedAt: 1000
+        }
+      });
+      database.close();
+    });
+
+    it("Test B: preserves VERIFIED_AT_INDEXING when second indexing encounters Chronik error", async () => {
+      let shouldThrow = false;
+      const chronik = {
+        getAddressUtxos: async () => {
+          if (shouldThrow) {
+            throw new Error("Chronik unavailable 503");
+          }
+          return makeUtxos(true);
+        }
+      };
+      const service = new FakeService(verifiedTm1Result(rawPayload));
+      const database = openIndexerDatabase({ filename: ":memory:" });
+      const store = new MemoStore(database);
+      const engine = new IndexingEngine({
+        verificationService: service as unknown as MemoVerificationService,
+        store,
+        clock: fakeClock([1000, 2000]),
+        chronik
+      });
+
+      // 1st indexing: VERIFIED_AT_INDEXING
+      await engine.indexTransaction(TXID);
+      const record1 = store.getVerificationRecord(TXID);
+      expect(record1?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record1?.attachmentCheckedAt).toBe(1000);
+
+      // 2nd indexing: Chronik throws -> preserve VERIFIED_AT_INDEXING
+      shouldThrow = true;
+      await engine.indexTransaction(TXID);
+      const record2 = store.getVerificationRecord(TXID);
+      expect(record2?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record2?.attachmentCheckedAt).toBe(1000);
+      expect(record2?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "VERIFIED_AT_INDEXING",
+          ownershipReason: "token-owned-and-verified-nft1-child",
+          checkedAt: 1000
+        }
+      });
+      database.close();
+    });
+
+    it("Test C: upgrades UNVERIFIED to VERIFIED_AT_INDEXING when second indexing finds NFT owned", async () => {
+      let ownsNft = false;
+      const chronik = {
+        getAddressUtxos: async () => makeUtxos(ownsNft)
+      };
+      const service = new FakeService(verifiedTm1Result(rawPayload));
+      const database = openIndexerDatabase({ filename: ":memory:" });
+      const store = new MemoStore(database);
+      const engine = new IndexingEngine({
+        verificationService: service as unknown as MemoVerificationService,
+        store,
+        clock: fakeClock([1000, 2000]),
+        chronik
+      });
+
+      // 1st indexing: UNVERIFIED
+      await engine.indexTransaction(TXID);
+      const record1 = store.getVerificationRecord(TXID);
+      expect(record1?.attachmentOwnershipStatus).toBe("UNVERIFIED");
+      expect(record1?.attachmentCheckedAt).toBe(1000);
+
+      // 2nd indexing: NFT owned -> upgrades to VERIFIED_AT_INDEXING
+      ownsNft = true;
+      await engine.indexTransaction(TXID);
+      const record2 = store.getVerificationRecord(TXID);
+      expect(record2?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record2?.attachmentCheckedAt).toBe(2000);
+      expect(record2?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "VERIFIED_AT_INDEXING",
+          ownershipReason: "token-owned-and-verified-nft1-child",
+          checkedAt: 2000
+        }
+      });
+      database.close();
+    });
+
+    it("Test D: preserves VERIFIED_AT_INDEXING and confirms transaction when reindexing confirmed after NFT transferred", async () => {
+      const unconfirmedTx = mempoolTx({ txid: TXID });
+      const confirmedTx = { ...unconfirmedTx, blockHeight: 900000, blockHash: "hash900k", blockTimestamp: 1700000000 };
+
+      let ownsNft = true;
+      const chronik = {
+        getAddressUtxos: async () => makeUtxos(ownsNft)
       };
 
+      const unconfirmedService = new FakeService(verifiedTm1Result(rawPayload, { transaction: unconfirmedTx }));
       const database = openIndexerDatabase({ filename: ":memory:" });
       const store = new MemoStore(database);
       const engine1 = new IndexingEngine({
@@ -260,13 +388,15 @@ describe("IndexingEngine", () => {
         chronik
       });
 
+      // 1st indexing: unconfirmed, NFT owned -> VERIFIED_AT_INDEXING
       await engine1.indexTransaction(TXID);
       const record1 = store.getVerificationRecord(TXID);
-      expect(record1?.attachedTokenId).toBe(tokenId);
       expect(record1?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record1?.attachmentCheckedAt).toBe(1000);
       expect(store.getTransaction(TXID)?.chainStatus).toBe("unconfirmed");
 
-      // Now index confirmed
+      // 2nd indexing: confirmed tx, NFT no longer in UTXO set
+      ownsNft = false;
       const confirmedService = new FakeService(verifiedTm1Result(rawPayload, { transaction: confirmedTx }));
       const engine2 = new IndexingEngine({
         verificationService: confirmedService as unknown as MemoVerificationService,
@@ -279,7 +409,53 @@ describe("IndexingEngine", () => {
       const record2 = store.getVerificationRecord(TXID);
       expect(record2?.attachedTokenId).toBe(tokenId);
       expect(record2?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+      expect(record2?.attachmentCheckedAt).toBe(1000);
       expect(store.getTransaction(TXID)?.chainStatus).toBe("confirmed");
+      expect(store.getTransaction(TXID)?.blockHeight).toBe(900000);
+      expect(record2?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "VERIFIED_AT_INDEXING",
+          ownershipReason: "token-owned-and-verified-nft1-child",
+          checkedAt: 1000
+        }
+      });
+      database.close();
+    });
+
+    it.each([
+      ["response null", null],
+      ["response sin utxos", {}],
+      ["utxos no-array", { utxos: "not an array" }],
+      ["array with null entry", { utxos: [null] }],
+      ["array with malformed outpoint", { utxos: [{ blockHeight: 100 }] }],
+      ["array with null token", { utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: null }] }],
+      ["array with malformed token", { utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: { tokenId: 123 } }] }]
+    ])("indexes valid TM1 memo as VERIFIED even if Chronik UTXO response is malformed (%s)", async (_caseName, malformedUtxos) => {
+      const service = new FakeService(verifiedTm1Result(rawPayload));
+      const chronik = {
+        getAddressUtxos: async () => malformedUtxos as unknown as ScriptUtxos
+      };
+      const { database, store, engine } = openEngine(service, [1234], chronik);
+
+      const outcome = await engine.indexTransaction(TXID);
+      expect(outcome.verificationResult.status).toBe("VERIFIED_TM1");
+      expect(outcome.persistedRecord).toBe(true);
+
+      const record = store.getVerificationRecord(TXID);
+      expect(record?.verificationStatus).toBe("VERIFIED");
+      expect(record?.payload).toBe(rawPayload);
+      expect(record?.attachedTokenId).toBe(tokenId);
+      expect(record?.attachmentOwnershipStatus).toBe("UNVERIFIED");
+      expect(record?.attachmentCheckedAt).toBe(1234);
+      expect(record?.diagnostics).toMatchObject({
+        attachment: {
+          tokenId,
+          ownershipStatus: "UNVERIFIED",
+          ownershipReason: "invalid-chronik-response",
+          checkedAt: 1234
+        }
+      });
       database.close();
     });
   });

@@ -161,4 +161,69 @@ describe("ChronikTransactionClient", () => {
     const client = createChronikTransactionAdapter({ source: { tx: async () => ({}) } });
     await expect(client.getAddressUtxos!(P2PKH_ZERO_ADDRESS)).rejects.toThrow("Chronik source does not support address UTXO queries.");
   });
+
+  it("throws INVALID_CHRONIK_RESPONSE when UTXO response is null", async () => {
+    const source = new FakeChronikTxSource(makeConfirmedTx(), null);
+    const client = createChronikTransactionAdapter({ source });
+    await expectAsyncAdapterError(
+      async () => client.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+  });
+
+  it("throws INVALID_CHRONIK_RESPONSE when UTXO response has no utxos property", async () => {
+    const source = new FakeChronikTxSource(makeConfirmedTx(), { outputScript: "76a914..." });
+    const client = createChronikTransactionAdapter({ source });
+    await expectAsyncAdapterError(
+      async () => client.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+  });
+
+  it("throws INVALID_CHRONIK_RESPONSE when utxos is not an array", async () => {
+    const source = new FakeChronikTxSource(makeConfirmedTx(), { outputScript: "76a914...", utxos: "not-an-array" });
+    const client = createChronikTransactionAdapter({ source });
+    await expectAsyncAdapterError(
+      async () => client.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+  });
+
+  it("throws INVALID_CHRONIK_RESPONSE when utxos contains null or malformed entries", async () => {
+    // null entry
+    const sourceNull = new FakeChronikTxSource(makeConfirmedTx(), { utxos: [null] });
+    const clientNull = createChronikTransactionAdapter({ source: sourceNull });
+    await expectAsyncAdapterError(
+      async () => clientNull.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+
+    // malformed entry without outpoint
+    const sourceNoOutpoint = new FakeChronikTxSource(makeConfirmedTx(), { utxos: [{ blockHeight: 100 }] });
+    const clientNoOutpoint = createChronikTransactionAdapter({ source: sourceNoOutpoint });
+    await expectAsyncAdapterError(
+      async () => clientNoOutpoint.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+
+    // malformed entry with null token
+    const sourceNullToken = new FakeChronikTxSource(makeConfirmedTx(), {
+      utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: null }]
+    });
+    const clientNullToken = createChronikTransactionAdapter({ source: sourceNullToken });
+    await expectAsyncAdapterError(
+      async () => clientNullToken.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+
+    // malformed entry with invalid token fields
+    const sourceBadToken = new FakeChronikTxSource(makeConfirmedTx(), {
+      utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: { tokenId: 123 } }]
+    });
+    const clientBadToken = createChronikTransactionAdapter({ source: sourceBadToken });
+    await expectAsyncAdapterError(
+      async () => clientBadToken.getAddressUtxos!(P2PKH_ZERO_ADDRESS),
+      "INVALID_CHRONIK_RESPONSE"
+    );
+  });
 });

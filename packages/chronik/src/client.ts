@@ -1,6 +1,6 @@
 import { ChronikClient } from "chronik-client";
 
-import { invalidOptions, mapChronikTxError } from "./errors.js";
+import { invalidChronikResponse, invalidOptions, mapChronikTxError } from "./errors.js";
 import { normalizeTransaction } from "./normalize.js";
 import { validateTxid } from "./txid.js";
 
@@ -60,6 +60,57 @@ const normalizeAddressPrefix = (addressPrefix: string | undefined): string => {
   return prefix;
 };
 
+export const isValidUtxoEntry = (utxo: unknown): boolean => {
+  if (utxo === null || typeof utxo !== "object") {
+    return false;
+  }
+  const u = utxo as Record<string, unknown>;
+  if (u.outpoint === null || typeof u.outpoint !== "object") {
+    return false;
+  }
+  const outpoint = u.outpoint as Record<string, unknown>;
+  if (
+    typeof outpoint.txid !== "string" ||
+    typeof outpoint.outIdx !== "number" ||
+    !Number.isSafeInteger(outpoint.outIdx) ||
+    outpoint.outIdx < 0
+  ) {
+    return false;
+  }
+  if (u.token !== undefined) {
+    if (u.token === null || typeof u.token !== "object") {
+      return false;
+    }
+    const t = u.token as Record<string, unknown>;
+    if (typeof t.tokenId !== "string" || t.tokenType === null || typeof t.tokenType !== "object") {
+      return false;
+    }
+    const tokenType = t.tokenType as Record<string, unknown>;
+    if (
+      typeof tokenType.protocol !== "string" ||
+      typeof tokenType.type !== "string" ||
+      typeof tokenType.number !== "number"
+    ) {
+      return false;
+    }
+    if (typeof t.isMintBaton !== "boolean" || typeof t.atoms !== "bigint") {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const isValidScriptUtxosResponse = (response: unknown): response is ScriptUtxos => {
+  if (response === null || typeof response !== "object") {
+    return false;
+  }
+  const candidate = response as Record<string, unknown>;
+  if (!("utxos" in candidate) || !Array.isArray(candidate.utxos)) {
+    return false;
+  }
+  return candidate.utxos.every(isValidUtxoEntry);
+};
+
 export class ChronikTransactionClient implements ChronikTransactionAdapter {
   private readonly source: ChronikTxSource;
   private readonly addressPrefix: string;
@@ -88,8 +139,16 @@ export class ChronikTransactionClient implements ChronikTransactionAdapter {
     if (this.source.addressUtxos === undefined) {
       throw new Error("Chronik source does not support address UTXO queries.");
     }
-    const result = await this.source.addressUtxos(address);
-    return result as ScriptUtxos;
+    let rawResponse: unknown;
+    try {
+      rawResponse = await this.source.addressUtxos(address);
+    } catch (error) {
+      throw mapChronikTxError(error, address);
+    }
+    if (!isValidScriptUtxosResponse(rawResponse)) {
+      throw invalidChronikResponse("Invalid UTXO response received from Chronik.", address);
+    }
+    return rawResponse;
   }
 }
 

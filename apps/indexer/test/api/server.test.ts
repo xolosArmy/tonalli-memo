@@ -291,7 +291,7 @@ describe("Tonalli Memo indexer HTTP API", () => {
             isFinal: true,
             token: {
               tokenId,
-              tokenType: { protocol: "SLP", type: "SLP_TOKEN_TYPE_NFT1_CHILD", number: 65 },
+              tokenType: { protocol: "SLP" as const, type: "SLP_TOKEN_TYPE_NFT1_CHILD" as const, number: 65 },
               isMintBaton: false,
               atoms: 1n
             }

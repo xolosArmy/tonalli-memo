@@ -308,11 +308,30 @@ export class MemoStore {
           evaluation_height = excluded.evaluation_height,
           authorization_context_json = excluded.authorization_context_json,
           authorization_decisions_json = excluded.authorization_decisions_json,
-          diagnostics_json = excluded.diagnostics_json,
+          diagnostics_json = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+             AND excluded.attachment_ownership_status = 'UNVERIFIED'
+            THEN verification_records.diagnostics_json
+            ELSE excluded.diagnostics_json
+          END,
           last_verified_at = excluded.last_verified_at,
           attached_token_id = excluded.attached_token_id,
-          attachment_ownership_status = excluded.attachment_ownership_status,
-          attachment_checked_at = excluded.attachment_checked_at
+          attachment_ownership_status = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+            THEN 'VERIFIED_AT_INDEXING'
+            ELSE excluded.attachment_ownership_status
+          END,
+          attachment_checked_at = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+            THEN verification_records.attachment_checked_at
+            ELSE excluded.attachment_checked_at
+          END
         `
       )
       .run({

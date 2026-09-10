@@ -13,7 +13,8 @@ import {
   TXID,
   TXID_2,
   unauthorizedResult,
-  verifiedResult
+  verifiedResult,
+  verifiedTm1Result
 } from "../fixtures.js";
 
 const persist = (store: ReturnType<typeof openStore>["store"], result: Parameters<typeof mapVerificationResult>[0], now = 100) =>
@@ -265,6 +266,55 @@ describe("MemoStore transaction lifecycle", () => {
     const { database, store } = openStore();
     persist(store, verifiedResult(), 100);
     expect(() => store.markTransactionInactive(TXID, "STALE" as never)).toThrow("Transaction inactive reason");
+    database.close();
+  });
+
+  it("enforces monotonic attachment ownership in SQL upsert", () => {
+    const { database, store } = openStore();
+    const tokenId = "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8";
+
+    const rawPayload = `@nft1:${tokenId}\nHello`;
+
+    // 1st persist: VERIFIED_AT_INDEXING
+    const verifiedAttachment = {
+      attachedTokenId: tokenId,
+      attachmentOwnershipStatus: "VERIFIED_AT_INDEXING" as const,
+      attachmentCheckedAt: 1000,
+      attachmentOwnershipReason: "token-owned-and-verified-nft1-child"
+    };
+    store.persistIndexingResult({
+      mappedResult: mapVerificationResult(verifiedTm1Result(rawPayload, { txid: TXID }), TXID, null, verifiedAttachment),
+      nowSeconds: 1000
+    });
+
+    const record1 = store.getVerificationRecord(TXID);
+    expect(record1?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+    expect(record1?.attachmentCheckedAt).toBe(1000);
+
+    // 2nd persist: UNVERIFIED attempt for same tokenId -> database must preserve VERIFIED_AT_INDEXING
+    const unverifiedAttachment = {
+      attachedTokenId: tokenId,
+      attachmentOwnershipStatus: "UNVERIFIED" as const,
+      attachmentCheckedAt: 2000,
+      attachmentOwnershipReason: "token-not-owned-or-not-valid-nft1-child"
+    };
+    store.persistIndexingResult({
+      mappedResult: mapVerificationResult(verifiedTm1Result(rawPayload, { txid: TXID }), TXID, null, unverifiedAttachment),
+      nowSeconds: 2000
+    });
+
+    const record2 = store.getVerificationRecord(TXID);
+    expect(record2?.attachmentOwnershipStatus).toBe("VERIFIED_AT_INDEXING");
+    expect(record2?.attachmentCheckedAt).toBe(1000);
+    expect(record2?.diagnostics).toMatchObject({
+      attachment: {
+        tokenId,
+        ownershipStatus: "VERIFIED_AT_INDEXING",
+        ownershipReason: "token-owned-and-verified-nft1-child",
+        checkedAt: 1000
+      }
+    });
+
     database.close();
   });
 });

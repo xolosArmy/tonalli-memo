@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ScriptUtxos, Token, TokenType } from "@tonalli-memo/chronik";
+import type { ScriptUtxos, Token } from "@tonalli-memo/chronik";
 import { verifyNftAttachmentOwnership } from "../../src/attachment/verifier.js";
 
 const TOKEN_ID = "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8";
@@ -124,8 +124,8 @@ describe("verifyNftAttachmentOwnership", () => {
         utxosResponse([
           validNft1ChildToken({
             tokenType: {
-              protocol: "SLP",
-              type: "SLP_TOKEN_TYPE_STANDARD" as TokenType["type"],
+              protocol: "SLP" as const,
+              type: "SLP_TOKEN_TYPE_FUNGIBLE" as const,
               number: 1
             }
           })
@@ -201,6 +201,156 @@ describe("verifyNftAttachmentOwnership", () => {
       status: "UNVERIFIED",
       checkedAt: NOW,
       reason: "chronik-unavailable"
+    });
+  });
+
+  it("handles Chronik error with INVALID_CHRONIK_RESPONSE code", async () => {
+    const error = new Error("Bad response") as Error & { code: string };
+    error.code = "INVALID_CHRONIK_RESPONSE";
+    const chronik = {
+      getAddressUtxos: async () => {
+        throw error;
+      }
+    };
+
+    const result = await verifyNftAttachmentOwnership({
+      chronik,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+
+    expect(result).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+  });
+
+  it("returns UNVERIFIED with invalid-chronik-response when response is null", async () => {
+    const chronik = {
+      getAddressUtxos: async () => null as unknown as ScriptUtxos
+    };
+
+    const result = await verifyNftAttachmentOwnership({
+      chronik,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+
+    expect(result).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+  });
+
+  it("returns UNVERIFIED with invalid-chronik-response when response has no utxos", async () => {
+    const chronik = {
+      getAddressUtxos: async () => ({ outputScript: "76a914..." }) as unknown as ScriptUtxos
+    };
+
+    const result = await verifyNftAttachmentOwnership({
+      chronik,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+
+    expect(result).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+  });
+
+  it("returns UNVERIFIED with invalid-chronik-response when utxos is not an array", async () => {
+    const chronik = {
+      getAddressUtxos: async () => ({ utxos: "not-an-array" }) as unknown as ScriptUtxos
+    };
+
+    const result = await verifyNftAttachmentOwnership({
+      chronik,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+
+    expect(result).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+  });
+
+  it("returns UNVERIFIED with invalid-chronik-response when utxos contains null or malformed entries", async () => {
+    // null entry in utxos
+    const chronikNullEntry = {
+      getAddressUtxos: async () => ({ utxos: [null] }) as unknown as ScriptUtxos
+    };
+    const resNull = await verifyNftAttachmentOwnership({
+      chronik: chronikNullEntry,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+    expect(resNull).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+
+    // entry without outpoint
+    const chronikNoOutpoint = {
+      getAddressUtxos: async () => ({ utxos: [{ blockHeight: 100 }] }) as unknown as ScriptUtxos
+    };
+    const resNoOutpoint = await verifyNftAttachmentOwnership({
+      chronik: chronikNoOutpoint,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+    expect(resNoOutpoint).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+
+    // entry with null token
+    const chronikNullToken = {
+      getAddressUtxos: async () => ({
+        utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: null }]
+      }) as unknown as ScriptUtxos
+    };
+    const resNullToken = await verifyNftAttachmentOwnership({
+      chronik: chronikNullToken,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+    expect(resNullToken).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
+    });
+
+    // entry with malformed token
+    const chronikBadToken = {
+      getAddressUtxos: async () => ({
+        utxos: [{ outpoint: { txid: "00".repeat(32), outIdx: 0 }, token: { tokenId: 123 } }]
+      }) as unknown as ScriptUtxos
+    };
+    const resBadToken = await verifyNftAttachmentOwnership({
+      chronik: chronikBadToken,
+      authorizingAddress: ADDRESS,
+      attachedTokenId: TOKEN_ID,
+      nowSeconds: NOW
+    });
+    expect(resBadToken).toEqual({
+      status: "UNVERIFIED",
+      checkedAt: NOW,
+      reason: "invalid-chronik-response"
     });
   });
 });

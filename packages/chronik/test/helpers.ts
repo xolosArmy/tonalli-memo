@@ -26,7 +26,10 @@ export class FakeChronikTxSource implements ChronikTxSource {
     if (typeof this.utxosResult === "function") {
       return this.utxosResult(address);
     }
-    return this.utxosResult ?? { outputScript: "", utxos: [] };
+    if (this.utxosResult !== undefined) {
+      return this.utxosResult;
+    }
+    return { outputScript: "", utxos: [] };
   }
 }
 
