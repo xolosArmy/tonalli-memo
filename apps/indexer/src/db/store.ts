@@ -2,6 +2,7 @@ import type Database from "better-sqlite3";
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
 import { serializeStoredTransaction } from "./serialization.js";
 import type {
+  AttachmentOwnershipStatus,
   ChainStatus,
   IndexerDatabase,
   StoredIndexingAttempt,
@@ -63,6 +64,9 @@ interface VerificationSqlRow {
   readonly diagnostics_json: string;
   readonly first_indexed_at: number;
   readonly last_verified_at: number;
+  readonly attached_token_id: string | null;
+  readonly attachment_ownership_status: AttachmentOwnershipStatus | null;
+  readonly attachment_checked_at: number | null;
 }
 
 interface VerifiedFeedSqlRow extends Omit<TransactionSqlRow, "first_indexed_at">, Omit<VerificationSqlRow, "first_indexed_at"> {
@@ -171,7 +175,10 @@ export class MemoStore {
           v.authorization_decisions_json,
           v.diagnostics_json,
           v.first_indexed_at AS verification_first_indexed_at,
-          v.last_verified_at
+          v.last_verified_at,
+          v.attached_token_id,
+          v.attachment_ownership_status,
+          v.attachment_checked_at
         FROM verification_records v
         INNER JOIN transactions t ON t.txid = v.txid
         WHERE v.verification_status = 'VERIFIED' AND t.is_active = 1
@@ -277,12 +284,14 @@ export class MemoStore {
         INSERT INTO verification_records (
           txid, verification_status, protocol, protocol_version, event_type, profile_code, payload, byte_length,
           candidate_output_index, candidate_push_index, authorizing_address, authorizing_input_index, evaluation_height,
-          authorization_context_json, authorization_decisions_json, diagnostics_json, first_indexed_at, last_verified_at
+          authorization_context_json, authorization_decisions_json, diagnostics_json, first_indexed_at, last_verified_at,
+          attached_token_id, attachment_ownership_status, attachment_checked_at
         )
         VALUES (
           @txid, @verificationStatus, @protocol, @protocolVersion, @eventType, @profileCode, @payload, @byteLength,
           @candidateOutputIndex, @candidatePushIndex, @authorizingAddress, @authorizingInputIndex, @evaluationHeight,
-          @authorizationContextJson, @authorizationDecisionsJson, @diagnosticsJson, @nowSeconds, @nowSeconds
+          @authorizationContextJson, @authorizationDecisionsJson, @diagnosticsJson, @nowSeconds, @nowSeconds,
+          @attachedTokenId, @attachmentOwnershipStatus, @attachmentCheckedAt
         )
         ON CONFLICT(txid) DO UPDATE SET
           verification_status = excluded.verification_status,
@@ -299,8 +308,30 @@ export class MemoStore {
           evaluation_height = excluded.evaluation_height,
           authorization_context_json = excluded.authorization_context_json,
           authorization_decisions_json = excluded.authorization_decisions_json,
-          diagnostics_json = excluded.diagnostics_json,
-          last_verified_at = excluded.last_verified_at
+          diagnostics_json = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+             AND excluded.attachment_ownership_status = 'UNVERIFIED'
+            THEN verification_records.diagnostics_json
+            ELSE excluded.diagnostics_json
+          END,
+          last_verified_at = excluded.last_verified_at,
+          attached_token_id = excluded.attached_token_id,
+          attachment_ownership_status = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+            THEN 'VERIFIED_AT_INDEXING'
+            ELSE excluded.attachment_ownership_status
+          END,
+          attachment_checked_at = CASE
+            WHEN verification_records.attached_token_id IS NOT NULL
+             AND verification_records.attached_token_id = excluded.attached_token_id
+             AND verification_records.attachment_ownership_status = 'VERIFIED_AT_INDEXING'
+            THEN verification_records.attachment_checked_at
+            ELSE excluded.attachment_checked_at
+          END
         `
       )
       .run({
@@ -320,7 +351,10 @@ export class MemoStore {
         authorizationContextJson: record.authorizationContext === null ? null : JSON.stringify(record.authorizationContext),
         authorizationDecisionsJson: JSON.stringify(record.authorizationDecisions),
         diagnosticsJson: JSON.stringify(record.diagnostics),
-        nowSeconds
+        nowSeconds,
+        attachedTokenId: record.attachedTokenId,
+        attachmentOwnershipStatus: record.attachmentOwnershipStatus,
+        attachmentCheckedAt: record.attachmentCheckedAt
       });
   }
 
@@ -396,7 +430,10 @@ function toVerificationRow(row: VerificationSqlRow): StoredVerificationRecord {
     authorizationDecisions: JSON.parse(row.authorization_decisions_json) as readonly unknown[],
     diagnostics: JSON.parse(row.diagnostics_json) as unknown,
     firstIndexedAt: row.first_indexed_at,
-    lastVerifiedAt: row.last_verified_at
+    lastVerifiedAt: row.last_verified_at,
+    attachedTokenId: row.attached_token_id,
+    attachmentOwnershipStatus: row.attachment_ownership_status,
+    attachmentCheckedAt: row.attachment_checked_at
   };
 }
 
@@ -449,7 +486,10 @@ function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
       authorization_decisions_json: row.authorization_decisions_json,
       diagnostics_json: row.diagnostics_json,
       first_indexed_at: row.verification_first_indexed_at,
-      last_verified_at: row.last_verified_at
+      last_verified_at: row.last_verified_at,
+      attached_token_id: row.attached_token_id,
+      attachment_ownership_status: row.attachment_ownership_status,
+      attachment_checked_at: row.attachment_checked_at
     })
   };
 }

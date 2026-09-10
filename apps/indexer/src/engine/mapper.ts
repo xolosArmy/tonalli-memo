@@ -1,6 +1,6 @@
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
 import type { MemoCandidate, VerificationResult } from "@tonalli-memo/verification";
-import type { DurableVerificationStatus, StoredMemoProtocol } from "../db/types.js";
+import type { DurableVerificationStatus, StoredMemoProtocol, AttachmentOwnershipStatus } from "../db/types.js";
 
 export interface CandidateLocationDto {
   readonly protocol: StoredMemoProtocol;
@@ -14,6 +14,13 @@ export interface AuthorizationDecisionDto {
   readonly authorized: boolean;
   readonly reason: string;
   readonly evaluationHeight: number;
+}
+
+export interface MappedAttachmentInfo {
+  readonly attachedTokenId: string | null;
+  readonly attachmentOwnershipStatus: AttachmentOwnershipStatus | null;
+  readonly attachmentCheckedAt: number | null;
+  readonly attachmentOwnershipReason?: string | null;
 }
 
 export interface MappedVerificationRecord {
@@ -32,6 +39,9 @@ export interface MappedVerificationRecord {
   readonly authorizationContext: unknown | null;
   readonly authorizationDecisions: readonly AuthorizationDecisionDto[];
   readonly diagnostics: unknown;
+  readonly attachedTokenId: string | null;
+  readonly attachmentOwnershipStatus: AttachmentOwnershipStatus | null;
+  readonly attachmentCheckedAt: number | null;
 }
 
 export interface MappedIndexingResult {
@@ -46,7 +56,8 @@ export interface MappedIndexingResult {
 export function mapVerificationResult(
   result: VerificationResult,
   requestedTxid: string,
-  tipHeight: number | null
+  tipHeight: number | null,
+  attachmentInfo?: MappedAttachmentInfo | null
 ): MappedIndexingResult {
   switch (result.status) {
     case "VERIFIED":
@@ -63,7 +74,10 @@ export function mapVerificationResult(
           evaluationHeight: result.evaluationHeight,
           authorizationContext: result.authorizationContext,
           authorizationDecisions: authorizationDecisions(result.authorizationDecisions),
-          diagnostics: {}
+          diagnostics: {},
+          attachedTokenId: null,
+          attachmentOwnershipStatus: null,
+          attachmentCheckedAt: null
         },
         attemptDiagnostics: {}
       };
@@ -93,8 +107,21 @@ export function mapVerificationResult(
             publicKeyHashHex: result.publicKeyHashHex,
             signatureWithHashTypeHex: result.signatureWithHashTypeHex,
             sighashByte: result.sighashByte,
-            trustModel: result.trustModel
-          }
+            trustModel: result.trustModel,
+            ...(attachmentInfo?.attachedTokenId
+              ? {
+                  attachment: {
+                    tokenId: attachmentInfo.attachedTokenId,
+                    ownershipStatus: attachmentInfo.attachmentOwnershipStatus,
+                    ownershipReason: attachmentInfo.attachmentOwnershipReason ?? null,
+                    checkedAt: attachmentInfo.attachmentCheckedAt
+                  }
+                }
+              : {})
+          },
+          attachedTokenId: attachmentInfo?.attachedTokenId ?? null,
+          attachmentOwnershipStatus: attachmentInfo?.attachmentOwnershipStatus ?? null,
+          attachmentCheckedAt: attachmentInfo?.attachmentCheckedAt ?? null
         },
         attemptDiagnostics: {}
       };
@@ -114,7 +141,10 @@ export function mapVerificationResult(
           authorizationDecisions: authorizationDecisions(result.authorizationDecisions),
           diagnostics: {
             authorizationDecisions: authorizationDecisions(result.authorizationDecisions)
-          }
+          },
+          attachedTokenId: null,
+          attachmentOwnershipStatus: null,
+          attachmentCheckedAt: null
         },
         attemptDiagnostics: {}
       };
@@ -243,6 +273,9 @@ function tm0MemoColumns(
   | "authorizationContext"
   | "authorizationDecisions"
   | "diagnostics"
+  | "attachedTokenId"
+  | "attachmentOwnershipStatus"
+  | "attachmentCheckedAt"
 > {
   return {
     protocol: "TM0",
@@ -286,7 +319,10 @@ function emptyRecord(
     evaluationHeight: null,
     authorizationContext: null,
     authorizationDecisions: [],
-    diagnostics: {}
+    diagnostics: {},
+    attachedTokenId: null,
+    attachmentOwnershipStatus: null,
+    attachmentCheckedAt: null
   };
 }
 

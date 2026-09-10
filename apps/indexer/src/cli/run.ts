@@ -101,7 +101,7 @@ function createIndexingEngine(config: IndexerCliConfig, store: MemoStore): Index
   }
   const chronik = createChronikTransactionAdapter({ urls: config.chronikUrls });
   const verificationService = createMemoVerificationService({ chronik });
-  return new IndexingEngine({ verificationService, store });
+  return new IndexingEngine({ verificationService, store, chronik });
 }
 
 export async function closeIndexerResources(resources: {

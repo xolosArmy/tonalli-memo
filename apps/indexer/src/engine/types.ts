@@ -1,3 +1,4 @@
+import type { ChronikTransactionAdapter } from "@tonalli-memo/chronik";
 import type { MemoVerificationService, VerificationResult } from "@tonalli-memo/verification";
 import type { MemoStore } from "../db/store.js";
 
@@ -25,6 +26,7 @@ export interface IndexingEngineOptions {
   readonly verificationService: MemoVerificationService;
   readonly store: MemoStore;
   readonly clock?: IndexerClock;
+  readonly chronik?: Pick<ChronikTransactionAdapter, "getAddressUtxos">;
 }
 
 export function validateUnixSeconds(value: number): number {

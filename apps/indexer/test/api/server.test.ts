@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { IndexingEngine, MemoStore, openIndexerDatabase, type IndexerDatabase } from "../../src/index.js";
 import type { MemoVerificationService, VerificationResult, VerifyTransactionContext } from "@tonalli-memo/verification";
+import type { ScriptUtxos } from "@tonalli-memo/chronik";
 import { createIndexerApi } from "../../src/api/server.js";
-import { TXID, TXID_2, normalizedTx, verificationResultForStatus, verifiedResult } from "./fixtures.js";
+import type { FeedResponseDto, TxResponseDto } from "../../src/api/dto.js";
+import { TXID, TXID_2, normalizedTx, verificationResultForStatus, verifiedResult, verifiedTm1Result } from "./fixtures.js";
 
 class FakeVerificationService {
   readonly calls: { readonly txid: string; readonly context: VerifyTransactionContext }[] = [];
@@ -37,6 +39,7 @@ async function openApi(options: {
   readonly results?: readonly VerificationResult[];
   readonly token?: string;
   readonly corsOrigins?: readonly string[];
+  readonly chronik?: { getAddressUtxos(address: string): Promise<ScriptUtxos> };
 } = {}): Promise<TestApi> {
   const database = openIndexerDatabase({ filename: ":memory:" });
   databases.push(database);
@@ -49,7 +52,8 @@ async function openApi(options: {
       nowSeconds() {
         return 1234567890 + service.calls.length;
       }
-    }
+    },
+    ...(options.chronik !== undefined ? { chronik: options.chronik } : {})
   });
   const app = await createIndexerApi({
     store,
@@ -270,5 +274,103 @@ describe("Tonalli Memo indexer HTTP API", () => {
     });
     expect(JSON.stringify(failed.body)).not.toContain("SQL");
     expect(JSON.stringify(failed.body)).not.toContain("/tmp/path");
+  });
+
+  it("exposes displayPayload and attachment on tx and feed endpoints according to contract", async () => {
+    const tokenId = "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8";
+    const rawPayload = `@nft1:${tokenId}\nMi xolo NFT`;
+    const chronik = {
+      getAddressUtxos: async () => ({
+        outputScript: "76a914...",
+        utxos: [
+          {
+            outpoint: { txid: "00".repeat(32), outIdx: 0 },
+            blockHeight: 800000,
+            isCoinbase: false,
+            sats: 546n,
+            isFinal: true,
+            token: {
+              tokenId,
+              tokenType: { protocol: "SLP" as const, type: "SLP_TOKEN_TYPE_NFT1_CHILD" as const, number: 65 },
+              isMintBaton: false,
+              atoms: 1n
+            }
+          }
+        ]
+      })
+    };
+
+    const api = await openApi({
+      token: "secret",
+      chronik,
+      results: [
+        verifiedTm1Result(rawPayload, {
+          txid: TXID,
+          transaction: normalizedTx({ txid: TXID, blockHeight: 900001 })
+        }),
+        verifiedResult({
+          txid: TXID_2,
+          transaction: normalizedTx({ txid: TXID_2, blockHeight: 900002 })
+        })
+      ]
+    });
+
+    await injectJson(api.app, {
+      method: "POST",
+      url: "/api/v1/admin/index",
+      headers: { authorization: "Bearer secret" },
+      payload: { txid: TXID }
+    });
+    await injectJson(api.app, {
+      method: "POST",
+      url: "/api/v1/admin/index",
+      headers: { authorization: "Bearer secret" },
+      payload: { txid: TXID_2 }
+    });
+
+    // Check tx endpoint with attachment
+    const tx1 = await injectJson(api.app, { method: "GET", url: `/api/v1/tx/${TXID}` });
+    expect(tx1.statusCode).toBe(200);
+    expect((tx1.body as TxResponseDto).verification).toMatchObject({
+      txid: TXID,
+      payload: rawPayload,
+      displayPayload: "Mi xolo NFT",
+      attachment: {
+        type: "NFT",
+        tokenId,
+        ownership: "VERIFIED_AT_INDEXING"
+      }
+    });
+
+    // Check tx endpoint without attachment
+    const tx2 = await injectJson(api.app, { method: "GET", url: `/api/v1/tx/${TXID_2}` });
+    expect(tx2.statusCode).toBe(200);
+    expect((tx2.body as TxResponseDto).verification).toMatchObject({
+      txid: TXID_2,
+      payload: "signal now lives on eCash",
+      displayPayload: "signal now lives on eCash",
+      attachment: null
+    });
+
+    // Check feed endpoint
+    const feed = await injectJson(api.app, { method: "GET", url: "/api/v1/feed" });
+    expect(feed.statusCode).toBe(200);
+    const feedItems = (feed.body as FeedResponseDto).items;
+    expect(feedItems).toHaveLength(2);
+    expect(feedItems[0]?.verification).toMatchObject({
+      txid: TXID_2,
+      displayPayload: "signal now lives on eCash",
+      attachment: null
+    });
+    expect(feedItems[1]?.verification).toMatchObject({
+      txid: TXID,
+      payload: rawPayload,
+      displayPayload: "Mi xolo NFT",
+      attachment: {
+        type: "NFT",
+        tokenId,
+        ownership: "VERIFIED_AT_INDEXING"
+      }
+    });
   });
 });

@@ -1,6 +1,7 @@
 import type { NormalizedTransaction } from "@tonalli-memo/chronik";
 import type { MemoCandidate, VerificationResult } from "@tonalli-memo/verification";
 import type {
+  AttachmentDto,
   CandidateLocationDto,
   FeedItemDto,
   PublicMemoDto,
@@ -9,6 +10,7 @@ import type {
   TransactionSummaryDto
 } from "./dto.js";
 import { decodeStoredTm1Authorship } from "./tm1-authorship.js";
+import { parseTm1Attachment } from "../attachment/parser.js";
 import type { StoredTransactionRow, StoredVerificationRecord, VerifiedFeedRow } from "../db/types.js";
 
 export function mapTransactionSummary(row: StoredTransactionRow): TransactionSummaryDto {
@@ -27,6 +29,18 @@ export function mapTransactionSummary(row: StoredTransactionRow): TransactionSum
 }
 
 export function mapStoredVerification(row: StoredVerificationRecord): StoredVerificationDto {
+  const hasAttachment = row.attachedTokenId !== null && row.attachmentOwnershipStatus !== null;
+  const attachment: AttachmentDto | null = hasAttachment
+    ? {
+        type: "NFT",
+        tokenId: row.attachedTokenId!,
+        ownership: row.attachmentOwnershipStatus!
+      }
+    : null;
+  const displayPayload = hasAttachment && row.payload !== null
+    ? parseTm1Attachment(row.payload).displayPayload
+    : row.payload;
+
   return {
     txid: row.txid,
     status: row.verificationStatus,
@@ -35,6 +49,7 @@ export function mapStoredVerification(row: StoredVerificationRecord): StoredVeri
     eventType: row.eventType,
     profileCode: row.profileCode,
     payload: row.payload,
+    displayPayload,
     byteLength: row.byteLength,
     candidate: storedCandidate(row),
     authorizingAddress: row.authorizingAddress,
@@ -44,6 +59,7 @@ export function mapStoredVerification(row: StoredVerificationRecord): StoredVeri
       row.protocol === "TM1" && row.verificationStatus === "VERIFIED"
         ? decodeStoredTm1Authorship(row.diagnostics)
         : null,
+    attachment,
     firstIndexedAt: row.firstIndexedAt,
     lastVerifiedAt: row.lastVerifiedAt
   };

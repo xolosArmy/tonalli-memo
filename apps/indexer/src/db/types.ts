@@ -64,6 +64,8 @@ export interface StoredTransactionRow {
   readonly inactiveReason: TransactionInactiveReason | null;
 }
 
+export type AttachmentOwnershipStatus = "VERIFIED_AT_INDEXING" | "UNVERIFIED";
+
 export interface StoredVerificationRecord {
   readonly txid: string;
   readonly verificationStatus: DurableVerificationStatus;
@@ -86,6 +88,9 @@ export interface StoredVerificationRecord {
   readonly diagnostics: unknown;
   readonly firstIndexedAt: number;
   readonly lastVerifiedAt: number;
+  readonly attachedTokenId: string | null;
+  readonly attachmentOwnershipStatus: AttachmentOwnershipStatus | null;
+  readonly attachmentCheckedAt: number | null;
 }
 
 export interface StoredIndexingAttempt {

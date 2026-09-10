@@ -6,8 +6,12 @@ import type { ChronikAdapterErrorCode, ChronikTxSource } from "../src/index.js";
 
 export class FakeChronikTxSource implements ChronikTxSource {
   readonly calls: string[] = [];
+  readonly addressUtxosCalls: string[] = [];
 
-  constructor(private readonly result: unknown | ((txid: string) => unknown | Promise<unknown>)) {}
+  constructor(
+    private readonly result: unknown | ((txid: string) => unknown | Promise<unknown>),
+    private readonly utxosResult?: unknown | ((address: string) => unknown | Promise<unknown>)
+  ) {}
 
   async tx(txid: string): Promise<unknown> {
     this.calls.push(txid);
@@ -15,6 +19,17 @@ export class FakeChronikTxSource implements ChronikTxSource {
       return this.result(txid);
     }
     return this.result;
+  }
+
+  async addressUtxos(address: string): Promise<unknown> {
+    this.addressUtxosCalls.push(address);
+    if (typeof this.utxosResult === "function") {
+      return this.utxosResult(address);
+    }
+    if (this.utxosResult !== undefined) {
+      return this.utxosResult;
+    }
+    return { outputScript: "", utxos: [] };
   }
 }
 
