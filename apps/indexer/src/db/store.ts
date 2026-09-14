@@ -91,6 +91,8 @@ interface BackfillCheckpointSqlRow {
   readonly protocol: StoredMemoProtocol;
   readonly lokad_id: string;
   readonly tx_count_cursor: number;
+  readonly history_tx_count: number;
+  readonly is_complete: 0 | 1;
   readonly block_height: number;
   readonly block_hash: string;
   readonly updated_at: number;
@@ -305,24 +307,31 @@ export class MemoStore {
     if (!Number.isSafeInteger(checkpoint.txCountCursor) || checkpoint.txCountCursor < 0) {
       throw new Error("Backfill transaction cursor must be a non-negative safe integer.");
     }
+    if (!Number.isSafeInteger(checkpoint.historyTxCount) || checkpoint.historyTxCount < checkpoint.txCountCursor) {
+      throw new Error("Backfill history count must be a safe integer at least as large as the transaction cursor.");
+    }
     this.connection
       .prepare(
         `
         INSERT INTO backfill_checkpoints (
-          protocol, lokad_id, tx_count_cursor, block_height, block_hash, updated_at, last_success_at
+          protocol, lokad_id, tx_count_cursor, history_tx_count, is_complete,
+          block_height, block_hash, updated_at, last_success_at
         ) VALUES (
-          @protocol, @lokadId, @txCountCursor, @blockHeight, @blockHash, @updatedAt, @lastSuccessAt
+          @protocol, @lokadId, @txCountCursor, @historyTxCount, @isComplete,
+          @blockHeight, @blockHash, @updatedAt, @lastSuccessAt
         )
         ON CONFLICT(protocol) DO UPDATE SET
           lokad_id = excluded.lokad_id,
           tx_count_cursor = excluded.tx_count_cursor,
+          history_tx_count = excluded.history_tx_count,
+          is_complete = excluded.is_complete,
           block_height = excluded.block_height,
           block_hash = excluded.block_hash,
           updated_at = excluded.updated_at,
           last_success_at = excluded.last_success_at
         `
       )
-      .run(checkpoint);
+      .run({ ...checkpoint, isComplete: checkpoint.complete ? 1 : 0 });
   }
 
   private upsertTransaction(transaction: NormalizedTransaction, nowSeconds: number): void {
@@ -586,6 +595,8 @@ function toBackfillCheckpoint(row: BackfillCheckpointSqlRow): BackfillCheckpoint
     protocol: row.protocol,
     lokadId: row.lokad_id,
     txCountCursor: row.tx_count_cursor,
+    historyTxCount: row.history_tx_count,
+    complete: row.is_complete === 1,
     blockHeight: row.block_height,
     blockHash: row.block_hash,
     updatedAt: row.updated_at,

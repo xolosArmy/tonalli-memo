@@ -4,6 +4,7 @@ import { IndexingEngine, MemoStore, openIndexerDatabase, type IndexerDatabase } 
 import type { MemoVerificationService, VerificationResult, VerifyTransactionContext } from "@tonalli-memo/verification";
 import type { ScriptUtxos } from "@tonalli-memo/chronik";
 import { createIndexerApi } from "../../src/api/server.js";
+import { IndexQueueUnavailableError } from "../../src/daemon/daemon.js";
 import type { FeedResponseDto, TxResponseDto } from "../../src/api/dto.js";
 import type { IndexRequestResult, IndexRequestService, IndexerDaemonStatus } from "../../src/daemon/types.js";
 import type { IndexingOutcome, IndexTransactionOptions } from "../../src/engine/types.js";
@@ -139,6 +140,7 @@ class FakeIndexRequestService implements IndexRequestService {
   readonly requests: string[] = [];
   nextStatus: IndexRequestResult["status"] = "queued";
   status = readyStatus();
+  administrativeFailure: "saturated" | "stopped" | null = null;
 
   requestIndex(txid: string): IndexRequestResult {
     this.requests.push(txid);
@@ -148,6 +150,9 @@ class FakeIndexRequestService implements IndexRequestService {
   async indexAndWait(_txid: string, _options?: IndexTransactionOptions): Promise<IndexingOutcome> {
     void _txid;
     void _options;
+    if (this.administrativeFailure !== null) {
+      throw new IndexQueueUnavailableError(this.administrativeFailure);
+    }
     throw new Error("Fake administrative indexing was not configured for this test.");
   }
 
@@ -239,6 +244,22 @@ describe("Tonalli Memo indexer HTTP API", () => {
     expect(await injectJson(unavailableApi.app, { method: "POST", url: "/api/v1/index-requests", payload: { txid: TXID } })).toMatchObject({
       statusCode: 503,
       body: { error: { code: "INDEXER_NOT_READY" } }
+    });
+  });
+
+  it("serializes stable administrative queue errors at HTTP 503", async () => {
+    const indexRequests = new FakeIndexRequestService();
+    const api = await openApi({ token: "secret", indexRequestService: indexRequests });
+    indexRequests.administrativeFailure = "saturated";
+
+    expect(await injectJson(api.app, {
+      method: "POST",
+      url: "/api/v1/admin/index",
+      headers: { authorization: "Bearer secret" },
+      payload: { txid: TXID }
+    })).toMatchObject({
+      statusCode: 503,
+      body: { error: { code: "INDEX_QUEUE_FULL" } }
     });
   });
 

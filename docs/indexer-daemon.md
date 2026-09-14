@@ -56,11 +56,13 @@ For each supported protocol (`TM0` / `544d307c` and `TM1` / `544d4d00`), confirm
 
 1. Reads the current Chronik tip height and hash.
 2. Loads that protocol's durable SQLite checkpoint.
-3. Reads the chronological Chronik `confirmedTxs` endpoint page by page, beginning at the saved transaction-count cursor minus `BACKFILL_OVERLAP_PAGES`.
+3. Probes Chronik page zero on every run because `confirmedTxs` is newest-first. It derives the exact number of prepended records from the saved history count, scans every page containing new records, and then resumes an incomplete older-history cursor.
 4. Sends every candidate TXID through the same bounded queue, `IndexingEngine`, protocol/identity verification, NFT ownership verifier, and `MemoStore` used by live events and administrative indexing.
 5. Advances the checkpoint only after every candidate in the batch produces a durable result and the Chronik tip remains stable.
 
-The checkpoint table was added by additive schema migration v5. Each row stores protocol, LOKAD ID, transaction-count cursor, anchor height/hash, and successful update timestamps. The overlap makes repeated scans idempotent while covering page-boundary changes; existing transaction, verification, attachment, attempt, and feed upserts remain the single persistence path. A bounded `BACKFILL_MAX_PAGES_PER_RUN` prevents one cycle from monopolizing the process. If more history remains, the next cycle resumes from the partial checkpoint; readiness remains false while its checkpoint is too far behind the observed tip.
+The checkpoint table was added by additive schema migration v5. Each row stores protocol, LOKAD ID, processed cursor, stable-snapshot history count, completion flag, tip height/hash, and successful update timestamps. A completed checkpoint revisits the configurable newest-page overlap; an incomplete checkpoint probes page zero and continues older pages without starving progress. Existing transaction, verification, attachment, attempt, and feed upserts remain the single persistence path. A bounded `BACKFILL_MAX_PAGES_PER_RUN` prevents one cycle from monopolizing the process. If more history remains, the next cycle resumes from the partial checkpoint; readiness remains false while its checkpoint is incomplete or too far behind the observed tip.
+
+Routine periodic scans are single-flight: the next timer is armed only after the current reconciliation settles. A healthy prior checkpoint remains ready while a routine refresh is running; initial synchronization, failed reconciliation, an incomplete cursor, excessive lag, WebSocket loss, or Chronik loss still makes readiness false.
 
 If a saved anchor hash is no longer present at its height, the daemon treats this as a chain reorganization. It revalidates all active confirmed records through `IndexingEngine`, marks records returning `TRANSACTION_NOT_FOUND` inactive with `INVALIDATED`, and restarts both protocol cursors. No verification row is deleted.
 

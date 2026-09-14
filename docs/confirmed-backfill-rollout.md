@@ -1,6 +1,6 @@
 # Confirmed Backfill Production Rollout
 
-This rollout changes SQLite from schema v4 to v5 with one additive table, `backfill_checkpoints`. It does not rewrite or delete existing transactions, verification records, attachments, feed rows, or indexing attempts.
+This rollout changes SQLite from schema v4 to v5 with one additive table, `backfill_checkpoints`. The table records both a stable tip anchor and the confirmed-history count/cursor needed to resume newest-first Chronik pagination. It does not rewrite or delete existing transactions, verification records, attachments, feed rows, or indexing attempts.
 
 ## Pre-deploy Backup
 
@@ -32,9 +32,9 @@ The exact protected paths are deployment-specific and must be resolved on the se
 
 ## Rollback
 
-The preferred rollback is application-only: stop the indexer, deploy the previous release SHA, and keep the unused v5 table. Schema v4 code does not read it, and all current feed records remain intact.
+The non-destructive rollback is: stop the indexer, take and verify a fresh backup, set only `PRAGMA user_version = 4`, deploy the previous release SHA, and keep the unused checkpoint table. Schema v4 code does not read the extra table, and all current feed records remain intact. Migration v5 uses `IF NOT EXISTS`, so a later redeploy safely adopts the retained table and restores `user_version = 5`.
 
-Only if an exact v4 database is operationally required, and only after a fresh verified backup and explicit authorization for destructive schema work, drop `backfill_checkpoints`, drop its index, and set `PRAGMA user_version = 4`. Never restore the pre-v5 backup merely to remove checkpoints after new feed records have been written, because that would discard those newer records.
+Only if removal of the unused table is operationally required, and only after a fresh verified backup and explicit authorization for destructive schema work, drop `backfill_checkpoints` and its index. Never restore the pre-v5 backup merely to remove checkpoints after new feed records have been written, because that would discard those newer records.
 
 ## Post-deploy Watch
 

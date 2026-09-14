@@ -432,7 +432,7 @@ export const adminIndexSchema = {
     422: adminIndexResponse,
     500: errorResponse,
     502: adminIndexResponse,
-    503: adminIndexResponse
+    503: { anyOf: [adminIndexResponse, errorResponse] }
   }
 } as const;
 

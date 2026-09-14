@@ -125,17 +125,19 @@ export const MIGRATIONS: readonly Migration[] = [
   {
     version: 5,
     sql: `
-      CREATE TABLE backfill_checkpoints (
+      CREATE TABLE IF NOT EXISTS backfill_checkpoints (
         protocol TEXT PRIMARY KEY CHECK (protocol IN ('TM0', 'TM1')),
         lokad_id TEXT NOT NULL,
         tx_count_cursor INTEGER NOT NULL CHECK (tx_count_cursor >= 0),
+        history_tx_count INTEGER NOT NULL DEFAULT 0 CHECK (history_tx_count >= 0),
+        is_complete INTEGER NOT NULL DEFAULT 0 CHECK (is_complete IN (0, 1)),
         block_height INTEGER NOT NULL CHECK (block_height >= 0),
         block_hash TEXT NOT NULL,
         updated_at INTEGER NOT NULL CHECK (updated_at >= 0),
         last_success_at INTEGER NOT NULL CHECK (last_success_at >= 0)
       );
 
-      CREATE INDEX idx_backfill_checkpoints_height ON backfill_checkpoints(block_height);
+      CREATE INDEX IF NOT EXISTS idx_backfill_checkpoints_height ON backfill_checkpoints(block_height);
     `
   }
 ];

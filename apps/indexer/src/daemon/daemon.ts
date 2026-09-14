@@ -2,7 +2,6 @@ import {
   TM0_LOKAD_ID,
   TM1_DRAFT_02_LOKAD_ID,
   type ChronikChainTip,
-  type ChronikConfirmedTxRef,
   type ChronikLiveConnection,
   type ChronikLiveEvent,
   type TonalliDiscoveryProtocol
@@ -41,8 +40,8 @@ interface ProtocolBackfillResult {
   readonly protocol: TonalliDiscoveryProtocol;
   readonly lokadId: string;
   readonly txCountCursor: number;
+  readonly historyTxCount: number;
   readonly complete: boolean;
-  readonly lastCandidate: ChronikConfirmedTxRef | null;
 }
 
 export class IndexQueueUnavailableError extends Error {
@@ -96,12 +95,15 @@ export class IndexerDaemon {
       ? null
       : Math.max(0, this.chronikHeight - checkpointHeight);
     const queueActivity = this.queue.activity;
+    const hasHealthyBackfill =
+      this.backfillComplete &&
+      this.backfillLastCompletedAtMs !== null &&
+      this.backfillState !== "failed";
     const ready =
       this.state === "running" &&
       this.websocketConnected &&
       this.chronikHeight !== null &&
-      this.backfillState === "succeeded" &&
-      this.backfillComplete &&
+      hasHealthyBackfill &&
       lagBlocks !== null &&
       lagBlocks <= this.readinessMaxLagBlocks();
     return {
@@ -169,7 +171,7 @@ export class IndexerDaemon {
     this.state = "stopping";
     this.websocketConnected = false;
     if (this.periodicTimer !== null) {
-      clearInterval(this.periodicTimer);
+      clearTimeout(this.periodicTimer);
       this.periodicTimer = null;
     }
     const errors: unknown[] = [];
@@ -344,7 +346,6 @@ export class IndexerDaemon {
 
   private async reconcileConfirmed(): Promise<void> {
     this.backfillState = "running";
-    this.backfillComplete = false;
     this.backfillLastStartedAtMs = Date.now();
     try {
       for (let stableAttempt = 1; stableAttempt <= MAX_STABLE_TIP_ATTEMPTS; stableAttempt += 1) {
@@ -368,10 +369,7 @@ export class IndexerDaemon {
         if (sameTip(startTip, endTip)) {
           const nowSeconds = this.nowSeconds();
           for (const result of results) {
-            const checkpoint = createCheckpoint(result, endTip, nowSeconds);
-            if (checkpoint !== null) {
-              this.options.store.upsertBackfillCheckpoint(checkpoint);
-            }
+            this.options.store.upsertBackfillCheckpoint(createCheckpoint(result, endTip, nowSeconds));
           }
           this.backfillState = "succeeded";
           this.backfillComplete = results.every((result) => result.complete);
@@ -382,6 +380,7 @@ export class IndexerDaemon {
             protocols: results.map((result) => ({
               protocol: result.protocol,
               cursor: result.txCountCursor,
+              historyTxCount: result.historyTxCount,
               complete: result.complete
             }))
           });
@@ -414,16 +413,25 @@ export class IndexerDaemon {
     resetCursor: boolean
   ): Promise<ProtocolBackfillResult> {
     const checkpoint = resetCursor ? null : this.options.store.getBackfillCheckpoint(protocol);
-    const overlapTxs = this.backfillPageSize() * this.backfillOverlapPages();
-    const scanCursor = Math.max(0, (checkpoint?.txCountCursor ?? 0) - overlapTxs);
-    let page = Math.floor(scanCursor / this.backfillPageSize());
-    let pagesProcessed = 0;
-    let txCountCursor = checkpoint?.txCountCursor ?? 0;
-    let lastCandidate: ChronikConfirmedTxRef | null = null;
+    const pageSize = this.backfillPageSize();
+    const maxPages = this.backfillMaxPagesPerRun();
+    const fetchedPages = new Set<number>();
+    const indexedTxids = new Set<string>();
+    let historyTxCount: number | null = null;
+    let historyPageCount: number | null = null;
 
-    while (pagesProcessed < this.backfillMaxPagesPerRun()) {
+    const fetchAndIndexPage = async (page: number) => {
       const result = await this.options.liveSource.listTonalliConfirmedTxs(protocol, page, this.backfillPageSize());
+      if (historyTxCount === null) {
+        historyTxCount = result.numTxs;
+        historyPageCount = result.numPages;
+      } else if (result.numTxs !== historyTxCount || result.numPages !== historyPageCount) {
+        throw new Error("Chronik confirmed history changed during protocol backfill.");
+      }
       for (const candidate of result.txs) {
+        if (indexedTxids.has(candidate.txid)) {
+          continue;
+        }
         const outcome = await this.indexAndWait(candidate.txid);
         if (!outcome.persistedRecord) {
           this.options.logger.error("Confirmed Tonalli candidate was not processed durably.", {
@@ -433,17 +441,75 @@ export class IndexerDaemon {
           });
           throw new Error("Confirmed Tonalli candidate did not produce a durable indexing result.");
         }
-        lastCandidate = candidate;
+        indexedTxids.add(candidate.txid);
       }
-      pagesProcessed += 1;
-      txCountCursor = Math.min(result.numTxs, (page + 1) * this.backfillPageSize());
-      if (page + 1 >= result.numPages) {
-        return { protocol, lokadId, txCountCursor: result.numTxs, complete: true, lastCandidate };
-      }
-      page += 1;
+      fetchedPages.add(page);
+      return result;
+    };
+
+    const firstPage = await fetchAndIndexPage(0);
+    const totalTxs = firstPage.numTxs;
+    const totalPages = firstPage.numPages;
+    if (totalPages <= 1) {
+      return { protocol, lokadId, txCountCursor: totalTxs, historyTxCount: totalTxs, complete: true };
     }
 
-    return { protocol, lokadId, txCountCursor, complete: false, lastCandidate };
+    const checkpointUsable = checkpoint !== null && totalTxs >= checkpoint.historyTxCount;
+    if (!checkpointUsable) {
+      if (checkpoint !== null) {
+        this.options.logger.warn("Chronik confirmed history count moved backwards; restarting protocol backfill.", {
+          protocol,
+          previousHistoryTxCount: checkpoint.historyTxCount,
+          historyTxCount: totalTxs
+        });
+      }
+      let page = 1;
+      while (page < totalPages && fetchedPages.size < maxPages) {
+        await fetchAndIndexPage(page);
+        page += 1;
+      }
+      const cursor = Math.min(totalTxs, page * pageSize);
+      return { protocol, lokadId, txCountCursor: cursor, historyTxCount: totalTxs, complete: cursor >= totalTxs };
+    }
+
+    const newTxCount = totalTxs - checkpoint.historyTxCount;
+    const pagesContainingNewTransactions = Math.ceil(newTxCount / pageSize);
+    let page = 1;
+    while (page < pagesContainingNewTransactions && fetchedPages.size < maxPages) {
+      await fetchAndIndexPage(page);
+      page += 1;
+    }
+    if (page < pagesContainingNewTransactions) {
+      const cursor = Math.min(totalTxs, page * pageSize);
+      return { protocol, lokadId, txCountCursor: cursor, historyTxCount: totalTxs, complete: false };
+    }
+
+    const shiftedCursor = Math.min(totalTxs, checkpoint.txCountCursor + newTxCount);
+    if (checkpoint.complete) {
+      const overlapEndPage = Math.min(
+        totalPages,
+        Math.max(1, pagesContainingNewTransactions) + this.backfillOverlapPages()
+      );
+      while (page < overlapEndPage && fetchedPages.size < maxPages) {
+        await fetchAndIndexPage(page);
+        page += 1;
+      }
+      return { protocol, lokadId, txCountCursor: totalTxs, historyTxCount: totalTxs, complete: true };
+    }
+
+    let cursor = shiftedCursor;
+    page = Math.floor(cursor / pageSize);
+    const pageZeroIsOnlyAProbe = newTxCount === 0 && page > 0;
+    const allowedFetchedPages = maxPages + (pageZeroIsOnlyAProbe ? 1 : 0);
+    while (page < totalPages) {
+      if (!fetchedPages.has(page) && fetchedPages.size >= allowedFetchedPages) {
+        break;
+      }
+      if (!fetchedPages.has(page)) await fetchAndIndexPage(page);
+      cursor = Math.max(cursor, Math.min(totalTxs, (page + 1) * pageSize));
+      page += 1;
+    }
+    return { protocol, lokadId, txCountCursor: cursor, historyTxCount: totalTxs, complete: cursor >= totalTxs };
   }
 
   private async hasCheckpointReorganization(tip: ChronikChainTip): Promise<boolean> {
@@ -553,10 +619,17 @@ export class IndexerDaemon {
     if (this.periodicTimer !== null) {
       return;
     }
-    this.periodicTimer = setInterval(() => {
-      void this.scheduleFullReconciliation("periodic").catch((error: unknown) => {
-        this.recordError(error);
-      });
+    this.periodicTimer = setTimeout(() => {
+      this.periodicTimer = null;
+      void this.scheduleFullReconciliation("periodic")
+        .catch((error: unknown) => {
+          this.recordError(error);
+        })
+        .finally(() => {
+          if (!this.stopping && this.state !== "stopped") {
+            this.startPeriodicBackfill();
+          }
+        });
     }, this.backfillIntervalMs());
     this.periodicTimer.unref?.();
   }
@@ -598,21 +671,15 @@ function createCheckpoint(
   result: ProtocolBackfillResult,
   stableTip: ChronikChainTip,
   nowSeconds: number
-): BackfillCheckpoint | null {
-  const anchor = result.complete
-    ? { blockHeight: stableTip.height, blockHash: stableTip.hash }
-    : result.lastCandidate === null
-      ? null
-      : { blockHeight: result.lastCandidate.blockHeight, blockHash: result.lastCandidate.blockHash };
-  if (anchor === null) {
-    return null;
-  }
+): BackfillCheckpoint {
   return {
     protocol: result.protocol as StoredMemoProtocol,
     lokadId: result.lokadId,
     txCountCursor: result.txCountCursor,
-    blockHeight: anchor.blockHeight,
-    blockHash: anchor.blockHash,
+    historyTxCount: result.historyTxCount,
+    complete: result.complete,
+    blockHeight: stableTip.height,
+    blockHash: stableTip.hash,
     updatedAt: nowSeconds,
     lastSuccessAt: nowSeconds
   };

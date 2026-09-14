@@ -55,6 +55,7 @@ class FakeLiveSource implements ChronikLiveSource {
   maxActiveUnconfirmedCalls = 0;
   listDeferreds: Array<Deferred<readonly string[]>> = [];
   failNextList = false;
+  confirmedDeferreds: Array<Deferred<void>> = [];
   confirmedByProtocol: Record<TonalliDiscoveryProtocol, string[]> = { TM0: [], TM1: [] };
   confirmedCalls: Array<{ readonly protocol: TonalliDiscoveryProtocol; readonly page: number; readonly pageSize: number }> = [];
   blockHashes = new Map<number, string>();
@@ -104,6 +105,8 @@ class FakeLiveSource implements ChronikLiveSource {
     pageSize: number
   ): Promise<ChronikConfirmedTxPage> {
     this.confirmedCalls.push({ protocol, page, pageSize });
+    const pending = this.confirmedDeferreds.shift();
+    if (pending !== undefined) await pending.promise;
     const all = this.confirmedByProtocol[protocol];
     return {
       txs: all.slice(page * pageSize, (page + 1) * pageSize).map((candidateTxid, index) => ({
@@ -386,7 +389,7 @@ describe("IndexerDaemon", () => {
     await daemon.stop();
   });
 
-  it("uses checkpoint overlap instead of downloading all confirmed history on every run", async () => {
+  it("revisits the newest checkpoint overlap without downloading all confirmed history", async () => {
     const first = daemonFixture({ backfillPageSize: 2, backfillOverlapPages: 1 });
     first.liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4"), txid("5")];
     await first.daemon.start();
@@ -405,8 +408,104 @@ describe("IndexerDaemon", () => {
       backfillOverlapPages: 1
     });
     await restarted.start();
-    expect(nextSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([1, 2]);
+    expect(nextSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1]);
     await restarted.stop();
+  });
+
+  it("discovers every newly prepended Chronik page after a completed checkpoint", async () => {
+    const first = daemonFixture({ backfillPageSize: 2, backfillOverlapPages: 0 });
+    first.liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4"), txid("5")];
+    await first.daemon.start();
+    await first.daemon.stop();
+
+    const nextEngine = new FakeEngine();
+    const nextSource = new FakeLiveSource();
+    const newTxids = [txid("a"), txid("b"), txid("c")];
+    nextSource.confirmedByProtocol.TM1 = [...newTxids, ...first.liveSource.confirmedByProtocol.TM1];
+    const restarted = new IndexerDaemon({
+      engine: nextEngine as unknown as IndexingEngine,
+      store: first.store as unknown as MemoStore,
+      liveSource: nextSource,
+      logger: logger().logger,
+      backfillPageSize: 2,
+      backfillOverlapPages: 0
+    });
+
+    await restarted.start();
+    expect(nextSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1]);
+    expect(nextEngine.calls.map((call) => call.txid)).toEqual(expect.arrayContaining(newTxids));
+    expect(first.store.getBackfillCheckpoint("TM1")).toMatchObject({
+      txCountCursor: 8,
+      historyTxCount: 8,
+      complete: true
+    });
+    await restarted.stop();
+  });
+
+  it("continues an incomplete bounded backfill after restart while probing page zero", async () => {
+    const first = daemonFixture({
+      backfillPageSize: 2,
+      backfillMaxPagesPerRun: 1,
+      backfillOverlapPages: 0
+    });
+    first.liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4")];
+    await first.daemon.start();
+    await first.daemon.stop();
+    expect(first.store.getBackfillCheckpoint("TM1")).toMatchObject({ txCountCursor: 2, complete: false });
+
+    const nextSource = new FakeLiveSource();
+    nextSource.confirmedByProtocol.TM1 = [...first.liveSource.confirmedByProtocol.TM1];
+    const restarted = new IndexerDaemon({
+      engine: new FakeEngine() as unknown as IndexingEngine,
+      store: first.store as unknown as MemoStore,
+      liveSource: nextSource,
+      logger: logger().logger,
+      backfillPageSize: 2,
+      backfillMaxPagesPerRun: 1,
+      backfillOverlapPages: 0
+    });
+
+    await restarted.start();
+    expect(nextSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1]);
+    expect(first.store.getBackfillCheckpoint("TM1")).toMatchObject({ txCountCursor: 4, complete: true });
+    await restarted.stop();
+  });
+
+  it("preserves readiness during a routine backfill after an initial complete checkpoint", async () => {
+    vi.useFakeTimers();
+    const { daemon, liveSource } = daemonFixture({ backfillIntervalMs: 1000 });
+    await daemon.start();
+    expect(daemon.getStatus().ready).toBe(true);
+
+    const pending = deferred<void>();
+    liveSource.confirmedDeferreds.push(pending);
+    await vi.advanceTimersByTimeAsync(1000);
+    await Promise.resolve();
+
+    expect(daemon.getStatus()).toMatchObject({
+      ready: true,
+      backfill: { state: "running", complete: true }
+    });
+    pending.resolve();
+    await daemon.stop();
+  });
+
+  it("does not accumulate periodic reconciliation ticks while one run is blocked", async () => {
+    vi.useFakeTimers();
+    const { daemon, liveSource } = daemonFixture({ backfillIntervalMs: 1000 });
+    await daemon.start();
+    const initialCalls = liveSource.confirmedCalls.length;
+    const pending = deferred<void>();
+    liveSource.confirmedDeferreds.push(pending);
+
+    await vi.advanceTimersByTimeAsync(1000);
+    await Promise.resolve();
+    expect(liveSource.confirmedCalls).toHaveLength(initialCalls + 1);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(liveSource.confirmedCalls).toHaveLength(initialCalls + 1);
+
+    pending.resolve();
+    await daemon.stop();
   });
 
   it("coalesces websocket, public, and administrative requests for the same txid", async () => {
@@ -434,6 +533,8 @@ describe("IndexerDaemon", () => {
         protocol,
         lokadId: protocol === "TM0" ? "544d307c" : "544d4d00",
         txCountCursor: 1,
+        historyTxCount: 1,
+        complete: true,
         blockHeight: 899,
         blockHash: txid("1"),
         updatedAt: 1,

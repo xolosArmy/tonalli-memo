@@ -114,6 +114,8 @@ export interface BackfillCheckpoint {
   readonly protocol: StoredMemoProtocol;
   readonly lokadId: string;
   readonly txCountCursor: number;
+  readonly historyTxCount: number;
+  readonly complete: boolean;
   readonly blockHeight: number;
   readonly blockHash: string;
   readonly updatedAt: number;

@@ -59,12 +59,22 @@ describe("database migrations v4 and v5", () => {
 
     db.prepare(`
       INSERT INTO backfill_checkpoints (
-        protocol, lokad_id, tx_count_cursor, block_height, block_hash, updated_at, last_success_at
-      ) VALUES ('TM1', '544d4d00', 14, 966781, ?, 1700000001, 1700000001)
+        protocol, lokad_id, tx_count_cursor, history_tx_count, is_complete,
+        block_height, block_hash, updated_at, last_success_at
+      ) VALUES ('TM1', '544d4d00', 14, 14, 1, 966781, ?, 1700000001, 1700000001)
     `).run("33".repeat(32));
-    expect(db.prepare("SELECT tx_count_cursor, block_height FROM backfill_checkpoints WHERE protocol = 'TM1'").get()).toEqual({
+    expect(db.prepare("SELECT tx_count_cursor, history_tx_count, is_complete, block_height FROM backfill_checkpoints WHERE protocol = 'TM1'").get()).toEqual({
       tx_count_cursor: 14,
+      history_tx_count: 14,
+      is_complete: 1,
       block_height: 966781
+    });
+
+    // Verify non-destructive rollback metadata and later re-adoption of the retained table.
+    db.pragma("user_version = 4");
+    expect(() => runMigrations(db)).not.toThrow();
+    expect(db.prepare("SELECT tx_count_cursor FROM backfill_checkpoints WHERE protocol = 'TM1'").get()).toEqual({
+      tx_count_cursor: 14
     });
 
     // Verify idempotency
