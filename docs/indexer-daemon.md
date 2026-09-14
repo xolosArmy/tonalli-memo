@@ -62,7 +62,7 @@ For each supported protocol (`TM0` / `544d307c` and `TM1` / `544d4d00`), confirm
 
 The checkpoint table was added by additive schema migration v5. Each row stores protocol, LOKAD ID, processed cursor, stable-snapshot history count, completion flag, tip height/hash, and successful update timestamps. A completed checkpoint revisits the configurable newest-page overlap; an incomplete checkpoint probes page zero and continues older pages without starving progress. Existing transaction, verification, attachment, attempt, and feed upserts remain the single persistence path. A bounded `BACKFILL_MAX_PAGES_PER_RUN` prevents one cycle from monopolizing the process. If more history remains, the next cycle resumes from the partial checkpoint; readiness remains false while its checkpoint is incomplete or too far behind the observed tip.
 
-Routine periodic scans are single-flight: the next timer is armed only after the current reconciliation settles. A healthy prior checkpoint remains ready while a routine refresh is running; initial synchronization, failed reconciliation, an incomplete cursor, excessive lag, WebSocket loss, or Chronik loss still makes readiness false.
+Routine periodic scans are single-flight: the next timer is armed only after the current reconciliation settles. A successful periodic recovery restores the daemon to `running` when the WebSocket is connected, including after a reconnect reconciliation failed transiently. A healthy prior checkpoint remains ready while a routine refresh is running; initial synchronization, failed reconciliation, an incomplete cursor, excessive lag, WebSocket loss, or Chronik loss still makes readiness false.
 
 If a saved anchor hash is no longer present at its height, the daemon treats this as a chain reorganization. It revalidates all active confirmed records through `IndexingEngine`, marks records returning `TRANSACTION_NOT_FOUND` inactive with `INVALIDATED`, and restarts both protocol cursors. Every reconciliation also revalidates active confirmed rows above the prior checkpoint, covering a shallow offline reorganization that leaves the older anchor block unchanged. No verification row is deleted.
 
@@ -81,11 +81,11 @@ Block `connected` reconciles a bounded batch of active unconfirmed rows using on
 
 ## Queue
 
-The daemon uses an internal bounded FIFO queue with default concurrency 1. Live discovery, confirmed backfill, the public index-request endpoint, and the administrative endpoint coalesce on TXID while work is queued or running. Reprocessing after completion remains safe because persistence is upsert-based: feed rows, transactions, verifications, and attachments are not duplicated. Indexing attempts remain an intentional audit log.
+The daemon uses an internal bounded FIFO queue with default concurrency 1. Live discovery, confirmed backfill, the public index-request endpoint, and the administrative endpoint coalesce on TXID while work is queued or running. Public requests obtain current Chronik tip context inside the queued job, so a public-first race with an unconfirmed WebSocket event cannot lose the stronger mempool verification context. Reprocessing after completion remains safe because persistence is upsert-based: feed rows, transactions, verifications, and attachments are not duplicated. Indexing attempts remain an intentional audit log.
 
 One transaction failure is logged and does not stop later independent work. Queue saturation rejects new work with a stable result and increments an observable counter.
 
-`stop()` rejects public and administrative indexing work immediately, closes the Chronik live connection, lets reconciliation already accepted finish, then stops and drains the internal queue before returning or timing out.
+`stop()` rejects public and administrative indexing work immediately, closes the Chronik live connection, and gives accepted reconciliation plus queue work one shared bounded shutdown window. Reconciliation cooperatively stops at Chronik await boundaries; a stuck external request cannot extend SIGTERM shutdown indefinitely.
 
 ## CLI
 

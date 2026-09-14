@@ -44,6 +44,13 @@ interface ProtocolBackfillResult {
   readonly complete: boolean;
 }
 
+class ReconciliationStoppedError extends Error {
+  constructor() {
+    super("Indexer daemon reconciliation stopped.");
+    this.name = "ReconciliationStoppedError";
+  }
+}
+
 export class IndexQueueUnavailableError extends Error {
   readonly reason: "saturated" | "stopped";
 
@@ -142,7 +149,7 @@ export class IndexerDaemon {
     if (!this.acceptsExternalIndexRequests()) {
       return { status: "stopped", completion: null };
     }
-    const queued = this.enqueueTransaction(txid, {});
+    const queued = this.enqueueTransactionWithTip(txid);
     return { status: queued.status, completion: queued.completion };
   }
 
@@ -179,16 +186,27 @@ export class IndexerDaemon {
       clearTimeout(this.periodicTimer);
       this.periodicTimer = null;
     }
+    const shutdownDeadlineMs = Date.now() + (this.options.drainTimeoutMs ?? DEFAULT_DRAIN_TIMEOUT_MS);
     const errors: unknown[] = [];
     try {
-      await this.connection?.stop();
+      if (this.connection !== null) {
+        await waitBeforeDeadline(this.connection.stop(), shutdownDeadlineMs, "Chronik connection shutdown timed out.");
+      }
     } catch (error) {
       errors.push(error);
     }
     try {
-      await this.reconciliationTail.catch(() => undefined);
-      this.queue.stopAccepting();
-      await this.queue.drain(this.options.drainTimeoutMs ?? DEFAULT_DRAIN_TIMEOUT_MS);
+      await waitBeforeDeadline(
+        this.reconciliationTail.catch(() => undefined),
+        shutdownDeadlineMs,
+        "Indexer daemon reconciliation shutdown timed out."
+      );
+    } catch (error) {
+      errors.push(error);
+    }
+    this.queue.stopAccepting();
+    try {
+      await this.queue.drain(Math.max(0, shutdownDeadlineMs - Date.now()));
     } catch (error) {
       errors.push(error);
     }
@@ -226,6 +244,9 @@ export class IndexerDaemon {
         await this.scheduleFullReconciliation("initial");
       } else {
         await this.reconciliationTail;
+      }
+      if (this.stopping) {
+        return;
       }
       this.state = "running";
       this.startPeriodicBackfill();
@@ -328,6 +349,9 @@ export class IndexerDaemon {
         return;
       }
       await this.reconcileConfirmed();
+      if (this.stopping) {
+        return;
+      }
       await this.reconcileUnconfirmed();
     });
     this.reconciliationTail = run;
@@ -355,14 +379,17 @@ export class IndexerDaemon {
     try {
       for (let stableAttempt = 1; stableAttempt <= MAX_STABLE_TIP_ATTEMPTS; stableAttempt += 1) {
         const startTip = await this.options.liveSource.getChainTip();
+        this.throwIfReconciliationStopped();
         this.chronikHeight = startTip.height;
         const reorgDetected = await this.hasCheckpointReorganization(startTip);
+        this.throwIfReconciliationStopped();
         if (reorgDetected) {
           this.options.logger.warn("Indexer daemon detected a chain reorganization during confirmed backfill.", {
             checkpointAction: "full-revalidation"
           });
         }
         await this.reconcileKnownConfirmed(reorgDetected ? 0 : this.confirmedRevalidationHeight());
+        this.throwIfReconciliationStopped();
 
         const results: ProtocolBackfillResult[] = [];
         for (const discovery of DISCOVERY_PROTOCOLS) {
@@ -370,6 +397,7 @@ export class IndexerDaemon {
         }
 
         const endTip = await this.options.liveSource.getChainTip();
+        this.throwIfReconciliationStopped();
         this.chronikHeight = endTip.height;
         if (sameTip(startTip, endTip)) {
           const nowSeconds = this.nowSeconds();
@@ -400,6 +428,9 @@ export class IndexerDaemon {
       }
       throw new Error("Chronik tip did not remain stable during confirmed backfill.");
     } catch (error) {
+      if (error instanceof ReconciliationStoppedError && this.stopping) {
+        return;
+      }
       this.backfillState = "failed";
       this.backfillLastCompletedAtMs = Date.now();
       this.backfillConsecutiveFailures += 1;
@@ -427,6 +458,7 @@ export class IndexerDaemon {
 
     const fetchAndIndexPage = async (page: number) => {
       const result = await this.options.liveSource.listTonalliConfirmedTxs(protocol, page, this.backfillPageSize());
+      this.throwIfReconciliationStopped();
       if (historyTxCount === null) {
         historyTxCount = result.numTxs;
         historyPageCount = result.numPages;
@@ -523,6 +555,7 @@ export class IndexerDaemon {
         return true;
       }
       const currentHash = await this.options.liveSource.getBlockHash(checkpoint.blockHeight);
+      this.throwIfReconciliationStopped();
       if (currentHash !== checkpoint.blockHash) {
         return true;
       }
@@ -532,8 +565,11 @@ export class IndexerDaemon {
 
   private async reconcileUnconfirmed(): Promise<void> {
     const tipHeight = await this.options.liveSource.getTipHeight();
+    if (this.stopping) return;
     this.chronikHeight = tipHeight;
-    for (const txid of await this.options.liveSource.listTonalliUnconfirmedTxids()) {
+    const discoveredTxids = await this.options.liveSource.listTonalliUnconfirmedTxids();
+    if (this.stopping) return;
+    for (const txid of discoveredTxids) {
       this.enqueueTransaction(txid, { tipHeight });
     }
     await this.reconcileKnownUnconfirmed(tipHeight);
@@ -541,6 +577,7 @@ export class IndexerDaemon {
 
   private async reconcileKnownUnconfirmed(existingTipHeight?: number): Promise<void> {
     const tipHeight = existingTipHeight ?? (await this.options.liveSource.getTipHeight());
+    if (this.stopping) return;
     this.chronikHeight = tipHeight;
     for (const txid of this.options.store.listActiveUnconfirmedTxids(this.reconcileLimit())) {
       this.enqueueTransaction(txid, { tipHeight });
@@ -586,6 +623,12 @@ export class IndexerDaemon {
     return !this.stopping && this.state === "running";
   }
 
+  private throwIfReconciliationStopped(): void {
+    if (this.stopping) {
+      throw new ReconciliationStoppedError();
+    }
+  }
+
   private async indexAndWaitInternal(
     txid: string,
     options: IndexTransactionOptions = {}
@@ -594,7 +637,7 @@ export class IndexerDaemon {
     return await this.awaitIndexingOutcome(txid, queued);
   }
 
-  private enqueueTransactionWithTip(txid: string): void {
+  private enqueueTransactionWithTip(txid: string): QueueEnqueueResult {
     const queued = this.queue.enqueue({
       txid,
       run: async () => {
@@ -606,6 +649,7 @@ export class IndexerDaemon {
     if (queued.status === "saturated") {
       this.recordError(new IndexQueueUnavailableError("saturated"));
     }
+    return queued;
   }
 
   private enqueueTransaction(txid: string, options: IndexTransactionOptions): QueueEnqueueResult {
@@ -650,6 +694,11 @@ export class IndexerDaemon {
     this.periodicTimer = setTimeout(() => {
       this.periodicTimer = null;
       void this.scheduleFullReconciliation("periodic")
+        .then(() => {
+          if (!this.stopping && this.websocketConnected) {
+            this.state = "running";
+          }
+        })
         .catch((error: unknown) => {
           this.recordError(error);
         })
@@ -715,6 +764,24 @@ function createCheckpoint(
 
 function sameTip(left: ChronikChainTip, right: ChronikChainTip): boolean {
   return left.height === right.height && left.hash === right.hash;
+}
+
+async function waitBeforeDeadline(promise: Promise<unknown>, deadlineMs: number, message: string): Promise<void> {
+  const remainingMs = Math.max(0, deadlineMs - Date.now());
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  try {
+    await Promise.race([
+      promise,
+      new Promise<never>((_resolve, reject) => {
+        timeout = setTimeout(() => reject(new Error(message)), remainingMs);
+        timeout.unref?.();
+      })
+    ]);
+  } finally {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+  }
 }
 
 function toIso(milliseconds: number | null): string | null {

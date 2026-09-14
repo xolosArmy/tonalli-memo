@@ -511,6 +511,23 @@ describe("IndexerDaemon", () => {
     await daemon.stop();
   });
 
+  it("restores running state after periodic reconciliation recovers a failed reconnect", async () => {
+    vi.useFakeTimers();
+    const { daemon, liveSource } = daemonFixture({ backfillIntervalMs: 1000 });
+    await daemon.start();
+    liveSource.handlers?.onReconnect?.();
+    liveSource.failNextList = true;
+    liveSource.handlers?.onConnect?.();
+    await vi.waitFor(() => expect(liveSource.unconfirmedCalls).toBe(2));
+    expect(daemon.getStatus()).toMatchObject({ state: "reconnecting", websocketConnected: true, ready: false });
+
+    await vi.advanceTimersByTimeAsync(1000);
+    await vi.waitFor(() => expect(liveSource.unconfirmedCalls).toBe(3));
+
+    expect(daemon.getStatus()).toMatchObject({ state: "running", websocketConnected: true, ready: true });
+    await daemon.stop();
+  });
+
   it("coalesces websocket, public, and administrative requests for the same txid", async () => {
     const target = txid("a");
     const { daemon, engine, liveSource } = daemonFixture();
@@ -524,6 +541,26 @@ describe("IndexerDaemon", () => {
     work.resolve();
     await expect(administrative).resolves.toMatchObject({ persistedRecord: true });
     expect(engine.calls.filter((call) => call.txid === target)).toHaveLength(1);
+    await daemon.stop();
+  });
+
+  it("gives a public-first coalesced mempool request current tip context", async () => {
+    const target = txid("b");
+    const { daemon, engine, liveSource } = daemonFixture();
+    await daemon.start();
+    const work = deferred<void>();
+    engine.deferredRuns.push(work);
+
+    expect(daemon.requestIndex(target).status).toBe("queued");
+    liveSource.handlers?.onEvent({ type: "transaction", event: "added-to-mempool", txid: target });
+    await vi.waitFor(() => expect(engine.calls.filter((call) => call.txid === target)).toHaveLength(1));
+    const administrative = daemon.indexAndWait(target, { tipHeight: 901 });
+    work.resolve();
+
+    await expect(administrative).resolves.toMatchObject({ persistedRecord: true });
+    expect(engine.calls.filter((call) => call.txid === target)).toEqual([
+      { txid: target, options: { tipHeight: 900 } }
+    ]);
     await daemon.stop();
   });
 
@@ -616,6 +653,26 @@ describe("IndexerDaemon", () => {
     blocked.resolve();
     await stopping;
     expect(daemon.getStatus().queueCompleted).toBe(1);
+  });
+
+  it("bounds shutdown while a Chronik reconciliation request is stuck", async () => {
+    vi.useFakeTimers();
+    const { daemon, liveSource } = daemonFixture({ drainTimeoutMs: 1000 });
+    await daemon.start();
+    const pending = deferred<void>();
+    liveSource.confirmedDeferreds.push(pending);
+    const callsBeforeReconnect = liveSource.confirmedCalls.length;
+    liveSource.handlers?.onConnect?.();
+    await vi.waitFor(() => expect(liveSource.confirmedCalls.length).toBe(callsBeforeReconnect + 1));
+
+    const stopping = daemon.stop();
+    const stoppedWithTimeout = expect(stopping).rejects.toThrow("reconciliation shutdown timed out");
+    await vi.advanceTimersByTimeAsync(1000);
+
+    await stoppedWithTimeout;
+    expect(daemon.getStatus().state).toBe("stopped");
+    pending.resolve();
+    await Promise.resolve();
   });
 
   it("rapid connection callbacks serialize reconciliation without overlap", async () => {
