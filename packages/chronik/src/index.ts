@@ -34,11 +34,15 @@ export type {
 } from "./types.js";
 export type {
   ChronikLiveBlockEvent,
+  ChronikChainTip,
+  ChronikConfirmedTxPage,
+  ChronikConfirmedTxRef,
   ChronikLiveConnection,
   ChronikLiveEvent,
   ChronikLiveHandlers,
   ChronikLiveLogger,
   ChronikLiveOptions,
   ChronikLiveSource,
-  ChronikLiveTransactionEvent
+  ChronikLiveTransactionEvent,
+  TonalliDiscoveryProtocol
 } from "./live/types.js";

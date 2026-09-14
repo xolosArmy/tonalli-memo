@@ -14,12 +14,16 @@
   "files": [
     "dist"
   ],
+  "bin": {
+    "tonalli-index-tx": "./dist/admin-cli.js"
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -p tsconfig.test.json --pretty false --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "start": "node dist/cli.js"
+    "start": "node dist/cli.js",
+    "index:tx": "node dist/admin-cli.js"
   },
   "dependencies": {
     "@tonalli-memo/verification": "workspace:*",

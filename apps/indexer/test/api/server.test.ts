@@ -5,6 +5,8 @@ import type { MemoVerificationService, VerificationResult, VerifyTransactionCont
 import type { ScriptUtxos } from "@tonalli-memo/chronik";
 import { createIndexerApi } from "../../src/api/server.js";
 import type { FeedResponseDto, TxResponseDto } from "../../src/api/dto.js";
+import type { IndexRequestResult, IndexRequestService, IndexerDaemonStatus } from "../../src/daemon/types.js";
+import type { IndexingOutcome, IndexTransactionOptions } from "../../src/engine/types.js";
 import { TXID, TXID_2, normalizedTx, verificationResultForStatus, verifiedResult, verifiedTm1Result } from "./fixtures.js";
 
 class FakeVerificationService {
@@ -40,6 +42,9 @@ async function openApi(options: {
   readonly token?: string;
   readonly corsOrigins?: readonly string[];
   readonly chronik?: { getAddressUtxos(address: string): Promise<ScriptUtxos> };
+  readonly indexRequestService?: IndexRequestService;
+  readonly publicIndexRateLimitMax?: number;
+  readonly publicIndexRateLimitWindowMs?: number;
 } = {}): Promise<TestApi> {
   const database = openIndexerDatabase({ filename: ":memory:" });
   databases.push(database);
@@ -58,7 +63,12 @@ async function openApi(options: {
   const app = await createIndexerApi({
     store,
     ...(options.token === undefined ? {} : { indexingEngine: engine, indexApiToken: options.token }),
-    ...(options.corsOrigins === undefined ? {} : { corsOrigins: options.corsOrigins })
+    ...(options.corsOrigins === undefined ? {} : { corsOrigins: options.corsOrigins }),
+    ...(options.indexRequestService === undefined ? {} : { indexRequestService: options.indexRequestService }),
+    ...(options.publicIndexRateLimitMax === undefined ? {} : { publicIndexRateLimitMax: options.publicIndexRateLimitMax }),
+    ...(options.publicIndexRateLimitWindowMs === undefined
+      ? {}
+      : { publicIndexRateLimitWindowMs: options.publicIndexRateLimitWindowMs })
   });
   apps.push(app);
   return { app, database, service, store };
@@ -97,13 +107,138 @@ const injectJson = async (
   };
 };
 
+const readyStatus = (overrides: Partial<IndexerDaemonStatus> = {}): IndexerDaemonStatus => ({
+  state: "running",
+  websocketConnected: true,
+  chronikHeight: 966781,
+  lastEventAt: "2026-09-14T00:00:00.000Z",
+  lastSuccessfulIndexAt: "2026-09-14T00:00:01.000Z",
+  lastSuccessfulIndexTxid: TXID,
+  queueSize: 0,
+  activeCount: 0,
+  queueAccepted: 1,
+  queueCompleted: 1,
+  queueFailed: 0,
+  queueRejected: 0,
+  queueLastActivityAt: "2026-09-14T00:00:01.000Z",
+  lastError: null,
+  backfill: {
+    state: "succeeded",
+    complete: true,
+    lastStartedAt: "2026-09-14T00:00:00.000Z",
+    lastCompletedAt: "2026-09-14T00:00:01.000Z",
+    checkpointHeight: 966781,
+    lagBlocks: 0,
+    consecutiveFailures: 0
+  },
+  ready: true,
+  ...overrides
+});
+
+class FakeIndexRequestService implements IndexRequestService {
+  readonly requests: string[] = [];
+  nextStatus: IndexRequestResult["status"] = "queued";
+  status = readyStatus();
+
+  requestIndex(txid: string): IndexRequestResult {
+    this.requests.push(txid);
+    return { status: this.nextStatus, completion: null };
+  }
+
+  async indexAndWait(_txid: string, _options?: IndexTransactionOptions): Promise<IndexingOutcome> {
+    void _txid;
+    void _options;
+    throw new Error("Fake administrative indexing was not configured for this test.");
+  }
+
+  getStatus(): IndexerDaemonStatus {
+    return this.status;
+  }
+}
+
 describe("Tonalli Memo indexer HTTP API", () => {
   it("serves the approved health route", async () => {
     const api = await openApi();
     await expect(injectJson(api.app, { method: "GET", url: "/api/v1/health" })).resolves.toEqual({
       statusCode: 200,
-      body: { status: "ok", service: "tonalli-memo-indexer" },
+      body: { status: "ok", service: "tonalli-memo-indexer", daemon: null },
       headers: expect.any(Object)
+    });
+  });
+
+  it("keeps liveness compatible and reports daemon readiness independently", async () => {
+    const indexRequests = new FakeIndexRequestService();
+    const api = await openApi({ indexRequestService: indexRequests });
+    expect(await injectJson(api.app, { method: "GET", url: "/api/v1/health" })).toMatchObject({
+      statusCode: 200,
+      body: { status: "ok", daemon: { state: "running", websocketConnected: true, ready: true } }
+    });
+    expect(await injectJson(api.app, { method: "GET", url: "/api/v1/ready" })).toMatchObject({
+      statusCode: 200,
+      body: { status: "ready", daemon: { backfill: { checkpointHeight: 966781, lagBlocks: 0 } } }
+    });
+
+    indexRequests.status = readyStatus({
+      websocketConnected: false,
+      ready: false,
+      backfill: { ...readyStatus().backfill, lagBlocks: 12 }
+    });
+    expect(await injectJson(api.app, { method: "GET", url: "/api/v1/ready" })).toMatchObject({
+      statusCode: 503,
+      body: { status: "not_ready", daemon: { websocketConnected: false, ready: false } }
+    });
+  });
+
+  it("accepts only a txid for public indexing and returns stable idempotent statuses", async () => {
+    const indexRequests = new FakeIndexRequestService();
+    const api = await openApi({ indexRequestService: indexRequests });
+
+    for (const status of ["queued", "already_queued", "already_indexed"] as const) {
+      indexRequests.nextStatus = status;
+      const response = await injectJson(api.app, {
+        method: "POST",
+        url: "/api/v1/index-requests",
+        payload: { txid: TXID }
+      });
+      expect(response).toMatchObject({ statusCode: 202, body: { status, txid: TXID } });
+    }
+    expect(indexRequests.requests).toEqual([TXID, TXID, TXID]);
+
+    for (const payload of [
+      { txid: "A".repeat(64) },
+      { txid: "0".repeat(63) },
+      { txid: TXID, content: "client supplied memo" },
+      { txid: TXID, status: "VERIFIED" }
+    ]) {
+      expect((await injectJson(api.app, { method: "POST", url: "/api/v1/index-requests", payload })).statusCode).toBe(400);
+    }
+    expect(indexRequests.requests).toHaveLength(3);
+  });
+
+  it("returns stable errors for public rate limiting, queue saturation, and a stopped daemon", async () => {
+    const indexRequests = new FakeIndexRequestService();
+    const rateLimitedApi = await openApi({
+      indexRequestService: indexRequests,
+      publicIndexRateLimitMax: 1,
+      publicIndexRateLimitWindowMs: 60_000
+    });
+    expect((await injectJson(rateLimitedApi.app, { method: "POST", url: "/api/v1/index-requests", payload: { txid: TXID } })).statusCode).toBe(202);
+    expect(await injectJson(rateLimitedApi.app, { method: "POST", url: "/api/v1/index-requests", payload: { txid: TXID_2 } })).toMatchObject({
+      statusCode: 429,
+      body: { error: { code: "RATE_LIMITED" } }
+    });
+
+    const unavailableRequests = new FakeIndexRequestService();
+    const unavailableApi = await openApi({ indexRequestService: unavailableRequests });
+    unavailableRequests.nextStatus = "saturated";
+    expect(await injectJson(unavailableApi.app, { method: "POST", url: "/api/v1/index-requests", payload: { txid: TXID } })).toMatchObject({
+      statusCode: 503,
+      body: { error: { code: "INDEX_QUEUE_FULL" } }
+    });
+    unavailableRequests.nextStatus = "stopped";
+    expect(await injectJson(unavailableApi.app, { method: "POST", url: "/api/v1/index-requests", payload: { txid: TXID } })).toMatchObject({
+      statusCode: 503,
+      body: { error: { code: "INDEXER_NOT_READY" } }
     });
   });
 

@@ -1,6 +1,7 @@
 import type { VerificationStatus } from "@tonalli-memo/verification";
 import type { ChainStatus, DurableVerificationStatus, StoredMemoProtocol } from "../db/types.js";
 import type { Tm1AuthorshipReadModel } from "./tm1-authorship.js";
+import type { IndexerDaemonStatus } from "../daemon/types.js";
 
 export interface ApiErrorDto {
   readonly error: {
@@ -12,6 +13,18 @@ export interface ApiErrorDto {
 export interface HealthResponseDto {
   readonly status: "ok";
   readonly service: "tonalli-memo-indexer";
+  readonly daemon: IndexerDaemonStatus | null;
+}
+
+export interface ReadinessResponseDto {
+  readonly status: "ready" | "not_ready";
+  readonly service: "tonalli-memo-indexer";
+  readonly daemon: IndexerDaemonStatus | null;
+}
+
+export interface IndexRequestResponseDto {
+  readonly status: "queued" | "already_queued" | "already_indexed";
+  readonly txid: string;
 }
 
 export interface TransactionSummaryDto {

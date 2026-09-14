@@ -3,7 +3,9 @@ import type { NormalizedTransaction } from "@tonalli-memo/chronik";
 import { serializeStoredTransaction } from "./serialization.js";
 import type {
   AttachmentOwnershipStatus,
+  BackfillCheckpoint,
   ChainStatus,
+  ConfirmedTransactionCursorRow,
   IndexerDatabase,
   StoredIndexingAttempt,
   StoredMemoProtocol,
@@ -83,6 +85,16 @@ interface AttemptSqlRow {
   readonly persisted_record: 0 | 1;
   readonly diagnostics_json: string;
   readonly attempted_at: number;
+}
+
+interface BackfillCheckpointSqlRow {
+  readonly protocol: StoredMemoProtocol;
+  readonly lokad_id: string;
+  readonly tx_count_cursor: number;
+  readonly block_height: number;
+  readonly block_hash: string;
+  readonly updated_at: number;
+  readonly last_success_at: number;
 }
 
 export class MemoStore {
@@ -236,6 +248,81 @@ export class MemoStore {
       )
       .all(height, limit) as { readonly txid: string }[];
     return rows.map((row) => row.txid);
+  }
+
+  listActiveConfirmedTransactionsPage(
+    minimumHeight: number,
+    limit: number,
+    after: ConfirmedTransactionCursorRow | null = null
+  ): readonly ConfirmedTransactionCursorRow[] {
+    validateBlockHeight(minimumHeight);
+    validateListLimit(limit);
+    if (after !== null) {
+      validateBlockHeight(after.blockHeight);
+    }
+    const rows = this.connection
+      .prepare(
+        `
+        SELECT txid, block_height
+        FROM transactions
+        WHERE is_active = 1
+          AND chain_status = 'confirmed'
+          AND block_height >= @minimumHeight
+          AND (
+            @afterHeight IS NULL
+            OR block_height > @afterHeight
+            OR (block_height = @afterHeight AND txid > @afterTxid)
+          )
+        ORDER BY block_height ASC, txid ASC
+        LIMIT @limit
+        `
+      )
+      .all({
+        minimumHeight,
+        afterHeight: after?.blockHeight ?? null,
+        afterTxid: after?.txid ?? null,
+        limit
+      }) as { readonly txid: string; readonly block_height: number }[];
+    return rows.map((row) => ({ txid: row.txid, blockHeight: row.block_height }));
+  }
+
+  getBackfillCheckpoint(protocol: StoredMemoProtocol): BackfillCheckpoint | null {
+    const row = this.connection
+      .prepare("SELECT * FROM backfill_checkpoints WHERE protocol = ?")
+      .get(protocol) as BackfillCheckpointSqlRow | undefined;
+    return row === undefined ? null : toBackfillCheckpoint(row);
+  }
+
+  listBackfillCheckpoints(): readonly BackfillCheckpoint[] {
+    const rows = this.connection
+      .prepare("SELECT * FROM backfill_checkpoints ORDER BY protocol ASC")
+      .all() as BackfillCheckpointSqlRow[];
+    return rows.map(toBackfillCheckpoint);
+  }
+
+  upsertBackfillCheckpoint(checkpoint: BackfillCheckpoint): void {
+    validateBlockHeight(checkpoint.blockHeight);
+    if (!Number.isSafeInteger(checkpoint.txCountCursor) || checkpoint.txCountCursor < 0) {
+      throw new Error("Backfill transaction cursor must be a non-negative safe integer.");
+    }
+    this.connection
+      .prepare(
+        `
+        INSERT INTO backfill_checkpoints (
+          protocol, lokad_id, tx_count_cursor, block_height, block_hash, updated_at, last_success_at
+        ) VALUES (
+          @protocol, @lokadId, @txCountCursor, @blockHeight, @blockHash, @updatedAt, @lastSuccessAt
+        )
+        ON CONFLICT(protocol) DO UPDATE SET
+          lokad_id = excluded.lokad_id,
+          tx_count_cursor = excluded.tx_count_cursor,
+          block_height = excluded.block_height,
+          block_hash = excluded.block_hash,
+          updated_at = excluded.updated_at,
+          last_success_at = excluded.last_success_at
+        `
+      )
+      .run(checkpoint);
   }
 
   private upsertTransaction(transaction: NormalizedTransaction, nowSeconds: number): void {
@@ -491,6 +578,18 @@ function toVerifiedFeedRow(row: VerifiedFeedSqlRow): VerifiedFeedRow {
       attachment_ownership_status: row.attachment_ownership_status,
       attachment_checked_at: row.attachment_checked_at
     })
+  };
+}
+
+function toBackfillCheckpoint(row: BackfillCheckpointSqlRow): BackfillCheckpoint {
+  return {
+    protocol: row.protocol,
+    lokadId: row.lokad_id,
+    txCountCursor: row.tx_count_cursor,
+    blockHeight: row.block_height,
+    blockHash: row.block_hash,
+    updatedAt: row.updated_at,
+    lastSuccessAt: row.last_success_at
   };
 }
 

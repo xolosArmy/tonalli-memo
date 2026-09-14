@@ -19,14 +19,24 @@ describe("indexer CLI configuration", () => {
       dbPath: "/tmp/tonalli.sqlite",
       chronikUrls: ["https://chronik1.example", "https://chronik2.example"],
       corsOrigins: ["https://app.example"],
+      trustProxy: false,
       indexApiToken: "secret",
-      daemonEnabled: false
+      daemonEnabled: false,
+      queueLimit: 1000,
+      backfillIntervalMs: 60_000,
+      backfillPageSize: 100,
+      backfillMaxPagesPerRun: 100,
+      backfillOverlapPages: 2,
+      readinessMaxLagBlocks: 6,
+      publicIndexRateLimitMax: 30,
+      publicIndexRateLimitWindowMs: 60_000
     });
   });
 
   it("parses DAEMON_ENABLED true and false exactly", () => {
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "false" }).daemonEnabled).toBe(false);
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "true", CHRONIK_URLS: "https://chronik.example" }).daemonEnabled).toBe(true);
+    expect(parseIndexerCliConfig({ DB_PATH: ":memory:", TRUST_PROXY: "true" }).trustProxy).toBe(true);
     expect(() =>
       parseIndexerCliConfig({
         DB_PATH: ":memory:",

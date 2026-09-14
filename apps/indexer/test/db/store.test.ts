@@ -177,7 +177,7 @@ describe("MemoStore transaction lifecycle", () => {
   it("migrates existing version 1 rows as active", () => {
     const { database, store } = openStore();
     persist(store, verifiedResult(), 100);
-    expect(database.connection.prepare("PRAGMA user_version").get()).toEqual({ user_version: 4 });
+    expect(database.connection.prepare("PRAGMA user_version").get()).toEqual({ user_version: 5 });
     expect(store.getTransaction(TXID)).toMatchObject({ isActive: true, inactiveReason: null });
     database.close();
   });
@@ -210,6 +210,53 @@ describe("MemoStore transaction lifecycle", () => {
     persist(store, verifiedResult({ txid: TXID_2, transaction: normalizedTx({ txid: TXID_2, blockHeight: 900010 }) }), 200);
     expect(store.listActiveUnconfirmedTxids(1)).toEqual([TXID]);
     expect(store.listActiveConfirmedTxidsAtOrAbove(900005, 1)).toEqual([TXID_2]);
+    database.close();
+  });
+
+  it("pages confirmed transactions with a stable height and txid cursor", () => {
+    const { database, store } = openStore();
+    persist(store, verifiedResult({ txid: TXID_2, transaction: normalizedTx({ txid: TXID_2, blockHeight: 900010 }) }), 100);
+    persist(store, verifiedResult({ txid: TXID, transaction: normalizedTx({ txid: TXID, blockHeight: 900010 }) }), 101);
+
+    const first = store.listActiveConfirmedTransactionsPage(900000, 1);
+    expect(first).toEqual([{ txid: [TXID, TXID_2].sort()[0], blockHeight: 900010 }]);
+    expect(store.listActiveConfirmedTransactionsPage(900000, 1, first[0] ?? null)).toEqual([
+      { txid: [TXID, TXID_2].sort()[1], blockHeight: 900010 }
+    ]);
+    database.close();
+  });
+
+  it("persists and atomically replaces one confirmed backfill checkpoint per protocol", () => {
+    const { database, store } = openStore();
+    expect(store.getBackfillCheckpoint("TM1")).toBeNull();
+    store.upsertBackfillCheckpoint({
+      protocol: "TM1",
+      lokadId: "544d4d00",
+      txCountCursor: 14,
+      blockHeight: 966781,
+      blockHash: "33".repeat(32),
+      updatedAt: 100,
+      lastSuccessAt: 100
+    });
+    store.upsertBackfillCheckpoint({
+      protocol: "TM1",
+      lokadId: "544d4d00",
+      txCountCursor: 15,
+      blockHeight: 966782,
+      blockHash: "44".repeat(32),
+      updatedAt: 200,
+      lastSuccessAt: 200
+    });
+    expect(store.getBackfillCheckpoint("TM1")).toEqual({
+      protocol: "TM1",
+      lokadId: "544d4d00",
+      txCountCursor: 15,
+      blockHeight: 966782,
+      blockHash: "44".repeat(32),
+      updatedAt: 200,
+      lastSuccessAt: 200
+    });
+    expect(store.listBackfillCheckpoints()).toHaveLength(1);
     database.close();
   });
 

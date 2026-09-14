@@ -99,10 +99,48 @@ const indexingEngine = new IndexingEngine({
     }
   }
 });
+const daemonStatus = {
+  state: "running",
+  websocketConnected: true,
+  chronikHeight: 900010,
+  lastEventAt: null,
+  lastSuccessfulIndexAt: null,
+  lastSuccessfulIndexTxid: null,
+  queueSize: 0,
+  activeCount: 0,
+  queueAccepted: 0,
+  queueCompleted: 0,
+  queueFailed: 0,
+  queueRejected: 0,
+  queueLastActivityAt: null,
+  lastError: null,
+  backfill: {
+    state: "succeeded",
+    complete: true,
+    lastStartedAt: null,
+    lastCompletedAt: null,
+    checkpointHeight: 900010,
+    lagBlocks: 0,
+    consecutiveFailures: 0
+  },
+  ready: true
+};
+const indexRequestService = {
+  requestIndex(txid) {
+    return { status: store.getTransaction(txid) === null ? "queued" : "already_indexed", completion: null };
+  },
+  async indexAndWait(txid, options = {}) {
+    return await indexingEngine.indexTransaction(txid, options);
+  },
+  getStatus() {
+    return daemonStatus;
+  }
+};
 const app = await createIndexerApi({
   store,
   indexingEngine,
-  indexApiToken: "secret"
+  indexApiToken: "secret",
+  indexRequestService
 });
 
 const injectJson = async (options) => {
@@ -114,6 +152,18 @@ try {
   const health = await injectJson({ method: "GET", url: "/api/v1/health" });
   assert.equal(health.statusCode, 200);
   assert.equal(health.body.status, "ok");
+  assert.equal(health.body.daemon.websocketConnected, true);
+
+  const ready = await injectJson({ method: "GET", url: "/api/v1/ready" });
+  assert.equal(ready.statusCode, 200);
+
+  const requested = await injectJson({
+    method: "POST",
+    url: "/api/v1/index-requests",
+    payload: { txid: TXID }
+  });
+  assert.equal(requested.statusCode, 202);
+  assert.equal(requested.body.status, "queued");
 
   const indexed = await injectJson({
     method: "POST",

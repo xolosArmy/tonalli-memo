@@ -19,6 +19,15 @@ export const unauthorizedError = (): HttpApiError =>
 export const notFoundError = (): HttpApiError =>
   new HttpApiError(404, "TRANSACTION_NOT_FOUND", "Transaction was not found.");
 
+export const rateLimitedError = (): HttpApiError =>
+  new HttpApiError(429, "RATE_LIMITED", "Too many indexing requests.");
+
+export const queueSaturatedError = (): HttpApiError =>
+  new HttpApiError(503, "INDEX_QUEUE_FULL", "The indexing queue is temporarily full.");
+
+export const daemonUnavailableError = (): HttpApiError =>
+  new HttpApiError(503, "INDEXER_NOT_READY", "The indexing service is not accepting requests.");
+
 export const httpStatusForVerificationStatus = (status: string): number => {
   switch (status) {
     case "VERIFIED":

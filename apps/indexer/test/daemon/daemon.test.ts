@@ -1,8 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BoundedWorkQueue, IndexerDaemon } from "../../src/index.js";
-import type { ChronikLiveConnection, ChronikLiveEvent, ChronikLiveHandlers, ChronikLiveSource } from "@tonalli-memo/chronik";
+import type {
+  ChronikConfirmedTxPage,
+  ChronikLiveConnection,
+  ChronikLiveEvent,
+  ChronikLiveHandlers,
+  ChronikLiveSource,
+  TonalliDiscoveryProtocol
+} from "@tonalli-memo/chronik";
 import type { IndexingEngine } from "../../src/engine/indexer.js";
 import type { MemoStore } from "../../src/db/store.js";
+import type { BackfillCheckpoint, ConfirmedTransactionCursorRow } from "../../src/db/types.js";
 
 type Deferred<T> = {
   readonly promise: Promise<T>;
@@ -39,6 +47,7 @@ class FakeLiveSource implements ChronikLiveSource {
   readonly connection = new FakeConnection();
   handlers: ChronikLiveHandlers | null = null;
   tipHeight = 900;
+  tipHash = txid("f");
   unconfirmed: string[] = [];
   tipHeightCalls = 0;
   unconfirmedCalls = 0;
@@ -46,6 +55,9 @@ class FakeLiveSource implements ChronikLiveSource {
   maxActiveUnconfirmedCalls = 0;
   listDeferreds: Array<Deferred<readonly string[]>> = [];
   failNextList = false;
+  confirmedByProtocol: Record<TonalliDiscoveryProtocol, string[]> = { TM0: [], TM1: [] };
+  confirmedCalls: Array<{ readonly protocol: TonalliDiscoveryProtocol; readonly page: number; readonly pageSize: number }> = [];
+  blockHashes = new Map<number, string>();
 
   createConnection(handlers: ChronikLiveHandlers): ChronikLiveConnection {
     this.handlers = handlers;
@@ -56,6 +68,15 @@ class FakeLiveSource implements ChronikLiveSource {
   async getTipHeight(): Promise<number> {
     this.tipHeightCalls += 1;
     return this.tipHeight;
+  }
+
+  async getChainTip(): Promise<{ readonly height: number; readonly hash: string }> {
+    this.tipHeightCalls += 1;
+    return { height: this.tipHeight, hash: this.tipHash };
+  }
+
+  async getBlockHash(height: number): Promise<string> {
+    return this.blockHashes.get(height) ?? (height === this.tipHeight ? this.tipHash : txid("e"));
   }
 
   async listTonalliUnconfirmedTxids(): Promise<readonly string[]> {
@@ -76,12 +97,32 @@ class FakeLiveSource implements ChronikLiveSource {
       this.activeUnconfirmedCalls -= 1;
     }
   }
+
+  async listTonalliConfirmedTxs(
+    protocol: TonalliDiscoveryProtocol,
+    page: number,
+    pageSize: number
+  ): Promise<ChronikConfirmedTxPage> {
+    this.confirmedCalls.push({ protocol, page, pageSize });
+    const all = this.confirmedByProtocol[protocol];
+    return {
+      txs: all.slice(page * pageSize, (page + 1) * pageSize).map((candidateTxid, index) => ({
+        txid: candidateTxid,
+        blockHeight: 800 + page * pageSize + index,
+        blockHash: txid(protocol === "TM0" ? "c" : "d")
+      })),
+      page,
+      numPages: Math.ceil(all.length / pageSize),
+      numTxs: all.length
+    };
+  }
 }
 
 class FakeEngine {
   calls: Array<{ readonly txid: string; readonly options: unknown }> = [];
   deferredRuns: Array<Deferred<void>> = [];
   failNext = false;
+  results = new Map<string, { readonly verificationResult: { readonly status: string }; readonly attemptId: number; readonly persistedRecord: boolean }>();
 
   async indexTransaction(txid: string, options: unknown = {}): Promise<unknown> {
     this.calls.push({ txid, options });
@@ -93,7 +134,11 @@ class FakeEngine {
     if (next !== undefined) {
       await next.promise;
     }
-    return { verificationResult: { status: "VERIFIED" } };
+    return this.results.get(txid) ?? {
+      verificationResult: { status: "VERIFIED" },
+      attemptId: this.calls.length,
+      persistedRecord: true
+    };
   }
 }
 
@@ -101,6 +146,7 @@ class FakeStore {
   inactive: Array<{ readonly txid: string; readonly reason: string }> = [];
   unconfirmed: string[] = [];
   confirmed: string[] = [];
+  checkpoints = new Map<string, BackfillCheckpoint>();
 
   markTransactionInactive(txid: string, reason: "REMOVED_FROM_MEMPOOL" | "INVALIDATED"): { readonly changed: boolean; readonly txid: string } {
     this.inactive.push({ txid, reason });
@@ -114,6 +160,39 @@ class FakeStore {
   listActiveConfirmedTxidsAtOrAbove(height = 0, limit = 1000): readonly string[] {
     void height;
     return this.confirmed.slice(0, limit);
+  }
+
+  listActiveConfirmedTransactionsPage(
+    minimumHeight = 0,
+    limit = 1000,
+    after: ConfirmedTransactionCursorRow | null = null
+  ): readonly ConfirmedTransactionCursorRow[] {
+    void minimumHeight;
+    const start = after === null ? 0 : this.confirmed.indexOf(after.txid) + 1;
+    return this.confirmed.slice(start, start + limit).map((confirmedTxid, index) => ({
+      txid: confirmedTxid,
+      blockHeight: 700 + start + index
+    }));
+  }
+
+  getTransaction(): null {
+    return null;
+  }
+
+  getVerificationRecord(): null {
+    return null;
+  }
+
+  getBackfillCheckpoint(protocol: "TM0" | "TM1"): BackfillCheckpoint | null {
+    return this.checkpoints.get(protocol) ?? null;
+  }
+
+  listBackfillCheckpoints(): readonly BackfillCheckpoint[] {
+    return [...this.checkpoints.values()];
+  }
+
+  upsertBackfillCheckpoint(checkpoint: BackfillCheckpoint): void {
+    this.checkpoints.set(checkpoint.protocol, checkpoint);
   }
 }
 
@@ -131,7 +210,14 @@ const logger = () => {
 
 const txid = (char: string) => char.repeat(64);
 
-function daemonFixture(options: { readonly queueLimit?: number; readonly drainTimeoutMs?: number } = {}) {
+function daemonFixture(options: {
+  readonly queueLimit?: number;
+  readonly drainTimeoutMs?: number;
+  readonly backfillIntervalMs?: number;
+  readonly backfillPageSize?: number;
+  readonly backfillMaxPagesPerRun?: number;
+  readonly backfillOverlapPages?: number;
+} = {}) {
   const engine = new FakeEngine();
   const store = new FakeStore();
   const liveSource = new FakeLiveSource();
@@ -143,7 +229,11 @@ function daemonFixture(options: { readonly queueLimit?: number; readonly drainTi
     logger: logs.logger,
     queueLimit: options.queueLimit ?? 100,
     reconcileLimit: 2,
-    drainTimeoutMs: options.drainTimeoutMs ?? 1000
+    drainTimeoutMs: options.drainTimeoutMs ?? 1000,
+    ...(options.backfillIntervalMs === undefined ? {} : { backfillIntervalMs: options.backfillIntervalMs }),
+    ...(options.backfillPageSize === undefined ? {} : { backfillPageSize: options.backfillPageSize }),
+    ...(options.backfillMaxPagesPerRun === undefined ? {} : { backfillMaxPagesPerRun: options.backfillMaxPagesPerRun }),
+    ...(options.backfillOverlapPages === undefined ? {} : { backfillOverlapPages: options.backfillOverlapPages })
   });
   return { daemon, engine, store, liveSource, logs };
 }
@@ -178,7 +268,7 @@ describe("IndexerDaemon", () => {
     liveSource.unconfirmed = [txid("0")];
     await daemon.start();
     expect(liveSource.unconfirmedCalls).toBe(1);
-    expect(liveSource.tipHeightCalls).toBe(1);
+    expect(liveSource.tipHeightCalls).toBe(3);
   });
 
   it("onReconnect alone does not reconcile before connectivity is restored", async () => {
@@ -209,6 +299,171 @@ describe("IndexerDaemon", () => {
     liveSource.handlers?.onConnect?.();
     await flush();
     expect(liveSource.unconfirmedCalls - beforeReconnect).toBe(1);
+  });
+
+  it("recovers a confirmed TM1 transaction missed while the websocket was disconnected", async () => {
+    const incidentTxid = "d1e819aefaa3610286df4f8534129a1e6afe166e07f29236acb85df3f147dabd";
+    const { daemon, engine, liveSource } = daemonFixture();
+    await daemon.start();
+    liveSource.handlers?.onReconnect?.();
+    liveSource.blockHashes.set(900, liveSource.tipHash);
+    liveSource.tipHeight = 901;
+    liveSource.tipHash = txid("9");
+    liveSource.confirmedByProtocol.TM1 = [incidentTxid];
+    expect(engine.calls.map((call) => call.txid)).not.toContain(incidentTxid);
+
+    liveSource.handlers?.onConnect?.();
+    await vi.waitFor(() => expect(engine.calls.map((call) => call.txid)).toContain(incidentTxid));
+    expect(daemon.getStatus()).toMatchObject({ state: "running", websocketConnected: true, backfill: { state: "succeeded" } });
+    await daemon.stop();
+  });
+
+  it("recovers confirmed candidates after a process restart from the durable checkpoint", async () => {
+    const incidentTxid = "d1e819aefaa3610286df4f8534129a1e6afe166e07f29236acb85df3f147dabd";
+    const first = daemonFixture();
+    await first.daemon.start();
+    await first.daemon.stop();
+
+    const nextEngine = new FakeEngine();
+    const nextSource = new FakeLiveSource();
+    nextSource.blockHashes.set(900, first.liveSource.tipHash);
+    nextSource.tipHeight = 901;
+    nextSource.tipHash = txid("9");
+    nextSource.confirmedByProtocol.TM1 = [incidentTxid];
+    const nextLogs = logger();
+    const restarted = new IndexerDaemon({
+      engine: nextEngine as unknown as IndexingEngine,
+      store: first.store as unknown as MemoStore,
+      liveSource: nextSource,
+      logger: nextLogs.logger
+    });
+    await restarted.start();
+    expect(nextEngine.calls.map((call) => call.txid)).toContain(incidentTxid);
+    expect(first.store.getBackfillCheckpoint("TM1")?.txCountCursor).toBe(1);
+    await restarted.stop();
+  });
+
+  it("runs confirmed backfill periodically without websocket events", async () => {
+    vi.useFakeTimers();
+    const incidentTxid = "d1e819aefaa3610286df4f8534129a1e6afe166e07f29236acb85df3f147dabd";
+    const { daemon, engine, liveSource } = daemonFixture({ backfillIntervalMs: 1000 });
+    await daemon.start();
+    liveSource.blockHashes.set(900, liveSource.tipHash);
+    liveSource.tipHeight = 901;
+    liveSource.tipHash = txid("8");
+    liveSource.confirmedByProtocol.TM1 = [incidentTxid];
+    await vi.advanceTimersByTimeAsync(1000);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(engine.calls.map((call) => call.txid)).toContain(incidentTxid);
+    await daemon.stop();
+  });
+
+  it("paginates confirmed history and persists a per-protocol cursor", async () => {
+    const { daemon, engine, store, liveSource } = daemonFixture({
+      backfillPageSize: 2,
+      backfillMaxPagesPerRun: 10,
+      backfillOverlapPages: 0
+    });
+    liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4"), txid("5")];
+    await daemon.start();
+    expect(liveSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1, 2]);
+    expect(engine.calls.map((call) => call.txid)).toEqual([txid("1"), txid("2"), txid("3"), txid("4"), txid("5")]);
+    expect(store.getBackfillCheckpoint("TM1")).toMatchObject({ txCountCursor: 5, blockHeight: 900 });
+    await daemon.stop();
+  });
+
+  it("keeps readiness false while the configured page budget leaves history incomplete", async () => {
+    const { daemon, store, liveSource } = daemonFixture({
+      backfillPageSize: 2,
+      backfillMaxPagesPerRun: 1,
+      backfillOverlapPages: 0
+    });
+    liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4")];
+    await daemon.start();
+    expect(store.getBackfillCheckpoint("TM1")?.txCountCursor).toBe(2);
+    expect(daemon.getStatus()).toMatchObject({ ready: false, backfill: { state: "succeeded", complete: false } });
+    await daemon.stop();
+  });
+
+  it("uses checkpoint overlap instead of downloading all confirmed history on every run", async () => {
+    const first = daemonFixture({ backfillPageSize: 2, backfillOverlapPages: 1 });
+    first.liveSource.confirmedByProtocol.TM1 = [txid("1"), txid("2"), txid("3"), txid("4"), txid("5")];
+    await first.daemon.start();
+    await first.daemon.stop();
+
+    const nextEngine = new FakeEngine();
+    const nextSource = new FakeLiveSource();
+    nextSource.confirmedByProtocol.TM1 = [...first.liveSource.confirmedByProtocol.TM1];
+    const nextLogs = logger();
+    const restarted = new IndexerDaemon({
+      engine: nextEngine as unknown as IndexingEngine,
+      store: first.store as unknown as MemoStore,
+      liveSource: nextSource,
+      logger: nextLogs.logger,
+      backfillPageSize: 2,
+      backfillOverlapPages: 1
+    });
+    await restarted.start();
+    expect(nextSource.confirmedCalls.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([1, 2]);
+    await restarted.stop();
+  });
+
+  it("coalesces websocket, public, and administrative requests for the same txid", async () => {
+    const target = txid("a");
+    const { daemon, engine, liveSource } = daemonFixture();
+    await daemon.start();
+    const work = deferred<void>();
+    engine.deferredRuns.push(work);
+    liveSource.handlers?.onEvent({ type: "transaction", event: "confirmed", txid: target });
+    await vi.waitFor(() => expect(engine.calls.filter((call) => call.txid === target)).toHaveLength(1));
+    expect(daemon.requestIndex(target).status).toBe("already_queued");
+    const administrative = daemon.indexAndWait(target);
+    work.resolve();
+    await expect(administrative).resolves.toMatchObject({ persistedRecord: true });
+    expect(engine.calls.filter((call) => call.txid === target)).toHaveLength(1);
+    await daemon.stop();
+  });
+
+  it("detects a checkpoint reorganization and invalidates transactions missing from Chronik", async () => {
+    const oldTxid = txid("7");
+    const { daemon, engine, store, liveSource } = daemonFixture();
+    store.confirmed = [oldTxid];
+    for (const protocol of ["TM0", "TM1"] as const) {
+      store.upsertBackfillCheckpoint({
+        protocol,
+        lokadId: protocol === "TM0" ? "544d307c" : "544d4d00",
+        txCountCursor: 1,
+        blockHeight: 899,
+        blockHash: txid("1"),
+        updatedAt: 1,
+        lastSuccessAt: 1
+      });
+    }
+    liveSource.blockHashes.set(899, txid("2"));
+    engine.results.set(oldTxid, {
+      verificationResult: { status: "TRANSACTION_NOT_FOUND" },
+      attemptId: 1,
+      persistedRecord: false
+    });
+    await daemon.start();
+    expect(store.inactive).toContainEqual({ txid: oldTxid, reason: "INVALIDATED" });
+    expect(daemon.getStatus().backfill.state).toBe("succeeded");
+    await daemon.stop();
+  });
+
+  it("reports queue saturation with stable status and activity counters", async () => {
+    const { daemon, engine } = daemonFixture({ queueLimit: 1 });
+    await daemon.start();
+    const blocked = deferred<void>();
+    engine.deferredRuns.push(blocked);
+    expect(daemon.requestIndex(txid("1")).status).toBe("queued");
+    await vi.waitFor(() => expect(engine.calls.map((call) => call.txid)).toContain(txid("1")));
+    expect(daemon.requestIndex(txid("2")).status).toBe("queued");
+    expect(daemon.requestIndex(txid("3")).status).toBe("saturated");
+    expect(daemon.getStatus()).toMatchObject({ queueSize: 1, queueRejected: 1 });
+    blocked.resolve();
+    await daemon.stop();
   });
 
   it("rapid connection callbacks serialize reconciliation without overlap", async () => {
@@ -343,7 +598,7 @@ describe("BoundedWorkQueue drain", () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
     const { queue } = queueFixture();
     const work = deferred<void>();
-    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise })).toBe(true);
+    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise }).status).toBe("queued");
     const drained = queue.drain(1000);
     work.resolve();
     await drained;
@@ -354,7 +609,7 @@ describe("BoundedWorkQueue drain", () => {
     vi.useFakeTimers();
     const { logs, queue } = queueFixture();
     const work = deferred<void>();
-    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise })).toBe(true);
+    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise }).status).toBe("queued");
     const drained = queue.drain(1000);
     work.resolve();
     await drained;
@@ -368,7 +623,7 @@ describe("BoundedWorkQueue drain", () => {
     vi.useFakeTimers();
     const { queue } = queueFixture();
     const work = deferred<void>();
-    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise })).toBe(true);
+    expect(queue.enqueue({ txid: txid("a"), run: () => work.promise }).status).toBe("queued");
     const drained = expect(queue.drain(1000)).rejects.toThrow("Indexer daemon queue drain timed out.");
     await vi.advanceTimersByTimeAsync(1000);
     await drained;
@@ -383,7 +638,7 @@ describe("BoundedWorkQueue drain", () => {
   it("does not accept work after stopAccepting begins", async () => {
     const { queue } = queueFixture();
     queue.stopAccepting();
-    expect(queue.enqueue({ txid: txid("a"), run: async () => undefined })).toBe(false);
+    expect(queue.enqueue({ txid: txid("a"), run: async () => undefined }).status).toBe("stopped");
     await expect(queue.drain(1000)).resolves.toBeUndefined();
   });
 });

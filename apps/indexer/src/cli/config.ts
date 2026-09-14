@@ -4,8 +4,17 @@ export interface IndexerCliConfig {
   readonly dbPath: string;
   readonly chronikUrls: readonly string[];
   readonly corsOrigins: readonly string[];
+  readonly trustProxy: boolean;
   readonly indexApiToken?: string;
   readonly daemonEnabled: boolean;
+  readonly queueLimit: number;
+  readonly backfillIntervalMs: number;
+  readonly backfillPageSize: number;
+  readonly backfillMaxPagesPerRun: number;
+  readonly backfillOverlapPages: number;
+  readonly readinessMaxLagBlocks: number;
+  readonly publicIndexRateLimitMax: number;
+  readonly publicIndexRateLimitWindowMs: number;
 }
 
 export class ConfigError extends Error {
@@ -36,9 +45,44 @@ export function parseIndexerCliConfig(env: NodeJS.ProcessEnv): IndexerCliConfig 
     dbPath,
     chronikUrls,
     corsOrigins: parseList(env.CORS_ORIGINS, "CORS_ORIGINS"),
+    trustProxy: parseBoolean(env.TRUST_PROXY, "TRUST_PROXY", false),
     daemonEnabled,
+    queueLimit: parseInteger(env.INDEX_QUEUE_LIMIT, "INDEX_QUEUE_LIMIT", 1000, 1),
+    backfillIntervalMs: parseInteger(env.BACKFILL_INTERVAL_MS, "BACKFILL_INTERVAL_MS", 60_000, 1000),
+    backfillPageSize: parseInteger(env.BACKFILL_PAGE_SIZE, "BACKFILL_PAGE_SIZE", 100, 1, 199),
+    backfillMaxPagesPerRun: parseInteger(env.BACKFILL_MAX_PAGES_PER_RUN, "BACKFILL_MAX_PAGES_PER_RUN", 100, 1),
+    backfillOverlapPages: parseInteger(env.BACKFILL_OVERLAP_PAGES, "BACKFILL_OVERLAP_PAGES", 2, 0),
+    readinessMaxLagBlocks: parseInteger(env.READINESS_MAX_LAG_BLOCKS, "READINESS_MAX_LAG_BLOCKS", 6, 0),
+    publicIndexRateLimitMax: parseInteger(env.PUBLIC_INDEX_RATE_LIMIT_MAX, "PUBLIC_INDEX_RATE_LIMIT_MAX", 30, 1),
+    publicIndexRateLimitWindowMs: parseInteger(
+      env.PUBLIC_INDEX_RATE_LIMIT_WINDOW_MS,
+      "PUBLIC_INDEX_RATE_LIMIT_WINDOW_MS",
+      60_000,
+      1000
+    ),
     ...(indexApiToken === undefined ? {} : { indexApiToken })
   };
+}
+
+function parseInteger(
+  value: string | undefined,
+  name: string,
+  defaultValue: number,
+  minimum: number,
+  maximum = Number.MAX_SAFE_INTEGER
+): number {
+  const raw = nonEmpty(value);
+  if (raw === undefined) {
+    return defaultValue;
+  }
+  if (!/^[0-9]+$/u.test(raw)) {
+    throw new ConfigError(`${name} must be an integer between ${minimum} and ${maximum}.`);
+  }
+  const parsed = Number(raw);
+  if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw new ConfigError(`${name} must be an integer between ${minimum} and ${maximum}.`);
+  }
+  return parsed;
 }
 
 function parseBoolean(value: string | undefined, name: string, defaultValue: boolean): boolean {

@@ -109,3 +109,18 @@ export interface VerifiedFeedRow {
   readonly transaction: StoredTransactionRow;
   readonly verification: StoredVerificationRecord;
 }
+
+export interface BackfillCheckpoint {
+  readonly protocol: StoredMemoProtocol;
+  readonly lokadId: string;
+  readonly txCountCursor: number;
+  readonly blockHeight: number;
+  readonly blockHash: string;
+  readonly updatedAt: number;
+  readonly lastSuccessAt: number;
+}
+
+export interface ConfirmedTransactionCursorRow {
+  readonly txid: string;
+  readonly blockHeight: number;
+}

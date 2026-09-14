@@ -1,4 +1,10 @@
-import type { IndexerDaemonLogger, QueueWorkItem } from "./types.js";
+import type {
+  IndexerDaemonLogger,
+  QueueActivitySnapshot,
+  QueueCompletion,
+  QueueEnqueueResult,
+  QueueWorkItem
+} from "./types.js";
 
 export interface WorkQueueOptions {
   readonly logger: IndexerDaemonLogger;
@@ -11,15 +17,24 @@ interface IdleWaiter {
   reject(error: Error): void;
 }
 
+interface PendingWorkItem extends QueueWorkItem {
+  readonly complete: (result: QueueCompletion) => void;
+}
+
 export class BoundedWorkQueue {
   private readonly logger: IndexerDaemonLogger;
   private readonly maxSize: number;
   private readonly concurrency: number;
-  private readonly pending: QueueWorkItem[] = [];
-  private readonly inFlight = new Set<string>();
+  private readonly pending: PendingWorkItem[] = [];
+  private readonly inFlight = new Map<string, Promise<QueueCompletion>>();
   private activeCount = 0;
   private accepting = true;
   private idleWaiters: IdleWaiter[] = [];
+  private acceptedCount = 0;
+  private completedCount = 0;
+  private failedCount = 0;
+  private rejectedCount = 0;
+  private lastActivityAtMs: number | null = null;
 
   constructor(options: WorkQueueOptions) {
     this.logger = options.logger;
@@ -35,25 +50,45 @@ export class BoundedWorkQueue {
     return this.activeCount;
   }
 
+  get activity(): QueueActivitySnapshot {
+    return {
+      accepted: this.acceptedCount,
+      completed: this.completedCount,
+      failed: this.failedCount,
+      rejected: this.rejectedCount,
+      lastActivityAtMs: this.lastActivityAtMs
+    };
+  }
+
   stopAccepting(): void {
     this.accepting = false;
   }
 
-  enqueue(item: QueueWorkItem): boolean {
+  enqueue(item: QueueWorkItem): QueueEnqueueResult {
     if (!this.accepting) {
-      return false;
+      this.recordRejected();
+      return { status: "stopped", completion: null };
     }
-    if (this.inFlight.has(item.txid)) {
-      return true;
+    const existing = this.inFlight.get(item.txid);
+    if (existing !== undefined) {
+      this.touch();
+      return { status: "already_queued", completion: existing };
     }
     if (this.pending.length >= this.maxSize) {
+      this.recordRejected();
       this.logger.error("Indexer daemon queue limit reached.", { txid: item.txid, queueSize: this.pending.length });
-      return false;
+      return { status: "saturated", completion: null };
     }
-    this.inFlight.add(item.txid);
-    this.pending.push(item);
+    let complete!: (result: QueueCompletion) => void;
+    const completion = new Promise<QueueCompletion>((resolve) => {
+      complete = resolve;
+    });
+    this.inFlight.set(item.txid, completion);
+    this.pending.push({ ...item, complete });
+    this.acceptedCount += 1;
+    this.touch();
     this.pump();
-    return true;
+    return { status: "queued", completion };
   }
 
   async drain(timeoutMs: number): Promise<void> {
@@ -104,14 +139,19 @@ export class BoundedWorkQueue {
     }
   }
 
-  private async runItem(item: QueueWorkItem): Promise<void> {
+  private async runItem(item: PendingWorkItem): Promise<void> {
     try {
-      await item.run();
+      const value = await item.run();
+      this.completedCount += 1;
+      item.complete({ ok: true, value });
     } catch (error) {
+      this.failedCount += 1;
+      item.complete({ ok: false, error });
       this.logger.error("Indexer daemon work item failed.", { txid: item.txid, error: toSafeErrorName(error) });
     } finally {
       this.activeCount -= 1;
       this.inFlight.delete(item.txid);
+      this.touch();
       this.resolveIdleIfNeeded();
       this.pump();
     }
@@ -124,6 +164,15 @@ export class BoundedWorkQueue {
     for (const waiter of this.idleWaiters.splice(0)) {
       waiter.resolve();
     }
+  }
+
+  private recordRejected(): void {
+    this.rejectedCount += 1;
+    this.touch();
+  }
+
+  private touch(): void {
+    this.lastActivityAtMs = Date.now();
   }
 }
 

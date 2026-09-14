@@ -235,17 +235,119 @@ const txParams = {
   }
 } as const;
 
+const nullableTimestamp = { type: ["string", "null"] } as const;
+
+const daemonStatus = {
+  anyOf: [
+    { type: "null" },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "state",
+        "websocketConnected",
+        "chronikHeight",
+        "lastEventAt",
+        "lastSuccessfulIndexAt",
+        "lastSuccessfulIndexTxid",
+        "queueSize",
+        "activeCount",
+        "queueAccepted",
+        "queueCompleted",
+        "queueFailed",
+        "queueRejected",
+        "queueLastActivityAt",
+        "lastError",
+        "backfill",
+        "ready"
+      ],
+      properties: {
+        state: { type: "string", enum: ["stopped", "starting", "running", "reconnecting", "stopping", "failed"] },
+        websocketConnected: { type: "boolean" },
+        chronikHeight: { type: ["integer", "null"], minimum: 0 },
+        lastEventAt: nullableTimestamp,
+        lastSuccessfulIndexAt: nullableTimestamp,
+        lastSuccessfulIndexTxid: { type: ["string", "null"], pattern: txidPattern },
+        queueSize: { type: "integer", minimum: 0 },
+        activeCount: { type: "integer", minimum: 0 },
+        queueAccepted: { type: "integer", minimum: 0 },
+        queueCompleted: { type: "integer", minimum: 0 },
+        queueFailed: { type: "integer", minimum: 0 },
+        queueRejected: { type: "integer", minimum: 0 },
+        queueLastActivityAt: nullableTimestamp,
+        lastError: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "object",
+              additionalProperties: false,
+              required: ["code", "at"],
+              properties: {
+                code: { type: "string" },
+                at: { type: "string" }
+              }
+            }
+          ]
+        },
+        backfill: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "state",
+            "complete",
+            "lastStartedAt",
+            "lastCompletedAt",
+            "checkpointHeight",
+            "lagBlocks",
+            "consecutiveFailures"
+          ],
+          properties: {
+            state: { type: "string", enum: ["idle", "running", "succeeded", "failed"] },
+            complete: { type: "boolean" },
+            lastStartedAt: nullableTimestamp,
+            lastCompletedAt: nullableTimestamp,
+            checkpointHeight: { type: ["integer", "null"], minimum: 0 },
+            lagBlocks: { type: ["integer", "null"], minimum: 0 },
+            consecutiveFailures: { type: "integer", minimum: 0 }
+          }
+        },
+        ready: { type: "boolean" }
+      }
+    }
+  ]
+} as const;
+
 export const healthSchema = {
   response: {
     200: {
       type: "object",
       additionalProperties: false,
-      required: ["status", "service"],
+      required: ["status", "service", "daemon"],
       properties: {
         status: { type: "string", const: "ok" },
-        service: { type: "string", const: "tonalli-memo-indexer" }
+        service: { type: "string", const: "tonalli-memo-indexer" },
+        daemon: daemonStatus
       }
     }
+  }
+} as const;
+
+const readinessResponse = {
+  type: "object",
+  additionalProperties: false,
+  required: ["status", "service", "daemon"],
+  properties: {
+    status: { type: "string", enum: ["ready", "not_ready"] },
+    service: { type: "string", const: "tonalli-memo-indexer" },
+    daemon: daemonStatus
+  }
+} as const;
+
+export const readinessSchema = {
+  response: {
+    200: readinessResponse,
+    503: readinessResponse,
+    500: errorResponse
   }
 } as const;
 
@@ -331,5 +433,33 @@ export const adminIndexSchema = {
     500: errorResponse,
     502: adminIndexResponse,
     503: adminIndexResponse
+  }
+} as const;
+
+const indexRequestAccepted = {
+  type: "object",
+  additionalProperties: false,
+  required: ["status", "txid"],
+  properties: {
+    status: { type: "string", enum: ["queued", "already_queued", "already_indexed"] },
+    txid: { type: "string", pattern: txidPattern }
+  }
+} as const;
+
+export const indexRequestSchema = {
+  body: {
+    type: "object",
+    additionalProperties: false,
+    required: ["txid"],
+    properties: {
+      txid: { type: "string", pattern: txidPattern }
+    }
+  },
+  response: {
+    202: indexRequestAccepted,
+    400: errorResponse,
+    429: errorResponse,
+    500: errorResponse,
+    503: errorResponse
   }
 } as const;
