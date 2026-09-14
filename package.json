@@ -6,7 +6,7 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "pnpm --filter @xolosarmy/tonalli-memo-protocol build && pnpm -r typecheck",
+    "typecheck": "tsc -b && pnpm -r typecheck",
     "test": "pnpm -r test",
     "build": "pnpm registry:generate && tsc -b && pnpm --filter @tonalli-memo/web build:bundle",
     "registry:generate": "node scripts/generate-registry-data.mjs",
