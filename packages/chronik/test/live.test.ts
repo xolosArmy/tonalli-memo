@@ -37,22 +37,31 @@ class FakeSource implements ChronikLiveSdkSource {
   readonly wsEndpoint = new FakeWs();
   configs: ChronikLiveWsConfig[] = [];
   tipHeight = 123;
+  tipHash = "f".repeat(64);
   txidsByLokad = new Map<string, string[]>([
     [TM0_LOKAD_ID, ["b".repeat(64), "a".repeat(64)]],
     [TM1_DRAFT_02_LOKAD_ID, ["c".repeat(64), "a".repeat(64)]]
   ]);
   failLokadId: string | null = null;
+  confirmedByLokad = new Map<string, Array<{ readonly txid: string; readonly block: { readonly height: number; readonly hash: string } }>>([
+    [TM0_LOKAD_ID, [{ txid: "d".repeat(64), block: { height: 120, hash: "e".repeat(64) } }]],
+    [TM1_DRAFT_02_LOKAD_ID, [{ txid: "e".repeat(64), block: { height: 121, hash: "d".repeat(64) } }]]
+  ]);
 
   ws(config: ChronikLiveWsConfig): FakeWs {
     this.configs.push(config);
     return this.wsEndpoint;
   }
 
-  async blockchainInfo(): Promise<{ readonly tipHeight: number }> {
-    return { tipHeight: this.tipHeight };
+  async blockchainInfo(): Promise<{ readonly tipHeight: number; readonly tipHash: string }> {
+    return { tipHeight: this.tipHeight, tipHash: this.tipHash };
   }
 
-  lokadId(lokadId: string): { unconfirmedTxs(): Promise<{ readonly txs: readonly { readonly txid: string }[] }> } {
+  async block(height: number): Promise<{ readonly blockInfo: { readonly height: number; readonly hash: string } }> {
+    return { blockInfo: { height, hash: height === this.tipHeight ? this.tipHash : "c".repeat(64) } };
+  }
+
+  lokadId(lokadId: string): ReturnType<ChronikLiveSdkSource["lokadId"]> {
     expect(TONALLI_DISCOVERY_LOKAD_IDS).toContain(lokadId);
     return {
       unconfirmedTxs: async () => {
@@ -60,6 +69,17 @@ class FakeSource implements ChronikLiveSdkSource {
           throw new Error(`failed ${lokadId}`);
         }
         return { txs: (this.txidsByLokad.get(lokadId) ?? []).map((txid) => ({ txid })) };
+      },
+      confirmedTxs: async (page, pageSize) => {
+        if (this.failLokadId === lokadId) {
+          throw new Error(`failed ${lokadId}`);
+        }
+        const all = this.confirmedByLokad.get(lokadId) ?? [];
+        return {
+          txs: all.slice(page * pageSize, (page + 1) * pageSize),
+          numPages: Math.ceil(all.length / pageSize),
+          numTxs: all.length
+        };
       }
     };
   }
@@ -139,7 +159,26 @@ describe("Chronik live adapter", () => {
     const source = new FakeSource();
     const live = createChronikLiveSource({ source });
     expect(await live.getTipHeight()).toBe(123);
+    expect(await live.getChainTip()).toEqual({ height: 123, hash: "f".repeat(64) });
+    expect(await live.getBlockHash(100)).toBe("c".repeat(64));
     expect(await live.listTonalliUnconfirmedTxids()).toEqual(["a".repeat(64), "b".repeat(64), "c".repeat(64)]);
+  });
+
+  it("returns paginated confirmed transaction references for each supported protocol", async () => {
+    const source = new FakeSource();
+    const live = createChronikLiveSource({ source });
+    await expect(live.listTonalliConfirmedTxs("TM0", 0, 1)).resolves.toEqual({
+      page: 0,
+      numPages: 1,
+      numTxs: 1,
+      txs: [{ txid: "d".repeat(64), blockHeight: 120, blockHash: "e".repeat(64) }]
+    });
+    await expect(live.listTonalliConfirmedTxs("TM1", 0, 1)).resolves.toEqual({
+      page: 0,
+      numPages: 1,
+      numTxs: 1,
+      txs: [{ txid: "e".repeat(64), blockHeight: 121, blockHash: "d".repeat(64) }]
+    });
   });
 
   it("fails closed when either protocol mempool query fails", async () => {

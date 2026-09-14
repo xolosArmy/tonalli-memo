@@ -7,6 +7,26 @@ export type ChronikLiveTransactionEvent =
 
 export type ChronikLiveBlockEvent = "connected" | "disconnected" | "finalized" | "invalidated";
 
+export type TonalliDiscoveryProtocol = "TM0" | "TM1";
+
+export interface ChronikChainTip {
+  readonly height: number;
+  readonly hash: string;
+}
+
+export interface ChronikConfirmedTxRef {
+  readonly txid: string;
+  readonly blockHeight: number;
+  readonly blockHash: string;
+}
+
+export interface ChronikConfirmedTxPage {
+  readonly txs: readonly ChronikConfirmedTxRef[];
+  readonly page: number;
+  readonly numPages: number;
+  readonly numTxs: number;
+}
+
 export type ChronikLiveEvent =
   | {
       readonly type: "transaction";
@@ -36,7 +56,14 @@ export interface ChronikLiveConnection {
 export interface ChronikLiveSource {
   createConnection(handlers: ChronikLiveHandlers): ChronikLiveConnection;
   getTipHeight(): Promise<number>;
+  getChainTip(): Promise<ChronikChainTip>;
+  getBlockHash(height: number): Promise<string>;
   listTonalliUnconfirmedTxids(): Promise<readonly string[]>;
+  listTonalliConfirmedTxs(
+    protocol: TonalliDiscoveryProtocol,
+    page: number,
+    pageSize: number
+  ): Promise<ChronikConfirmedTxPage>;
 }
 
 export interface ChronikLiveLogger {
@@ -51,9 +78,21 @@ export interface ChronikLiveOptions {
 
 export interface ChronikLiveSdkSource {
   ws(config: ChronikLiveWsConfig): ChronikLiveWsEndpoint;
-  blockchainInfo(): Promise<{ readonly tipHeight: number }>;
+  blockchainInfo(): Promise<{ readonly tipHeight: number; readonly tipHash: string }>;
+  block(height: number): Promise<{ readonly blockInfo: { readonly height: number; readonly hash: string } }>;
   lokadId(lokadId: string): {
     unconfirmedTxs(): Promise<{ readonly txs: readonly { readonly txid: string }[] }>;
+    confirmedTxs(
+      page: number,
+      pageSize: number
+    ): Promise<{
+      readonly txs: readonly {
+        readonly txid: string;
+        readonly block?: { readonly height: number; readonly hash: string };
+      }[];
+      readonly numPages: number;
+      readonly numTxs: number;
+    }>;
   };
 }
 

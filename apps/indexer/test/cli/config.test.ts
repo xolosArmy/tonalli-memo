@@ -19,14 +19,24 @@ describe("indexer CLI configuration", () => {
       dbPath: "/tmp/tonalli.sqlite",
       chronikUrls: ["https://chronik1.example", "https://chronik2.example"],
       corsOrigins: ["https://app.example"],
+      trustProxy: false,
       indexApiToken: "secret",
-      daemonEnabled: false
+      daemonEnabled: false,
+      queueLimit: 1000,
+      backfillIntervalMs: 60_000,
+      backfillPageSize: 100,
+      backfillMaxPagesPerRun: 100,
+      backfillOverlapPages: 2,
+      readinessMaxLagBlocks: 6,
+      publicIndexRateLimitMax: 30,
+      publicIndexRateLimitWindowMs: 60_000
     });
   });
 
   it("parses DAEMON_ENABLED true and false exactly", () => {
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "false" }).daemonEnabled).toBe(false);
     expect(parseIndexerCliConfig({ DB_PATH: ":memory:", DAEMON_ENABLED: "true", CHRONIK_URLS: "https://chronik.example" }).daemonEnabled).toBe(true);
+    expect(parseIndexerCliConfig({ DB_PATH: ":memory:", TRUST_PROXY: "true" }).trustProxy).toBe(true);
     expect(() =>
       parseIndexerCliConfig({
         DB_PATH: ":memory:",
@@ -103,7 +113,7 @@ describe("indexer CLI configuration", () => {
         })
       }
     });
-    expect(events).toEqual(["daemon.start", "listen"]);
+    expect(events).toEqual(["listen", "daemon.start"]);
   });
 
   it("startup failure cleans all resources", async () => {
@@ -113,7 +123,13 @@ describe("indexer CLI configuration", () => {
         env: { DB_PATH: ":memory:", DAEMON_ENABLED: "true", CHRONIK_URLS: "https://chronik.example" },
         factories: {
           openDatabase: () => ({ connection: {}, close: () => events.push("database.close") }) as never,
-          createApi: async () => ({ close: async () => events.push("app.close") }) as unknown as FastifyInstance,
+          createApi: async () => ({
+            listen: async () => {
+              events.push("listen");
+              return "http://127.0.0.1:0";
+            },
+            close: async () => events.push("app.close")
+          }) as unknown as FastifyInstance,
           createDaemon: () => ({
             async start(): Promise<void> {
               events.push("daemon.start");
@@ -126,7 +142,7 @@ describe("indexer CLI configuration", () => {
         }
       })
     ).rejects.toThrow("start failed");
-    expect(events).toEqual(["daemon.start", "daemon.stop", "app.close", "database.close"]);
+    expect(events).toEqual(["listen", "daemon.start", "daemon.stop", "app.close", "database.close"]);
   });
 
   it("closes daemon, Fastify, and database in order and attempts all after failures", async () => {

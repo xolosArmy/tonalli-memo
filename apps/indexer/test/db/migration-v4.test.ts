@@ -5,8 +5,8 @@ import { openIndexerDatabase, runMigrations } from "../../src/db/database.js";
 
 const TXID = "11".repeat(32);
 
-describe("database migration v4", () => {
-  it("migrates cleanly from schema v3 to v4 preserving existing records with null attachment fields", () => {
+describe("database migrations v4 and v5", () => {
+  it("migrates cleanly from schema v3 while preserving existing records and adding durable checkpoints", () => {
     const db = new Database(":memory:");
     db.pragma("foreign_keys = ON");
 
@@ -39,11 +39,11 @@ describe("database migration v4", () => {
       ) VALUES (?, 'VERIFIED', 'TM1', 1, 'POST', NULL, ?, 100, 0, NULL, 'ecash:qptest', 0, NULL, NULL, '[]', '{}', 1700000000, 1700000000)
     `).run(TXID, rawPayload);
 
-    // Run migrations to current version (v4)
+    // Run additive migrations to the current version.
     runMigrations(db);
 
-    expect(db.pragma("user_version", { simple: true })).toBe(4);
-    expect(CURRENT_SCHEMA_VERSION).toBe(4);
+    expect(db.pragma("user_version", { simple: true })).toBe(5);
+    expect(CURRENT_SCHEMA_VERSION).toBe(5);
 
     // Check that existing row survived with preserved payload and null attachment fields
     const row = db.prepare("SELECT * FROM verification_records WHERE txid = ?").get(TXID) as Record<string, unknown>;
@@ -55,10 +55,31 @@ describe("database migration v4", () => {
     // Verify index exists
     const indexes = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index'").all() as { name: string }[];
     expect(indexes.map((i) => i.name)).toContain("idx_verification_records_attached_token_id");
+    expect(indexes.map((i) => i.name)).toContain("idx_backfill_checkpoints_height");
+
+    db.prepare(`
+      INSERT INTO backfill_checkpoints (
+        protocol, lokad_id, tx_count_cursor, history_tx_count, is_complete,
+        block_height, block_hash, updated_at, last_success_at
+      ) VALUES ('TM1', '544d4d00', 14, 14, 1, 966781, ?, 1700000001, 1700000001)
+    `).run("33".repeat(32));
+    expect(db.prepare("SELECT tx_count_cursor, history_tx_count, is_complete, block_height FROM backfill_checkpoints WHERE protocol = 'TM1'").get()).toEqual({
+      tx_count_cursor: 14,
+      history_tx_count: 14,
+      is_complete: 1,
+      block_height: 966781
+    });
+
+    // Verify non-destructive rollback metadata and later re-adoption of the retained table.
+    db.pragma("user_version = 4");
+    expect(() => runMigrations(db)).not.toThrow();
+    expect(db.prepare("SELECT tx_count_cursor FROM backfill_checkpoints WHERE protocol = 'TM1'").get()).toEqual({
+      tx_count_cursor: 14
+    });
 
     // Verify idempotency
     expect(() => runMigrations(db)).not.toThrow();
-    expect(db.pragma("user_version", { simple: true })).toBe(4);
+    expect(db.pragma("user_version", { simple: true })).toBe(5);
 
     db.close();
   });

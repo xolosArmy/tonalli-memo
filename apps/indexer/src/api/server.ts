@@ -2,19 +2,25 @@ import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import type { IndexingEngine } from "../engine/indexer.js";
 import type { MemoStore } from "../db/store.js";
+import type { IndexRequestService } from "../daemon/types.js";
 import { registerApiRoutes, toSafeErrorResponse } from "./routes.js";
 
 export interface CreateIndexerApiOptions {
   readonly store: MemoStore;
   readonly indexingEngine?: IndexingEngine;
   readonly indexApiToken?: string;
+  readonly indexRequestService?: IndexRequestService;
+  readonly publicIndexRateLimitMax?: number;
+  readonly publicIndexRateLimitWindowMs?: number;
   readonly corsOrigins?: readonly string[];
+  readonly trustProxy?: FastifyServerOptions["trustProxy"];
   readonly logger?: FastifyServerOptions["logger"];
 }
 
 export async function createIndexerApi(options: CreateIndexerApiOptions): Promise<FastifyInstance> {
   const fastify = Fastify({
     logger: options.logger ?? false,
+    trustProxy: options.trustProxy ?? false,
     ajv: {
       customOptions: {
         removeAdditional: false,
@@ -60,7 +66,12 @@ export async function createIndexerApi(options: CreateIndexerApiOptions): Promis
   await fastify.register(registerApiRoutes, {
     store: options.store,
     ...(options.indexingEngine === undefined ? {} : { indexingEngine: options.indexingEngine }),
-    ...(options.indexApiToken === undefined ? {} : { indexApiToken: options.indexApiToken })
+    ...(options.indexApiToken === undefined ? {} : { indexApiToken: options.indexApiToken }),
+    ...(options.indexRequestService === undefined ? {} : { indexRequestService: options.indexRequestService }),
+    ...(options.publicIndexRateLimitMax === undefined ? {} : { publicIndexRateLimitMax: options.publicIndexRateLimitMax }),
+    ...(options.publicIndexRateLimitWindowMs === undefined
+      ? {}
+      : { publicIndexRateLimitWindowMs: options.publicIndexRateLimitWindowMs })
   });
 
   return fastify;

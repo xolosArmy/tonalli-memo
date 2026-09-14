@@ -4,6 +4,7 @@ import type { FastifyInstance } from "fastify";
 import { createIndexerApi } from "../api/server.js";
 import { IndexerDaemon } from "../daemon/daemon.js";
 import type { IndexerDaemonLogger } from "../daemon/types.js";
+import type { IndexRequestService } from "../daemon/types.js";
 import type { IndexerDatabase } from "../db/types.js";
 import { MemoStore } from "../db/store.js";
 import { openIndexerDatabase } from "../db/database.js";
@@ -19,8 +20,10 @@ export interface RunIndexerCliOptions {
 export interface IndexerCliFactories {
   readonly openDatabase: typeof openIndexerDatabase;
   readonly createApi: typeof createIndexerApi;
-  readonly createDaemon: (options: ConstructorParameters<typeof IndexerDaemon>[0]) => Pick<IndexerDaemon, "start" | "stop">;
+  readonly createDaemon: (options: ConstructorParameters<typeof IndexerDaemon>[0]) => IndexerDaemonRuntime;
 }
+
+type IndexerDaemonRuntime = Partial<IndexRequestService> & Pick<IndexerDaemon, "start" | "stop">;
 
 const defaultFactories: IndexerCliFactories = {
   openDatabase: openIndexerDatabase,
@@ -32,13 +35,13 @@ const defaultFactories: IndexerCliFactories = {
 
 const cliDaemonLogger: IndexerDaemonLogger = {
   info(message, context) {
-    console.info(message, context ?? {});
+    console.info(JSON.stringify({ level: "info", message, ...(context ?? {}) }));
   },
   warn(message, context) {
-    console.warn(message, context ?? {});
+    console.warn(JSON.stringify({ level: "warn", message, ...(context ?? {}) }));
   },
   error(message, context) {
-    console.error(message, context ?? {});
+    console.error(JSON.stringify({ level: "error", message, ...(context ?? {}) }));
   }
 };
 
@@ -48,14 +51,7 @@ export async function runIndexerCli(options: RunIndexerCliOptions = {}): Promise
   const database = factories.openDatabase({ filename: config.dbPath });
   const store = new MemoStore(database);
   const indexingEngine = createIndexingEngine(config, store);
-  let daemon: Pick<IndexerDaemon, "start" | "stop"> | undefined;
-  const app = await factories.createApi({
-    store,
-    ...(indexingEngine === undefined ? {} : { indexingEngine }),
-    ...(config.indexApiToken === undefined ? {} : { indexApiToken: config.indexApiToken }),
-    corsOrigins: config.corsOrigins,
-    logger: true
-  });
+  let daemon: IndexerDaemonRuntime | undefined;
 
   if (config.daemonEnabled) {
     if (indexingEngine === undefined) {
@@ -65,9 +61,27 @@ export async function runIndexerCli(options: RunIndexerCliOptions = {}): Promise
       engine: indexingEngine,
       store,
       liveSource: createChronikLiveSource({ urls: config.chronikUrls, logger: cliDaemonLogger }),
-      logger: cliDaemonLogger
+      logger: cliDaemonLogger,
+      queueLimit: config.queueLimit,
+      backfillIntervalMs: config.backfillIntervalMs,
+      backfillPageSize: config.backfillPageSize,
+      backfillMaxPagesPerRun: config.backfillMaxPagesPerRun,
+      backfillOverlapPages: config.backfillOverlapPages,
+      readinessMaxLagBlocks: config.readinessMaxLagBlocks
     });
   }
+
+  const app = await factories.createApi({
+    store,
+    ...(indexingEngine === undefined ? {} : { indexingEngine }),
+    ...(config.indexApiToken === undefined ? {} : { indexApiToken: config.indexApiToken }),
+    ...(isIndexRequestService(daemon) ? { indexRequestService: daemon } : {}),
+    publicIndexRateLimitMax: config.publicIndexRateLimitMax,
+    publicIndexRateLimitWindowMs: config.publicIndexRateLimitWindowMs,
+    corsOrigins: config.corsOrigins,
+    trustProxy: config.trustProxy,
+    logger: true
+  });
 
   let shuttingDown = false;
   const shutdown = async (): Promise<void> => {
@@ -86,13 +100,20 @@ export async function runIndexerCli(options: RunIndexerCliOptions = {}): Promise
   });
 
   try {
-    await daemon?.start();
     const address = await app.listen({ host: config.host, port: config.port });
     options.onListening?.(address);
+    await daemon?.start();
   } catch (error) {
     await shutdown();
     throw error;
   }
+}
+
+function isIndexRequestService(daemon: IndexerDaemonRuntime | undefined): daemon is IndexerDaemonRuntime & IndexRequestService {
+  return daemon !== undefined &&
+    typeof daemon.requestIndex === "function" &&
+    typeof daemon.indexAndWait === "function" &&
+    typeof daemon.getStatus === "function";
 }
 
 function createIndexingEngine(config: IndexerCliConfig, store: MemoStore): IndexingEngine | undefined {

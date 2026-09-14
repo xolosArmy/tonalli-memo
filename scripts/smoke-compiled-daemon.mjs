@@ -19,6 +19,7 @@ class FakeConnection {
 class FakeLiveSource {
   constructor() {
     this.tipHeight = 777;
+    this.tipHash = "f".repeat(64);
     this.connection = null;
   }
 
@@ -29,6 +30,23 @@ class FakeLiveSource {
 
   async getTipHeight() {
     return this.tipHeight;
+  }
+
+  async getChainTip() {
+    return { height: this.tipHeight, hash: this.tipHash };
+  }
+
+  async getBlockHash(height) {
+    if (height !== this.tipHeight) {
+      throw new Error("Unexpected smoke-test block height.");
+    }
+    return this.tipHash;
+  }
+
+  async listTonalliConfirmedTxs(_protocol, page, _pageSize) {
+    void _protocol;
+    void _pageSize;
+    return { txs: [], page, numPages: 0, numTxs: 0 };
   }
 
   async listTonalliUnconfirmedTxids() {
