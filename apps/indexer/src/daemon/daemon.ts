@@ -139,13 +139,18 @@ export class IndexerDaemon {
     if (transaction?.isActive === true && this.options.store.getVerificationRecord(txid) !== null) {
       return { status: "already_indexed", completion: null };
     }
+    if (!this.acceptsExternalIndexRequests()) {
+      return { status: "stopped", completion: null };
+    }
     const queued = this.enqueueTransaction(txid, {});
     return { status: queued.status, completion: queued.completion };
   }
 
   async indexAndWait(txid: string, options: IndexTransactionOptions = {}): Promise<IndexingOutcome> {
-    const queued = this.enqueueTransaction(txid, options);
-    return await this.awaitIndexingOutcome(txid, queued);
+    if (!this.acceptsExternalIndexRequests()) {
+      throw new IndexQueueUnavailableError("stopped");
+    }
+    return await this.indexAndWaitInternal(txid, options);
   }
 
   async start(): Promise<void> {
@@ -356,8 +361,8 @@ export class IndexerDaemon {
           this.options.logger.warn("Indexer daemon detected a chain reorganization during confirmed backfill.", {
             checkpointAction: "full-revalidation"
           });
-          await this.reconcileKnownConfirmed(0);
         }
+        await this.reconcileKnownConfirmed(reorgDetected ? 0 : this.confirmedRevalidationHeight());
 
         const results: ProtocolBackfillResult[] = [];
         for (const discovery of DISCOVERY_PROTOCOLS) {
@@ -432,7 +437,7 @@ export class IndexerDaemon {
         if (indexedTxids.has(candidate.txid)) {
           continue;
         }
-        const outcome = await this.indexAndWait(candidate.txid);
+        const outcome = await this.indexAndWaitInternal(candidate.txid);
         if (!outcome.persistedRecord) {
           this.options.logger.error("Confirmed Tonalli candidate was not processed durably.", {
             protocol,
@@ -543,16 +548,19 @@ export class IndexerDaemon {
   }
 
   private async reconcileKnownConfirmed(minimumHeight: number): Promise<void> {
-    const tipHeight = await this.options.liveSource.getTipHeight();
-    this.chronikHeight = tipHeight;
+    let tipHeight: number | null = null;
     let cursor: ConfirmedTransactionCursorRow | null = null;
     while (true) {
       const rows = this.options.store.listActiveConfirmedTransactionsPage(minimumHeight, this.reconcileLimit(), cursor);
       if (rows.length === 0) {
         return;
       }
+      if (tipHeight === null) {
+        tipHeight = await this.options.liveSource.getTipHeight();
+        this.chronikHeight = tipHeight;
+      }
       for (const row of rows) {
-        const outcome = await this.indexAndWait(row.txid, { tipHeight });
+        const outcome = await this.indexAndWaitInternal(row.txid, { tipHeight });
         if (outcome.verificationResult.status === "TRANSACTION_NOT_FOUND") {
           this.options.store.markTransactionInactive(row.txid, "INVALIDATED");
         } else if (!outcome.persistedRecord) {
@@ -564,6 +572,26 @@ export class IndexerDaemon {
         return;
       }
     }
+  }
+
+  private confirmedRevalidationHeight(): number {
+    const checkpoints = this.options.store.listBackfillCheckpoints();
+    if (checkpoints.length !== DISCOVERY_PROTOCOLS.length) {
+      return 0;
+    }
+    return Math.min(...checkpoints.map((checkpoint) => checkpoint.blockHeight)) + 1;
+  }
+
+  private acceptsExternalIndexRequests(): boolean {
+    return !this.stopping && this.state === "running";
+  }
+
+  private async indexAndWaitInternal(
+    txid: string,
+    options: IndexTransactionOptions = {}
+  ): Promise<IndexingOutcome> {
+    const queued = this.enqueueTransaction(txid, options);
+    return await this.awaitIndexingOutcome(txid, queued);
   }
 
   private enqueueTransactionWithTip(txid: string): void {

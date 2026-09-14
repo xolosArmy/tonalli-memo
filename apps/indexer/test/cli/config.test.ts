@@ -113,7 +113,7 @@ describe("indexer CLI configuration", () => {
         })
       }
     });
-    expect(events).toEqual(["daemon.start", "listen"]);
+    expect(events).toEqual(["listen", "daemon.start"]);
   });
 
   it("startup failure cleans all resources", async () => {
@@ -123,7 +123,13 @@ describe("indexer CLI configuration", () => {
         env: { DB_PATH: ":memory:", DAEMON_ENABLED: "true", CHRONIK_URLS: "https://chronik.example" },
         factories: {
           openDatabase: () => ({ connection: {}, close: () => events.push("database.close") }) as never,
-          createApi: async () => ({ close: async () => events.push("app.close") }) as unknown as FastifyInstance,
+          createApi: async () => ({
+            listen: async () => {
+              events.push("listen");
+              return "http://127.0.0.1:0";
+            },
+            close: async () => events.push("app.close")
+          }) as unknown as FastifyInstance,
           createDaemon: () => ({
             async start(): Promise<void> {
               events.push("daemon.start");
@@ -136,7 +142,7 @@ describe("indexer CLI configuration", () => {
         }
       })
     ).rejects.toThrow("start failed");
-    expect(events).toEqual(["daemon.start", "daemon.stop", "app.close", "database.close"]);
+    expect(events).toEqual(["listen", "daemon.start", "daemon.stop", "app.close", "database.close"]);
   });
 
   it("closes daemon, Fastify, and database in order and attempts all after failures", async () => {

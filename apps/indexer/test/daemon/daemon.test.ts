@@ -149,6 +149,7 @@ class FakeStore {
   inactive: Array<{ readonly txid: string; readonly reason: string }> = [];
   unconfirmed: string[] = [];
   confirmed: string[] = [];
+  confirmedHeights = new Map<string, number>();
   checkpoints = new Map<string, BackfillCheckpoint>();
 
   markTransactionInactive(txid: string, reason: "REMOVED_FROM_MEMPOOL" | "INVALIDATED"): { readonly changed: boolean; readonly txid: string } {
@@ -170,12 +171,14 @@ class FakeStore {
     limit = 1000,
     after: ConfirmedTransactionCursorRow | null = null
   ): readonly ConfirmedTransactionCursorRow[] {
-    void minimumHeight;
-    const start = after === null ? 0 : this.confirmed.indexOf(after.txid) + 1;
-    return this.confirmed.slice(start, start + limit).map((confirmedTxid, index) => ({
-      txid: confirmedTxid,
-      blockHeight: 700 + start + index
-    }));
+    const rows = this.confirmed
+      .map((confirmedTxid, index) => ({
+        txid: confirmedTxid,
+        blockHeight: this.confirmedHeights.get(confirmedTxid) ?? 700 + index
+      }))
+      .filter((row) => row.blockHeight >= minimumHeight);
+    const start = after === null ? 0 : rows.findIndex((row) => row.txid === after.txid) + 1;
+    return rows.slice(start, start + limit);
   }
 
   getTransaction(): null {
@@ -553,6 +556,37 @@ describe("IndexerDaemon", () => {
     await daemon.stop();
   });
 
+  it("revalidates confirmed rows above the checkpoint after an offline shallow reorganization", async () => {
+    const staleTxid = txid("6");
+    const { daemon, engine, store } = daemonFixture();
+    store.confirmed = [staleTxid];
+    store.confirmedHeights.set(staleTxid, 900);
+    for (const protocol of ["TM0", "TM1"] as const) {
+      store.upsertBackfillCheckpoint({
+        protocol,
+        lokadId: protocol === "TM0" ? "544d307c" : "544d4d00",
+        txCountCursor: 0,
+        historyTxCount: 0,
+        complete: true,
+        blockHeight: 899,
+        blockHash: txid("e"),
+        updatedAt: 1,
+        lastSuccessAt: 1
+      });
+    }
+    engine.results.set(staleTxid, {
+      verificationResult: { status: "TRANSACTION_NOT_FOUND" },
+      attemptId: 1,
+      persistedRecord: false
+    });
+
+    await daemon.start();
+
+    expect(engine.calls.map((call) => call.txid)).toContain(staleTxid);
+    expect(store.inactive).toContainEqual({ txid: staleTxid, reason: "INVALIDATED" });
+    await daemon.stop();
+  });
+
   it("reports queue saturation with stable status and activity counters", async () => {
     const { daemon, engine } = daemonFixture({ queueLimit: 1 });
     await daemon.start();
@@ -565,6 +599,23 @@ describe("IndexerDaemon", () => {
     expect(daemon.getStatus()).toMatchObject({ queueSize: 1, queueRejected: 1 });
     blocked.resolve();
     await daemon.stop();
+  });
+
+  it("rejects new public and administrative indexing work as soon as shutdown starts", async () => {
+    const { daemon, engine } = daemonFixture();
+    await daemon.start();
+    const blocked = deferred<void>();
+    engine.deferredRuns.push(blocked);
+    expect(daemon.requestIndex(txid("1")).status).toBe("queued");
+    await vi.waitFor(() => expect(engine.calls.map((call) => call.txid)).toContain(txid("1")));
+
+    const stopping = daemon.stop();
+
+    expect(daemon.requestIndex(txid("2")).status).toBe("stopped");
+    await expect(daemon.indexAndWait(txid("3"))).rejects.toMatchObject({ reason: "stopped" });
+    blocked.resolve();
+    await stopping;
+    expect(daemon.getStatus().queueCompleted).toBe(1);
   });
 
   it("rapid connection callbacks serialize reconciliation without overlap", async () => {

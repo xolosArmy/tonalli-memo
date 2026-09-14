@@ -100,9 +100,9 @@ export async function runIndexerCli(options: RunIndexerCliOptions = {}): Promise
   });
 
   try {
-    await daemon?.start();
     const address = await app.listen({ host: config.host, port: config.port });
     options.onListening?.(address);
+    await daemon?.start();
   } catch (error) {
     await shutdown();
     throw error;
