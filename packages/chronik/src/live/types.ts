@@ -111,7 +111,7 @@ export interface ChronikLiveWsConfig {
 export interface ChronikLiveWsEndpoint {
   /** Node chronik-client exposes its underlying ws WebSocket for ping/pong. */
   readonly ws?: import("./heartbeat.js").ChronikHeartbeatSocket;
-  waitForOpen(): Promise<void;
+  waitForOpen(): Promise<void>;
   subscribeToLokadId(lokadId: string): void;
   subscribeToBlocks(): void;
   close(): void;
