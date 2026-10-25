@@ -1,3 +1,4 @@
+/* global Buffer, setTimeout, fetch, console */
 // Local-only integration test of the real chronik-client 4.3.0 transport.
 // No internet, credentials, database or eCash transactions involved.
 import assert from "node:assert/strict";
