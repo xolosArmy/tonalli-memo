@@ -246,6 +246,8 @@ const daemonStatus = {
       required: [
         "state",
         "websocketConnected",
+        "websocketLastPongAt",
+        "websocketHeartbeatTimeouts",
         "chronikHeight",
         "lastEventAt",
         "lastSuccessfulIndexAt",
@@ -264,6 +266,8 @@ const daemonStatus = {
       properties: {
         state: { type: "string", enum: ["stopped", "starting", "running", "reconnecting", "stopping", "failed"] },
         websocketConnected: { type: "boolean" },
+        websocketLastPongAt: nullableTimestamp,
+        websocketHeartbeatTimeouts: { type: "integer", minimum: 0 },
         chronikHeight: { type: ["integer", "null"], minimum: 0 },
         lastEventAt: nullableTimestamp,
         lastSuccessfulIndexAt: nullableTimestamp,

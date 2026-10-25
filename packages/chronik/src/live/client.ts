@@ -1,6 +1,7 @@
 import { ChronikClient } from "chronik-client";
 import { TONALLI_DISCOVERY_LOKAD_IDS, mapChronikLiveMessage } from "./mapper.js";
 import { isCanonicalTxid } from "../txid.js";
+import { ChronikWsHeartbeat } from "./heartbeat.js";
 import type {
   ChronikConfirmedTxPage,
   ChronikLiveConnection,
@@ -20,8 +21,12 @@ const LOKAD_ID_BY_PROTOCOL: Readonly<Record<TonalliDiscoveryProtocol, string>> =
 class ChronikClientLiveSource implements ChronikLiveSource {
   private readonly source: ChronikLiveSdkSource;
   private readonly logger: ChronikLiveOptions["logger"];
+  private readonly heartbeatIntervalMs: number;
+  private readonly heartbeatTimeoutMs: number;
 
   constructor(options: ChronikLiveOptions = {}) {
+    this.heartbeatIntervalMs = options.heartbeatIntervalMs ?? 30_000;
+    this.heartbeatTimeoutMs = options.heartbeatTimeoutMs ?? 15_000;
     if (options.source === undefined) {
       if (options.urls === undefined || options.urls.length === 0) {
         throw new Error("At least one Chronik URL is required when no live source is supplied.");
@@ -34,7 +39,7 @@ class ChronikClientLiveSource implements ChronikLiveSource {
   }
 
   createConnection(handlers: ChronikLiveHandlers): ChronikLiveConnection {
-    return new ChronikClientLiveConnection(this.source, handlers, this.logger);
+    return new ChronikClientLiveConnection(this.source, handlers, this.logger, this.heartbeatIntervalMs, this.heartbeatTimeoutMs);
   }
 
   async getTipHeight(): Promise<number> {
@@ -91,51 +96,151 @@ class ChronikClientLiveSource implements ChronikLiveSource {
   }
 }
 
+/**
+ * Owns each WebSocket session rather than delegating reconnect to the SDK.
+ * chronik-client 4.3.0 reconnect has an unhandled async rejection when every
+ * endpoint is unavailable and can duplicate its subscription registry.
+ * A new WsEndpoint on every attempt avoids both code paths.
+ */
 class ChronikClientLiveConnection implements ChronikLiveConnection {
   private endpoint: ChronikLiveWsEndpoint | null = null;
+  private readonly heartbeat: ChronikWsHeartbeat;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryFailures = 0;
+  private reconnecting = false;
+  private stopped = true;
 
   constructor(
     private readonly source: ChronikLiveSdkSource,
     private readonly handlers: ChronikLiveHandlers,
-    private readonly logger: ChronikLiveOptions["logger"]
-  ) {}
+    private readonly logger: ChronikLiveOptions["logger"],
+    heartbeatIntervalMs: number,
+    heartbeatTimeoutMs: number
+  ) {
+    this.heartbeat = new ChronikWsHeartbeat(
+      heartbeatIntervalMs,
+      heartbeatTimeoutMs,
+      () => this.handlers.onHeartbeatPong?.(),
+      () => {
+        this.handlers.onHeartbeatTimeout?.();
+        this.handlers.onError?.(new Error("Chronik WebSocket heartbeat timed out."));
+        const expired = this.endpoint;
+        if (expired !== null) this.handleDisconnect(expired);
+        // ChronikWsHeartbeat terminates the expired raw socket after this callback.
+      }
+    );
+  }
+
+  private isCurrent(endpoint: ChronikLiveWsEndpoint): boolean {
+    return !this.stopped && this.endpoint === endpoint;
+  }
+
+  private attachHeartbeat(endpoint: ChronikLiveWsEndpoint): void {
+    const socket = endpoint.ws;
+    if (socket === undefined || typeof socket.ping !== "function" ||
+        typeof socket.terminate !== "function" || typeof socket.on !== "function" ||
+        typeof socket.off !== "function") {
+      throw new Error("Chronik SDK WebSocket lacks Node ping/pong support.");
+    }
+    this.heartbeat.attach(socket);
+  }
+
+  private handleDisconnect(endpoint: ChronikLiveWsEndpoint): void {
+    if (!this.isCurrent(endpoint)) return;
+    this.heartbeat.stop();
+    this.endpoint = null;
+    if (!this.reconnecting) {
+      this.reconnecting = true;
+      this.handlers.onReconnect?.();
+    }
+    this.scheduleRetry();
+  }
+
+  private scheduleRetry(): void {
+    if (this.stopped || this.retryTimer !== null) return;
+    // Capped exponential backoff: 1, 2, 4, 8, 16, 30 seconds.
+    // One timer at a time; do not keep opening sockets during an outage.
+    const delay = Math.min(30_000, 1_000 * 2 ** Math.min(this.retryFailures, 5));
+    this.retryFailures += 1;
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null;
+      void this.connect();
+    }, delay);
+    this.retryTimer.unref?.();
+  }
+
+  private async connect(): Promise<void> {
+    if (this.stopped || this.endpoint !== null) return;
+    let endpoint: ChronikLiveWsEndpoint | null = null;
+    try {
+      endpoint = this.source.ws({
+        // SDK autoReconnect has an unhandled Promise path and duplicates subs
+        // in the pinned version. All reconnects are supervised here instead.
+        autoReconnect: false,
+        onEnd: () => {
+          if (endpoint !== null) this.handleDisconnect(endpoint);
+        },
+        onError: (error) => {
+          if (endpoint !== null && this.isCurrent(endpoint)) this.handlers.onError?.(error);
+        },
+        onMessage: (message) => {
+          if (endpoint === null || !this.isCurrent(endpoint)) return;
+          try {
+            const mapped = mapChronikLiveMessage(message);
+            if (mapped === null) {
+              this.logger?.warn("Ignored unrecognized Chronik live message.");
+              return;
+            }
+            this.handlers.onEvent(mapped);
+          } catch (error) {
+            this.handlers.onError?.(error);
+          }
+        }
+      });
+      this.endpoint = endpoint;
+      await endpoint.waitForOpen();
+      // stop() may run while waitForOpen is pending. Do not re-arm timers or
+      // write subscriptions if a stale open resolves after shutdown/retry.
+      if (!this.isCurrent(endpoint)) return;
+      for (const lokadId of TONALLI_DISCOVERY_LOKAD_IDS) {
+        endpoint.subscribeToLokadId(lokadId);
+      }
+      endpoint.subscribeToBlocks();
+      if (!this.isCurrent(endpoint)) return;
+      this.attachHeartbeat(endpoint);
+      this.retryFailures = 0;
+      this.reconnecting = false;
+      this.handlers.onConnect?.();
+    } catch (error) {
+      if (this.stopped || (endpoint !== null && !this.isCurrent(endpoint))) return;
+      this.handlers.onError?.(error);
+      if (endpoint === null) {
+        if (!this.reconnecting) {
+          this.reconnecting = true;
+          this.handlers.onReconnect?.();
+        }
+        this.scheduleRetry();
+      } else {
+        this.handleDisconnect(endpoint);
+        endpoint.close();
+      }
+    }
+  }
 
   async start(): Promise<void> {
-    const endpoint = this.source.ws({
-      autoReconnect: true,
-      onConnect: () => {
-        this.handlers.onConnect?.();
-      },
-      onReconnect: () => {
-        this.handlers.onReconnect?.();
-      },
-      onError: (error) => {
-        this.handlers.onError?.(error);
-      },
-      onMessage: (message) => {
-        try {
-          const mapped = mapChronikLiveMessage(message);
-          if (mapped === null) {
-            this.logger?.warn("Ignored unrecognized Chronik live message.");
-            return;
-          }
-          this.handlers.onEvent(mapped);
-        } catch (error) {
-          this.handlers.onError?.(error);
-        }
-      }
-    });
-    this.endpoint = endpoint;
-    await endpoint.waitForOpen();
-    for (const lokadId of TONALLI_DISCOVERY_LOKAD_IDS) {
-      endpoint.subscribeToLokadId(lokadId);
-    }
-    endpoint.subscribeToBlocks();
+    if (!this.stopped) throw new Error("Chronik live connection already started.");
+    this.stopped = false;
+    await this.connect();
   }
 
   async stop(): Promise<void> {
-    this.endpoint?.close();
+    this.stopped = true;
+    this.heartbeat.stop();
+    if (this.retryTimer !== null) clearTimeout(this.retryTimer);
+    this.retryTimer = null;
+    const endpoint = this.endpoint;
     this.endpoint = null;
+    endpoint?.close();
   }
 }
 

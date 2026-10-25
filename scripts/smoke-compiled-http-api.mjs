@@ -102,6 +102,8 @@ const indexingEngine = new IndexingEngine({
 const daemonStatus = {
   state: "running",
   websocketConnected: true,
+  websocketLastPongAt: null,
+  websocketHeartbeatTimeouts: 0,
   chronikHeight: 900010,
   lastEventAt: null,
   lastSuccessfulIndexAt: null,
