@@ -111,6 +111,8 @@ const injectJson = async (
 const readyStatus = (overrides: Partial<IndexerDaemonStatus> = {}): IndexerDaemonStatus => ({
   state: "running",
   websocketConnected: true,
+  websocketLastPongAt: "2026-09-14T00:00:00.000Z",
+  websocketHeartbeatTimeouts: 0,
   chronikHeight: 966781,
   lastEventAt: "2026-09-14T00:00:00.000Z",
   lastSuccessfulIndexAt: "2026-09-14T00:00:01.000Z",
