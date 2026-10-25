@@ -107,6 +107,7 @@ export interface ChronikLiveWsConfig {
   readonly onConnect?: () => void;
   readonly onReconnect?: () => void;
   readonly onError?: (error: unknown) => void;
+  readonly onEnd?: () => void;
   readonly autoReconnect?: boolean;
 }
 
