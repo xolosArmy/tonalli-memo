@@ -42,9 +42,11 @@ class FakeWs {
   blocks = 0;
   closed = false;
   opened = false;
+  pendingOpen: Promise<void> | null = null;
 
   async waitForOpen(): Promise<void> {
     this.opened = true;
+    if (this.pendingOpen !== null) await this.pendingOpen;
   }
 
   subscribeToLokadId(lokadId: string): void {
@@ -61,7 +63,8 @@ class FakeWs {
 }
 
 class FakeSource implements ChronikLiveSdkSource {
-  readonly wsEndpoint = new FakeWs();
+  wsEndpoint = new FakeWs();
+  readonly endpoints: FakeWs[] = [];
   configs: ChronikLiveWsConfig[] = [];
   tipHeight = 123;
   tipHash = "f".repeat(64);
@@ -77,6 +80,8 @@ class FakeSource implements ChronikLiveSdkSource {
 
   ws(config: ChronikLiveWsConfig): FakeWs {
     this.configs.push(config);
+    if (this.endpoints.length > 0) this.wsEndpoint = new FakeWs();
+    this.endpoints.push(this.wsEndpoint);
     return this.wsEndpoint;
   }
 
@@ -134,7 +139,7 @@ describe("Chronik live adapter", () => {
     const connection = live.createConnection({ onEvent: () => undefined });
     await connection.start();
     expect(source.configs).toHaveLength(1);
-    expect(source.configs[0]?.autoReconnect).toBe(true);
+    expect(source.configs[0]?.autoReconnect).toBe(false);
     expect(source.wsEndpoint.opened).toBe(true);
     expect(source.wsEndpoint.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
     expect(source.wsEndpoint.blocks).toBe(1);
@@ -178,10 +183,10 @@ describe("Chronik live adapter", () => {
     });
     await connection.start();
     source.configs[0]?.onMessage?.({ type: "Tx", msgType: "UNRECOGNIZED", txid: "a".repeat(64) });
-    source.configs[0]?.onReconnect?.();
+    source.configs[0]?.onEnd?.();
     source.configs[0]?.onError?.("boom");
     expect(warnings).toEqual(["Ignored unrecognized Chronik live message."]);
-    expect(events).toEqual(["reconnect", "boom"]);
+    expect(events).toEqual(["connect", "reconnect"]);
   });
 
   it("maps tip height and returns deterministic deduplicated unconfirmed TXIDs across both protocols", async () => {
@@ -275,13 +280,17 @@ describe("Chronik WebSocket ping/pong watchdog (M0-A-WS-01)", () => {
     }).createConnection({ onEvent: () => undefined });
     await connection.start();
     const oldSocket = source.wsEndpoint.ws;
-    source.configs[0]?.onReconnect?.();
-    source.wsEndpoint.ws = new FakeHeartbeatSocket();
-    source.configs[0]?.onConnect?.();
+    source.configs[0]?.onEnd?.();
     await vi.advanceTimersByTimeAsync(1000);
+    expect(source.configs).toHaveLength(2);
+    expect(source.configs[1]?.autoReconnect).toBe(false);
     expect(oldSocket.pings).toBe(0);
+    expect(source.wsEndpoint.ws.pings).toBe(0);
+    await vi.advanceTimersByTimeAsync(1000);
     expect(source.wsEndpoint.ws.pings).toBe(1);
     source.wsEndpoint.ws.pong();
+    expect(source.endpoints[0]?.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
+    expect(source.endpoints[1]?.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
     await connection.stop();
   });
 
@@ -298,5 +307,95 @@ describe("Chronik WebSocket ping/pong watchdog (M0-A-WS-01)", () => {
     expect(source.wsEndpoint.ws.terminations).toBe(0);
     expect(source.wsEndpoint.ws.pings).toBe(1);
     expect(source.wsEndpoint.closed).toBe(true);
+  });
+});
+
+describe("Codex P1/P2 SDK-retry and shutdown regression tests", () => {
+  it("retries rejected handshakes with backoff and fresh subscription sets", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    const connect = source.ws.bind(source);
+    let handshakes = 0;
+    source.ws = (config) => {
+      const endpoint = connect(config);
+      handshakes++;
+      if (handshakes === 2 || handshakes === 3) {
+        endpoint.pendingOpen = Promise.reject(new Error("handshake unavailable"));
+      }
+      return endpoint;
+    };
+    let errors = 0;
+    let reconnects = 0;
+    let connects = 0;
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({
+      onEvent: () => undefined,
+      onError: () => { errors++; },
+      onReconnect: () => { reconnects++; },
+      onConnect: () => { connects++; }
+    });
+    await connection.start();
+    const first = source.wsEndpoint;
+    source.configs[0]?.onEnd?.();
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(source.endpoints).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(2_000);
+    expect(source.endpoints).toHaveLength(3);
+    await vi.advanceTimersByTimeAsync(4_000);
+    expect(source.endpoints).toHaveLength(4);
+    expect(errors).toBe(2);
+    expect(reconnects).toBe(1);
+    expect(connects).toBe(2);
+    expect(first.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
+    for (const endpoint of source.endpoints) {
+      expect(endpoint.lokadIds.length).toBeLessThanOrEqual(2);
+      expect(endpoint.blocks).toBeLessThanOrEqual(1);
+    }
+    expect(source.endpoints[3]?.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
+    await connection.stop();
+    await vi.advanceTimersByTimeAsync(35_000);
+    expect(source.endpoints).toHaveLength(4);
+  });
+
+  it("does not re-arm heartbeat if stop occurs before waitForOpen resolves", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    let release!: () => void;
+    source.wsEndpoint.pendingOpen = new Promise<void>((resolve) => { release = resolve; });
+    let connects = 0;
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({
+      onEvent: () => undefined,
+      onConnect: () => { connects++; }
+    });
+    const starting = connection.start();
+    await connection.stop();
+    release();
+    await starting;
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(source.wsEndpoint.ws.pings).toBe(0);
+    expect(source.wsEndpoint.ws.terminations).toBe(0);
+    expect(source.wsEndpoint.lokadIds).toEqual([]);
+    expect(connects).toBe(0);
+    expect(source.wsEndpoint.closed).toBe(true);
+  });
+
+  it("reconnects after a missing pong with a fresh endpoint instead of SDK reconnect", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({ onEvent: () => undefined });
+    await connection.start();
+    await vi.advanceTimersByTimeAsync(1250);
+    expect(source.endpoints[0]?.ws.terminations).toBe(1);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(source.endpoints).toHaveLength(2);
+    expect(source.configs.every((config) => config.autoReconnect === false)).toBe(true);
+    expect(source.endpoints[1]?.lokadIds).toEqual([...TONALLI_DISCOVERY_LOKAD_IDS]);
+    expect(source.endpoints[1]?.blocks).toBe(1);
+    await connection.stop();
   });
 });
