@@ -261,14 +261,15 @@ describe("Chronik WebSocket ping/pong watchdog (M0-A-WS-01)", () => {
       onHeartbeatTimeout: () => { timeouts += 1; }
     });
     await connection.start();
+    const stale = source.wsEndpoint;
     await vi.advanceTimersByTimeAsync(1250);
-    expect(source.wsEndpoint.ws.pings).toBe(1);
-    expect(source.wsEndpoint.ws.terminations).toBe(1);
+    expect(stale.ws.pings).toBe(1);
+    expect(stale.ws.terminations).toBe(1);
     expect(timeouts).toBe(1);
     expect(errors).toHaveLength(1);
     expect((errors[0] as Error).message).toContain("heartbeat timed out");
     await vi.advanceTimersByTimeAsync(4000);
-    expect(source.wsEndpoint.ws.terminations).toBe(1);
+    expect(stale.ws.terminations).toBe(1);
     await connection.stop();
   });
 
