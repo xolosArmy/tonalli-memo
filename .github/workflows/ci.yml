@@ -57,6 +57,9 @@ jobs:
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-chronik.mjs"
 
+      - name: Real Chronik SDK WebSocket retry integration
+        run: node packages/chronik/test/live-sdk-integration.mjs
+
       - name: Compiled verification smoke test
         run: |
           pnpm smoke:compiled-verification
