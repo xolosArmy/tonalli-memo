@@ -1,3 +1,5 @@
+import type { ChronikHeartbeatSocket } from "./heartbeat.js";
+
 export type ChronikLiveTransactionEvent =
   | "added-to-mempool"
   | "removed-from-mempool"
@@ -110,7 +112,7 @@ export interface ChronikLiveWsConfig {
 
 export interface ChronikLiveWsEndpoint {
   /** Node chronik-client exposes its underlying ws WebSocket for ping/pong. */
-  readonly ws?: import("./heartbeat.js").ChronikHeartbeatSocket;
+  readonly ws?: ChronikHeartbeatSocket;
   waitForOpen(): Promise<void>;
   subscribeToLokadId(lokadId: string): void;
   subscribeToBlocks(): void;
