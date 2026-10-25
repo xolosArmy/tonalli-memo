@@ -72,6 +72,8 @@ export class IndexerDaemon {
   private stopping = false;
   private periodicTimer: ReturnType<typeof setInterval> | null = null;
   private websocketConnected = false;
+  private websocketLastPongAtMs: number | null = null;
+  private websocketHeartbeatTimeouts = 0;
   private chronikHeight: number | null = null;
   private lastEventAtMs: number | null = null;
   private lastSuccessfulIndexAtMs: number | null = null;
@@ -116,6 +118,8 @@ export class IndexerDaemon {
     return {
       state: this.state,
       websocketConnected: this.websocketConnected,
+      websocketLastPongAt: toIso(this.websocketLastPongAtMs),
+      websocketHeartbeatTimeouts: this.websocketHeartbeatTimeouts,
       chronikHeight: this.chronikHeight,
       lastEventAt: toIso(this.lastEventAtMs),
       lastSuccessfulIndexAt: toIso(this.lastSuccessfulIndexAtMs),
@@ -226,6 +230,15 @@ export class IndexerDaemon {
       this.connection = this.options.liveSource.createConnection({
         onEvent: (event) => {
           this.handleLiveEvent(event);
+        },
+        onHeartbeatPong: () => {
+          this.websocketLastPongAtMs = Date.now();
+        },
+        onHeartbeatTimeout: () => {
+          this.websocketHeartbeatTimeouts += 1;
+          this.websocketConnected = false;
+          if (!this.stopping && this.state === "running") this.state = "reconnecting";
+          this.options.logger.warn("Indexer daemon Chronik heartbeat timeout.", { state: this.state });
         },
         onConnect: () => {
           this.handleConnect();

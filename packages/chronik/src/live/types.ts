@@ -43,6 +43,8 @@ export type ChronikLiveEvent =
 
 export interface ChronikLiveHandlers {
   readonly onEvent: (event: ChronikLiveEvent) => void;
+  readonly onHeartbeatPong?: () => void;
+  readonly onHeartbeatTimeout?: () => void;
   readonly onConnect?: () => void;
   readonly onReconnect?: () => void;
   readonly onError?: (error: unknown) => void;
@@ -71,6 +73,8 @@ export interface ChronikLiveLogger {
 }
 
 export interface ChronikLiveOptions {
+  readonly heartbeatIntervalMs?: number;
+  readonly heartbeatTimeoutMs?: number;
   readonly urls?: readonly string[];
   readonly source?: ChronikLiveSdkSource;
   readonly logger?: ChronikLiveLogger;
@@ -105,7 +109,9 @@ export interface ChronikLiveWsConfig {
 }
 
 export interface ChronikLiveWsEndpoint {
-  waitForOpen(): Promise<void>;
+  /** Node chronik-client exposes its underlying ws WebSocket for ping/pong. */
+  readonly ws?: import("./heartbeat.js").ChronikHeartbeatSocket;
+  waitForOpen(): Promise<void;
   subscribeToLokadId(lokadId: string): void;
   subscribeToBlocks(): void;
   close(): void;

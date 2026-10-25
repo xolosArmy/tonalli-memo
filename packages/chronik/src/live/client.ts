@@ -1,6 +1,7 @@
 import { ChronikClient } from "chronik-client";
 import { TONALLI_DISCOVERY_LOKAD_IDS, mapChronikLiveMessage } from "./mapper.js";
 import { isCanonicalTxid } from "../txid.js";
+import { ChronikWsHeartbeat } from "./heartbeat.js";
 import type {
   ChronikConfirmedTxPage,
   ChronikLiveConnection,
@@ -20,8 +21,12 @@ const LOKAD_ID_BY_PROTOCOL: Readonly<Record<TonalliDiscoveryProtocol, string>> =
 class ChronikClientLiveSource implements ChronikLiveSource {
   private readonly source: ChronikLiveSdkSource;
   private readonly logger: ChronikLiveOptions["logger"];
+  private readonly heartbeatIntervalMs: number;
+  private readonly heartbeatTimeoutMs: number;
 
   constructor(options: ChronikLiveOptions = {}) {
+    this.heartbeatIntervalMs = options.heartbeatIntervalMs ?? 30_000;
+    this.heartbeatTimeoutMs = options.heartbeatTimeoutMs ?? 15_000;
     if (options.source === undefined) {
       if (options.urls === undefined || options.urls.length === 0) {
         throw new Error("At least one Chronik URL is required when no live source is supplied.");
@@ -34,7 +39,7 @@ class ChronikClientLiveSource implements ChronikLiveSource {
   }
 
   createConnection(handlers: ChronikLiveHandlers): ChronikLiveConnection {
-    return new ChronikClientLiveConnection(this.source, handlers, this.logger);
+    return new ChronikClientLiveConnection(this.source, handlers, this.logger, this.heartbeatIntervalMs, this.heartbeatTimeoutMs);
   }
 
   async getTipHeight(): Promise<number> {
@@ -93,20 +98,58 @@ class ChronikClientLiveSource implements ChronikLiveSource {
 
 class ChronikClientLiveConnection implements ChronikLiveConnection {
   private endpoint: ChronikLiveWsEndpoint | null = null;
+  private readonly heartbeat: ChronikWsHeartbeat;
+  private stopped = false;
 
   constructor(
     private readonly source: ChronikLiveSdkSource,
     private readonly handlers: ChronikLiveHandlers,
-    private readonly logger: ChronikLiveOptions["logger"]
-  ) {}
+    private readonly logger: ChronikLiveOptions["logger"],
+    heartbeatIntervalMs: number,
+    heartbeatTimeoutMs: number
+  ) {
+    this.heartbeat = new ChronikWsHeartbeat(
+      heartbeatIntervalMs,
+      heartbeatTimeoutMs,
+      () => this.handlers.onHeartbeatPong?.(),
+      () => {
+        this.handlers.onHeartbeatTimeout?.();
+        this.handlers.onError?.(new Error("Chronik WebSocket heartbeat timed out."));
+      }
+    );
+  }
+
+  private attachHeartbeat(endpoint: ChronikLiveWsEndpoint): void {
+    const socket = endpoint.ws;
+    if (socket === undefined || typeof socket.ping !== "function" ||
+        typeof socket.terminate !== "function" || typeof socket.on !== "function" ||
+        typeof socket.off !== "function") {
+      throw new Error("Chronik SDK WebSocket lacks Node ping/pong support.");
+    }
+    this.heartbeat.attach(socket);
+  }
 
   async start(): Promise<void> {
+    this.stopped = false;
     const endpoint = this.source.ws({
       autoReconnect: true,
       onConnect: () => {
+        if (this.stopped) return;
+        // The SDK can reconnect its own websocket without recreating this adapter.
+        // Bind pong to the new socket on every successful connection.
+        try {
+          this.attachHeartbeat(endpoint);
+        } catch (error) {
+          this.handlers.onError?.(error);
+          this.handlers.onReconnect?.();
+          endpoint.close();
+          return;
+        }
         this.handlers.onConnect?.();
       },
       onReconnect: () => {
+        if (this.stopped) return;
+        this.heartbeat.stop();
         this.handlers.onReconnect?.();
       },
       onError: (error) => {
@@ -131,9 +174,14 @@ class ChronikClientLiveConnection implements ChronikLiveConnection {
       endpoint.subscribeToLokadId(lokadId);
     }
     endpoint.subscribeToBlocks();
+    // Some test adapters do not invoke onConnect when waitForOpen resolves.
+    // Also ensures the production connection is actively probed from startup.
+    this.attachHeartbeat(endpoint);
   }
 
   async stop(): Promise<void> {
+    this.stopped = true;
+    this.heartbeat.stop();
     this.endpoint?.close();
     this.endpoint = null;
   }

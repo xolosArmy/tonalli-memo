@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { TM1_LOKAD_ID_HEX } from "@xolosarmy/tonalli-memo-protocol";
 import {
   TM0_LOKAD_ID,
@@ -10,7 +10,34 @@ import {
 } from "../src/index.js";
 import type { ChronikLiveSdkSource, ChronikLiveWsConfig } from "../src/live/types.js";
 
+class FakeHeartbeatSocket {
+  pings = 0;
+  terminations = 0;
+  private readonly listeners = new Set<() => void>();
+
+  on(_event: "pong", listener: () => void): void {
+    this.listeners.add(listener);
+  }
+
+  off(_event: "pong", listener: () => void): void {
+    this.listeners.delete(listener);
+  }
+
+  ping(): void {
+    this.pings += 1;
+  }
+
+  terminate(): void {
+    this.terminations += 1;
+  }
+
+  pong(): void {
+    for (const listener of this.listeners) listener();
+  }
+}
+
 class FakeWs {
+  ws = new FakeHeartbeatSocket();
   readonly lokadIds: string[] = [];
   blocks = 0;
   closed = false;
@@ -84,6 +111,8 @@ class FakeSource implements ChronikLiveSdkSource {
     };
   }
 }
+
+afterEach(() => vi.useRealTimers());
 
 describe("Chronik live adapter", () => {
   it("exports explicit TM0 and TM1 Draft 0.2 discovery IDs while preserving the legacy alias", () => {
@@ -186,5 +215,88 @@ describe("Chronik live adapter", () => {
     source.failLokadId = TM1_DRAFT_02_LOKAD_ID;
     const live = createChronikLiveSource({ source });
     await expect(live.listTonalliUnconfirmedTxids()).rejects.toThrow(`failed ${TM1_DRAFT_02_LOKAD_ID}`);
+  });
+});
+
+describe("Chronik WebSocket ping/pong watchdog (M0-A-WS-01)", () => {
+  it("keeps a quiet chain connected while pongs continue", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    let errors = 0;
+    let pongs = 0;
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({
+      onEvent: () => undefined,
+      onError: () => { errors += 1; },
+      onHeartbeatPong: () => { pongs += 1; }
+    });
+    await connection.start();
+    for (let i = 0; i < 5; i++) {
+      await vi.advanceTimersByTimeAsync(1000);
+      source.wsEndpoint.ws.pong();
+    }
+    expect(source.wsEndpoint.ws.pings).toBe(5);
+    expect(source.wsEndpoint.ws.terminations).toBe(0);
+    expect(pongs).toBe(5);
+    expect(errors).toBe(0);
+    await connection.stop();
+  });
+
+  it("terminates a half-open socket after a missing pong, without block events", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    let timeouts = 0;
+    const errors: unknown[] = [];
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({
+      onEvent: () => undefined,
+      onError: (error) => errors.push(error),
+      onHeartbeatTimeout: () => { timeouts += 1; }
+    });
+    await connection.start();
+    await vi.advanceTimersByTimeAsync(1250);
+    expect(source.wsEndpoint.ws.pings).toBe(1);
+    expect(source.wsEndpoint.ws.terminations).toBe(1);
+    expect(timeouts).toBe(1);
+    expect(errors).toHaveLength(1);
+    expect((errors[0] as Error).message).toContain("heartbeat timed out");
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(source.wsEndpoint.ws.terminations).toBe(1);
+    await connection.stop();
+  });
+
+  it("attaches to the replacement socket on SDK reconnect", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({ onEvent: () => undefined });
+    await connection.start();
+    const oldSocket = source.wsEndpoint.ws;
+    source.configs[0]?.onReconnect?.();
+    source.wsEndpoint.ws = new FakeHeartbeatSocket();
+    source.configs[0]?.onConnect?.();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(oldSocket.pings).toBe(0);
+    expect(source.wsEndpoint.ws.pings).toBe(1);
+    source.wsEndpoint.ws.pong();
+    await connection.stop();
+  });
+
+  it("cleans up pings and timeouts on shutdown", async () => {
+    vi.useFakeTimers();
+    const source = new FakeSource();
+    const connection = createChronikLiveSource({
+      source, heartbeatIntervalMs: 1000, heartbeatTimeoutMs: 250
+    }).createConnection({ onEvent: () => undefined });
+    await connection.start();
+    await vi.advanceTimersByTimeAsync(1000);
+    await connection.stop();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(source.wsEndpoint.ws.terminations).toBe(0);
+    expect(source.wsEndpoint.ws.pings).toBe(1);
+    expect(source.wsEndpoint.closed).toBe(true);
   });
 });

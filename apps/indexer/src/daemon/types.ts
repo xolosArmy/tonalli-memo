@@ -9,6 +9,8 @@ export type IndexerDaemonState = "stopped" | "starting" | "running" | "reconnect
 export interface IndexerDaemonStatus {
   readonly state: IndexerDaemonState;
   readonly websocketConnected: boolean;
+  readonly websocketLastPongAt: string | null;
+  readonly websocketHeartbeatTimeouts: number;
   readonly chronikHeight: number | null;
   readonly lastEventAt: string | null;
   readonly lastSuccessfulIndexAt: string | null;
