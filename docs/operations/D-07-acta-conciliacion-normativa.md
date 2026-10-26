@@ -19,7 +19,7 @@
 
 | ID | Estado | Propuesta y alcance |
 | --- | --- | --- |
-| D07-R1 — múltiples sobres | **ACEPTADO como dirección; PENDIENTE DE CONFORMIDAD en alcance exacto** | Rechazar una transacción con **más de un candidato TM1**, sin elegir arbitrariamente el primer output. `tm1-spec.md` define `MULTIPLE_MEMOS`. El verificador actual retorna `MULTIPLE_MEMOS` con más de un candidato *en total* (TM0+TM1), por lo que deben aclararse y probarse las mezclas TM0/TM1 y outputs ajenos antes de declarar plena equivalencia. |
+| D07-R1 — múltiples sobres | **ACEPTADO como dirección; PENDIENTE DE CONFORMIDAD en interoperabilidad y alcance de aplicación** | **TM1 Wire Protocol:** múltiples candidatos TM1 se rechazan; salidas OP_RETURN ajenas pueden coexistir. **Tonalli Memo Verifier Policy:** candidatos Tonalli combinados TM0+TM1 se rechazan actualmente como `MULTIPLE_MEMOS`. La política de aplicación no se convierte automáticamente en una regla del formato TM1. Falta un test específico de coexistencia con marcador ajeno y delimitar cobertura de sobres malformados. |
 | D07-R2 — autoría | **ACEPTADO** | La autoría se deriva del input especificado por el byte `author_input_index` (0–255 y dentro del rango real de inputs), **no necesariamente input 0**. El prevout seleccionado debe ser P2PKH estándar; comprobar scriptSig, hash de clave pública y política sighash, con las condiciones de confianza del verificador documentadas. |
 | D07-R3 — P2SH/multifirma | **ACEPTADO (exclusión de v1.0); DIFERIDO (extensiones)** | No admitir P2SH, multisig, covenant u otros scripts como fuente de autoría TM1 Core v1.0. No se les declara inválidos para eCash; solo **no compatibles con autoría TM1 v1.0**. Una eventual extensión requiere especificación y revisión independientes. |
 | D07-R4 — checkpoints/rate limiting | **ACEPTADO como política operativa, NO regla de bytes de consenso** | Backfill, reconciliación, paginación, límites de tasa, retry/backoff y checkpoints locales son mecanismos del indexador; nunca autoridad sobre datos on-chain. **No establecer backups de SQLite obligatorios** ni asumir una reconstrucción completa demostrada. |
@@ -34,11 +34,28 @@ El lenguaje «ACEPTADO» de esta matriz representa **la propuesta de decisiones 
 
 La auditoría D-07 describe el input 0 como obligatorio, pero la especificación Draft 0.2 señala que **los verificadores NO DEBEN suponer input 0**; es solo el valor recomendado para publicaciones ordinarias. El encoder `encodeTm1Post` acepta 0–255, y `parseTm1Output` preserva ese byte. `verifyNormalizedTransaction` llama a `verifyTm1DesignatedInput(transaction, memo.authorInputIndex)`. **Criterio de conciliación:** conservar el índice explícito. No reinterpretar publicaciones históricas.
 
-### 3.2 Cardinalidad de candidatos — regla ya escrita, matiz de implementación pendiente
+### 3.2 Cardinalidad — frontera entre TM1 Wire Protocol y Tonalli Memo Verifier Policy
 
-La sección 2 de `tm1-spec.md` establece rechazo de **más de un candidato TM1**, y permite que un OP_RETURN de otro protocolo coexista. `findMemoCandidates` combina candidatos TM0 y TM1; `verifyNormalizedTransaction` devuelve `MULTIPLE_MEMOS` si la lista combinada tiene longitud mayor que uno. Por tanto, el código implementa actualmente una política potencialmente **más estricta** que la regla específica TM1 de Draft 0.2.
+**TM1 Wire Protocol:** la [especificación Draft 0.2](../protocol/tm1-spec.md) exige exactamente un candidato TM1 por transacción y `MULTIPLE_MEMOS` cuando hay dos o más. También permite otros `OP_RETURN` ajenos a TM1. La mera existencia de un candidato TM0 no constituye otro candidato **TM1**.
 
-**Puerta de conformidad:** fijar explícitamente la semántica normativa de TM1+TM0, TM1+otro OP_RETURN, dos candidatos TM1 (incluidos sobres malformados tras LOKAD reconocido), y múltiples candidatos TM0; agregar/ejecutar vectores transaccionales antes de declarar compatible el alcance. No resolverlo por preferencia implícita por el primer output.
+**Tonalli Memo Verifier Policy (aplicación):** [`findMemoCandidates`](../../packages/verification/src/candidates.ts) combina candidatos TM0 y TM1; [`verifyNormalizedTransaction`](../../packages/verification/src/verify-normalized.ts) retorna `{status: "MULTIPLE_MEMOS", ...}` si la lista combinada contiene más de un candidato. Es un **resultado estructurado**, no una excepción y no declara inválida la transacción según el consenso eCash. La política del verificador puede ser más restrictiva para el read model sin redefinir el formato TM1 interoperable.
+
+#### Matriz de conformidad — evidencia existente vs. pruebas pendientes
+
+| Combinación sintética | Comportamiento actual o esperado | Sustento | Estado de evidencia |
+| --- | --- | --- | --- |
+| TM1 único válido, autoría verificable | `VERIFIED_TM1` | [`tm1-integration.test.ts`](../../packages/verification/test/tm1-integration.test.ts), caso `verifies one TM1 candidate through the designated input` | **Cubierto en test** |
+| Dos candidatos TM1 | `MULTIPLE_MEMOS` | Vectores transaccionales inválidos y lógica de cardinalidad en `verify-normalized.ts` | **Cubierto por vectores e implementación** |
+| TM1 y TM0 en outputs separados | `MULTIPLE_MEMOS`, candidatos `["TM1", "TM0"]` | [`tm1-integration.test.ts`](../../packages/verification/test/tm1-integration.test.ts), caso `fails closed when independent TM0 and TM1 candidates coexist` | **Cubierto en test explícito** |
+| TM1 + OP_RETURN con marcador ajeno a TM0/TM1 | No debe provocar `MULTIPLE_MEMOS` únicamente por coexistencia; el TM1 se evalúa según las demás reglas | [`tm1-spec.md`](../protocol/tm1-spec.md), sección 2; filtros de `candidates.ts` | **Inferencia del código; test específico pendiente** |
+| Dos candidatos TM0 | `MULTIPLE_MEMOS` | [`verify-normalized.test.ts`](../../packages/verification/test/verify-normalized.test.ts), `returns coherent MULTIPLE_MEMOS for two valid candidates before protocol selection` | **Cubierto en test explícito** |
+| TM1 válido + segundo candidato TM1 malformado tras reconocer LOKAD | `MULTIPLE_MEMOS` antes de interpretar el segundo sobre | `isTm1CandidateScript`, enumeración de candidatos y cardinalidad previa | **Derivado del código; ampliar cobertura específica** |
+
+**Precisión sobre CI:** la prueba TM1+TM0 ya existía antes del PR #31 y está incluida en la suite; el CI de su primer commit terminó `success`. No debe presentarse ese CI como prueba de un nuevo test TM1+OP_RETURN ajeno: ese escenario todavía requiere un caso dedicado. No se han emitido transacciones ni se ha alterado producción.
+
+**Resolución normativa propuesta:** conservar unicidad **TM1** en la especificación del sobre; documentar separadamente el rechazo de **TM0+TM1** como política de aceptación del verificador Tonalli Memo. No imponer esta última como restricción universal a todos los consumidores TM1.
+
+**Puerta pendiente:** añadir una prueba específica para TM1 junto a OP_RETURN realmente ajeno, precisar la cobertura de candidatos TM1 malformados, documentar el resultado API y decidir si la política del verificador se publica como perfil de aplicación versionado antes de ratificar v1.0.
 
 ### 3.3 P2PKH y firmas — modelo de confianza
 
@@ -64,7 +81,7 @@ No convertir lag, uptime, frecuencia de checkpoints, límites de peticiones, cro
 
 ## 5. Puertas para una ratificación posterior
 
-1. Resolver la matriz de casos de múltiples candidatos (TM1/TM0/otros) y codificar los vectores esperados sin ruptura silenciosa de histórico.
+1. Mantener separadas la regla wire de unicidad TM1 y la política de unicidad de candidatos Tonalli en el verificador. Conservar la prueba TM1+TM0 existente y agregar pruebas de regresión TM1+OP_RETURN ajeno y de segundo TM1 malformado, sin ruptura silenciosa del histórico.
 2. Actualizar el candidato normativo para expresar `author_input_index` explícito (no fijado a cero) y acotar el modelo `trusted-chronik` frente a verificación criptográfica independiente.
 3. Revisar exhaustivamente el resto de divergencias e inconsistencias de la auditoría D-07 y la especificación Draft 0.2, incluidos los requisitos formales de finalización; recopilar resultados CI y comparación con RMZWallet.
 4. Publicar una tabla de compatibilidad para bytes/script, eventos reservados, sighash, errores, UTF-8 y mínimos pushes, citando pruebas reproducibles.
