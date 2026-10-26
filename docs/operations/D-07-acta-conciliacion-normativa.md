@@ -67,6 +67,25 @@ La selección de input y los controles de estructura P2PKH, coincidencia de HASH
 
 `MAX_TM1_SCRIPT_BYTES=223`, `MAX_TM1_EVENT_DATA_BYTES=212`, `POST=0x01` y el rechazo de eventos distintos se encuentran en el parser/encoder. Los test del parser cubren valores de borde, UTF-8 estricto, pushes no mínimos y rechazo de `0x02`. Estos límites son de compatibilidad y política de aplicación; no sustituirlos por «consenso eCash».
 
+#### D07-CONF-01 — Verificación del motor de indexación frente a TM1 malformado
+
+**Evidencia incorporada en `main`:** [PR #33](https://github.com/xolosArmy/tonalli-memo/pull/33), Squash and Merge `6d6860b610b8437fbd7462016b5ba582be0928eb`. Revisión manual de Codex completada **sin problemas importantes** para el head previo `711fa36b07133d7bab9959fc484c4c0d6531fe1c`; GitHub Actions de ese head: **SUCCESS**, [run 40351652808](https://github.com/xolosArmy/tonalli-memo/actions/runs/40351652808).
+
+**Suite:** [`apps/indexer/test/engine/d07-conf-01.test.ts`](https://github.com/xolosArmy/tonalli-memo/blob/main/apps/indexer/test/engine/d07-conf-01.test.ts). Incluye fixtures de scripts OP_RETURN construidos con bytes crudos y ejecución offline del flujo `MemoVerificationService → IndexingEngine → SQLite in-memory`.
+
+| Vector / condición | Resultado comprobado | Persistencia |
+| --- | --- | --- |
+| `event_data` UTF-8 inválido (`c3 28`) | `INVALID_TM1` / `INVALID_UTF8` | `INVALID_MEMO` en SQLite; diagnóstico preservado; sin publicación en feed verificado |
+| `event_data` de **213 bytes** (script de 224 bytes) | `INVALID_TM1` / `PAYLOAD_TOO_LARGE` | Diagnóstico durable; sin payload verificado |
+| Empuje no mínimo en envelope o marcador LOKAD | `INVALID_TM1` / `INVALID_FORMAT` | Diagnóstico durable; sin payload verificado |
+| `event_data` de **212 bytes** (script de 223 bytes) | `VERIFIED_TM1` | Texto completo y longitud 212 preservados |
+| TM1 válido + otro candidato TM1 malformado | `MULTIPLE_MEMOS` | Rechazo del registro como publicación verificada |
+| TM1 inválido seguido por TM1 válido; dos variantes (UTF-8 y exceso) | Primero `INVALID_TM1`, después `VERIFIED_TM1` | Intentos independientes; inválido excluido del feed; válido preservado |
+
+**Alcance demostrado:** continuidad **secuencial del motor de indexación**, clasificación explícita de errores de protocolo y persistencia separada en SQLite temporal. Los errores de formato detectados por el parser se traducen a **resultados** `INVALID_TM1` en la frontera del verificador; no corresponde describirlos como excepciones de red propagadas o como eliminación/purga de transacciones de la cadena.
+
+**Alcance NO demostrado por este PR:** ejecución de esos fixtures mediante el ciclo real de backfill del `IndexerDaemon`, checkpoint y recuperación después de reinicio, tolerancia ante fallas inesperadas del servicio/SQLite, ni revisión exhaustiva de publicaciones históricas minadas. Permanecen **PENDIENTES DE CONFORMIDAD**, y no se deben prometer garantías absolutas de ausencia de corrupción de estado para todos los casos. El PR #33 añadió solo tests y no modificó el verificador operativo ni realizó broadcast.
+
 ### 3.5 Estado documental histórico y publicación productiva
 
 `tm1-spec.md` continúa marcado **Draft 0.2**, con una advertencia histórica sobre la emisión de transacciones en producción previa a su finalización. La auditoría describe uso productivo posterior. **Puerta de conformidad:** conciliar explícitamente la cronología, el requisito de finalización n.º 6 del borrador y su evidencia real; no eliminar la advertencia ni declarar cumplimiento retrospectivo sin revisión.
@@ -83,10 +102,10 @@ No convertir lag, uptime, frecuencia de checkpoints, límites de peticiones, cro
 
 ## 5. Puertas para una ratificación posterior
 
-1. Mantener separadas la regla wire de unicidad TM1 y la política de unicidad de candidatos Tonalli en el verificador. **Test TM1+TM0 existente y test TM1+OP_RETURN ajeno completado en PR #32 (CI `success`)**; todavía revisar/agregar cobertura transaccional de segundo TM1 malformado, precisar la compatibilidad histórica y definir el alcance del perfil de aplicación.
+1. Mantener separadas la regla wire de unicidad TM1 y la política de unicidad de candidatos Tonalli en el verificador. **TM1+TM0**, **TM1+OP_RETURN ajeno** (PR #32) y **TM1 válido + segundo TM1 malformado** (PR #33) cuentan ya con regresiones y CI exitoso; continúa pendiente precisar compatibilidad histórica y si la política combinada se publica como perfil de aplicación independiente.
 2. Actualizar el candidato normativo para expresar `author_input_index` explícito (no fijado a cero) y acotar el modelo `trusted-chronik` frente a verificación criptográfica independiente.
 3. Revisar exhaustivamente el resto de divergencias e inconsistencias de la auditoría D-07 y la especificación Draft 0.2, incluidos los requisitos formales de finalización; recopilar resultados CI y comparación con RMZWallet.
-4. Publicar una tabla de compatibilidad para bytes/script, eventos reservados, sighash, errores, UTF-8 y mínimos pushes, citando pruebas reproducibles.
+4. **Avance D07-CONF-01:** documentados y cubiertos en PR #33 el UTF-8 inválido, script 223/224 bytes, empujes no mínimos, múltiples candidatos y continuidad secuencial con SQLite temporal. **Pendiente:** comprobar el paso real por backfill/reinicio, consolidar la tabla completa de eventos reservados, sighash y errores, con evidencia reproducible.
 5. Obtener aprobación humana explícita del texto final; fusionar **otro PR de ratificación** que sustituya `Draft 0.2` solo cuando se cumplan las puertas y se identifique versión, SHA de referencia y fecha de vigencia.
 
 **Resultado de esta acta:** `D-07 = READY FOR NORMATIVE REVIEW / ACTA PREPARATORIA`. **NO RATIFICADO**. La publicación de este acta, incluso si se fusiona, no constituye ratificación automática, firma jurídica ni activación de `REPLY`.
