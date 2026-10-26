@@ -198,12 +198,21 @@ describe("D07-CONF-03 — daemon recovery, reorgs and durable checkpoints", () =
         expect(first.store.getVerificationRecord(TX_INVALID)).toBeNull();
       }
       const initialIndexedAt = first.store.getTransaction(TX_ONE)?.firstIndexedAt;
+      const attemptsBeforeRestart = {
+        valid: first.store.listIndexingAttempts(TX_ONE),
+        malformed: first.store.listIndexingAttempts(TX_INVALID)
+      };
+      expect(attemptsBeforeRestart.valid).toHaveLength(1);
+      expect(attemptsBeforeRestart.malformed).toHaveLength(invalidWasPersisted ? 1 : 0);
       await first.daemon.stop();
       first.database.close();
       first = null;
 
-      // A newly constructed daemon, engine and SQLite connection reuse persisted state.
+      // Verify the original audit attempt IDs and full row contents survive
+      // closing and reopening SQLite *before* retrying any work.
       restarted = harness(filename, chronik, ids);
+      expect(restarted.store.listIndexingAttempts(TX_ONE)).toEqual(attemptsBeforeRestart.valid);
+      expect(restarted.store.listIndexingAttempts(TX_INVALID)).toEqual(attemptsBeforeRestart.malformed);
       await restarted.daemon.start();
 
       expect(restarted.daemon.getStatus()).toMatchObject({
@@ -223,8 +232,14 @@ describe("D07-CONF-03 — daemon recovery, reorgs and durable checkpoints", () =
       expect(singleTxRows(restarted.database, "transactions")).toBe(3);
       expect(singleTxRows(restarted.database, "verification_records")).toBe(3);
       expect(restarted.store.getTransaction(TX_ONE)?.firstIndexedAt).toBe(initialIndexedAt);
-      // Replayed candidates create additional audit attempts, never duplicate feed rows.
-      expect(restarted.store.listIndexingAttempts(TX_ONE).length).toBeGreaterThanOrEqual(2);
+      // Backfill replays may add audit attempts. None may overwrite old
+      // attempts (including their IDs, timestamps, results and diagnostics).
+      const validAttemptsAfterRestart = restarted.store.listIndexingAttempts(TX_ONE);
+      const malformedAttemptsAfterRestart = restarted.store.listIndexingAttempts(TX_INVALID);
+      expect(validAttemptsAfterRestart.slice(0, attemptsBeforeRestart.valid.length)).toEqual(attemptsBeforeRestart.valid);
+      expect(malformedAttemptsAfterRestart.slice(0, attemptsBeforeRestart.malformed.length)).toEqual(attemptsBeforeRestart.malformed);
+      expect(validAttemptsAfterRestart.length).toBeGreaterThan(attemptsBeforeRestart.valid.length);
+      expect(malformedAttemptsAfterRestart.length).toBeGreaterThan(attemptsBeforeRestart.malformed.length);
       await restarted.daemon.stop();
     } finally {
       if (first !== null) {
@@ -296,53 +311,56 @@ describe("D07-CONF-03 — daemon recovery, reorgs and durable checkpoints", () =
     }
   });
 
-  it("resumes an incomplete bounded page cursor after daemon restart (without claiming time-based rate limiting)", async () => {
+  it("reopens SQLite and resumes a previously persisted incomplete page cursor", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "d07-conf-03-cursor-"));
+    const filename = join(dir, "indexer.sqlite");
     const all = [TX_ONE, TX_INVALID, TX_THREE, TX_FOUR].map((txid) => confirmedTm1(txid));
     const chronik = new MockChronik(all);
     const ids = all.map((transaction) => transaction.txid);
-    const first = harness(":memory:", chronik, ids, { pageSize: 2, maxPages: 1 });
+    let first: ReturnType<typeof harness> | null = null;
+    let restarted: ReturnType<typeof harness> | null = null;
+
     try {
+      first = harness(filename, chronik, ids, { pageSize: 2, maxPages: 1 });
       await first.daemon.start();
-      expect(first.store.getBackfillCheckpoint("TM1")).toMatchObject({
-        txCountCursor: 2, historyTxCount: 4, complete: false
+      const checkpointBeforeRestart = first.store.getBackfillCheckpoint("TM1");
+      expect(checkpointBeforeRestart).toMatchObject({
+        txCountCursor: 2, historyTxCount: 4, complete: false,
+        blockHeight: 900, blockHash: TIP_HASH
       });
       expect(first.live.pages.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0]);
       expect(first.live.pages.every((call) => call.size === 2)).toBe(true);
       expect(first.store.listVerifiedFeed(10)).toHaveLength(2);
       await first.daemon.stop();
-
-      const next = harness(":memory:", chronik, ids, { pageSize: 2, maxPages: 1 });
-      // A fresh in-memory database would lose the checkpoint; the next daemon
-      // instead shares the existing durable MemoStore via explicit construction.
-      // See the file-backed restart test above for actual DB reopen semantics.
-      const resumed = new IndexerDaemon({
-        engine: new IndexingEngine({
-          verificationService: new MemoVerificationService({ chronik }),
-          store: first.store,
-          clock: { nowSeconds: () => 1760000000 }
-        }),
-        store: first.store,
-        liveSource: next.live,
-        logger: silentLogger,
-        backfillPageSize: 2,
-        backfillMaxPagesPerRun: 1,
-        backfillOverlapPages: 0,
-        backfillIntervalMs: 60_000
-      });
-      try {
-        await resumed.start();
-        expect(next.live.pages.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1]);
-        expect(first.store.getBackfillCheckpoint("TM1")).toMatchObject({
-          txCountCursor: 4, historyTxCount: 4, complete: true
-        });
-        expect(first.store.listVerifiedFeed(10)).toHaveLength(4);
-      } finally {
-        await resumed.stop();
-        next.database.close();
-      }
-    } finally {
-      await first.daemon.stop();
       first.database.close();
+      first = null;
+
+      // A fresh connection must recover the exact incomplete checkpoint
+      // before any daemon reconciliation runs.
+      restarted = harness(filename, chronik, ids, { pageSize: 2, maxPages: 1 });
+      expect(restarted.store.getBackfillCheckpoint("TM1")).toEqual(checkpointBeforeRestart);
+      expect(restarted.store.listVerifiedFeed(10)).toHaveLength(2);
+
+      await restarted.daemon.start();
+      expect(restarted.live.pages.filter((call) => call.protocol === "TM1").map((call) => call.page)).toEqual([0, 1]);
+      expect(restarted.live.pages.every((call) => call.size === 2)).toBe(true);
+      expect(restarted.store.getBackfillCheckpoint("TM1")).toMatchObject({
+        txCountCursor: 4, historyTxCount: 4, complete: true,
+        blockHeight: 900, blockHash: TIP_HASH
+      });
+      expect(restarted.store.listVerifiedFeed(10)).toHaveLength(4);
+      expect(singleTxRows(restarted.database, "transactions")).toBe(4);
+      expect(singleTxRows(restarted.database, "verification_records")).toBe(4);
+    } finally {
+      if (first !== null) {
+        await first.daemon.stop();
+        first.database.close();
+      }
+      if (restarted !== null) {
+        await restarted.daemon.stop();
+        restarted.database.close();
+      }
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 });
