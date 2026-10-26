@@ -98,7 +98,7 @@ test("distinguishes compatible historical TM1 from rejected and unavailable cand
   assert.equal(verified.verdict, "INCOMPLETE_OR_REVIEW_REQUIRED");
   assert.equal(verified.records[0].verdict, "STRUCTURALLY_COMPATIBLE");
   assert.equal(verified.records[0].trustModel, "trusted-chronik");
-  assert.equal(verified.records[0].scriptBytes, 11);
+  assert.equal(verified.records[0].scriptBytes, 12);
   assert.equal(verified.records[1].protocolErrorCode, "UNSUPPORTED_AUTHOR_SCRIPT");
   assert.equal(verified.records[2].verdict, "SOURCE_ERROR");
   assert.equal(verified.records[2].sourceError.code, "CHRONIK_UNAVAILABLE");
