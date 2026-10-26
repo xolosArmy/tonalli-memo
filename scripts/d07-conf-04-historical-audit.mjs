@@ -86,10 +86,11 @@ export function validateEntries(entries) {
         typeof entry.txid !== "string" || !TXID.test(entry.txid) || seen.has(entry.txid)) {
       throw new Error("Manifest contains duplicate or noncanonical transaction IDs.");
     }
-    if (entry.label !== undefined && (typeof entry.label !== "string" || entry.label.length > 160)) {
+    if (entry.label !== undefined && entry.label !== null &&
+        (typeof entry.label !== "string" || entry.label.length > 160)) {
       throw new Error("Manifest label must be a short string.");
     }
-    if (entry.sourceUrl !== undefined &&
+    if (entry.sourceUrl !== undefined && entry.sourceUrl !== null &&
         (typeof entry.sourceUrl !== "string" || !entry.sourceUrl.startsWith("https://"))) {
       throw new Error("Manifest sourceUrl must be an HTTPS URL.");
     }
