@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc -b && pnpm -r typecheck",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && node --test scripts/d07-conf-04-historical-audit.test.mjs",
     "build": "pnpm registry:generate && tsc -b && pnpm --filter @tonalli-memo/web build:bundle",
     "registry:generate": "node scripts/generate-registry-data.mjs",
     "smoke:compiled-registry": "node scripts/smoke-compiled-registry.mjs",
