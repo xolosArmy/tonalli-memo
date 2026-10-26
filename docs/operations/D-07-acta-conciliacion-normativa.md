@@ -63,6 +63,25 @@ La auditoría D-07 describe el input 0 como obligatorio, pero la especificación
 
 La selección de input y los controles de estructura P2PKH, coincidencia de HASH160 y sighash `0x41`/`0xc1` se encuentran en `verify-tm1-designated-input.ts`. El propio módulo documenta que **no revalida criptográficamente el digest de firma por sí mismo**: depende de Chronik/nodo confiable para validez de script/transacción. La especificación distingue ese modelo de un verificador autónomo no confiable, que debe validar también la firma. No declarar «firma verificada localmente de forma independiente» sin demostrarlo.
 
+#### D07-CONF-02 — Autoría designada y política P2PKH
+
+**Evidencia incorporada en `main`:** [PR #34](https://github.com/xolosArmy/tonalli-memo/pull/34), Squash and Merge `a232b26ec99eaac5fac7a340baaebb04492c1b6a`. Commit del test sometido a CI y revisión manual de Codex: `206e7db2bcb6b3e52130430210d6ffeb2b6c5383`. GitHub Actions [run 40355179729](https://github.com/xolosArmy/tonalli-memo/actions/runs/40355179729): **SUCCESS**; Codex Connector: revisión completada **sin problemas importantes**.
+
+**Suite:** [`apps/indexer/test/engine/d07-conf-02.test.ts`](https://github.com/xolosArmy/tonalli-memo/blob/main/apps/indexer/test/engine/d07-conf-02.test.ts). Cubre vía `MemoVerificationService → IndexingEngine → SQLite in-memory`:
+
+| Escenario sintético | Resultado / evidencia |
+| --- | --- |
+| Índices `author_input_index` 1 y 255 fuera de rango para transacciones de una entrada | `INVALID_TM1` / `AUTHOR_INPUT_OUT_OF_RANGE` |
+| Metadata del prevout designado ausente | `INVALID_TM1` / `PREVOUT_UNAVAILABLE` |
+| Prevout designado P2SH o multifirma bare | `INVALID_TM1` / `UNSUPPORTED_AUTHOR_SCRIPT` |
+| `scriptSig` malformado o empuje no mínimo | `INVALID_TM1` / `INVALID_AUTHOR_SCRIPT_SIG` |
+| Hash de clave pública incompatible con el prevout | `INVALID_TM1` / `INVALID_AUTHOR_SIGNATURE` |
+| Sighash `0x42` | `INVALID_TM1` / `UNSUPPORTED_SIGHASH` |
+| Índice designado no cero (=1) y sighash `0x41` o `0xc1` | `VERIFIED_TM1`; índice y política de confianza preservados |
+| Una autoría P2SH inválida seguida de otra entrada TM1 válida en diferente transacción | El resultado inválido no entra en el feed verificado; la segunda transacción se procesa |
+
+En las variantes inválidas, la persistencia almacena estado `INVALID_MEMO`, diagnósticos explícitos y **ningún autor atribuido**. **Alcance y límite:** los fixtures son sintéticos, con firmas de prueba no criptográficamente válidas. `VERIFIED_TM1` en un mock de Chronik prueba la **política estructural bajo el modelo `trusted-chronik`**, **no** verificación local independiente de ECDSA/Schnorr, ni aceptación en consenso de transacciones fabricadas. `PREVOUT_UNAVAILABLE` representa falta de metadata en la respuesta normalizada, no prueba que un UTXO sea inexistente en la blockchain. Quedan pendientes validaciones históricas y backfill/reinicio reales. Sin cambios de producción, Wallet, protocolo ni broadcast.
+
 ### 3.4 Reglas de capacidad y push mínimo
 
 `MAX_TM1_SCRIPT_BYTES=223`, `MAX_TM1_EVENT_DATA_BYTES=212`, `POST=0x01` y el rechazo de eventos distintos se encuentran en el parser/encoder. Los test del parser cubren valores de borde, UTF-8 estricto, pushes no mínimos y rechazo de `0x02`. Estos límites son de compatibilidad y política de aplicación; no sustituirlos por «consenso eCash».
@@ -103,7 +122,7 @@ No convertir lag, uptime, frecuencia de checkpoints, límites de peticiones, cro
 ## 5. Puertas para una ratificación posterior
 
 1. Mantener separadas la regla wire de unicidad TM1 y la política de unicidad de candidatos Tonalli en el verificador. **TM1+TM0**, **TM1+OP_RETURN ajeno** (PR #32) y **TM1 válido + segundo TM1 malformado** (PR #33) cuentan ya con regresiones y CI exitoso; continúa pendiente precisar compatibilidad histórica y si la política combinada se publica como perfil de aplicación independiente.
-2. Actualizar el candidato normativo para expresar `author_input_index` explícito (no fijado a cero) y acotar el modelo `trusted-chronik` frente a verificación criptográfica independiente.
+2. **Avance D07-CONF-02:** índices designados no cero, ausencia de metadata de prevout, rechazo P2SH/multifirma, scriptSig, HASH160 y sighash ya cuentan con pruebas de integración y persistencia SQLite (PR #34, CI y Codex favorables). **Pendiente:** trasladar la separación normativa `trusted-chronik` vs. verificador criptográfico independiente a la especificación candidata y conciliar evidencia de uso histórico.
 3. Revisar exhaustivamente el resto de divergencias e inconsistencias de la auditoría D-07 y la especificación Draft 0.2, incluidos los requisitos formales de finalización; recopilar resultados CI y comparación con RMZWallet.
 4. **Avance D07-CONF-01:** documentados y cubiertos en PR #33 el UTF-8 inválido, script 223/224 bytes, empujes no mínimos, múltiples candidatos y continuidad secuencial con SQLite temporal. **Pendiente:** comprobar el paso real por backfill/reinicio, consolidar la tabla completa de eventos reservados, sighash y errores, con evidencia reproducible.
 5. Obtener aprobación humana explícita del texto final; fusionar **otro PR de ratificación** que sustituya `Draft 0.2` solo cuando se cumplan las puertas y se identifique versión, SHA de referencia y fecha de vigencia.
