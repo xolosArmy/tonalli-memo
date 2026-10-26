@@ -119,6 +119,42 @@ describe("TM1 normalized verification integration", () => {
     expect(result.protocolError.code).toBe("INVALID_AUTHOR_SCRIPT_SIG");
   });
 
+  it.each([
+    { tm1OutputIndex: 0, unrelatedOutputIndex: 1 },
+    { tm1OutputIndex: 1, unrelatedOutputIndex: 0 }
+  ])(
+    "accepts valid TM1 with an unrelated OP_RETURN (TM1 output $tm1OutputIndex)",
+    ({ tm1OutputIndex, unrelatedOutputIndex }) => {
+      const input = authorInput();
+      // OP_RETURN followed by a minimal four-byte push unrelated to TM0 or TM1.
+      const unrelatedOutput = normalizeOpReturnOutput(
+        unrelatedOutputIndex,
+        0n,
+        "6a04deadbeef"
+      );
+      expect(unrelatedOutput.parseStatus).toBe("parsed");
+
+      const result = verifyNormalizedTransaction(
+        normalizedTx({
+          inputs: [input],
+          inputAddresses: input.address === null ? [] : [input.address],
+          opReturnOutputs: [
+            tm1Output(tm1OutputIndex),
+            unrelatedOutput
+          ].sort((a, b) => a.outputIndex - b.outputIndex)
+        })
+      );
+
+      expect(result.status).toBe("VERIFIED_TM1");
+      if (result.status !== "VERIFIED_TM1") {
+        throw new Error(`Expected VERIFIED_TM1, got ${result.status}`);
+      }
+      expect(result.candidate).toEqual({ outputIndex: tm1OutputIndex });
+      expect(result.memo.eventData).toBe("hello");
+      expect(result.authorizingInputIndex).toBe(0);
+    }
+  );
+
   it("fails closed when independent TM0 and TM1 candidates coexist", () => {
     const input = authorInput();
     const result = verifyNormalizedTransaction(
