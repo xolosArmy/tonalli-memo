@@ -7,6 +7,8 @@
  * trusted-Chronik, not independent signature validation or ratification.
  */
 import { readFile } from "node:fs/promises";
+import console from "node:console";
+import process from "node:process";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
