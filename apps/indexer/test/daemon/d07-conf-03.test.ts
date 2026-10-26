@@ -125,9 +125,9 @@ class MockLive implements ChronikLiveSource {
 }
 
 const silentLogger = {
-  info: (_message: string) => {},
-  warn: (_message: string) => {},
-  error: (_message: string) => {}
+  info: () => {},
+  warn: () => {},
+  error: () => {}
 };
 
 function harness(
