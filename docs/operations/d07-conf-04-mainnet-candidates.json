@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "protocol": "TM1",
+  "network": "eCash-mainnet",
+  "cohortNote": "Published as TM1 Draft 0.2 on 2026-09-10; provenance from contemporaneous article, not cryptographic evidence of software revision.",
+  "entries": [
+    {
+      "txid": "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
+      "label": "Primer canary TM1",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html"
+    },
+    {
+      "txid": "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
+      "label": "Primera auto-ingesta TM1 desde mempool",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html"
+    },
+    {
+      "txid": "0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150",
+      "label": "Primer Memo + NFT",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html"
+    }
+  ]
+}
