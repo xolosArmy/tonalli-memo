@@ -90,28 +90,47 @@ jobs:
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-web.mjs"
 
-      - name: D07-CONF-04 mainnet historical TXIDs (read only, isolated evidence)
-        timeout-minutes: 4
+      - name: D07-CONF-04 expanded TM1 mainnet discovery (read only)
+        timeout-minutes: 10
         run: |
           set +e
           node scripts/d07-conf-04-historical-audit.mjs \
             --chronik-url https://chronik.e.cash \
-            --txids-file docs/operations/d07-conf-04-mainnet-candidates.json \
-            > d07-mainnet-audit-report.json \
-            2> d07-mainnet-audit-stderr.txt
+            --discover --pages 20 --page-size 100 --max-txids 200 \
+            > d07-mainnet-discovery-report.json \
+            2> d07-mainnet-discovery-stderr.txt
           result=$?
-          echo "D07-CONF-04 exit code: $result"
-          cat d07-mainnet-audit-report.json
-          cat d07-mainnet-audit-stderr.txt
+          echo "D07-CONF-04 expanded discovery exit code: $result"
+          if [ -s d07-mainnet-discovery-report.json ]; then
+            node --input-type=module -e '
+              import { readFileSync } from "node:fs";
+              const r = JSON.parse(readFileSync("d07-mainnet-discovery-report.json", "utf8"));
+              const verdictCounts = Object.fromEntries([...new Set(r.records.map(x => x.verdict))].sort().map(v => [v, r.records.filter(x => x.verdict === v).length]));
+              const statuses = Object.fromEntries([...new Set(r.records.map(x => x.verificationStatus))].sort().map(v => [v ?? "null", r.records.filter(x => x.verificationStatus === v).length]));
+              const compatible = r.records.filter(x => x.verdict === "STRUCTURALLY_COMPATIBLE");
+              const edge = {
+                nearLimitEventDataGte200: compatible.filter(x => x.eventDataBytes >= 200).map(x => ({ txid:x.txid, bytes:x.eventDataBytes })),
+                nearLimitScriptGte211: compatible.filter(x => x.scriptBytes >= 211).map(x => ({ txid:x.txid, bytes:x.scriptBytes })),
+                nonzeroAuthorInputIndex: compatible.filter(x => x.authorInputIndex !== 0).map(x => ({ txid:x.txid, index:x.authorInputIndex })),
+                anyoneCanPaySighashC1: compatible.filter(x => x.sighashByte === 193).map(x => ({ txid:x.txid }))
+              };
+              const exceptions = r.records.filter(x => x.verdict !== "STRUCTURALLY_COMPATIBLE").map(x => ({
+                txid:x.txid, verdict:x.verdict, status:x.verificationStatus, code:x.protocolErrorCode, sourceError:x.sourceError
+              }));
+              console.log(JSON.stringify({verdict:r.verdict,totals:r.totals,discovery:r.discovery,verdictCounts,statuses,edge,exceptions,limitations:r.limitations},null,2));
+              console.log("Unicode categories, full event texts and secondary OP_RETURN marker combinations are not classified by the current audit script.");
+            '
+          fi
+          cat d07-mainnet-discovery-stderr.txt
           exit "$result"
 
-      - name: Archive D07 mainnet audit evidence (even on failure)
+      - name: Archive D07 expanded discovery evidence (even on failure)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: d07-conf-04-mainnet-audit-${{ github.sha }}
+          name: d07-conf-04-expanded-mainnet-${{ github.sha }}
           path: |
-            d07-mainnet-audit-report.json
-            d07-mainnet-audit-stderr.txt
+            d07-mainnet-discovery-report.json
+            d07-mainnet-discovery-stderr.txt
           if-no-files-found: error
           retention-days: 30
