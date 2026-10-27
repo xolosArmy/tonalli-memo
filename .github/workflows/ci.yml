@@ -89,3 +89,29 @@ jobs:
           pnpm smoke:compiled-web
           cd /tmp
           node "$GITHUB_WORKSPACE/scripts/smoke-compiled-web.mjs"
+
+      - name: D07-CONF-04 mainnet historical TXIDs (read only, isolated evidence)
+        timeout-minutes: 4
+        run: |
+          set +e
+          node scripts/d07-conf-04-historical-audit.mjs \
+            --chronik-url https://chronik.e.cash \
+            --txids-file docs/operations/d07-conf-04-mainnet-candidates.json \
+            > d07-mainnet-audit-report.json \
+            2> d07-mainnet-audit-stderr.txt
+          result=$?
+          echo "D07-CONF-04 exit code: $result"
+          cat d07-mainnet-audit-report.json
+          cat d07-mainnet-audit-stderr.txt
+          exit "$result"
+
+      - name: Archive D07 mainnet audit evidence (even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d07-conf-04-mainnet-audit-${{ github.sha }}
+          path: |
+            d07-mainnet-audit-report.json
+            d07-mainnet-audit-stderr.txt
+          if-no-files-found: error
+          retention-days: 30
