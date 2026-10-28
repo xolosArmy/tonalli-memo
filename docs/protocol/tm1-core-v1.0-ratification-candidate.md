@@ -311,6 +311,46 @@ TM1 verification MUST use only the input selected by
 `author_input_index`. It MUST NOT scan all inputs and select the first
 address matching an external registry.
 
+### 10.1 No prior editorial approval (proposed v1.0 release rule)
+
+**Proposed supersession of Draft 0.2, subject to formal ratification.**
+TM1 Core v1.0 MUST NOT require administrative, editorial or committee
+pre-approval before an author may sign or broadcast a `POST = 0x01`
+transaction, nor as a condition for recognizing a valid on-chain POST.
+There is no protocol-level allowlist, publication approval or human
+officialization step. A missing approval MUST NOT invalidate a TM1-compliant
+transaction, and approval MUST NOT override a failed protocol check.
+
+A confirmed eCash transaction carrying a POST is eligible for the
+`VERIFIED_TM1` classification **if and only if** its full TM1 envelope,
+cardinality, UTF-8 and byte limits, explicit author input, designated P2PKH
+prevout, unlocking script, permitted sighash and the cryptographic trust
+requirements in §§2–10 have been successfully checked. Confirmation or
+mining **alone** does not imply `VERIFIED_TM1`; unavailable prevouts or
+unverified authorship MUST NOT be treated as verified. Under the documented
+`trusted-chronik` model, chain/script validity is delegated to the trusted
+eCash source; independent verification requires the additional signature
+checks in §8.6. `VERIFIED_TM1` is an application/indexer classification,
+not an eCash consensus status or a claim of universal chain coverage.
+
+Client applications, including RMZWallet, MAY independently moderate
+visibility, search/discovery or profiles and restrict their own composition
+or broadcast UI. Such product policies MUST NOT redefine the Core protocol
+validity of already published posts. This protocol is permissionless with
+respect to editorial approval, **not** necessarily stateless in operation:
+author verification requires resolving spent outputs, and indexers may
+maintain chain/reorganization state.
+
+**Historical disposition proposed for ratification:** the Draft 0.2
+instruction not to emit production transactions before finalization, and
+its §11(6) condition requiring no such previous issuance, are proposed
+to be superseded as **future v1.0 protocol requirements**, rather than
+declared retrospectively fulfilled. Earlier production issuance remains
+part of the unaltered historical record. The supersession and its effective
+date require a dated, explicit governance decision; this candidate does
+not itself ratify v1.0, authorize new broadcasts or amend
+`tm1-spec.md`.
+
 ## 11. Ratification gates — NOT YET CLOSED
 
 A technical review, a CI pass or merging a preparatory acta MUST NOT by itself
@@ -334,13 +374,14 @@ following gates are reconciled with dated evidence:
    212-byte event / 223-byte script boundaries. Both carry the verdict
    `SAMPLE_COMPATIBLE_NOT_RATIFICATION`. Neither proves whole-chain coverage,
    the historical Draft 0.2 issuance revision, or zero universal false negatives.
-5. **Conflicting historical finalization condition:** Draft 0.2 §11(6)
-   originally required *no production issuance before review and fixture
-   publication*, while candidate TM1 transaction IDs have now been observed
-   confirmed on mainnet. This retrospective precondition cannot be assumed
-   fulfilled; governance must explicitly document the chronology, assess
-   ramifications and approve a transparent disposition (including any
-   necessary amendment), without deleting or backdating the historical text.
+5. **Historical issuance prohibition and proposed supersession:** Draft
+   0.2 §11(6) originally required *no production issuance before review and
+   fixture publication*, yet TM1 candidates have been observed confirmed on
+   mainnet. The historical condition is **not retroactively fulfilled**.
+   §10.1 proposes removing prior human approval/issuance restrictions from
+   the future Core v1.0 validity rule. Governance must still record the dated
+   chronology and risks, explicitly approve or reject that supersession,
+   and fix its effective date without deleting or backdating Draft 0.2.
 6. **Recovery scope:** synthetic backfill, daemon restart, SQLite persistence,
    reorg/reconnect tests (PR #35) are evidence of tested mechanisms, not a
    guarantee of complete recovery under all real faults or rate limits.
@@ -369,7 +410,7 @@ is an unreconciled *candidate*, not a safe drop-in canonical v1.0 source:
 | It contemplates replacing malformed UTF-8 with U+FFFD | Malformed UTF-8 MUST be rejected with `INVALID_UTF8`; no replacement, normalization, trimming or re-encoding of valid event bytes. |
 | It conflates P2SH rejection with all transaction inputs | Only the **designated author prevout** must be standard P2PKH; other unrelated inputs follow eCash consensus rules. |
 | It treats observed source processing as a proof of independent signature validation | `trusted-chronik` relies on the trusted node/Chronik for transaction validity; offline verification MUST independently check signatures. |
-| It suggests final ratification while historical publication chronology remains unsettled | Keep Draft 0.2 §11(6) and the source chronology under an explicit **unresolved** decision gate (above). |
+| It suggests final ratification while historical publication chronology remains unsettled | §10.1 proposes a future-facing supersession of Draft 0.2 §11(6), **not** a claim of retroactive compliance. The dated governance decision, risks and effective date are still pending. |
 
 No changes to the on-chain envelope, LOKAD, bytes, author-index semantics,
 accepted sighash values or active event set are proposed. This document is
