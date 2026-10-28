@@ -182,9 +182,172 @@ and reply `hola` (`686f6c61`), the proposed envelope is:
 `02 02 00` + the 32 listed parent bytes + `68 6f 6c 61`.
 It contains 39 bytes (3 + 32 + 4), uses a direct second-push opcode `0x27` and a 46-byte total script (1 + 5 + 1 + 39). This is a serialization illustration, **not** a claim the sample TXID exists.
 
-## M1.4. Author identity and authorization — TODO
+## M1.4. Author identity and authorization — proposed requirements
 
-Specify social author-domain separation, keys, P2PKH proof inheritance, replay limits, author rotation and third-party indexing. No change to v1.0 author identity is authorized by PR0.
+**Scope:** This section specifies the proposed authorship profile for a future
+`version=0x02 / event_type=0x02` on-chain REPLY. It inherits the Core v1.0
+designated-input P2PKH proof; it does not activate delegated signing,
+multisignature identities, P2SH author inputs, or off-chain authorization.
+The requirements become binding only if an RFC and corresponding
+implementation/deployment are independently approved.
+
+### M1.4.1. Protocol identity versus display identity
+
+The canonical REPLY author identifier MUST be the **20-byte HASH160 public-key
+hash** from the P2PKH previous output spent by the input selected by
+`author_input_index`. This is the same author identity model as TM1 Core
+v1.0. A CashAddr string is a network-specific presentation of that hash; it
+MUST NOT replace or override on-chain evidence.
+
+A username, profile NFT, domain name, social handle, avatar, contact list,
+wallet label, database record or user-entered address MUST NOT establish
+protocol-level authorship. Display clients MAY link a verified author
+identifier to such metadata, but MUST distinguish unverified claims from
+independently verified account-to-profile attestations.
+
+A REPLY author **does not need to be the parent POST/REPLY author**. A link to
+a valid parent proves what was referenced, not that the parent author
+consented to the response or endorsed its contents. Moderation and
+visibility policies belong to client/indexer application layers and MUST
+NOT silently change the cryptographic author of a transaction.
+
+### M1.4.2. Designated-input verification procedure
+
+Before classifying a proposed REPLY as **cryptographically verified**,
+the social-aware verifier MUST:
+
+1. Identify exactly one TM1 candidate and verify the proposed REPLY
+   `(version=0x02, event_type=0x02)` envelope, canonical pushes, 212-byte
+   `event_data` limit and strict UTF-8 **reply_text** segment.
+2. Read `author_input_index` as an unsigned byte and require
+   `0 <= author_input_index < transaction.inputs.length`.
+3. Resolve the **specific spent previous output** for that input from a
+   trusted active-chain or other correctly verified eCash transaction
+   source. A missing, unresolvable or untrusted previous output MUST NOT
+   produce an author-verified result.
+4. Require that designated previous output's locking script be **standard
+   P2PKH**. Require the selected input's unlocking script to consist of
+   exactly **two minimal data pushes**:
+   `<signature_with_hashtype> <public_key>`.
+5. Require `HASH160(public_key)` to equal the 20-byte hash committed in
+   that designated P2PKH previous output.
+6. Require the signature's final sighash byte to be **exactly `0x41` or
+   `0xc1`**, rejecting unsupported combinations, including SIGHASH_NONE
+   and SIGHASH_SINGLE. These two allowed combinations commit to **all**
+   transaction outputs, including the entire REPLY `OP_RETURN`
+   containing `parent_txid` and `reply_text`.
+7. Verify cryptographic/transaction validity under active eCash rules.
+   In the documented `trusted-chronik` model the verifier MAY rely on a
+   trusted node/Chronik source for script validity **while still enforcing
+   the explicit sighash restrictions**; offline/untrusted-source
+   verification MUST independently verify the P2PKH signature using the
+   correct transaction digest, prevout amount and active eCash rules.
+8. Extract the author hash **only from the selected designated input**.
+   Other inputs MAY fund the transaction and MAY use other valid eCash
+   script types; they MUST NOT be reinterpreted as an alternative author.
+
+The verifier MUST NOT assume the designated index is input zero, infer
+ownership from a fee-paying input, or select the first address matching a
+registry. Wallets MAY prefer author input index 0 as a creation convention,
+not a validation requirement.
+
+The `author_input_index`, `parent_txid` and reply text are committed into
+the output by the permitted `SIGHASH_ALL` modes; applications MUST NOT
+attribute an altered payload to the original signature. This proof is a
+transaction-level authorization, **not an independent signature embedded
+inside `event_data`**.
+
+### M1.4.3. Unauthorized authorship claims and failure handling
+
+| Attempt or condition | Required disposition under proposed REPLY profile |
+| --- | --- |
+| Input signature made by a different key whose HASH160 does not match the selected P2PKH prevout | Reject author verification as `INVALID_AUTHOR_SCRIPT_SIG` or `INVALID_AUTHOR_SIGNATURE`, as applicable |
+| Public key and prevout appear to match, but signature/transaction is invalid | Reject with `INVALID_AUTHOR_SIGNATURE`; do not publish as verified |
+| Selected input is P2SH, multisig, covenant or unknown script | Reject as `UNSUPPORTED_AUTHOR_SCRIPT` in this profile |
+| Selected prevout unavailable or source trust insufficient | Withhold verified status; classify `PREVOUT_UNAVAILABLE` or explicitly pending, and retry when appropriate |
+| Sighash `0x01`, SIGHASH_NONE, SINGLE or other unsupported combination | Reject with `UNSUPPORTED_SIGHASH` |
+| REPLY is correctly signed by **another person's own** valid P2PKH key | Accept that key as the REPLY author if all rules pass; it is not impersonation merely because the parent author differs |
+| Reply text or external metadata claims to be another person | Do not alter the verified author hash; UI MAY warn, label or moderate |
+| Valid key used without its owner's consent (e.g., stolen private key) | Cryptographically indistinguishable solely from on-chain data; use application-level reporting, compromise signals and prospective account/profile responses, not fictional on-chain invalidation |
+
+All error labels above reference the Core v1.0 validation taxonomy where
+available. An application-specific pending state MUST remain distinguishable
+from a definitive invalid author signature. The thread linkage state in
+M1.3 MUST NOT upgrade an unverified author to verified.
+
+### M1.4.4. Funding, replay, revocation and key rotation
+
+A third party MAY contribute other valid transaction inputs and fees.
+Such sponsorship grants **no authorship** unless a separately standardized
+and explicitly activated scheme says otherwise. Core's `0xc1`
+(`SIGHASH_ALL | SIGHASH_FORKID | SIGHASH_ANYONECANPAY`) MAY support
+transactions with other funding inputs while maintaining commitment to
+**all outputs**; this RFC does not authorize a new signing service.
+
+Each on-chain REPLY is identified by its actual network transaction ID.
+A signature authorizes a transaction under the active eCash signature rules;
+it is not a portable off-chain token that grants permission to send new
+messages. Indexers MUST key on-chain verification by network and TXID and
+MUST NOT assume that replaying a raw signature across a different
+transaction or network proves a new valid reply. Cross-network or fork
+contexts require explicit network/profile separation in storage and APIs.
+
+A P2PKH key rotation or loss MUST NOT rewrite the verified author hash of
+historical POSTs and REPLYs. A later profile association between old and
+new keys would require **separate, authenticated, time-scoped** evidence and
+a standard for its application-level interpretation. A social profile MAY
+mark a key compromised or deprecated, but this MUST NOT automatically
+change historical transaction-authorship evidence.
+
+### M1.4.5. Delegation and multisignature: explicitly out of scope
+
+**No delegated authoring is active or specified by RFC-0001 PR0.**
+
+A future scheme that allows an agent, shared profile, multisignature wallet,
+P2SH author prevout or separate signed delegation certificate MUST be
+introduced through a **distinct reviewed and ratified RFC and explicit
+version/profile activation**. It MUST NOT silently interpret an existing
+Core v1.0 or proposed v2 REPLY P2PKH author as a different person or
+authority.
+
+Any future delegation proposal MUST specify at least: delegator and
+delegate key identifiers; signature and domain separation; chain/network
+scope; permitted operations and parent targets; validity interval, nonce
+and replay rules; key rotation and revocation; how indexers resolve and
+cache rights across reorgs; privacy and compromise recovery; deterministic
+positive/negative vectors; and a migration path which preserves old
+authorship assignments. Merely listing these requirements confers
+**no delegation permission**.
+
+A Wallet MAY offer a local multi-approver **workflow** without altering the
+protocol author input, but the final designated author proof remains a
+standard P2PKH spend that meets this section. Wallet UI approval itself
+MUST NOT count as a protocol signature.
+
+### M1.4.6. Deterministic conformance evidence to add in M1.7
+
+Before ratification, independent fixtures and tests MUST cover:
+
+- Valid author index 0 and a valid nonzero author index with another
+  unrelated input paying transaction fees.
+- Wrong public key hash, invalid signature and unsupported sighash values
+  contrasted against valid `0x41` and `0xc1`.
+- P2SH/multisig **designated** author inputs rejected while unrelated
+  P2SH funding inputs do not invalidate the author rule.
+- Author prevout unavailable, source untrusted, and correct distinction
+  between `trusted-chronik` and independently verified signatures.
+- Reply to a parent written by a different valid author, including
+  malicious text impersonation attempts that do not change the author hash.
+- Valid full-output signature commitment to `parent_txid` and text,
+  with mutated outputs no longer verifying.
+- Key rotation, historical attribution stability and compromised-key
+  application flags that do not rewrite on-chain proofs.
+- No implicit delegation; unsupported extra signatures, profiles or
+  multisig schemes rejected or treated as nonauthoritative metadata.
+
+**Ratification boundary:** M1.4 defines a candidate verification profile,
+not a change to eCash consensus, not proof of a human's identity and not
+permission to deploy, broadcast, move funds or sign using third-party keys.
 
 ## M1.5. Signed off-chain reactions — TODO
 
