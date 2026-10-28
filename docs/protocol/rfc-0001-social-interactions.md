@@ -600,12 +600,39 @@ proposed v2 version.
 
 The transaction MUST additionally contain at least one spendable,
 non-OP_RETURN P2PKH output to the exact resolved target-author hash,
-with positive satoshi value. The verified native XEC tip amount is
-the integer sum of **only** matching destination outputs (excluding
-the OP_RETURN, fees and any outputs to other addresses). Ordinary
-change to a different payer HASH160 is excluded by this rule.
-When the same hash controls the payer and alleged recipient the
-tip is classified as self-tip/uncounted rather than inferring change.
+with positive satoshi value.
+
+**Strict TIP_XEC funding-attribution rule (Codex P2 resolution):**
+To classify any amount as a verified third-party tip in this initial
+profile, the verifier MUST resolve **every transaction input's spent
+previous output**, require each value-funding prevout to be standard
+P2PKH controlled by the **same HASH160 as the transaction's designated
+TIP author**, and require the target-author HASH160 to be different
+from that tipper hash. A prevout controlled by the target author, a
+different sponsor, an unknown/unsupported script or an unresolved input
+MUST yield `AMBIGUOUS_TIP_FUNDING` / no verified tip credit. This
+restriction is intentionally **stricter than M1.4's general allowance
+for additional fee-paying inputs**. Multi-party/sponsored tipping
+requires its own separately reviewed net-value attribution design.
+The mere fact that an input has a valid P2PKH script does NOT prove it
+belongs to the designated tipper.
+
+Only AFTER all input ownership and output rules pass, the verified
+native XEC tip amount is the positive integer sum of **only**
+matching recipient outputs (excluding the OP_RETURN, fees and any
+outputs to other addresses). Ordinary change to the distinct payer
+HASH160 is excluded; returning a recipient's own funds as "tip"
+is impossible under the strict all-input ownership requirement.
+When the same hash controls the payer and recipient, classify the
+transfer as `SELF_TIP_UNCREDITED`, not as third-party tipping.
+
+**Required negative counterexample from Codex:** designated author A
+spends a 1,000-satoshi prevout, target author B spends a
+1,000,000-satoshi prevout, and outputs return 1,000,000 satoshis
+to B and 500 to A (500 fee). A simplistic sum of B outputs would
+miscredit a 1,000,000-satoshi TIP despite B receiving no new funds.
+The strict funding rule MUST reject this as
+`AMBIGUOUS_TIP_FUNDING` regardless of a valid TIP declaration.
 
 A client MUST NOT infer intent from a payment output alone: the
 **same transaction** must contain exactly one valid supported social
@@ -718,7 +745,8 @@ identified actions. On reorg/reconnect, receipts and
 aggregates MUST be recalculated against the active chain,
 without rewriting historical evidence or claiming a reverted
 transfer is settled. Missing target messages, absent
-author prevouts, untrusted token proofs or unsupported
+author/funding prevouts, multi-owner TIP_XEC funding,
+untrusted token proofs or unsupported
 script variants MUST fail closed for **verified tip credit**.
 
 The application MUST NOT present a social tipping total as
@@ -740,8 +768,10 @@ identity, amount, fee and linked post before approval.
 
 Before any ratification or release, M1.7 MUST include:
 - XEC single/multiple matching recipient outputs,
-  nonmatching change, empty/zero payment, self-tip,
-  negative/unrepresentable amount and wrong recipient;
+  verified all-input sender ownership, nonmatching change,
+  recipient-funded/mixed-funded attacks (Codex P2), absent
+  prevout and unsupported script, empty/zero payment,
+  self-tip, negative/unrepresentable amount and wrong recipient;
 - valid/invalid eMPP framing with an ALP SEND and **exactly
   one** TMM entry, actual 223-byte script limits, wrong
   token ID, unsupported ALP action and output token mapping;
@@ -766,9 +796,289 @@ security review, reproducible fixtures and independent
 governance are REQUIRED before any activation, signature,
 broadcast or use of funds.
 
-## M1.7 / M1.8. Conformance vectors and threat model — TODO
+## M1.7. Deterministic conformance vectors and acceptance specification — DRAFT
 
-Produce byte-for-byte vectors and independent decoder tests for POST, proposed REPLY, on-chain REACTION/REACTION_REMOVE and both TIP formats (XEC two-push vs. ALP/eMPP RMZ); review fee costs, spam/DoS, sybil behavior, malformed references, phishing, malicious media/links, key compromise, cross-network replay, reorgs, token change and settlement fraud.
+**Normative status:** this section specifies the **test contract** that
+must be implemented in independently reproducible fixtures before
+RFC-0001 ratification. Hexadecimal examples below have been
+byte-counted, but are **synthetic fragments, not existing signed
+mainnet transactions, successful eCash broadcasts or proofs of
+signature/parent verification**. A script-format pass is NOT equivalent
+to a verified social event or a settled payment.
+
+### M1.7.1. Fixture conventions, oracle and provenance
+
+- Network: **eCash mainnet** for the proposed production profile;
+  synthetic unit vectors use no real funds and MUST NOT be broadcast.
+  Each fixture carries a separate `network` field; other network
+  contexts MUST NOT be silently treated as mainnet.
+- Canonical synthetic displayed target TXID (non-palindromic):
+  `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f`.
+  Its on-wire bytes MUST match this left-to-right display order.
+  For a documented little-endian upstream byte buffer, a **single**
+  reversal produces this value; a second reversal MUST fail
+  target matching.
+- For the byte-only examples, `author_input_index=0x01` intentionally
+  exercises a **nonzero** designated author input; this is not a
+  valid signed transaction until an independent fixture supplies
+  enough actual inputs and a valid signature. The reference
+  `LOKAD=544d4d00` remains unchanged.
+- The oracle MUST expose separate outcomes for (a) script/envelope
+  format, (b) designated author identity/signature, (c) referenced
+  target resolution, (d) token/payment validation and
+  (e) active-chain settlement. `VALID_FORMAT` MUST NOT be
+  reported as `VERIFIED_TM1` or `SETTLED`.
+- A fixture's manifest MUST pin SHA-256 of raw transaction bytes,
+  canonical TXID, chosen network, active-chain/Chronik snapshot,
+  parent and author prevout scripts/values, token ancestry,
+  expected error/state and independent encoder/decoder outputs.
+  Non-chain synthetic fixtures MUST be clearly marked as synthetic.
+
+### M1.7.2. Exact synthetic OP_RETURN scripts
+
+Every hex string includes **the entire script** beginning with
+`OP_RETURN=6a`, followed by the minimal four-byte LOKAD push
+`04544d4d00`, then the second push opcode and contiguous envelope.
+
+| ID | Event / expected structural outcome | Script length |
+| --- | --- | ---: |
+| S-01 | REPLY with text `a`; `VALID_FORMAT`, target/author verification separately pending | 43 |
+| S-02 | REPLY with a raw `ff` byte as text; reject `INVALID_UTF8` | 43 |
+| S-03 | REPLY with 180 ASCII `a` bytes; `VALID_FORMAT` at 223-byte boundary | 223 |
+| S-04 | REPLY with 181 ASCII `a` bytes; reject `PAYLOAD_TOO_LARGE`, script=224 | 224 |
+| S-05 | REACTION LIKE kind `01`; `VALID_FORMAT`, binary target not UTF-8 decoded | 43 |
+| S-06 | REACTION_REMOVE LIKE kind `01`; `VALID_FORMAT` | 43 |
+| S-07 | REACTION unknown `reaction_kind=02`; reject `UNSUPPORTED_REACTION_KIND` (proposed extension error) | 43 |
+| S-08 | TIP_XEC format; `VALID_FORMAT` only, **not** evidence of transfer | 42 |
+
+**S-01 — REPLY positive structure**
+
+```hex
+6a04544d4d0024020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61
+```
+
+**S-02 — REPLY invalid UTF-8**
+
+```hex
+6a04544d4d0024020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff
+```
+
+**S-03 — REPLY 180-byte text, exact 223-byte script**
+
+```hex
+6a04544d4d004cd7020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161
+```
+
+**S-04 — REPLY 181-byte text, exact 224-byte script (reject)**
+
+```hex
+6a04544d4d004cd8020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161
+```
+
+**S-05 — REACTION LIKE**
+
+```hex
+6a04544d4d0024020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f01
+```
+
+**S-06 — REACTION_REMOVE LIKE**
+
+```hex
+6a04544d4d0024020401000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f01
+```
+
+**S-07 — REACTION unsupported kind**
+
+```hex
+6a04544d4d0024020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f02
+```
+
+**S-08 — TIP_XEC binary declaration only**
+
+```hex
+6a04544d4d0023020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
+```
+
+For S-05/S-06/S-07, the 33-byte typed data is
+`target_txid[32] || reaction_kind[1]` and MUST NOT be
+UTF-8-decoded, even if some of its byte sequences happen to
+be valid UTF-8. For S-01/S-02/S-03/S-04, **only** the text
+after the first 32 bytes requires strict UTF-8 decoding.
+A Core v1.0-only parser MUST continue to reject all v2
+events without altering valid historical v1 POSTs.
+
+**S-09 — RMZ eMPP application entry (partial, NOT an eMPP tx):**
+
+```hex
+544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
+```
+
+S-09 is exactly **39 bytes**:
+`TMM_LOKAD[4] || version[1] || TIP_EVENT[1] ||
+author_input_index[1] || target_txid[32]`.
+An eMPP push of this entry uses minimal direct-push opcode
+`0x27`. This entry ALONE is **not** a valid ALP SEND,
+an executable complete eMPP script or a valid token
+payment. A complete positive eMPP sample MUST wait for
+independently verified ALP SEND encoding, output index and
+token input fixture data and satisfy the total-size
+compatibility ceiling applicable to that transaction.
+**Do not invent an ALP encoding to make a positive test pass.**
+
+### M1.7.3. Transaction-level positive and negative matrices
+
+The following IDs are **specified cases**, not yet committed
+independently executable transaction fixtures. Each case MUST
+include raw bytes, expected oracle classifications and
+independent reproduction before M1.10 acceptance.
+
+| ID | Case / deterministic arrangement | Expected oracle |
+| --- | --- | --- |
+| A-01 | REPLY, designated input index **1**, prevout P2PKH key hash matches public key, valid `0x41` signature | `AUTHOR_VERIFIED` after all required checks |
+| A-02 | Same as A-01 with permitted `0xc1` and an extra fee-paying input | `AUTHOR_VERIFIED` (REPLY only) |
+| A-03 | Referenced input index out of range or its prevout unavailable | `AUTHOR_INPUT_OUT_OF_RANGE` or `PREVOUT_UNAVAILABLE`, never verified |
+| A-04 | Wrong key hash, signature or unsupported `0x01`/SINGLE/NONE sighash | `INVALID_AUTHOR_SCRIPT_SIG`, `INVALID_AUTHOR_SIGNATURE` or `UNSUPPORTED_SIGHASH` |
+| A-05 | Designated author prevout P2SH/multisig or invalid unlocking push count | `UNSUPPORTED_AUTHOR_SCRIPT` or `INVALID_AUTHOR_SCRIPT_SIG` |
+| P-01 | Parent verifies as eligible POST v1.0 / activated REPLY | `PARENT_VERIFIED` |
+| P-02 | Parent missing with retryable Chronik outage | `PARENT_PENDING`, not false invalid-parent verdict |
+| P-03 | Parent is a valid unrelated transaction without eligible TM1 message | `INVALID_PARENT` |
+| P-04 | Corrupt index creates repeated-node ancestor path / self reference | `REFERENCE_CYCLE`; no verified graph edge |
+| P-05 | Parent becomes unconfirmed or reorged out of active chain | `PARENT_UNCONFIRMED` or `PARENT_REORGED` with deterministic rollback |
+| R-01 | Two distinct verified authors LIKE same valid target | Two active likes |
+| R-02 | Same author sends two LIKEs to same target | Two events recorded; **one active** like |
+| R-03 | Same author LIKE, REMOVE, LIKE across three confirmed transactions | Active-state sequence `true,false,true`; latest true |
+| R-04 | Different author sends REMOVE for a LIKE by first author | First author's active state remains unchanged; removal only affects remover's own key |
+| R-05 | Reorg drops final REACTION_REMOVE | Recompute active state from selected chain; never decrement twice |
+| X-01 | XEC TIP: all input prevouts match designated tipper A; eligible target is B (different hash); exactly one recipient output of **1000 sats** to B plus A-only change | `SETTLED` and amount **1000 sats** only after confirmation and other checks |
+| X-02 | Same XEC TIP but **two** recipient outputs of **400** and **600 sats** to B (assume scripts/relay accepted), other change to A | `SETTLED`, amount **1000 sats**, not fee or change |
+| X-03 | TIP target B but payment output points to C instead of B | `INVALID_RECIPIENT`; **0 credited** to B |
+| X-04 | TIP output has zero payable value, recipient missing, or sender equals target author | `NO_VALUE_TRANSFER` or `SELF_TIP_UNCREDITED`, no positive social amount |
+| X-05 | **Codex P2 counterexample:** designated tipper A input=1000 sats; target B input=1,000,000 sats; outputs B=1,000,000, A=500, fee=500 | `AMBIGUOUS_TIP_FUNDING`; **0 credited**, despite B matching a large output |
+| X-06 | Third-party C funds XEC TIP or any prevout cannot be resolved/attributed to A | `AMBIGUOUS_TIP_FUNDING`; no verified tip credit |
+| X-07 | TIP declaration is signed without matching XEC destination output or with unsupported sighash | No `TipReceipt SETTLED` |
+| T-01 | RMZ `ALP SEND` for **verified exact token ID**, target author B receives **125 atoms**; sender A owns all RMZ token inputs and A != B | `SETTLED`, amount **125 atoms = 1.25 RMZ** after valid atomic eMPP-TMM and confirmation |
+| T-02 | RMZ token transfer output carries XEC dust but **zero** RMZ atoms to B | `NO_VALUE_TRANSFER`; do not count XEC dust as RMZ |
+| T-03 | RMZ SEND but incorrect token ID, SLP instead of ALP or invalid/burned token provenance | `INVALID_ASSET`; no credited RMZ |
+| T-04 | RMZ output to non-target hash or attribution from mixed-owner token inputs | `INVALID_RECIPIENT` or `AMBIGUOUS_TIP_FUNDING`; no credited RMZ |
+| T-05 | Multiple TMM TIP entries, eMPP missing ALP SEND, invalid entry size or over policy limit | Reject social TIP classification; preserve legitimate unrelated ALP handling when applicable |
+| T-06 | Source reorg removes token transfer after a confirmed receipt | `REORGED`, remove settled aggregates and reconcile idempotently |
+| C-01 | Unsupported v2 interpreted by v1.0-only parser, v1 POST unchanged | v2 rejects `UNSUPPORTED_VERSION`; v1 POST remains valid |
+| C-02 | Duplicate TM1 candidates or malformed push / overlong ordinary TM1 script | Reject relevant v2 TM1 candidate; no verified social event |
+| C-03 | Different TXID byte order / wrong chain / mutated target bytes | No valid verified parent/target association |
+| C-04 | Re-index same TXID/transaction across restart and websocket reconnect | One logical verified event and one tip receipt per eligible TXID |
+
+For X-02, fixture output values MUST satisfy then-current eCash
+relay/dust requirements; the listed 400/600 are **logical
+amount assertions**, not a promise that those output amounts
+are broadcastable. Test generators MUST use relay-valid
+amounts when constructing integration fixtures.
+
+### M1.7.4. Release gate for executable test corpus
+
+Before RFC-0001 acceptance, the repository MUST contain
+machine-readable positive and negative fixtures with fixed raw
+transaction bytes, deterministic expected verdicts and
+independent encoder + decoder comparison for **all**
+supported event/container combinations, including ALP/eMPP.
+A parser-only success is insufficient for TIP settlement.
+
+Acceptance MUST separately prove deterministic script lengths,
+validated signature/prevout rules, active-chain target
+resolution, token ancestry, recipient output attribution,
+reorg rollback, idempotence and hostile/synthetic
+multi-owner transaction handling. The independently
+reviewed output must include the test command, CI run
+reference and reviewed commit SHA. Any incomplete token
+encoding or signature tests MUST remain listed as a
+blocking gate rather than passed by inspection.
+
+## M1.8. Threat model and required mitigations — DRAFT
+
+### M1.8.1. Assets, actors and security boundaries
+
+**Protected assets:** on-chain transaction/author attribution,
+immutable parent/reaction linkage, noninflated likes,
+noninflated XEC/RMZ tip amounts, correct recipient,
+private signing keys, accurate chain-state classification
+and users' ability to understand what is signed.
+
+**Adversaries:** malicious webpage, fake token/recipient
+metadata, compromised social indexer, malicious Chronik
+upstream, attacker who can publish ordinary eCash
+transactions, spammer with many keys, colluding
+tipper/recipient or participant with wallet/keys
+compromised. We do not assume the network, clients or
+indexers are always online, honest or final.
+
+**Trust boundaries:** untrusted input/URLs and social UI;
+noncustodial wallet confirmation and signing;
+raw transaction/prevout verification;
+Chronik node and token-validation model; deterministic
+indexer/database; application-visible reputation.
+Cryptographic authenticity of a public-key hash does
+**not** prove a unique human identity, charitable intent,
+non-coercion, or economic reputation.
+
+### M1.8.2. Attack-to-control matrix
+
+| ID | Threat / failure mode | Severity | Mandatory proposed defense / evidence |
+| --- | --- | --- | --- |
+| SEC-01 | **Recipient phishing:** modified profile or deeplink substitutes attacker wallet for post author | Critical | Wallet independently derives verified target-author HASH160 from target TXID; displays recipient and network; refuses mismatched script (X-03) |
+| SEC-02 | **Author spoofing:** attacker substitutes `author_input_index=0` or selects unrelated fee input | High | Verify selected in-range index, prevout P2PKH HASH160, unlocking script, signature and supported sighash (A-01–A-05) |
+| SEC-03 | **Mutating signed social intent:** change target/reaction/amount/output after user preview | Critical | Require approved full-output SIGHASH_ALL variants; recalculate and re-preview final raw transaction before signing (A-04, X-07) |
+| SEC-04 | **Like/unlike replay or duplicates:** count repeated events as multiple active likes | Medium | Immutable history + idempotent key `(network, author, target, kind)` derived from selected chain, deterministic last event (R-01–R-05) |
+| SEC-05 | **Recipient-funded XEC spoof:** count recipient's own input/change as tip | Critical | For TIP_XEC require ALL funding prevouts owned by designated tipper, no recipient inputs, no third-party/ambiguous inputs (X-05, X-06) |
+| SEC-06 | **Wrong RMZ identity/amount:** false ticker, token ID, output mapping, decimals or dust mistaken for atoms | Critical | Verify ALP ancestry, exact RMZ ID, token type, decimals, atom allocations and actual P2PKH receiver (T-01–T-04) |
+| SEC-07 | **eMPP injection / confusion:** misparse ALP+TMM entry as ordinary TM1 or double-count duplicate entries | High | Container-specific strict parsing, minimal pushes, uniqueness, output constraints and 223-byte compatibility tests (T-05, C-02) |
+| SEC-08 | **Reorg / double-count:** confirmations revert or websocket replay indexes twice | High | Chain-aware rollback/replay, idempotency by TXID, `PENDING` vs `SETTLED` vs `REORGED` (T-06, C-04) |
+| SEC-09 | **Unknown/malicious parent:** phantom reply/like to nonexistent or non-TM1 tx | High | Verify parent event, network and chain status; bounded retries; do not credit pending/invalid targets (P-02–P-05) |
+| SEC-10 | **Indexing DoS:** huge thread depth, duplicate memos, malformed UTF-8 or excessive eMPP bytes | High | Strict script limits, typed validators, bounded traversal/work budget, pagination, rate limits and no unbounded retries (S-02–S-04, P-04, C-02) |
+| SEC-11 | **Key compromise / delegated signing spoof:** valid key controlled by malicious actor, rogue P2SH or registry override | High | Require canonical P2PKH proof, explicit no-delegation profile, compartmentalize Wallet approvals, preserve historical evidence (A-03–A-05) |
+| SEC-12 | **Sybil/wash tipping:** self-transfers or collusive addresses artificially inflate popularity | High | Zero credit for self-tips; separately label transfer totals as on-chain value, never verified human reputation; anti-abuse policy outside consensus (X-04, T-04) |
+| SEC-13 | **Mempool conflict and premature finality:** UI advertises unsettled or RBF/reorged tip as paid | High | Provisional mempool view only; settlement requires active-chain confirmation and independent finality labeling (P-05, T-06) |
+| SEC-14 | **Private-key exfiltration / fee drain:** fake social tip prompt requests seed or hides high fees | Critical | Signing only in noncustodial wallet; display final recipient, amount, token, network and fee; no seed export to web UI (X-07) |
+| SEC-15 | **Cross-network and byte-order confusion:** valid-looking target links to another chain or reversed TXID | High | Key by network+TXID; display-order serialization with exact-once conversion and mismatched-parent tests (C-03) |
+| SEC-16 | **Privacy correlation:** immutable P2PKH activity reveals common authors/funders and transfer history | Medium | Client disclosures and opt-in visibility; avoid false anonymity promises; protect local browsing metadata; no retroactive on-chain deletion |
+
+Severity is a security triage proposal; it is **not** a claim
+of measured attack likelihood or completed penetration
+testing. A case's mapped test ID may prove a local invariant
+without providing complete production-system security.
+
+### M1.8.3. Fail-closed versus retryable outcomes
+
+A structurally invalid event, unsupported script/sighash,
+wrong token ID, wrong recipient, ambiguous funding, bad
+signature or invalid linked target MUST NOT receive
+`VERIFIED` or `TipReceipt SETTLED` status.
+
+A transient Chronik outage, missing prevout, unconfirmed
+parent, unresolved token history or chain reorg MUST
+instead be classified distinctly as `PENDING`,
+`PREVOUT_UNAVAILABLE`, `PARENT_PENDING` or `REORGED`
+as appropriate, with bounded retries and auditing.
+A pending item MUST NOT silently become valid merely
+because the current indexer's cache contains a matching
+display address. If trust is delegated to Chronik, clients
+MUST disclose that trust model and MUST NOT claim
+offline independent cryptographic verification.
+
+### M1.8.4. Testable security exit criteria
+
+M1.8 is satisfied only when each SEC-ID is mapped to
+a passing fixture, integration/security test or an
+explicit, reviewed and accepted **residual risk** with
+owner and date; no severe risk may be silently waived.
+A security review MUST examine both social client and
+wallet transaction preview/signing flows independently.
+
+M1.9/M1.10 MUST publish the active protocol/profile
+boundaries and feature flags, including the ability to
+disable v2 social parsing/creation, while keeping historical
+Core v1.0 POST verification functional. **Neither
+writing this threat model nor a green documentation CI
+establishes that the listed mitigations have been
+implemented or independently tested.**
 
 ## M1.9 / M1.10. Activation and milestone gates — TODO
 
