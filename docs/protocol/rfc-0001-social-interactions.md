@@ -62,6 +62,16 @@ This comparison is **architectural background**, not a wire-level claim of cross
 
 The new parser MUST dispatch by the *pair* `(version, event_type)`, not by event type alone. It MUST maintain the Core candidate-cardinality policy and canonical minimal push encoding. A v1 parser remains conforming if it rejects the proposed v2 message as unsupported.
 
+**Two-stage social validation (proposed v2):**
+
+1. **Structural / event-specific validation:** enforce the shared TM1 candidate count, output value, exactly two minimal pushes, envelope bounds and supported `(version, event_type)`; THEN dispatch to the matching typed-payload validator:
+   - `(0x02, 0x02)` **REPLY**: `event_data = parent_txid[32] || reply_text[1..180]` (33–212 bytes). Treat the first 32 bytes as binary; ONLY `reply_text` MUST decode as strict UTF-8.
+   - `(0x02, 0x03)` **REACTION** and `(0x02, 0x04)` **REACTION_REMOVE**: `event_data = target_txid[32] || reaction_kind[1]` (EXACTLY 33 bytes). Both fields are binary and MUST NOT be UTF-8 decoded, normalized or replacement-decoded. Require an approved `reaction_kind`, currently proposed `0x01` for LIKE only.
+   - `(0x01, 0x01)` **POST**: retain Core v1.0 validation, including strict UTF-8 over its ENTIRE `event_data`. The proposed v2 dispatch MUST NOT loosen this v1.0 requirement.
+2. **Shared author verification:** AFTER the correct event-specific payload validation passes, execute the common designated P2PKH author-input checks in M1.4.2. These checks MUST NOT re-interpret an event's typed payload or impose REPLY UTF-8 rules on binary reactions.
+
+A failure of event-specific validation MUST NOT be obscured by success in P2PKH verification, and a structurally valid event MUST NOT be marked author-verified until the independent M1.4.2 checks pass. Neither stage activates v2 before independent ratification.
+
 ### M1.2.2. Activation gates
 
 The proposed v2 social combinations `(0x02, 0x02)`, `(0x02, 0x03)` and `(0x02, 0x04)` MUST NOT be considered active unless all of the following have been satisfied through explicit governance and deployment processes:
@@ -186,16 +196,20 @@ It contains 39 bytes (3 + 32 + 4), uses a direct second-push opcode `0x27` and a
 
 ## M1.4. Author identity and authorization — proposed requirements
 
-**Scope:** This section specifies the proposed authorship profile for a future
-`version=0x02 / event_type=0x02` on-chain REPLY. It inherits the Core v1.0
-designated-input P2PKH proof; it does not activate delegated signing,
-multisignature identities, P2SH author inputs, or off-chain authorization.
-The requirements become binding only if an RFC and corresponding
-implementation/deployment are independently approved.
+**Scope:** This section specifies the **shared authorship profile** for
+future `version=0x02` on-chain social events: `REPLY=0x02`,
+`REACTION=0x03` and `REACTION_REMOVE=0x04`. It inherits the Core v1.0
+designated-input P2PKH proof and is **payload-agnostic**: event-specific
+binary lengths, fields and UTF-8 checks are performed exclusively by the
+typed dispatch in M1.2.1 with event definitions in M1.3 and M1.5. It
+does not activate delegated signing, multisignature identities, P2SH
+author inputs, or off-chain authorization. The requirements become
+binding only if RFC-0001 and corresponding implementation/deployment
+are independently approved.
 
 ### M1.4.1. Protocol identity versus display identity
 
-The canonical REPLY author identifier MUST be the **20-byte HASH160 public-key
+The canonical social-event author identifier MUST be the **20-byte HASH160 public-key
 hash** from the P2PKH previous output spent by the input selected by
 `author_input_index`. This is the same author identity model as TM1 Core
 v1.0. A CashAddr string is a network-specific presentation of that hash; it
@@ -213,14 +227,19 @@ consented to the response or endorsed its contents. Moderation and
 visibility policies belong to client/indexer application layers and MUST
 NOT silently change the cryptographic author of a transaction.
 
-### M1.4.2. Designated-input verification procedure
+### M1.4.2. Shared designated-input verification procedure
 
-Before classifying a proposed REPLY as **cryptographically verified**,
-the social-aware verifier MUST:
+For ANY supported proposed v2 social event, the social-aware verifier
+MUST first complete the **event-specific structural and payload stage**
+defined in M1.2.1. Only after that stage succeeds, the verifier MUST
+apply the same **payload-independent author checks** below, before
+classifying that event as cryptographically verified:
 
-1. Identify exactly one TM1 candidate and verify the proposed REPLY
-   `(version=0x02, event_type=0x02)` envelope, canonical pushes, 212-byte
-   `event_data` limit and strict UTF-8 **reply_text** segment.
+1. Confirm the preceding event-specific stage found exactly one TM1
+   candidate with valid shared framing and a supported, correctly parsed
+   `(version, event_type)`. Do NOT require REPLY formatting or
+   `reply_text` UTF-8 for reactions. Do NOT parse, reinterpret or validate
+   any event payload in this identity-verification stage.
 2. Read `author_input_index` as an unsigned byte and require
    `0 <= author_input_index < transaction.inputs.length`.
 3. Resolve the **specific spent previous output** for that input from a
@@ -236,8 +255,8 @@ the social-aware verifier MUST:
 6. Require the signature's final sighash byte to be **exactly `0x41` or
    `0xc1`**, rejecting unsupported combinations, including SIGHASH_NONE
    and SIGHASH_SINGLE. These two allowed combinations commit to **all**
-   transaction outputs, including the entire REPLY `OP_RETURN`
-   containing `parent_txid` and `reply_text`.
+   transaction outputs, including the entire social event `OP_RETURN`,
+   whatever its already-validated typed payload.
 7. Verify cryptographic/transaction validity under active eCash rules.
    In the documented `trusted-chronik` model the verifier MAY rely on a
    trusted node/Chronik source for script validity **while still enforcing
@@ -253,15 +272,16 @@ ownership from a fee-paying input, or select the first address matching a
 registry. Wallets MAY prefer author input index 0 as a creation convention,
 not a validation requirement.
 
-The `author_input_index`, `parent_txid` and reply text are committed into
-the output by the permitted `SIGHASH_ALL` modes; applications MUST NOT
-attribute an altered payload to the original signature. This proof is a
-transaction-level authorization, **not an independent signature embedded
-inside `event_data`**.
+The `author_input_index` and **all event-specific fields** encoded in the
+output (REPLY parent reference and text, or REACTION/REACTION_REMOVE target
+reference and kind) are committed by the permitted `SIGHASH_ALL` modes.
+Applications MUST NOT attribute an altered payload to the original signature.
+This proof is transaction-level authorization, **not an independent
+signature embedded inside `event_data`**.
 
 ### M1.4.3. Unauthorized authorship claims and failure handling
 
-| Attempt or condition | Required disposition under proposed REPLY profile |
+| Attempt or condition | Required disposition under proposed social v2 profile |
 | --- | --- |
 | Input signature made by a different key whose HASH160 does not match the selected P2PKH prevout | Reject author verification as `INVALID_AUTHOR_SCRIPT_SIG` or `INVALID_AUTHOR_SIGNATURE`, as applicable |
 | Public key and prevout appear to match, but signature/transaction is invalid | Reject with `INVALID_AUTHOR_SIGNATURE`; do not publish as verified |
@@ -269,7 +289,7 @@ inside `event_data`**.
 | Selected prevout unavailable or source trust insufficient | Withhold verified status; classify `PREVOUT_UNAVAILABLE` or explicitly pending, and retry when appropriate |
 | Sighash `0x01`, SIGHASH_NONE, SINGLE or other unsupported combination | Reject with `UNSUPPORTED_SIGHASH` |
 | REPLY is correctly signed by **another person's own** valid P2PKH key | Accept that key as the REPLY author if all rules pass; it is not impersonation merely because the parent author differs |
-| Reply text or external metadata claims to be another person | Do not alter the verified author hash; UI MAY warn, label or moderate |
+| Reply text, reaction metadata or external profile data claims to be another person | Do not alter the verified author hash; UI MAY warn, label or moderate |
 | Valid key used without its owner's consent (e.g., stolen private key) | Cryptographically indistinguishable solely from on-chain data; use application-level reporting, compromise signals and prospective account/profile responses, not fictional on-chain invalidation |
 
 All error labels above reference the Core v1.0 validation taxonomy where
@@ -286,7 +306,7 @@ and explicitly activated scheme says otherwise. Core's `0xc1`
 transactions with other funding inputs while maintaining commitment to
 **all outputs**; this RFC does not authorize a new signing service.
 
-Each on-chain REPLY is identified by its actual network transaction ID.
+Each on-chain REPLY, REACTION or REACTION_REMOVE is identified by its actual network transaction ID.
 A signature authorizes a transaction under the active eCash signature rules;
 it is not a portable off-chain token that grants permission to send new
 messages. Indexers MUST key on-chain verification by network and TXID and
@@ -309,7 +329,7 @@ A future scheme that allows an agent, shared profile, multisignature wallet,
 P2SH author prevout or separate signed delegation certificate MUST be
 introduced through a **distinct reviewed and ratified RFC and explicit
 version/profile activation**. It MUST NOT silently interpret an existing
-Core v1.0 or proposed v2 REPLY P2PKH author as a different person or
+Core v1.0 or proposed v2 social-event P2PKH author as a different person or
 authority.
 
 Any future delegation proposal MUST specify at least: delegator and
@@ -340,8 +360,12 @@ Before ratification, independent fixtures and tests MUST cover:
   between `trusted-chronik` and independently verified signatures.
 - Reply to a parent written by a different valid author, including
   malicious text impersonation attempts that do not change the author hash.
-- Valid full-output signature commitment to `parent_txid` and text,
+- Valid full-output signature commitment to each event's typed fields
+  (REPLY parent/text, REACTION/REACTION_REMOVE target/kind),
   with mutated outputs no longer verifying.
+- Valid binary REACTION/REACTION_REMOVE passes author verification
+  despite containing non-UTF-8 TXID bytes; REPLY validates UTF-8 only
+  in `reply_text`, and v1 POST validates UTF-8 across all `event_data`.
 - Key rotation, historical attribution stability and compromised-key
   application flags that do not rewrite on-chain proofs.
 - No implicit delegation; unsupported extra signatures, profiles or
@@ -373,7 +397,10 @@ The initial proposed `reaction_kind=0x01` means **LIKE**. Other kinds are
 reserved until separately documented and authorized. Neither event value,
 reaction kind nor v2 version is currently active. Both events use the
 same standard, minimal two-push TM1 script framing and the same explicit
-`author_input_index` P2PKH author verification as proposed REPLY in M1.4.
+`author_input_index` P2PKH author verification as proposed REPLY in M1.4,
+**not** its REPLY-only payload decoding. The index is not restricted to
+input zero: any in-range unsigned index designating a qualifying P2PKH
+author input is valid.
 
 ```text
 OP_RETURN <LOKAD_ID>
@@ -383,7 +410,12 @@ OP_RETURN <LOKAD_ID>
 
 `target_txid` is exactly 32 **binary** bytes in the human-readable
 display-order encoding defined by M1.3.3; it MUST NOT be UTF-8 decoded.
-`reaction_kind` is one unsigned byte, not Unicode text.
+`reaction_kind` is one unsigned byte, not Unicode text. The
+`event_data` fields for either reaction type MUST be processed as a
+**33-byte binary record only**; no UTF-8 validity, normalization or
+replacement-decoding rule applies to these bytes. The version/event
+dispatcher in M1.2.1 enforces this length and type BEFORE the separate
+author-verification stage in M1.4.2.
 Under these proposed version/event combinations, `event_data` is exactly
 33 bytes, the envelope is exactly 36 bytes, and the complete script
 is **43 bytes**:
@@ -395,7 +427,11 @@ rejected. No off-chain typed message can substitute for this transaction.
 
 A reaction MUST be attributed only to the 20-byte public-key hash from
 the **designated P2PKH author input** of its own valid on-chain
-transaction, subject to the complete M1.4 verification rules.
+transaction. It MUST pass its **own binary REACTION/REACTION_REMOVE
+payload rules** in M1.2.1 and M1.5.1, and then the **shared
+payload-independent author-verification checks** in M1.4.2. A
+reaction MUST NOT be required to satisfy the REPLY-only
+`parent_txid || reply_text` layout or UTF-8 checks.
 The `0x41`/`0xc1` permitted `SIGHASH_ALL` modes commit to all transaction
 outputs, including the reaction target and kind. A social handle or
 fee-paying input is not an author credential.
