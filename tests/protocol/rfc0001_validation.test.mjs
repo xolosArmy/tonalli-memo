@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { URL } from 'node:url';
+import { TextDecoder } from 'node:util';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
