@@ -18,7 +18,7 @@
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed |
 | M1.4 | Author identity and authorization | Pending |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
-| M1.6 | RMZ tips with verifiable on-chain settlement | Architectural direction; token rules pending |
+| M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified |
 | M1.7 | Canonical vectors and byte-boundary tests | Outline / vectors pending |
 | M1.8 | Threat model: spam, reorgs, phishing, replay | Outline / analysis pending |
 | M1.9 | Compatibility, migration and staged activation | Pending |
@@ -56,6 +56,8 @@ This comparison is **architectural background**, not a wire-level claim of cross
 | `544d4d00` | `0x02` | `0x02` REPLY | 32-byte binary parent TXID followed by 1–180 bytes strict UTF-8 | **RFC-0001 proposal only** |
 | `544d4d00` | `0x02` | `0x03` REACTION | 32-byte target TXID + 1-byte reaction kind | **RFC-0001 proposal only** |
 | `544d4d00` | `0x02` | `0x04` REACTION_REMOVE | 32-byte target TXID + 1-byte reaction kind | **RFC-0001 proposal only** |
+| `544d4d00` | `0x02` | `0x05` TIP_XEC | 32-byte binary target TXID + verified XEC payment outputs | **RFC-0001 proposal only** |
+| eMPP entry `544d4d00` | `0x02` | `0x05` TIP_RMZ | 32-byte binary target TXID + verified ALP RMZ SEND in same transaction | **Separate eMPP extension proposal only** |
 | `544d4d00` | `0x02` | any other value | Undefined | Unsupported |
 
 `0x02` is the proposed **envelope version**, not a retroactive change to TM1 Core v1.0 and not a ratified activation assignment. The `event_type=0x02` value was reserved by Core v1.0 and remains inactive in production until an independently authorized change to social-aware verifiers.
@@ -64,9 +66,11 @@ The new parser MUST dispatch by the *pair* `(version, event_type)`, not by event
 
 **Two-stage social validation (proposed v2):**
 
-1. **Structural / event-specific validation:** enforce the shared TM1 candidate count, output value, exactly two minimal pushes, envelope bounds and supported `(version, event_type)`; THEN dispatch to the matching typed-payload validator:
+1. **Structural / event-specific validation:** for ordinary TM1 framing, enforce the TM1 candidate count, zero output value, exactly two minimal pushes, envelope bounds and supported `(version, event_type)`; for the separately proposed RMZ tip eMPP profile, enforce the independent eMPP container and ALP token-validity checks in M1.6. THEN dispatch to the matching typed-payload validator:
    - `(0x02, 0x02)` **REPLY**: `event_data = parent_txid[32] || reply_text[1..180]` (33–212 bytes). Treat the first 32 bytes as binary; ONLY `reply_text` MUST decode as strict UTF-8.
    - `(0x02, 0x03)` **REACTION** and `(0x02, 0x04)` **REACTION_REMOVE**: `event_data = target_txid[32] || reaction_kind[1]` (EXACTLY 33 bytes). Both fields are binary and MUST NOT be UTF-8 decoded, normalized or replacement-decoded. Require an approved `reaction_kind`, currently proposed `0x01` for LIKE only.
+   - `(0x02, 0x05)` **TIP_XEC**: in the **ordinary two-push TM1 framing**, `event_data = target_txid[32]` (EXACTLY 32 binary bytes); ALSO verify XEC outputs according to M1.6. No UTF-8 decoding of the target TXID.
+   - **TIP_RMZ** `(0x02, 0x05)`: this variant is only proposed **inside a distinct ALP/eMPP container** with a TMM-tagged eMPP app entry as defined by M1.6, *not* the ordinary two-push TM1 script. Parsing MUST first dispatch by the actual OP_RETURN container and verify an ALP SEND and a single TMM app entry; this is an additional opt-in indexer/parser profile, not a change to Core v1.0. A legacy TM1 parser MUST NOT treat an eMPP output as a valid TM1 two-push output.
    - `(0x01, 0x01)` **POST**: retain Core v1.0 validation, including strict UTF-8 over its ENTIRE `event_data`. The proposed v2 dispatch MUST NOT loosen this v1.0 requirement.
 2. **Shared author verification:** AFTER the correct event-specific payload validation passes, execute the common designated P2PKH author-input checks in M1.4.2. These checks MUST NOT re-interpret an event's typed payload or impose REPLY UTF-8 rules on binary reactions.
 
@@ -74,9 +78,9 @@ A failure of event-specific validation MUST NOT be obscured by success in P2PKH 
 
 ### M1.2.2. Activation gates
 
-The proposed v2 social combinations `(0x02, 0x02)`, `(0x02, 0x03)` and `(0x02, 0x04)` MUST NOT be considered active unless all of the following have been satisfied through explicit governance and deployment processes:
+The proposed v2 social combinations `(0x02, 0x02)`, `(0x02, 0x03)`, `(0x02, 0x04)` and `(0x02, 0x05)` (including the independently specified eMPP variant of TIP) MUST NOT be considered active unless all of the following have been satisfied through explicit governance and deployment processes:
 
-1. Ratified RFC-0001 REPLY and REACTION schemas, TXID byte order, target/parent-resolution rules and active reaction kinds.
+1. Ratified RFC-0001 REPLY, REACTION and TIP schemas, TXID byte order, target/parent-resolution rules, ALP/eMPP handling and active reaction kinds.
 2. Deterministic positive and negative encoding/decoding vectors and independent implementation review.
 3. Documented compatibility with historical Core v1.0 POSTs, security checks and handling of TM0/TM1 application-profile differences.
 4. Defined behavior for unconfirmed parents, missing previous outputs, reorgs, pagination and abuse controls.
@@ -229,15 +233,19 @@ NOT silently change the cryptographic author of a transaction.
 
 ### M1.4.2. Shared designated-input verification procedure
 
-For ANY supported proposed v2 social event, the social-aware verifier
+For ANY supported proposed v2 social event (including either separately
+specified TIP container), the social-aware verifier
 MUST first complete the **event-specific structural and payload stage**
 defined in M1.2.1. Only after that stage succeeds, the verifier MUST
 apply the same **payload-independent author checks** below, before
 classifying that event as cryptographically verified:
 
-1. Confirm the preceding event-specific stage found exactly one TM1
-   candidate with valid shared framing and a supported, correctly parsed
-   `(version, event_type)`. Do NOT require REPLY formatting or
+1. Confirm the preceding event-specific stage established the correct
+   container and unique event candidate (ordinary two-push TM1, or the
+   separately defined ALP/eMPP TIP profile), plus a supported, correctly
+   parsed `(version, event_type)`. Do NOT require ordinary two-push TM1
+   framing when validating the ALP/eMPP TIP variant; its exact container
+   rules appear in M1.6. Do NOT require REPLY formatting or
    `reply_text` UTF-8 for reactions. Do NOT parse, reinterpret or validate
    any event payload in this identity-verification stage.
 2. Read `author_input_index` as an unsigned byte and require
@@ -256,7 +264,8 @@ classifying that event as cryptographically verified:
    `0xc1`**, rejecting unsupported combinations, including SIGHASH_NONE
    and SIGHASH_SINGLE. These two allowed combinations commit to **all**
    transaction outputs, including the entire social event `OP_RETURN`,
-   whatever its already-validated typed payload.
+   whatever its already-validated typed payload or independently specified
+   ALP/eMPP container.
 7. Verify cryptographic/transaction validity under active eCash rules.
    In the documented `trusted-chronik` model the verifier MAY rely on a
    trusted node/Chronik source for script validity **while still enforcing
@@ -273,8 +282,9 @@ registry. Wallets MAY prefer author input index 0 as a creation convention,
 not a validation requirement.
 
 The `author_input_index` and **all event-specific fields** encoded in the
-output (REPLY parent reference and text, or REACTION/REACTION_REMOVE target
-reference and kind) are committed by the permitted `SIGHASH_ALL` modes.
+output (REPLY parent/text, REACTION/REACTION_REMOVE target/kind, or TIP
+target and required payment outputs) are committed by the permitted
+`SIGHASH_ALL` modes.
 Applications MUST NOT attribute an altered payload to the original signature.
 This proof is transaction-level authorization, **not an independent
 signature embedded inside `event_data`**.
@@ -306,7 +316,7 @@ and explicitly activated scheme says otherwise. Core's `0xc1`
 transactions with other funding inputs while maintaining commitment to
 **all outputs**; this RFC does not authorize a new signing service.
 
-Each on-chain REPLY, REACTION or REACTION_REMOVE is identified by its actual network transaction ID.
+Each on-chain REPLY, REACTION, REACTION_REMOVE or TIP is identified by its actual network transaction ID.
 A signature authorizes a transaction under the active eCash signature rules;
 it is not a portable off-chain token that grants permission to send new
 messages. Indexers MUST key on-chain verification by network and TXID and
@@ -507,34 +517,258 @@ an unmodified Core v1.0 parser; and independent encoder/decoder agreement.
 
 **No implementation or broadcast is authorized by this draft.**
 
-## M1.6. RMZ tips — on-chain settlement required; contracts pending
+## M1.6. Atomic on-chain tips — proposed XEC and RMZ contracts
 
-A tip that contributes to Tonalli social records MUST correspond to a
-**real, verifiable on-chain transfer of RMZ** on the supported network,
-with the correct token identity, amount and intended beneficiary.
-An off-chain promise, signed message, in-app balance change or unconfirmed
-`TipIntent` MUST NOT be displayed as a completed tip.
+**Status: DRAFT only.** The proposed `event_type=0x05` is **not
+ratified or active**. The protocol supports no actual TIP event until
+separate governance and indexer/Wallet authorizations. All MUST clauses
+below apply solely to the candidate social v2 profile.
 
-The eventual `TipIntent` and `TipReceipt` contracts MUST link to chain
-evidence: intent, when retained as a publishable social action, MUST
-be an on-chain event; receipt MUST identify and verify on-chain token
-settlement, not merely a server assertion. Whether tip intent and
-settlement can share a transaction or require **separate on-chain
-transactions** is **unresolved**. In particular, this RFC MUST NOT
-assume that an eCash token OP_RETURN and a TM1 social OP_RETURN can
-always be co-located without protocol or indexer conflicts.
+### M1.6.1. Goal, assets and canonical identity
 
-M1.6 still needs the authoritative RMZ token ID and exact token
-protocol/standard, beneficiary binding, secure invoice reference,
-transaction and settlement validation, matching and deduplication,
-reorg handling, amount precision, wallet authorization, fee and dust
-policy, plus byte-accurate event encoding and deterministic vectors.
-No new TIP event code is assigned or activated by PR0. Do not send,
-sign or broadcast any token transaction on the strength of this draft.
+A credited tip MUST be an **actual on-chain transfer** in the same
+**transaction ID (TXID)** as a cryptographically linked social TIP
+declaration. There is no credited tip from a standalone off-chain
+promise, separate memo-only transaction, speculative balance change
+or transaction with merely nominal/zero transferred value.
+
+The initial proposed assets are:
+
+| Asset | On-chain representation | Amount unit |
+| --- | --- | --- |
+| XEC | Native eCash spendable P2PKH output(s) | Integer satoshis |
+| Xolos RMZ | ALP eToken SEND; token ID `c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908` | Integer **atoms**; token decimals = **2** |
+
+The RMZ identity and decimals follow the [public ALP genesis transaction](https://explorer.e.cash/tx/c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908) and
+the [Tonalli Wallet token configuration](https://github.com/xolosArmy/RMZWallet/blob/main/src/config/rmzToken.ts). Token *ticker* alone
+MUST NOT establish identity; the token ID, ALP protocol and relevant
+genesis decimals MUST match. A TIP for an unrecognized or wrong token
+MUST NOT be credited as RMZ.
+
+### M1.6.2. Event type and correct author input
+
+The new **candidate** social `event_type=0x05` identifies TIP with
+`version=0x02`. Its logical envelope is:
+
+```text
+version(1) || event_type(1) || author_input_index(1)
+|| target_txid(32)
+```
+
+The 32-byte `target_txid` is in the display-order serialization
+specified by M1.3.3. It MUST refer to an eligible verified POST or
+activated REPLY on the same network. The **sender** is independently
+authenticated by that TIP transaction's designated P2PKH input using
+M1.4, not by the recipient address, the first input or a wallet
+profile. `author_input_index` may designate **any in-range input**;
+it MUST NOT be silently hardcoded to input 0.
+
+The recipient MUST be resolved from the **target message's own**
+designated author input as recorded and verified under its original
+protocol rules, yielding the target author's 20-byte HASH160.
+The recipient MUST be represented by the P2PKH locking script for
+that exact HASH160. Neither input zero of the parent transaction, nor
+an unverified display alias, nor a mutable profile payment address
+MUST substitute for the target's proven author identity in this
+initial strict profile.
+
+For the purpose of public tipping metrics, a sender whose designated
+author HASH160 equals the recipient HASH160 MUST NOT be credited as
+a **third-party tip**. Such self-payments MAY be flagged as
+`SELF_TIP_UNCREDITED` rather than causing historical event erasure.
+A valid token/XEC output to the recipient is necessary, not sufficient:
+the indexer MUST also establish the correct asset, author, target
+and matching transaction-level declaration.
+
+### M1.6.3. Native XEC: standard two-push TIP
+
+For a **native XEC tip**, the proposed ordinary TM1 social v2
+framing is:
+
+```text
+OP_RETURN <TMM_LOKAD_ID[4]>
+          <0x02 || 0x05 || author_input_index[1] || target_txid[32]>
+```
+
+This carries 32 bytes of **binary** `event_data` (not UTF-8),
+a 35-byte envelope and a **42-byte locking script**:
+`OP_RETURN(1) + LOKAD push(5) + direct envelope push(1)
++ envelope(35)`. The TM1 `OP_RETURN` output MUST have value
+zero, exactly two minimal pushes, and no extra data or opcodes.
+An unmodified TM1 Core v1.0 parser MUST continue to reject the
+proposed v2 version.
+
+The transaction MUST additionally contain at least one spendable,
+non-OP_RETURN P2PKH output to the exact resolved target-author hash,
+with positive satoshi value. The verified native XEC tip amount is
+the integer sum of **only** matching destination outputs (excluding
+the OP_RETURN, fees and any outputs to other addresses). Ordinary
+change to a different payer HASH160 is excluded by this rule.
+When the same hash controls the payer and alleged recipient the
+tip is classified as self-tip/uncounted rather than inferring change.
+
+A client MUST NOT infer intent from a payment output alone: the
+**same transaction** must contain exactly one valid supported social
+TIP declaration and a verified designated author signature committing
+to **all outputs** with approved sighash `0x41` or `0xc1`.
+
+### M1.6.4. RMZ ALP: eMPP container variant, not TM1 Core wire
+
+RMZ is **ALP**, whose transaction token metadata is encoded in an
+**eMPP `OP_RETURN OP_RESERVED` container**. Its transfer and a
+separate application data push can share a TXID using ALP/eMPP.
+However, an eMPP script is **not the canonical two-push TM1 script**
+and cannot be reclassified as an ordinary v1 POST or proposed
+two-push v2 REPLY/REACTION/TIP event.
+
+The following is a **proposed, unratified second wire profile** for
+an atomic RMZ tip, requiring an independently reviewed indexer/parser
+extension:
+
+```text
+OP_RETURN OP_RESERVED
+  <ALP_SEND_ENTRY>  # canonical ALP SEND for the actual RMZ token ID
+  <TMM_TIP_ENTRY>   # binary bytes:
+                    # TMM_LOKAD_ID[4] || 0x02 || 0x05
+                    # || author_input_index[1] || target_txid[32]
+```
+
+The proposed `TMM_TIP_ENTRY` is a single **39-byte push**
+(`4 + 1 + 1 + 1 + 32`); it is not a second standalone
+`OP_RETURN` output. It MUST be validated using eMPP container
+parsing and a distinct, explicit TMM entry matcher. The presence,
+ordering and byte sizing of the real ALP SEND entry and any other
+eMPP actions MUST be standardized and tested before activation.
+The **complete** eMPP script MUST respect then-current eCash
+relay policy, including the **223-byte compatibility budget**
+where applicable. No blanket claim is made that an arbitrary
+ALP SEND plus arbitrary metadata always fits.
+
+The indexer MUST confirm the same TXID:
+
+1. Contains a valid ALP SEND for the exact RMZ token ID,
+   with token ancestry and token type validated by the trusted
+   Chronik/full node source or an independent token verifier.
+2. Contains **exactly one** valid proposed `TMM_TIP_ENTRY`
+   for this social profile, not arbitrary unrecognized substitutes.
+3. Has the required designated P2PKH author input, sighash
+   restrictions and full transaction/script validity under M1.4.
+   In the initial strict RMZ tipping profile, the designated
+   author MUST control a **valid RMZ-bearing input**; all RMZ
+   inputs whose atoms fund the transfer MUST be attributable to
+   that same author HASH160. Ambiguous multi-owner RMZ spending
+   MUST NOT be reported as a third-party tip by an unrelated
+   payer without an independently approved attribution rule.
+4. Assigns a **strictly positive** quantity of valid RMZ
+   **atoms** to one or more token-carrying outputs whose
+   actual P2PKH locking scripts match the verified
+   `target_txid` author hash. The credited amount is the
+   integer sum of RMZ atoms **actually assigned** to these
+   outputs, not their attached XEC dust value.
+5. Does not double-count sender change, dust-only outputs,
+   invalid/burned token outputs, another token ID, replayed
+   indexer records or an unrelated ALP transfer.
+
+If current eMPP/Chronik/Wallet behavior fails any of these
+assumptions, the RFC MUST remain **unactivated**, or be revised
+through a separate, reviewed protocol decision. It MUST NOT
+fall back to two unlinked transactions while claiming atomic
+linkage. The proposal does not change TM1 Core v1.0 or imply
+that its legacy indexer understands eMPP/TMM entries.
+
+### M1.6.5. TipIntent, TipReceipt and verification states
+
+`TipIntent` is a **local, nonauthoritative wallet proposal**
+containing the network, target TXID, verified recipient HASH160,
+asset ID or XEC, proposed integer amount, any fee preview, and
+expected transaction output structure. A UI MAY prepare and
+display this draft, but it is **not a published social action,
+payment, on-chain receipt, or confirmed donation**. It MUST NOT
+be counted or broadcast merely because a user opened a tip UI.
+Any publishable TIP event occurs in the final on-chain
+transaction, as required by M1.6.3 or M1.6.4.
+
+`TipReceipt` is a **deterministic, independently reconstructible
+indexer result**, not an assertion or transaction signed by a
+social frontend. Its canonical evidence MUST identify at least
+`(network, txid, target_txid, tipper_author_hash160,
+recipient_hash160, asset_id, asset_protocol, amount_in_base_units,
+settlement_state)` and the exact credited output indices.
+For RMZ, `asset_protocol = ALP` and `asset_id` is the verified
+token ID above. For XEC, use the native asset identifier and
+integer satoshis.
+
+A receipt MUST NOT be classified `SETTLED` merely because
+a sender signed a draft or a mempool transaction was seen.
+Applications MUST distinguish `PENDING` (not yet confirmed),
+`SETTLED` (confirmed in selected active chain with valid
+transfer/link), `REORGED`, `INVALID_ASSET`,
+`INVALID_RECIPIENT`, `INVALID_AUTHOR`,
+`INVALID_TARGET`, `NO_VALUE_TRANSFER` and
+`SELF_TIP_UNCREDITED`. Finality claims require separately
+documented trusted chain/finality evidence.
+
+### M1.6.6. Fraud resistance, aggregation and Wallet authority
+
+The indexer MUST key credited receipts by `(network, txid)`;
+repeated indexing MUST be idempotent. A TXID MUST NOT be
+double-counted as multiple social tips unless an explicit,
+ratified multi-tip encoding defines separate uniquely
+identified actions. On reorg/reconnect, receipts and
+aggregates MUST be recalculated against the active chain,
+without rewriting historical evidence or claiming a reverted
+transfer is settled. Missing target messages, absent
+author prevouts, untrusted token proofs or unsupported
+script variants MUST fail closed for **verified tip credit**.
+
+The application MUST NOT present a social tipping total as
+a cryptographic proof of genuine human reputation. Self-tips,
+coordinated sybil payments, wash tipping and address rotation
+can inflate totals; any public reputation or ranking formula
+requires a separate, transparent abuse-control policy.
+
+Only an explicitly authorized **noncustodial Wallet**
+MAY construct, present and sign a user's actual XEC/ALP
+transfer. A social frontend MAY request a payment draft or
+deep-link, but MUST NOT request private keys/seed phrases,
+bypass recipient and fee confirmation, silently rebind a
+target author, or exercise signing/broadcast privileges.
+The Wallet MUST display the resolved recipient, asset/token
+identity, amount, fee and linked post before approval.
+
+### M1.6.7. Required deterministic vectors and gates
+
+Before any ratification or release, M1.7 MUST include:
+- XEC single/multiple matching recipient outputs,
+  nonmatching change, empty/zero payment, self-tip,
+  negative/unrepresentable amount and wrong recipient;
+- valid/invalid eMPP framing with an ALP SEND and **exactly
+  one** TMM entry, actual 223-byte script limits, wrong
+  token ID, unsupported ALP action and output token mapping;
+- RMZ genesis decimals = 2, integer atoms, dust versus
+  token amount, token change, mixed-owner token inputs,
+  missing token history and token burns;
+- in-range nonzero author input index; designated
+  prevout verification; bad sighash, signature or source trust;
+- correct target author index **not necessarily zero**,
+  invalid/unknown target and cross-network confusion;
+- replay/reorg, mempool versus confirmed, duplicate indexing,
+  output-order changes, parent author key changes and
+  deterministic receipts;
+- independent parsers distinguishing ordinary TM1
+  `OP_RETURN <LOKAD> <envelope>` from
+  `OP_RETURN OP_RESERVED <ALP> <TMM>`.
+
+**No on-chain TIP exists as an approved Tonalli Memo event
+yet.** M1.6 is a design candidate only. Integration with the
+existing Chronik, indexer, Tonalli Wallet and ALP libraries,
+security review, reproducible fixtures and independent
+governance are REQUIRED before any activation, signature,
+broadcast or use of funds.
 
 ## M1.7 / M1.8. Conformance vectors and threat model — TODO
 
-Produce byte-for-byte vectors and independent decoder tests for POST, proposed REPLY and proposed on-chain REACTION/REACTION_REMOVE; review fee costs, spam/DoS, sybil behavior, malformed references, phishing, malicious media/links, key compromise, cross-network replay, reorgs and RMZ settlement fraud.
+Produce byte-for-byte vectors and independent decoder tests for POST, proposed REPLY, on-chain REACTION/REACTION_REMOVE and both TIP formats (XEC two-push vs. ALP/eMPP RMZ); review fee costs, spam/DoS, sybil behavior, malformed references, phishing, malicious media/links, key compromise, cross-network replay, reorgs, token change and settlement fraud.
 
 ## M1.9 / M1.10. Activation and milestone gates — TODO
 
