@@ -1,10 +1,12 @@
-# TM1 Core Protocol v1.0 — Canonical POST Specification (Ratification Candidate)
+# TM1 Core Protocol v1.0 — Canonical POST Specification
 
-- **Status:** **PROPOSED FOR NORMATIVE REVIEW — NOT ACCEPTED / NOT RATIFIED**
-- **Source baseline:** [`tm1-spec.md`](./tm1-spec.md) (Draft 0.2; remains the operative repository specification)
+- **Status:** **RATIFIED / CANONICAL**, conditional on approval and merge of the final ratification PR. Before that merge this remains a ratification proposal.
+- **Historical source:** [`tm1-spec.md`](./tm1-spec.md) (Draft 0.2; preserved as a prior draft and superseded prospectively upon the ratification merge)
 - **Governance evidence:** [D-07 draft acta — PR #31](https://github.com/xolosArmy/tonalli-memo/pull/31), reviewed head `21fe1a53888caa8a31629588e8813fed158e5b3c`
 - **Reference implementation:** `xolosArmy/tonalli-memo` `main` at `8393670503be6d46e5badb9ea7c29e7597bb4c26`
-- **Effective date:** **UNSET — awaits independent ratification decision**
+- **Governance decision date:** 2026-10-27 (America/Mexico_City), proposed for formal ratification by the project owner
+- **Effective instant:** **the actual merge timestamp of the final ratification PR**, not earlier. The requested effective calendar date is 2026-10-27 (America/Mexico_City) **only if that merge occurs on that local date**; otherwise the actual merge date prevails. Record the merge SHA as the canonical ratification record.
+- **Approved preparatory baseline:** [PR #38](https://github.com/xolosArmy/tonalli-memo/pull/38), merged as `c797fcf8d58a73ebdaf4999aec2ecf55b9854a98`
 - **Protocol name:** Tonalli Memo
 - **LOKAD ID:** `544d4d00` (`TMM\0`)
 - **Version:** `0x01`
@@ -16,26 +18,29 @@ TM1 derives authorship from a designated transaction input. It does not
 include a textual address or a secondary message signature inside the
 `OP_RETURN` payload.
 
-**Normative proposal only.** This file is not a version change, a production
-activation, or an instruction to issue transactions. It describes the
-proposed canonical POST baseline for consideration in a distinct ratification
-procedure. The original Draft 0.2 warning remains in the operative
-[`tm1-spec.md`](./tm1-spec.md). Historical on-chain observations are documented
-separately and do not retroactively satisfy or silently erase that warning.
+**Ratification boundary.** Upon the authorized merge of the final
+ratification PR, this document becomes the canonical TM1 Core v1.0 POST
+specification and prospectively supersedes Draft 0.2 for Core protocol
+interpretation. Before that merge it remains a proposal. The original Draft
+0.2 warning is retained as historical evidence in
+[`tm1-spec.md`](./tm1-spec.md), not declared retrospectively satisfied.
+This documentation change is not an eCash consensus upgrade, a Wallet
+deployment, a new signing/broadcast permission, or a retroactive judgment
+on historical publications.
 
 RFC-0001, REPLY, tips and reactions remain out of scope. No Wallet signing,
 authorization or broadcast behavior is changed by this candidate.
 
 ## 1. Scope
 
-The proposed TM1 Core v1.0 POST baseline defines:
+The TM1 Core v1.0 POST baseline defines:
 
 - one active event type: `POST`;
 - authorship through a designated standard P2PKH input;
 - exact UTF-8 byte preservation;
 - a maximum script size compatible with the default eCash relay policy.
 
-The proposed TM1 Core v1.0 POST baseline does not define:
+The TM1 Core v1.0 POST baseline does not define:
 
 - replies or threads;
 - P2SH or multisig authorship;
@@ -78,7 +83,7 @@ The first push MUST contain exactly four bytes:
 
     LOKAD_ID
 
-The proposed v1.0 LOKAD ID is `544d4d00` (`TMM\0`).
+The v1.0 LOKAD ID is `544d4d00` (`TMM\0`).
 
 ### 3.2 Second push
 
@@ -141,7 +146,7 @@ Wallet MAY limit `event_data` to 80 UTF-8 bytes.
 
 ### `0x01` — POST
 
-`POST` is the only active TM1 Core v1.0 event type proposed here.
+`POST` is the only active TM1 Core v1.0 event type.
 
 Its `event_data` field contains the complete top-level publication text.
 
@@ -313,7 +318,7 @@ address matching an external registry.
 
 ### 10.1 No prior editorial approval (proposed v1.0 release rule)
 
-**Proposed supersession of Draft 0.2, subject to formal ratification.**
+**Normative supersession effective on the ratification merge.**
 TM1 Core v1.0 MUST NOT require administrative, editorial or committee
 pre-approval before an author may sign or broadcast a `POST = 0x01`
 transaction, nor as a condition for recognizing a valid on-chain POST.
@@ -341,64 +346,78 @@ respect to editorial approval, **not** necessarily stateless in operation:
 author verification requires resolving spent outputs, and indexers may
 maintain chain/reorganization state.
 
-**Historical disposition proposed for ratification:** the Draft 0.2
-instruction not to emit production transactions before finalization, and
-its §11(6) condition requiring no such previous issuance, are proposed
-to be superseded as **future v1.0 protocol requirements**, rather than
-declared retrospectively fulfilled. Earlier production issuance remains
-part of the unaltered historical record. The supersession and its effective
-date require a dated, explicit governance decision; this candidate does
-not itself ratify v1.0, authorize new broadcasts or amend
-`tm1-spec.md`.
+**Historical governance resolution (prospective only):** from the actual
+ratification merge instant, the Draft 0.2 instruction not to emit production
+TM1 transactions before finalization and §11(6)'s requirement that no
+production issuance had previously occurred are superseded as Core v1.0
+requirements. They are **not** retrospectively fulfilled, deleted, or
+backdated. Confirmed on-chain historical TM1 candidates remain in the audit
+record; their presence alone does not establish that they pass complete
+TM1 verification. This ratification does not authorize any Wallet release,
+change signing/broadcast behavior, or alter eCash network consensus.
 
-## 11. Ratification gates — NOT YET CLOSED
+## 11. Ratification decision, evidence and accepted limitations
 
-A technical review, a CI pass or merging a preparatory acta MUST NOT by itself
-convert this candidate into an accepted protocol version. A distinct,
-explicitly authorized ratification decision and PR are required after the
-following gates are reconciled with dated evidence:
+**Decision authority:** the xolosArmy / Xolos Ramírez project owner approves
+the final ratification PR by explicitly authorizing its merge. Approval
+of preparatory PR #38 was limited to advancing the candidate; it was not
+itself the final ratification. The effective instant and canonical commit
+are recorded by the merged final PR, not by a prior proposal or a bot.
 
-1. **Canonical vectors:** demonstrate valid and invalid wire, Unicode,
-   author-index, sighash (`0x41`, `0xc1` and rejected variants), malformed
-   and duplicate candidate outputs, with independent encoding/decoding tests.
-2. **Wire vs. application policy:** keep the rule of exactly one **TM1**
-   candidate distinct from the Tonalli verifier's stricter combined **TM0 +
-   TM1** cardinality policy; publish any application profile separately.
-3. **Verification trust:** document the `trusted-chronik` verification model,
-   missing-prevout behavior and the stricter requirements for independent
-   cryptographic verification. Do not call structural validation a standalone
-   proof of signatures.
-4. **Historical compatibility:** retain the audited evidence of 3/3
-   confirmed sample TXIDs ([run 40528073357](https://github.com/xolosArmy/tonalli-memo/actions/runs/40528073357)) and 50/50 LOKAD-discovered
-   candidates ([run 40546981820](https://github.com/xolosArmy/tonalli-memo/actions/runs/40546981820)), including three exact
-   212-byte event / 223-byte script boundaries. Both carry the verdict
-   `SAMPLE_COMPATIBLE_NOT_RATIFICATION`. Neither proves whole-chain coverage,
-   the historical Draft 0.2 issuance revision, or zero universal false negatives.
-5. **Historical issuance prohibition and proposed supersession:** Draft
-   0.2 §11(6) originally required *no production issuance before review and
-   fixture publication*, yet TM1 candidates have been observed confirmed on
-   mainnet. The historical condition is **not retroactively fulfilled**.
-   §10.1 proposes removing prior human approval/issuance restrictions from
-   the future Core v1.0 validity rule. Governance must still record the dated
-   chronology and risks, explicitly approve or reject that supersession,
-   and fix its effective date without deleting or backdating Draft 0.2.
-6. **Recovery scope:** synthetic backfill, daemon restart, SQLite persistence,
-   reorg/reconnect tests (PR #35) are evidence of tested mechanisms, not a
-   guarantee of complete recovery under all real faults or rate limits.
-7. **RFC boundary:** `REPLY=0x02` remains reserved and rejected; RFC-0001,
-   responses, likes, tips, Wallet interfaces, approvals, signatures and
-   broadcast remain separate approval and deployment domains. Proposals for
-   M1/S0 PR0 are documents and test vectors only.
-8. **Formal governance:** identify the final reviewed commit SHA, the decision
-   maker/approving body, date, status and effective scope; obtain explicit
-   approval for the independent ratification PR. The preparatory PR #31 stays
-   unmerged unless separately authorized.
+**Scope of ratification:** the TM1 Core v1.0 POST specification in §§1–10.1,
+with `POST=0x01` active; `REPLY=0x02` reserved and rejected. No signing,
+broadcast, Wallet, indexer deployment, P2SH authorization, RFC-0001, tip
+or reaction implementation is approved by this documentary decision.
 
-**Ratification decision:** **PENDING**. **Effective date:** **UNSET**.
-No protocol activation, Wallet changes, broadcast, `REPLY` support or
-production deployment is authorized by this document.
+**Documented dispositions and continuing obligations:**
 
-## 12. Candidate provenance and corrections to Deliverable B
+1. **Protocol vectors and implementation conformance:** wire, UTF-8,
+   author-index, sighash (`0x41`/`0xc1`), malformed and multiple-output
+   vectors remain required as canonical conformance evidence; CI and a
+   documentation review alone are not proof of universal interoperability.
+2. **Wire versus application profile:** Core permits unrelated
+   `OP_RETURN` outputs but requires exactly one TM1 candidate. The present
+   Tonalli verifier may apply a stricter combined TM0+TM1 cardinality
+   rule; this is documented as an **implementation/profile difference**,
+   not silently promoted into the wire protocol. Any implementation
+   change requires its own tests and approval.
+3. **Verification model:** `trusted-chronik` delegates transaction
+   validity to the trusted source. Independent verification MUST
+   validate the relevant author signature itself under §8.6.
+   Missing prevouts MUST NOT yield `VERIFIED_TM1`.
+4. **Mainnet observations:** prior D-07 read-only audits reported 3/3
+   confirmed selected transactions and 50/50 LOKAD-discovered candidates
+   as `SAMPLE_COMPATIBLE_NOT_RATIFICATION`, including three boundary
+   cases of 212-byte event / 223-byte script; neither sample proves
+   complete chain-wide coverage or independent signature verification
+   ([3/3 evidence](https://github.com/xolosArmy/tonalli-memo/actions/runs/40528073357),
+   [50/50 evidence](https://github.com/xolosArmy/tonalli-memo/actions/runs/40546981820)).
+5. **Historical Draft 0.2 §11(6):** its no-prior-production-issuance
+   condition could not be retroactively met after on-chain observations.
+   The project owner, by approving the final ratification merge,
+   **explicitly supersedes that condition prospectively** as specified
+   in §10.1; the original record is preserved, and historical
+   publication prior to finalization is acknowledged rather than denied.
+6. **Recovery limitations:** synthetic backfill, SQLite restart and
+   reorg/reconnect tests (PR #35) do not guarantee recovery under every
+   real failure or rate limit; operational validation remains separate.
+7. **Social protocol isolation:** `REPLY=0x02`, RFC-0001, responses,
+   likes and tips remain outside Core v1.0. Any S1/M1 rollout requires
+   independent protocol/design review and Wallet authorization.
+8. **Governance record:** [preparatory PR #38](https://github.com/xolosArmy/tonalli-memo/pull/38)
+   and the final ratification PR together document the approval trail.
+   D-07 preparatory [PR #31](https://github.com/xolosArmy/tonalli-memo/pull/31)
+   remains a separate draft, not an independently ratified act.
+   Review and CI approvals are technical evidence, not a substitute
+   for the project owner's final decision.
+
+**Ratification status:** effective **only from the approved final PR merge**
+and subject to the resulting merge commit/time. No earlier effective date
+is implied. S0 completion must be recorded against its own acceptance
+criteria; documentary ratification alone does not prove every social
+architecture work item completed.
+
+## 12. Historical provenance and corrections to Deliverable B
 
 The [D-07 audit's Deliverable B](https://docs.google.com/document/d/1ZpVL0Bgc5dYglFq5IfmZ15YPicJ_rxFNlMTd_Db3oAo/edit)
 is an unreconciled *candidate*, not a safe drop-in canonical v1.0 source:
@@ -410,8 +429,9 @@ is an unreconciled *candidate*, not a safe drop-in canonical v1.0 source:
 | It contemplates replacing malformed UTF-8 with U+FFFD | Malformed UTF-8 MUST be rejected with `INVALID_UTF8`; no replacement, normalization, trimming or re-encoding of valid event bytes. |
 | It conflates P2SH rejection with all transaction inputs | Only the **designated author prevout** must be standard P2PKH; other unrelated inputs follow eCash consensus rules. |
 | It treats observed source processing as a proof of independent signature validation | `trusted-chronik` relies on the trusted node/Chronik for transaction validity; offline verification MUST independently check signatures. |
-| It suggests final ratification while historical publication chronology remains unsettled | §10.1 proposes a future-facing supersession of Draft 0.2 §11(6), **not** a claim of retroactive compliance. The dated governance decision, risks and effective date are still pending. |
+| It suggests final ratification while historical publication chronology remains unsettled | §§10.1 and 11 record the governance supersession of Draft 0.2 §11(6) **from the final PR merge forward only**; the earlier no-issuance condition is not declared retroactively fulfilled. |
 
 No changes to the on-chain envelope, LOKAD, bytes, author-index semantics,
-accepted sighash values or active event set are proposed. This document is
-**a review candidate, not the canonical accepted protocol**.
+accepted sighash values or active event set are made by this ratification.
+This text becomes **canonical only upon the approved final ratification
+merge**; before that event it remains a proposed document.
