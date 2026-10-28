@@ -16,13 +16,13 @@
 | M1.1 | Historical comparison: Memo.cash, Member, BlockPress | Initial notes; evidence review pending |
 | M1.2 | Versioning, event types and activation | Proposed |
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed |
-| M1.4 | Author identity and authorization | Pending |
+| M1.4 | Author identity and authorization | Proposed; Codex reviewed |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
 | M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified |
-| M1.7 | Canonical vectors and byte-boundary tests | Outline / vectors pending |
-| M1.8 | Threat model: spam, reorgs, phishing, replay | Outline / analysis pending |
-| M1.9 | Compatibility, migration and staged activation | Pending |
-| M1.10 | S0 acceptance gates and S1 hand-off | Pending |
+| M1.7 | Canonical vectors and byte-boundary tests | Synthetic byte examples and test matrix documented; executable corpus pending |
+| M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; mitigation evidence pending |
+| M1.9 | Compatibility, migration and staged activation | Proposed; operational proof pending |
+| M1.10 | S0 acceptance gates and S1 hand-off | Proposed; gates unfulfilled |
 
 ## 0. Scope and invariants
 
@@ -1080,6 +1080,328 @@ writing this threat model nor a green documentation CI
 establishes that the listed mitigations have been
 implemented or independently tested.**
 
-## M1.9 / M1.10. Activation and milestone gates — TODO
+## M1.9. Compatibility, deployment isolation and activation gates — DRAFT
 
-Document feature flags, indexer deployment isolation, client compatibility and explicit governance release gates. **S0 is not closed by PR0**; completion requires full RFC-0001 review and its independent acceptance criteria. S1 implementation remains out of scope until later approval.
+This section defines prospective deployment requirements for the
+**unratified** social v2 protocol. A documented flag is **not**
+proof that the flag exists or works in production today. No
+implementation, production activation, signing or transfer is
+authorized by PR0, Codex review or documentation CI.
+
+### M1.9.1. Independent profiles and default-off controls
+
+All code paths that can produce, index, serve or display
+social-v2 events MUST be explicitly gated and **OFF by
+default** in production as well as in a newly installed
+environment, including when a flag is missing, malformed,
+unknown or fails to load. An implementation MUST fail
+closed rather than silently enabling a feature because
+a configuration value is absent.
+
+The final implementation MAY use the following example
+configuration names or functionally equivalent audited
+controls; these strings are **examples**, not present
+production settings:
+
+| Proposed gate | Default | Guarded capability |
+| --- | --- | --- |
+| `ENABLE_SOCIAL_V2` | `false` | Master gate for all v2 code paths |
+| `ENABLE_V2_REPLIES_WRITE` | `false` | Create/sign/broadcast new REPLY |
+| `ENABLE_V2_REACTIONS_WRITE` | `false` | Create/sign/broadcast REACTION or REACTION_REMOVE |
+| `ENABLE_V2_TIPS_WRITE` | `false` | Construct/sign/broadcast social XEC or RMZ TIP |
+| `ENABLE_V2_INDEX` | `false` | Classify and ingest v2/eMPP social event records |
+| `ENABLE_V2_READ` | `false` | Serve/display separately labeled v2-derived feeds or counters |
+| `ENABLE_V2_RMZ_EMPP` | `false` | Interpret extra TMM entry within ALP/eMPP for verified RMZ TIP |
+
+**Effective enablement** MUST require the master gate **and**
+the relevant per-capability gate; the RMZ TIP path MUST
+additionally require the dedicated eMPP gate. Read, ingest
+and write MUST be independently disableable. No generic
+`ENABLE_SOCIAL_V2=true` override may bypass the separate
+security or economic gates. A frontend-visible toggle
+MUST NOT serve as the sole enforcement point for an
+indexer or Wallet operation.
+
+Controls MUST be enforced server-side for indexers/APIs
+and within each relevant Wallet's privileged signing
+flow. Feature decisions SHOULD be logged with sanitized
+environment, protocol version, binary SHA, rule set
+version, and approval record; logs MUST NOT contain
+seed phrases, private keys or secret payment material.
+A runtime configuration change MUST NOT retroactively
+reclassify v1 POSTs or turn unverified v2 messages into
+verified payments.
+
+### M1.9.2. Historical compatibility evidence
+
+The approved TM1 Core v1.0 POST verifier and wire
+contract MUST remain **unchanged** by social v2.
+The legacy Draft 0.2 specification is an **historical
+reference**, not a separately active protocol whose
+obsolete rules can override the ratified v1.0 text.
+
+Before any social-v2 activation, an independent
+compatibility harness MUST compare baseline and candidate
+implementations on a **fixed, versioned** corpus of
+known-valid and known-invalid TM0 and TM1 cases,
+including:
+
+1. v1.0 POST framing, minimal pushes, strict UTF-8,
+   author-input bounds and P2PKH signature constraints;
+2. historical observed confirmed transactions, with
+   `trusted-chronik` explicitly differentiated from
+   independent signature verification;
+3. application-level TM0/TM1 candidate-cardinality
+   differences and documented legacy-client behavior;
+4. duplicate TM1 candidates, unknown versions, P2SH
+   designated inputs, invalid sighash and missing prevouts;
+5. normal v1-only parsing of proposed v2
+   `(0x02,0x02..0x05)` without accidental acceptance;
+6. independent eMPP/TMM handling, without interpreting
+   ALP/eMPP as an ordinary two-push TM1 transaction.
+
+The same corpus, baseline snapshot SHA, candidate SHA,
+expected verdicts and execution command MUST be retained
+as test artifacts. Every historical v1 POST present in
+this certified corpus MUST preserve its prior canonical
+verification verdict and bytes. A finite corpus does
+**not** prove compatibility with every possible historic
+transaction; coverage limitations MUST be disclosed.
+
+Unknown v2 formats MUST be distinguishable from invalid
+v1 POSTs. A v1-only node or indexer MUST NOT be required
+to accept social v2 to remain Core v1.0 conformant.
+A separate optional v2 read index MAY retain unsupported
+events without elevating them to the verified Core feed.
+
+### M1.9.3. Regtest-only implementation and isolation
+
+S1 implementation and tests MUST begin and remain in
+**isolated eCash regtest** or a separately reviewed,
+faithful local transaction/token test harness where a
+needed regtest token or Chronik feature has not yet been
+demonstrated. Such a harness MUST be explicitly
+classified as simulated, not falsely reported as a
+passing regtest or mainnet end-to-end test.
+
+Before any S1 work can access transaction-creation
+functions, CI/runtime policy MUST establish:
+
+- A strict allowlist of **regtest/test-only RPC/Chronik
+  endpoints and chain identifiers**; attempts to reach
+  mainnet or an unidentified chain MUST fail closed.
+- Isolated test-only UTXOs, token genesis fixtures,
+  addresses, wallets and throwaway keys; never import
+  a production seed, private key or wallet profile.
+- Deterministic fee/dust and token rule fixtures,
+  repeatable tests of ALP/eMPP parsing and output
+  attribution, and no real-money recipients.
+- Network/broadcast guardrails that prevent test
+  code from signing or submitting to any production
+  eCash node even if a user mistakenly supplies a
+  mainnet URL or a production wallet.
+- Separate permissions for read-only chain analysis,
+  test-transaction assembly, signature generation,
+  broadcast and deployments; the documentation stage
+  grants **none** of the last four on mainnet.
+- CI checks verifying all feature flags default off
+  and no production credentials or keys occur in
+  fixtures, logs, build artifacts or test snapshots.
+
+The mere existence of an eCash sandbox is not evidence
+that ALP/eMPP integration works there. Inability to
+reproduce the target token behavior in an isolated
+environment is an **open gate**, not grounds to test
+with real funds.
+
+### M1.9.4. Staged promotion, rollback and reorg safety
+
+The proposed release sequence is:
+
+| Stage | Allowed scope | Exit evidence |
+| --- | --- | --- |
+| `D0` RFC documentation | PR0 Draft, reviews, synthetics, architecture | Design and blocking gaps recorded; no runtime changes |
+| `D1` Offline parser harness | Local fixtures, signed synthetic transactions and independent decoding, **no broadcast** | All relevant M1.7 checks reproduced |
+| `D2` Isolated regtest | Testnet-only on-chain-like submission, ingest, rebuild and reorg fault injection | Integration/security checks, repeatability |
+| `D3` Production read-only shadow evaluation | **Not authorized by this RFC**; separate approval and read-only credentials required | Explicitly documented comparison, privacy and limits |
+| `D4` Mainnet social write | **Not authorized by this RFC or by S1** | Independent future governance approval, security and release gate |
+
+These stage names express a proposal, not existing
+infrastructure or approvals. S0 acceptance never
+implies D3 or D4 permission.
+
+A documented, rehearsed rollback MUST disable v2
+write, ingest and read **independently**, preserve
+Core v1.0 and accepted TM0 functionality, and leave
+the original immutable chain transactions untouched.
+The indexer MUST persist enough chain identity,
+block hash/height, transaction ordering, event
+version, source-trust and reconciliation checkpoints
+to rebuild derived v2 state from the active chain
+without double-crediting tips or duplicating likes.
+
+Recovery MUST be idempotent across restarts,
+deep reorgs, partial database migrations, shadow
+indexes and obsolete client caches. A flag-off
+state MUST NOT discard historical raw transaction
+evidence needed for auditing, but MUST cease
+publishing data outside the authorized feature
+scope. Existing personal-data/secret handling
+controls MUST remain in force throughout recovery.
+
+### M1.9.5. Version activation authority
+
+Only an explicitly recorded, approved activation
+decision can move any social event from **proposed**
+to **supported**. The decision MUST name:
+repository, exact source SHA, protocol version
+and event/container pairs, trust model, deployment
+target, Wallet/indexer release identifiers,
+independent review and test corpus, asset scope,
+rollback owner and approval timestamp.
+
+The ratification of RFC-0001 **as a document**
+MUST NOT silently enable `version=0x02`,
+`TIP=0x05`, ALP/eMPP TMM entries, P2SH,
+delegation, mainnet signing or transfers.
+Change to Core v1.0 would require separate
+governance and must not be smuggled into
+an implementation toggle.
+
+## M1.10. S0 design acceptance and S1 implementation boundary — DRAFT
+
+### M1.10.1. Two different approvals, never implied by a merge
+
+- **S0 architecture/design acceptance** means RFC-0001
+  has passed the documented design, security, fixture,
+  compatibility and governance acceptance criteria
+  below. It authorizes **no production social write**.
+- **S1 implementation authorization** means a
+  separately reviewed PR1 plan may implement the
+  **approved** parts of the design strictly in the
+  isolated environment described by M1.9.3.
+  It is not permission to deploy into production.
+- **Mainnet activation** is an independent and later
+  governance/release decision, never granted
+  automatically by a green CI run, Codex feedback,
+  draft-PR merge or S0/S1 status.
+
+Codex's automated review is valuable independent
+feedback, but **"no major issues" is not a proof
+of protocol correctness, completed cryptographic
+verification, chain compatibility or economic
+security**. A documentation-CI pass verifies only
+what that workflow actually executed.
+
+### M1.10.2. Explicit S0 gate checklist
+
+The project MUST NOT mark S0 `CLOSED` until the
+responsible governance authority explicitly
+approves the closure **after verifying evidence**
+for every required item.
+
+| ID | S0 acceptance criterion | Current PR0 evidence / disposition |
+| --- | --- | --- |
+| `S0-01` | Scope and historical M1.1 comparison sourced and reviewed | Initial comparison exists; external source verification **pending** |
+| `S0-02` | Core v1.0 boundary and type-by-type v2 binary schema unambiguous | M1.2/M1.3/M1.5 drafted; independent fixture proof **pending** |
+| `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | M1.4 drafted, review received; executable proofs **pending** |
+| `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | M1.3/M1.5/M1.6 drafted; ALP/eMPP integration **pending** |
+| `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic structural hex and matrix documented; executable corpus **pending** |
+| `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | Threat matrix written; mitigation proofs/owner review **pending** |
+| `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | **Pending** |
+| `S0-08` | M1.9 activation flags, isolated staging and rollback rehearsed or independently verified to the extent required by the approved gate | Proposed controls only; execution evidence **pending** |
+| `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Previous heads reviewed; final head review **pending** |
+| `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **NOT ratification** |
+
+The acceptance authority MAY approve a documented
+alternative for an item **only through a separate
+explicitly recorded governance change** detailing
+rationale and residual risk; neither a model nor
+a CI workflow can quietly waive a required gate.
+A previously filed P2 issue may be marked resolved
+only with a traceable correction commit; this
+does not imply all architectural risks are closed.
+
+**Current status at PR0:** the architecture text has
+been drafted, but M1.7.4 explicitly requires
+machine-readable, independently reproducible
+fixtures **before RFC acceptance**. Therefore
+this PR MUST NOT assert "S0 complete" merely
+because M1.1–M1.10 have headings, the Codex
+review is favorable, or CI is green. The S0
+gate remains **OPEN** pending the evidence and
+final governance review above.
+
+### M1.10.3. S1 requirements and acceptance tests
+
+S1 MAY begin only after a separately approved
+implementation work order establishes the
+exact approved schema and isolation controls.
+Proposed PR1 and subsequent PRs MUST be
+scoped, revertible and independently reviewed;
+the progression below is **not** approval
+to implement or activate now.
+
+| S1 test/workstream | Minimum required evidence |
+| --- | --- |
+| Wire encoding/decoding | Deterministic positive/negative fixture corpus for each approved REPLY/REACTION/TIP profile; exact script sizes, minimal pushes, UTF-8 segregation, author signature and invalid cases |
+| On-chain-like publish/read | Regtest or proven equivalent isolated harness: create **test-only** REPLY and read it through an indexer, never using mainnet coins or keys |
+| Thread reconstruction | Root, replies-to-replies, orphan handling, bounded cycles/depth, restart and reorg replay, stable deterministic ordering |
+| Reaction state | LIKE, duplicate LIKE, REMOVE, LIKE again and multi-author replay; one active reaction per author/target/kind |
+| XEC payments | Invalid recipient, output/change attribution, all-input source ownership, exact satoshi amounts, recipient-funded P2 exploit, self-tip and no-value paths |
+| RMZ ALP/eMPP | Real library-compatible ALP SEND + TMM entry; token ID/decimals, eMPP size budget, token output mapping, zero/invalid atoms, token history and signing |
+| Reliability/security | Restart, reorg, shadow snapshot, idempotence, message injection, phishing, replay, availability failure, proof provenance and metrics |
+| Wallet boundary | No private-key access from social UI; test-only preview, approval, fee checks, anti-mainnet endpoint guardrail, explicit signed-transaction permission |
+| Compatibility | Compare v1 baseline vs v2 candidate; v1 cannot accidentally accept v2; no corruption of historical POST verification |
+
+All such acceptance tests MUST record
+commands, fixture hashes, run links,
+source commits, reviewers and scope
+limitations. They MUST NOT be
+self-certified from textual proposals alone.
+
+**Mainnet prohibition during S1:** there
+MUST be no signing, submission, minting,
+transfers or deployment using production
+keys, real XEC, real RMZ or any live
+mainnet broadcast endpoint under this
+S1 plan. Analysis of publicly available
+mainnet transactions, when separately
+permitted, MUST be strictly read-only
+and MUST NOT reuse production credentials
+to create transactions. Any future
+mainnet pilot would require a
+new, explicit governance authorization
+beyond S1 and an independently
+tested release boundary.
+
+### M1.10.4. Human closure record and S1 hand-off
+
+The eventual S0 closure decision MUST
+include a permanent record of:
+(a) ratified RFC file path and exact
+merged commit SHA, (b) signed-off
+review/report URLs, (c) completed
+acceptance evidence, (d) explicitly
+accepted residual risks, (e) tests
+and CI hashes, (f) decision date/time,
+and (g) the named approver's direct
+authorization. A proposal that is
+still in Draft status is not this
+record.
+
+The hand-off MUST list approved
+and **excluded** v2 event/container
+profiles independently. Unresolved
+ALP/eMPP or Wallet integration risks
+MUST remain disabled and MUST NOT
+be swept into "S1 ready" by implication.
+A partial design acceptance MAY be
+recorded without closing S0 if
+the blocking gate criteria remain unmet.
+
+**State of this PR0:** DOCUMENTATION
+DRAFT; **S0 OPEN, S1 NOT AUTHORIZED,
+SOCIAL V2 NOT ACTIVE, NO MAINNET
+SIGNING/BROADCAST, NO AUTOMATIC
+SQUASH AND MERGE.**
