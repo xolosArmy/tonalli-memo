@@ -17,8 +17,8 @@
 | M1.2 | Versioning, event types and activation | Proposed |
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed |
 | M1.4 | Author identity and authorization | Pending |
-| M1.5 | Signed off-chain likes and reaction lifecycle | Pending |
-| M1.6 | RMZ `TipIntent` / `TipReceipt` contracts | Pending |
+| M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
+| M1.6 | RMZ tips with verifiable on-chain settlement | Architectural direction; token rules pending |
 | M1.7 | Canonical vectors and byte-boundary tests | Outline / vectors pending |
 | M1.8 | Threat model: spam, reorgs, phishing, replay | Outline / analysis pending |
 | M1.9 | Compatibility, migration and staged activation | Pending |
@@ -26,13 +26,13 @@
 
 ## 0. Scope and invariants
 
-RFC-0001 proposes a social layer for replies, reactions and RMZ tips. The initial on-chain extension is limited to **REPLY**; the off-chain reaction and tipping formats remain independent design work.
+RFC-0001 proposes a social layer in which **every state-changing social action** (REPLY, reaction, reaction withdrawal and RMZ tip) MUST have an identifiable on-chain transaction or verifiable on-chain settlement record. REPLY and reactions are proposed as independently authorized TM1 social v2 transactions. RMZ tips require an actual on-chain token transfer; the token-specific settlement/linking design remains separate and pending. Off-chain caches and notifications MAY assist discovery but MUST NOT become authoritative social events.
 
 The approved TM1 Core v1.0 **POST** wire protocol, including `LOKAD_ID=544d4d00`, `version=0x01`, `event_type=0x01`, exactly two minimal pushes, explicit `author_input_index`, designated P2PKH author input, accepted sighash policy and strict UTF-8 `event_data`, remains unchanged. A valid v1.0 POST MUST remain valid after any future social activation.
 
 The new binary payload rule below applies **only** to a future `version=0x02 / event_type=0x02` combination. It MUST NOT be interpreted as a relaxation of v1.0 POST validation. Unknown or inactive combinations MUST continue to be rejected by the existing Core parser. **Legacy indexers are not promised to silently ignore the new format**: they can classify it as an unsupported-version event and omit it from verified social feeds.
 
-An approved RFC, by itself, would not automatically enable signing, broadcasting, wallet support, a production indexer or economic transfers; these require separate implementation and release authorizations.
+An approved RFC, by itself, would not automatically enable signing, broadcasting, wallet support, a production indexer or economic transfers; these require separate implementation and release authorizations. Each on-chain action has potential network fees, relay/miner-policy constraints and indexing costs; this design does not promise zero-cost likes.
 
 ## M1.1. Comparative background (initial draft)
 
@@ -43,7 +43,7 @@ An approved RFC, by itself, would not automatically enable signing, broadcasting
 | BlockPress | Compact transaction-encoded social actions | Keep the wire small, deterministic and versioned |
 | Tonalli Memo Core v1.0 | Explicit P2PKH author input, bounded UTF-8 POST, verified transaction linkage | Preserve Core semantics while isolating social extensions |
 
-This comparison is **architectural background**, not a wire-level claim of cross-protocol compatibility. Authoritative references, exact historical opcodes and trade-offs require separate M1.1 source review before RFC approval. A hybrid design is proposed: REPLY on-chain, reactions signed off-chain, and verifiable RMZ settlement evidence separate from intent.
+This comparison is **architectural background**, not a wire-level claim of cross-protocol compatibility. Authoritative references, exact historical opcodes and trade-offs require separate M1.1 source review before RFC approval. An on-chain social design is proposed: both REPLY and REACTION/REACTION_REMOVE are eCash transactions authenticated by a designated P2PKH input; RMZ tips require independently verifiable on-chain token settlement. A feed or database may be derived off-chain, but no off-chain reaction signature by itself counts as a published like.
 
 ## M1.2. Versioning and event types
 
@@ -54,6 +54,8 @@ This comparison is **architectural background**, not a wire-level claim of cross
 | `544d4d00` | `0x01` | `0x01` POST | Entire `event_data` is 1–212 bytes strict UTF-8 | **RATIFIED Core v1.0** |
 | `544d4d00` | `0x01` | `0x02` REPLY | Not defined; MUST be rejected | Reserved / inactive |
 | `544d4d00` | `0x02` | `0x02` REPLY | 32-byte binary parent TXID followed by 1–180 bytes strict UTF-8 | **RFC-0001 proposal only** |
+| `544d4d00` | `0x02` | `0x03` REACTION | 32-byte target TXID + 1-byte reaction kind | **RFC-0001 proposal only** |
+| `544d4d00` | `0x02` | `0x04` REACTION_REMOVE | 32-byte target TXID + 1-byte reaction kind | **RFC-0001 proposal only** |
 | `544d4d00` | `0x02` | any other value | Undefined | Unsupported |
 
 `0x02` is the proposed **envelope version**, not a retroactive change to TM1 Core v1.0 and not a ratified activation assignment. The `event_type=0x02` value was reserved by Core v1.0 and remains inactive in production until an independently authorized change to social-aware verifiers.
@@ -62,9 +64,9 @@ The new parser MUST dispatch by the *pair* `(version, event_type)`, not by event
 
 ### M1.2.2. Activation gates
 
-The combination `(0x02, 0x02)` MUST NOT be considered active unless all of the following have been satisfied through explicit governance and deployment processes:
+The proposed v2 social combinations `(0x02, 0x02)`, `(0x02, 0x03)` and `(0x02, 0x04)` MUST NOT be considered active unless all of the following have been satisfied through explicit governance and deployment processes:
 
-1. Ratified RFC-0001 schema, TXID byte order and parent-resolution rules.
+1. Ratified RFC-0001 REPLY and REACTION schemas, TXID byte order, target/parent-resolution rules and active reaction kinds.
 2. Deterministic positive and negative encoding/decoding vectors and independent implementation review.
 3. Documented compatibility with historical Core v1.0 POSTs, security checks and handling of TM0/TM1 application-profile differences.
 4. Defined behavior for unconfirmed parents, missing previous outputs, reorgs, pagination and abuse controls.
@@ -344,22 +346,159 @@ Before ratification, independent fixtures and tests MUST cover:
   application flags that do not rewrite on-chain proofs.
 - No implicit delegation; unsupported extra signatures, profiles or
   multisig schemes rejected or treated as nonauthoritative metadata.
+- Consistent designated-input authorship for on-chain REACTION and REACTION_REMOVE, with rejection of a funded event that cannot verify its designated author.
 
 **Ratification boundary:** M1.4 defines a candidate verification profile,
 not a change to eCash consensus, not proof of a human's identity and not
 permission to deploy, broadcast, move funds or sign using third-party keys.
 
-## M1.5. Signed off-chain reactions — TODO
+## M1.5. On-chain reactions and likes — proposed requirements
 
-Specify deterministic typed payload, cryptographic domain separation, target network and TXID, anti-replay nonces, idempotency, expiry/revocation, moderation and signature validation. A signed `LIKE` is not an on-chain payment.
+**Governance design decision (PR0):** All publishable likes, reactions and
+reaction withdrawals are **eCash transactions**, not off-chain signatures
+kept in a social database. A backend MAY cache, filter, aggregate and
+display state derived from the chain, but MUST NOT invent an authoritative
+reaction that has no valid on-chain event. This design adds **no active event**
+to TM1 Core v1.0; everything below is proposed for independently activated
+TM1 social v2.
 
-## M1.6. RMZ tips: `TipIntent` and `TipReceipt` — TODO
+### M1.5.1. Proposed event assignments and binary envelopes
 
-Specify the exact token identity/standard, networks, amounts, beneficiary binding, canonical signature messages, settlement proof, double-claim prevention and reorg handling. An intent MUST NOT be treated as a settled token transfer. Do not sign, broadcast or move funds in this RFC.
+| Version | Event type | Meaning | Typed `event_data` |
+| --- | --- | --- | --- |
+| `0x02` | `0x03` | `REACTION` | `target_txid[32] || reaction_kind[1]` |
+| `0x02` | `0x04` | `REACTION_REMOVE` | `target_txid[32] || reaction_kind[1]` |
+
+The initial proposed `reaction_kind=0x01` means **LIKE**. Other kinds are
+reserved until separately documented and authorized. Neither event value,
+reaction kind nor v2 version is currently active. Both events use the
+same standard, minimal two-push TM1 script framing and the same explicit
+`author_input_index` P2PKH author verification as proposed REPLY in M1.4.
+
+```text
+OP_RETURN <LOKAD_ID>
+          <version(1) || event_type(1) || author_input_index(1)
+           || target_txid(32) || reaction_kind(1)>
+```
+
+`target_txid` is exactly 32 **binary** bytes in the human-readable
+display-order encoding defined by M1.3.3; it MUST NOT be UTF-8 decoded.
+`reaction_kind` is one unsigned byte, not Unicode text.
+Under these proposed version/event combinations, `event_data` is exactly
+33 bytes, the envelope is exactly 36 bytes, and the complete script
+is **43 bytes**:
+`OP_RETURN(1) + 4-byte LOKAD push(5) + direct envelope push(1) + envelope(36)`.
+A malformed length, unknown reaction kind or nonminimal push MUST be
+rejected. No off-chain typed message can substitute for this transaction.
+
+### M1.5.2. Authorship, target and verification
+
+A reaction MUST be attributed only to the 20-byte public-key hash from
+the **designated P2PKH author input** of its own valid on-chain
+transaction, subject to the complete M1.4 verification rules.
+The `0x41`/`0xc1` permitted `SIGHASH_ALL` modes commit to all transaction
+outputs, including the reaction target and kind. A social handle or
+fee-paying input is not an author credential.
+
+An eligible reaction target MUST resolve to a valid, recognized
+TM1 Core v1.0 POST or a separately activated social REPLY on the same
+network. A valid TXID that does not contain an eligible message is not
+a reaction target. A missing/temporarily unavailable target does not
+authorize a verified like; preserve a pending link and retry according
+to the resolution principles of M1.3.5–M1.3.7. Indexers MUST distinguish
+transaction/author verification from target-link verification.
+
+### M1.5.3. Immutable action history; derived active-like state
+
+Each valid REACTION or REACTION_REMOVE transaction is a distinct,
+permanent historical event with its own TXID. A reaction removal does
+**not** delete or rewrite an earlier transaction.
+
+For a given `(network, author_hash160, target_txid, reaction_kind)`,
+the confirmed **active reaction state** is derived by replaying eligible
+events in deterministic selected-chain order:
+
+- A `REACTION` sets the state **active**.
+- A `REACTION_REMOVE` sets the state **inactive**.
+- Repeated identical actions are valid historical events but do not add
+  duplicate active likes or cause negative counts.
+- An `REACTION_REMOVE` with no preceding active reaction leaves the
+  state inactive; it MUST NOT be treated as removal of another author.
+- A different author cannot withdraw a reaction on behalf of someone
+  else simply by referencing the same target.
+
+For confirmed events, replay order MUST be based on selected active-chain
+block height, transaction position within that block and an unambiguous
+TXID tie-breaker for deterministic data processing. Pending/mempool
+events MAY be shown provisionally but MUST NOT be mixed into confirmed
+counts without explicit provisional labeling. For visible public
+aggregates, an indexer MUST count at most one **active** LIKE per
+`(network, author_hash160, target_txid)`.
+
+Counts, profile feeds, user reputation and sorting are **derived views**,
+not blockchain consensus. Different moderation policies MAY hide an
+event in a particular application, but MUST NOT fabricate or alter
+its cryptographic identity or the canonical history.
+
+### M1.5.4. Reorgs, spam and economic cost
+
+If an event or its target is displaced by a chain reorganization, the
+indexer MUST roll back and deterministically recompute affected active
+reaction states from the selected chain. It SHOULD retain historical
+transaction evidence and perform idempotent ingest/recovery without
+duplicate active counts. A confirmed reaction with a pending/invalid
+target MUST NOT be counted as a verified linked like until the target
+passes verification.
+
+Every REACTION and REACTION_REMOVE consumes an on-chain transaction,
+potentially including a fee and UTXO/change-management cost. Wallets
+SHOULD disclose costs before signing, avoid accidental duplicates, and
+apply explicit rate/fee controls. Implementers SHOULD model spam,
+high-volume reactions, transaction batching, mempool conflicts,
+sybil behavior and chain/indexer growth. **On-chain authenticity does not
+guarantee one human equals one author key**, nor does it make spam
+impossible.
+
+### M1.5.5. Required test vectors (M1.7)
+
+Before ratification, tests MUST cover exact binary framing and 43-byte
+script size; accepted and rejected `reaction_kind`; display-order TXID
+round-trip; valid/invalid designated authors and sighash; a reaction
+with missing/invalid target; duplicate LIKE; repeated REMOVE; two
+different authors liking the same post; distinct users unable to remove
+each other's like; deterministic reorg replay; unsupported v2 events in
+an unmodified Core v1.0 parser; and independent encoder/decoder agreement.
+
+**No implementation or broadcast is authorized by this draft.**
+
+## M1.6. RMZ tips — on-chain settlement required; contracts pending
+
+A tip that contributes to Tonalli social records MUST correspond to a
+**real, verifiable on-chain transfer of RMZ** on the supported network,
+with the correct token identity, amount and intended beneficiary.
+An off-chain promise, signed message, in-app balance change or unconfirmed
+`TipIntent` MUST NOT be displayed as a completed tip.
+
+The eventual `TipIntent` and `TipReceipt` contracts MUST link to chain
+evidence: intent, when retained as a publishable social action, MUST
+be an on-chain event; receipt MUST identify and verify on-chain token
+settlement, not merely a server assertion. Whether tip intent and
+settlement can share a transaction or require **separate on-chain
+transactions** is **unresolved**. In particular, this RFC MUST NOT
+assume that an eCash token OP_RETURN and a TM1 social OP_RETURN can
+always be co-located without protocol or indexer conflicts.
+
+M1.6 still needs the authoritative RMZ token ID and exact token
+protocol/standard, beneficiary binding, secure invoice reference,
+transaction and settlement validation, matching and deduplication,
+reorg handling, amount precision, wallet authorization, fee and dust
+policy, plus byte-accurate event encoding and deterministic vectors.
+No new TIP event code is assigned or activated by PR0. Do not send,
+sign or broadcast any token transaction on the strength of this draft.
 
 ## M1.7 / M1.8. Conformance vectors and threat model — TODO
 
-Produce byte-for-byte vectors and independent decoder tests; review spam/DoS, malformed references, phishing, malicious media/links, key compromise, cross-network replay, reorgs and settlement fraud.
+Produce byte-for-byte vectors and independent decoder tests for POST, proposed REPLY and proposed on-chain REACTION/REACTION_REMOVE; review fee costs, spam/DoS, sybil behavior, malformed references, phishing, malicious media/links, key compromise, cross-network replay, reorgs and RMZ settlement fraud.
 
 ## M1.9 / M1.10. Activation and milestone gates — TODO
 
