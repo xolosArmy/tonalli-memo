@@ -48,3 +48,23 @@ test("pre-stop validator rejects missing trailing newline and unsafe Chronik opt
     assert.notEqual(result.status, 0, config);
   }
 });
+
+test("Chronik startup uses config-only binds and a stopped-node recovery path", () => {
+  assert.match(script, /--recover\) MODE="recover"/u);
+  assert.match(script, /--recover refuses a running lab process/u);
+  assert.match(script, /Recovery requires existing Chronik-enabled config/u);
+  assert.match(script, /Lab node is stopped: --enable cannot recover it/u);
+
+  // Both binds live exactly once in the validated bitcoin.conf. Passing either
+  // with bitcoind is additive and produced the documented OS error 98.
+  const start = script.slice(script.lastIndexOf('"$BIN_DIR/bitcoind" \\'));
+  assert.ok(start.length > 100, "find actual daemon launch");
+  assert.doesNotMatch(start, /-chronikbind=/u);
+  assert.doesNotMatch(start, /-rpcbind=/u);
+  assert.match(start, /-chronik=1/u);
+  assert.match(start, /-rpcport=19443/u);
+
+  const preStop = script.indexOf("rpc stop >/dev/null");
+  assert.ok(preStop > script.indexOf('[[ "$RUNNING" == 1 ]]'));
+  assert.ok(preStop < script.lastIndexOf('"$BIN_DIR/bitcoind"'));
+});
