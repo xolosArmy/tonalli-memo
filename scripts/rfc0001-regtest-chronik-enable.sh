@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # RFC-0001 / PR #42 — enable Chronik on the existing lab regtest node.
 # Default is --check. --enable restarts a running lab node; --recover starts ONLY an already-stopped lab node with Chronik config.
+# A successful ss -ltnp table is required before any rpc stop or bitcoind start.
 # Do not pass --enable until Codex has reviewed the current HEAD and no P1/P2 remains.
 # Refuses every datadir other than /home/xolosarmy/xolosarmy-regtest/data.
 set -euo pipefail
@@ -78,6 +79,45 @@ production_untouched() {
   [[ "$PROD_PID" != "$(tr -d '[:space:]' < "$DATADIR/regtest/bitcoind.pid" 2>/dev/null || true)" ]] || die "Lab pid file points at the production process"
 }
 
+# One validated listener table. A missing binary, a non-zero status, an empty
+# capture, or a headerless capture is not an empty listener set.
+require_socket_table() {
+  command -v ss >/dev/null 2>&1 || die "ss is required before any lab stop or start"
+  local status=0
+  local output
+  output="$(ss -ltnp 2>/dev/null)" || status=$?
+  if [[ "$status" -ne 0 ]]; then
+    die "ss -ltnp failed with status ${status}; refusing to treat that as no listeners"
+  fi
+  if [[ -z "$output" ]]; then
+    die "ss -ltnp returned no output; refusing to treat that as no listeners"
+  fi
+  local header="${output%%$'\n'*}"
+  case "$header" in
+    *State*Local\ Address:Port*) ;;
+    *) die "ss -ltnp returned invalid output; refusing to treat that as no listeners" ;;
+  esac
+  SOCKET_TABLE="$output"
+}
+
+socket_data_rows() {
+  [[ -n "${SOCKET_TABLE:-}" ]] || die "Socket table was not validated"
+  printf '%s\n' "$SOCKET_TABLE" | tail -n +2
+}
+
+# Exit 0 when one validated data row matches. This never invokes ss.
+socket_table_matches() {
+  local pattern="$1"
+  local pid="${2:-}"
+  local rows
+  rows="$(socket_data_rows)"
+  if [[ -n "$pid" ]]; then
+    printf '%s\n' "$rows" | awk -v pid="$pid" -v pat="$pattern" 'index($0, "pid=" pid ",") && $0 ~ pat { found=1 } END { exit found ? 0 : 1 }'
+  else
+    printf '%s\n' "$rows" | awk -v pat="$pattern" '$0 ~ pat { found=1 } END { exit found ? 0 : 1 }'
+  fi
+}
+
 lab_cmdline_ok() {
   local cmdline="$1"
   printf '%s\n' "$cmdline" | grep -Fq -- "-datadir=$DATADIR" || die "Running pid is not the lab datadir"
@@ -121,6 +161,7 @@ validate_lab_conf
 export RFC0001_POST="$POST_TXID"
 export RFC0001_REPLY="$REPLY_TXID"
 production_untouched
+require_socket_table
 
 PID=""
 RUNNING=0
@@ -141,8 +182,12 @@ if [[ "$RUNNING" == 1 ]]; then
     if printf '%s\n' "$CMDLINE" | grep -Eq -- '-chronikbind=|-rpcbind='; then
       die "Repeated socket bind in Chronik or RPC command line"
     fi
-    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\.0\.0\.1:19442[[:space:]]' || die "Chronik listener missing"
-    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "RPC listener missing"
+    if ! socket_table_matches '127\.0\.0\.1:19442[[:space:]]' "$PID"; then
+      die "Chronik listener missing"
+    fi
+    if ! socket_table_matches '127\.0\.0\.1:19443[[:space:]]' "$PID"; then
+      die "RPC listener missing"
+    fi
     printf '{"action":"already-enabled","restart":false,"chain":"regtest","blocks":104,"chronik":"127.0.0.1:19442","s0":"NOT_CLOSED"}\n'
     exit 0
   fi
@@ -150,7 +195,7 @@ fi
 
 if [[ "$MODE" == "check" ]]; then
   [[ "$RUNNING" == 1 ]] || die "Lab node is not running; --check does not start it"
-  if ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") && /:19442[[:space:]]/' | grep -q .; then
+  if socket_table_matches ':19442[[:space:]]' "$PID"; then
     die "Port 19442 is already open before Chronik is enabled"
   fi
   printf '{"action":"check","restart":false,"chain":"regtest","block104":"%s","chronik":"NOT_ENABLED","s0":"NOT_CLOSED"}\n' "$BLOCK104"
@@ -167,7 +212,7 @@ if [[ "$MODE" == "recover" ]]; then
   production_untouched
 else
   [[ "$RUNNING" == 1 ]] || die "Lab node is stopped: --enable cannot recover it; use --recover after review"
-  if ss -ltnp | awk '/:19442[[:space:]]/' | grep -q .; then
+  if socket_table_matches ':19442[[:space:]]'; then
     die "Port 19442 is occupied before enable"
   fi
 
@@ -190,9 +235,9 @@ else
   validate_lab_conf
 fi
 
-# Both ports must be available after shutdown and before any start.
-command -v ss >/dev/null || die "ss is required for socket isolation checks"
-if ss -ltnp | awk '/:(19442|19443)[[:space:]]/' | grep -q .; then
+# Refresh after a possible stop. Failure here still refuses the start.
+require_socket_table
+if socket_table_matches ':(19442|19443)[[:space:]]'; then
   die "A lab RPC/Chronik port is already in use; refusing start"
 fi
 
@@ -224,7 +269,12 @@ else
   die "Restarted node loaded an unexpected wallet set"
 fi
 rpc listwallets | python3 -c 'import json,sys; assert json.load(sys.stdin)==["rfc0001-regtest-only"]'
-ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19442[[:space:]]' || die "Chronik is not listening on 127.0.0.1:19442"
-ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "RPC is not listening on 127.0.0.1:19443"
+require_socket_table
+if ! socket_table_matches '127\.0\.0\.1:19442[[:space:]]' "$NEW_PID"; then
+  die "Chronik is not listening on 127.0.0.1:19442"
+fi
+if ! socket_table_matches '127\.0\.0\.1:19443[[:space:]]' "$NEW_PID"; then
+  die "RPC is not listening on 127.0.0.1:19443"
+fi
 production_untouched
 printf '{"action":"enabled","restart":%s,"chain":"regtest","block104":"%s","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}\n' "$([[ "$MODE" == "enable" ]] && echo true || echo false)" "$BLOCK104"
