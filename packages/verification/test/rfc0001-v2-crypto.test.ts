@@ -114,9 +114,11 @@ function signedMaterial(tx: Tx, author: CryptoKey) {
   const designated = unsignedForPreimage.inputs[1];
   if (designated === undefined) throw new Error("Missing author input");
   designated.signData = { sats: 10000n, outputScript: author.lockingScript };
+  const sighashType = SigHashType.fromInt(sighash);
+  if (sighashType === undefined) throw new Error("Unsupported sighash type");
   const preimage = UnsignedTx.fromTx(unsignedForPreimage)
     .inputAt(1)
-    .sigHashPreimage(SigHashType.fromInt(sighash)).bytes;
+    .sigHashPreimage(sighashType).bytes;
   return {
     signature,
     publicKey,
@@ -124,6 +126,51 @@ function signedMaterial(tx: Tx, author: CryptoKey) {
     digest: sha256d(preimage),
     lockingHashHex: Buffer.from(author.publicKeyHash).toString("hex")
   };
+}
+
+/**
+ * Independently checks the designated-index value actually embedded in OP_RETURN
+ * and the P2PKH HASH160 of the provided spent prevout (not a wallet/key label).
+ * Using a wrong index or wrong prevout must fail instead of calling a different
+ * key's successful signature "proof of the claimed social author".
+ */
+function verifyAgainstSuppliedPrevout(
+  tx: Tx,
+  chosenAuthorInputIndex: number,
+  actualSpentPrevout: Script
+): "VERIFIED" | "AUTHOR_INDEX_MISMATCH" | "PREVOUT_PUBKEY_MISMATCH" | "INVALID_SIGNATURE" {
+  const socialHex = tx.outputs[0]?.script.toHex() ?? "";
+  const socialBytes = Uint8Array.from(Buffer.from(socialHex, "hex"));
+  if (socialBytes[9] !== chosenAuthorInputIndex) return "AUTHOR_INDEX_MISMATCH";
+
+  const rawScriptHex = tx.inputs[chosenAuthorInputIndex]?.script?.toHex() ?? "";
+  const unlock = Uint8Array.from(Buffer.from(rawScriptHex, "hex"));
+  if (unlock.length !== 100 || unlock[0] !== 65 || unlock[66] !== 33) return "INVALID_SIGNATURE";
+  const publicKey = unlock.slice(67);
+  const lockingScriptFromSignature = Script.p2pkh(shaRmd160(publicKey));
+  if (lockingScriptFromSignature.toHex() !== actualSpentPrevout.toHex()) {
+    return "PREVOUT_PUBKEY_MISMATCH";
+  }
+  const sighashType = SigHashType.fromInt(unlock[65] ?? 0);
+  if (sighashType === undefined || ![0x41, 0xc1].includes(unlock[65] ?? 0)) {
+    return "INVALID_SIGNATURE";
+  }
+
+  const unsigned = Tx.fromHex(tx.toHex());
+  const selected = unsigned.inputs[chosenAuthorInputIndex];
+  if (selected === undefined) return "INVALID_SIGNATURE";
+  selected.signData = { sats: 10000n, outputScript: actualSpentPrevout };
+  const digest = sha256d(
+    UnsignedTx.fromTx(unsigned)
+      .inputAt(chosenAuthorInputIndex)
+      .sigHashPreimage(sighashType).bytes
+  );
+  try {
+    ecc.schnorrVerify(unlock.slice(1, 65), digest, publicKey);
+    return "VERIFIED";
+  } catch {
+    return "INVALID_SIGNATURE";
+  }
 }
 
 describe("RFC-0001 Social v2: offline real P2PKH/Schnorr signing, no network", () => {
@@ -172,17 +219,24 @@ describe("RFC-0001 Social v2: offline real P2PKH/Schnorr signing, no network", (
     expect(() => ecc.schnorrVerify(alteredSig, material.digest, material.publicKey)).toThrow();
   });
 
-  it("detects an incorrect designated input and wrong prevout key hash", () => {
-    const { tx, author, unrelated } = buildSignedEvent(0x04);
-    const validAuthor = signedMaterial(tx, author);
-    expect(Buffer.from(shaRmd160(validAuthor.publicKey)).toString("hex")).toBe(
-      Buffer.from(author.publicKeyHash).toString("hex")
-    );
-    expect(Buffer.from(shaRmd160(validAuthor.publicKey)).toString("hex")).not.toBe(
-      Buffer.from(unrelated.publicKeyHash).toString("hex")
-    );
-    const opReturn = Uint8Array.from(Buffer.from(tx.outputs[0]?.script.toHex() ?? "", "hex"));
-    expect(opReturn[9]).toBe(1); // 6-byte marker + 1-byte push + version + event + author index
+  it("verifies correct signed author using the actual supplied P2PKH prevout", () => {
+    const { tx, author } = buildSignedEvent(0x04);
+    expect(verifyAgainstSuppliedPrevout(tx, 1, author.lockingScript)).toBe("VERIFIED");
+  });
+
+  it("rejects selecting a different validly signed input than social author_input_index", () => {
+    const { tx, unrelated } = buildSignedEvent(0x04);
+    // Input 0 is itself correctly signed by 'unrelated' but the social event
+    // declares input 1. Accepting it would silently change author identity.
+    expect(verifyAgainstSuppliedPrevout(tx, 0, unrelated.lockingScript))
+      .toBe("AUTHOR_INDEX_MISMATCH");
+  });
+
+  it("rejects a mismatched actual designated prevout despite a valid test author's signature", () => {
+    const { tx, unrelated } = buildSignedEvent(0x04);
+    // The signed author input at index 1 does NOT spend the unrelated key's P2PKH output.
+    expect(verifyAgainstSuppliedPrevout(tx, 1, unrelated.lockingScript))
+      .toBe("PREVOUT_PUBKEY_MISMATCH");
   });
 
   it("never treats cryptographic success on invented prevouts as regtest consensus acceptance", () => {
