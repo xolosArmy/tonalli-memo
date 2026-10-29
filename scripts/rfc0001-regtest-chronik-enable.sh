@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # RFC-0001 / PR #42 — enable Chronik on the existing lab regtest node.
-# Default is --check. --enable stops and starts only this lab process.
+# Default is --check. --enable restarts a running lab node; --recover starts ONLY an already-stopped lab node with Chronik config.
 # Do not pass --enable until Codex has reviewed the current HEAD and no P1/P2 remains.
 # Refuses every datadir other than /home/xolosarmy/xolosarmy-regtest/data.
 set -euo pipefail
@@ -21,12 +21,13 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --check) MODE="check"; shift ;;
     --enable) MODE="enable"; shift ;;
+    --recover) MODE="recover"; shift ;;
     --bin) BIN_DIR="$2"; shift 2 ;;
     *) die "Unknown argument: $1" ;;
   esac
 done
 
-[[ "$MODE" == "check" || "$MODE" == "enable" ]] || die "Mode must be check or enable"
+[[ "$MODE" == "check" || "$MODE" == "enable" || "$MODE" == "recover" ]] || die "Mode must be check, enable or recover"
 [[ "$BIN_DIR" == /home/xolosarmy/bitcoin-abc-0.34.2/bin ]] || die "Refusing a Bitcoin ABC path other than the verified 0.34.2 bin"
 [[ -x "$BIN_DIR/bitcoind" && -x "$BIN_DIR/bitcoin-cli" ]] || die "Verified bitcoind and bitcoin-cli must be executable"
 [[ -d "$DATADIR" && ! -L "$DATADIR" ]] || die "Lab datadir must exist and must not be a symlink"
@@ -83,7 +84,7 @@ lab_cmdline_ok() {
   printf '%s\n' "$cmdline" | grep -Fq -- '-regtest' || die "Running node is not regtest"
   printf '%s\n' "$cmdline" | grep -Fq -- '-listen=0' || die "Running node is listening for peers"
   printf '%s\n' "$cmdline" | grep -Fq -- '-connect=0' || die "Running node allows outbound peers"
-  printf '%s\n' "$cmdline" | grep -Fq -- '-rpcbind=127.0.0.1' || die "Running node RPC is not localhost-only"
+  # RPC bind is exclusively in validated bitcoin.conf; do not duplicate it on CLI.
   printf '%s\n' "$cmdline" | grep -Fq -- '-rpcport=19443' || die "Running node is not on port 19443"
   if printf '%s\n' "$cmdline" | grep -Fq -- "$HOME/.bitcoin"; then
     die "Lab cmdline references the default datadir"
@@ -135,8 +136,14 @@ if [[ "$RUNNING" == 1 ]]; then
   lab_cmdline_ok "$CMDLINE"
   assert_chain
   if printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1'; then
-    printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronikbind=127.0.0.1:19442' || die "Running Chronik bind is not 127.0.0.1:19442"
-    printf '{"action":"already-enabled","restart":false,"chain":"regtest","blocks":104,"chronik":"127.0.0.1:19442","s0":"NOT_CLOSED"}\n'
+    grep -qx 'chronik=1' "$CONF" || die "Chronik is not enabled in config"
+    grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Chronik bind is not localhost in config"
+    if printf '%s\\n' "$CMDLINE" | grep -Eq -- '-chronikbind=|-rpcbind='; then
+      die "Repeated socket bind in Chronik or RPC command line"
+    fi
+    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\\.0\\.0\\.1:19442[[:space:]]' || die "Chronik listener missing"
+    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\\.0\\.0\\.1:19443[[:space:]]' || die "RPC listener missing"
+    printf '{"action":"already-enabled","restart":false,"chain":"regtest","blocks":104,"chronik":"127.0.0.1:19442","s0":"NOT_CLOSED"}\\n'
     exit 0
   fi
 fi
@@ -150,38 +157,52 @@ if [[ "$MODE" == "check" ]]; then
   exit 0
 fi
 
-[[ "$RUNNING" == 1 ]] || die "Lab node is not running; --enable refuses to create a new chain"
-if ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") && /:19442[[:space:]]/' | grep -q .; then
-  die "Port 19442 is already open"
-fi
-if ss -ltnp | awk '/:19442[[:space:]]/ && !/127\.0\.0\.1:19442/' | grep -q .; then
-  die "Port 19442 is occupied outside localhost"
+# This path is the sole recovery from the previously documented double-bind
+# startup failure. It must not stop another process or reset the chain.
+if [[ "$MODE" == "recover" ]]; then
+  [[ "$RUNNING" == 0 ]] || die "--recover refuses a running lab process"
+  [[ ! -e "$DATADIR/regtest/bitcoind.pid" ]] || die "Stale or unexpected lab PID file: inspect manually"
+  grep -qx 'chronik=1' "$CONF" || die "Recovery requires existing Chronik-enabled config"
+  grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Recovery requires localhost Chronik bind"
+  production_untouched
+else
+  [[ "$RUNNING" == 1 ]] || die "Lab node is stopped: --enable cannot recover it; use --recover after review"
+  if ss -ltnp | awk '/:19442[[:space:]]/' | grep -q .; then
+    die "Port 19442 is occupied before enable"
+  fi
+
+  CMDLINE="$(tr '\\0' ' ' < "/proc/$PID/cmdline")"
+  lab_cmdline_ok "$CMDLINE"
+  assert_chain
+  rpc stop >/dev/null
+  for _wait in $(seq 1 30); do
+    [[ ! -d "/proc/$PID" ]] && break
+    sleep 1
+  done
+  [[ ! -d "/proc/$PID" ]] || die "Lab node did not stop. No signal was sent to any other process."
+  production_untouched
+
+  # Configuration was checked fully before stopping; append the bind in ONE
+  # source only (bitcoin.conf). The new process must not pass -chronikbind.
+  if ! grep -qx 'chronik=1' "$CONF"; then
+    printf 'chronik=1\\nchronikbind=127.0.0.1:19442\\n' >> "$CONF"
+  fi
+  validate_lab_conf
 fi
 
-CMDLINE="$(tr '\0' ' ' < "/proc/$PID/cmdline")"
-lab_cmdline_ok "$CMDLINE"
-assert_chain
-rpc stop >/dev/null
-for _wait in $(seq 1 30); do
-  [[ ! -d "/proc/$PID" ]] && break
-  sleep 1
-done
-[[ ! -d "/proc/$PID" ]] || die "Lab node did not stop. No signal was sent to any other process."
-production_untouched
-
-# Preflight validated the exact configuration before rpc stop.
-if ! grep -qx 'chronik=1' "$CONF"; then
-  printf 'chronik=1\nchronikbind=127.0.0.1:19442\n' >> "$CONF"
+# Both ports must be available after shutdown and before any start.
+command -v ss >/dev/null || die "ss is required for socket isolation checks"
+if ss -ltnp | awk '/:(19442|19443)[[:space:]]/' | grep -q .; then
+  die "A lab RPC/Chronik port is already in use; refusing start"
 fi
-validate_lab_conf
 
 "$BIN_DIR/bitcoind" \
   "-datadir=$DATADIR" \
   "-conf=$CONF" \
   -regtest -server=1 -daemonwait \
   -listen=0 -connect=0 -dnsseed=0 \
-  -rpcbind=127.0.0.1 -rpcallowip=127.0.0.1 -rpcport=19443 \
-  -chronik=1 -chronikbind=127.0.0.1:19442
+  -rpcport=19443 \
+  -chronik=1
 
 NEW_PID="$(tr -d '[:space:]' < "$DATADIR/regtest/bitcoind.pid")"
 [[ "$NEW_PID" =~ ^[0-9]+$ && -d "/proc/$NEW_PID" ]] || die "Restarted lab node pid is not visible"
@@ -189,7 +210,10 @@ NEW_PID="$(tr -d '[:space:]' < "$DATADIR/regtest/bitcoind.pid")"
 NEW_CMD="$(tr '\0' ' ' < "/proc/$NEW_PID/cmdline")"
 lab_cmdline_ok "$NEW_CMD"
 printf '%s\n' "$NEW_CMD" | grep -Fq -- '-chronik=1' || die "Restarted node did not enable Chronik"
-printf '%s\n' "$NEW_CMD" | grep -Fq -- '-chronikbind=127.0.0.1:19442' || die "Restarted Chronik bind is wrong"
+if printf '%s\\n' "$NEW_CMD" | grep -Eq -- '-chronikbind=|-rpcbind='; then
+  die "Restarted lab process duplicates config-only binding"
+fi
+grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Missing Chronik bind in config"
 assert_chain
 mapfile -t WALLETS < <(rpc listwallets | python3 -c 'import json,sys; [print(item) for item in json.load(sys.stdin)]')
 if [[ ${#WALLETS[@]} -eq 0 ]]; then
@@ -203,4 +227,4 @@ rpc listwallets | python3 -c 'import json,sys; assert json.load(sys.stdin)==["rf
 ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19442[[:space:]]' || die "Chronik is not listening on 127.0.0.1:19442"
 ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "RPC is not listening on 127.0.0.1:19443"
 production_untouched
-printf '{"action":"enabled","restart":true,"chain":"regtest","block104":"%s","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}\n' "$BLOCK104"
+printf '{"action":"enabled","restart":%s,"chain":"regtest","block104":"%s","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}\\n' "$([[ "$MODE" == "enable" ]] && echo true || echo false)" "$BLOCK104"
