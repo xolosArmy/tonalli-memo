@@ -30,6 +30,7 @@ umask 077
 cat > "$CONF" <<'CONF'
 regtest=1
 server=1
+[regtest]
 listen=0
 connect=0
 dnsseed=0
@@ -66,11 +67,27 @@ rpc generatetoaddress 101 "$ADDR" > "$DATADIR/initial-regtest-blocks.json"
 
 CHAIN_AFTER="$(rpc getblockchaininfo | python3 -c 'import json,sys; print(json.load(sys.stdin)["chain"])')"
 [[ "$CHAIN_AFTER" == "regtest" ]] || die "Chain switched unexpectedly; do not use this node"
+FINAL_HEIGHT="$(rpc getblockcount)" || die "Could not verify final block height"
+[[ "$FINAL_HEIGHT" == "101" ]] || die "Expected block 101, got $FINAL_HEIGHT"
+BALANCE="$(rpc "-rpcwallet=$WALLET" getbalance)" || die "Could not verify test-wallet balance"
+UTXO_JSON="$(rpc "-rpcwallet=$WALLET" listunspent)" || die "Could not verify spendable regtest UTXOs"
+export RFC0001_TEST_BALANCE="$BALANCE"
+export RFC0001_TEST_UTXOS="$UTXO_JSON"
+python3 - <<'PY' || die "No positive wallet balance or mature spendable test UTXO"
+import json, os
+from decimal import Decimal
+balance = Decimal(os.environ["RFC0001_TEST_BALANCE"])
+utxos = json.loads(os.environ["RFC0001_TEST_UTXOS"])
+assert balance > 0
+assert any(u.get("spendable") is True and
+           Decimal(str(u.get("amount", "0"))) > 0 and
+           int(u.get("confirmations", 0)) >= 101
+           for u in utxos)
+PY
 printf 'Regtest chain: %s\n' "$CHAIN_AFTER"
-printf 'Block height: %s\n' "$(rpc getblockcount)"
-printf 'Wallet test-only balance: %s\n' "$(rpc "-rpcwallet=$WALLET" getbalance)"
-printf 'Test-only UTXOs:\n'
-rpc "-rpcwallet=$WALLET" listunspent
+printf 'Block height: %s\n' "$FINAL_HEIGHT"
+printf 'Wallet test-only balance: %s\n' "$BALANCE"
+printf 'Test-only UTXOs:\n%s\n' "$UTXO_JSON"
 
 printf '\nBootstrap complete. No social transactions were assembled, signed or broadcast.\n'
 printf 'Use -regtest and -datadir=%s with every subsequent local RPC.\n' "$DATADIR"
