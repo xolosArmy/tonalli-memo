@@ -1,6 +1,6 @@
 # Antigravity execution handoff — RFC-0001 / PR #42
 
-**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted, and mined. On commit `afd455f`, `--enable` stopped the lab node. The replacement process loaded height 104 and then exited because Chronik tried to bind `127.0.0.1:19442` twice. Chronik is not listening. The chronik-client query was not run. S0 is not closed. A second start was not attempted.**
+**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted, and mined. On commit `4858ad0`, `--recover` started the already stopped lab node. Chronik listens only on `127.0.0.1:19442` and RPC only on `127.0.0.1:19443`. The chronik-client query returned `verification.ok=true` for the block-103 POST and the block-104 REPLY. S0 is not closed. The earlier double-bind failure at `afd455f` remains in the execution record. `--enable` was not run again.**
 
 The execution record is `tests/protocol/RFC0001-PR42-REGTEST-EVIDENCE.md`.
 The unsigned-phase rejection stays in that record. The signed phase is the later section of the same file. Confirmed lab txids:

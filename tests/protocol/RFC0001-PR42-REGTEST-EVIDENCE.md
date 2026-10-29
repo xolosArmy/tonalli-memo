@@ -2,7 +2,7 @@
 
 This file records what was run on 2026-10-29 from commit `91e5b854e8474f17058c88b1a0a68507f53467f1` on branch `test/rfc0001-p2pkh-offline-regtest-prep-20261028`. It is not a merge request and it does not change the production protocol.
 
-The sections through "Still not done" are the unsigned phase and stay as that historical record. The section "Signed regtest transactions" records three later transactions that this lab node accepted and mined. Chronik was not tested. S0 is not closed.
+The sections through "Still not done" are the unsigned phase and stay as that historical record. The section "Signed regtest transactions" records three later transactions that this lab node accepted and mined. Chronik was not tested in that phase. The section "Chronik recovered at 4858ad0" records the first query against `127.0.0.1:19442`. S0 is not closed.
 
 ## Boundaries kept
 
@@ -390,3 +390,62 @@ chronikbind=127.0.0.1:19442
 ```
 
 The block index was not rewound. Production pid 2075049, ports 8331, 8332, and 8333, and `/home/xolosarmy/.bitcoin` were not changed. S0 remains `NOT_CLOSED`. The result is not Chronik acceptance: `CHRONIK_NOT_TESTED`.
+
+## Chronik recovered at 4858ad0
+
+Local HEAD was `4858ad0018f862664088843e2e9604ea939f919d`, clean and matching `origin`. Before any start:
+
+- No lab `bitcoind` process and no `bitcoind.pid`.
+- `ss -ltnp` exited 0. Nothing listened on `19442` or `19443`.
+- `/home/xolosarmy/xolosarmy-regtest/data/bitcoin.conf` was mode `0600`, ended with a newline, and was exactly the authorized base lines plus `chronik=1` and `chronikbind=127.0.0.1:19442`.
+- Production pid 2075049 still had `-datadir=/home/xolosarmy/.bitcoin`. Its listeners on `8331`, `8332`, and `8333` were unchanged.
+
+The recovery command, run from the repository root, was:
+
+```sh
+bash scripts/rfc0001-regtest-chronik-enable.sh \
+  --bin /home/xolosarmy/bitcoin-abc-0.34.2/bin \
+  --recover
+```
+
+`--enable` was not used. The chain was not regenerated. The script exited 0:
+
+```text
+{"action":"enabled","restart":false,"chain":"regtest","block104":"6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}
+```
+
+Stderr printed twice, before the pid file existed, that `regtest/bitcoind.pid` was absent. Those reads are the production-pid comparison. They did not stop the script. The new lab pid is `2794445`. Its command line is Bitcoin ABC 0.34.2 with `-datadir=/home/xolosarmy/xolosarmy-regtest/data`, `-regtest`, `-listen=0`, `-connect=0`, `-dnsseed=0`, `-rpcport=19443`, and `-chronik=1`. It does not pass `-chronikbind` or `-rpcbind`.
+
+Independent RPC after the start:
+
+| Check | Result |
+| --- | --- |
+| Chain | `regtest` |
+| Height | 104 |
+| Block 103 | `0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17` |
+| Block 104 | `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915` |
+| Connections | 0 in, 0 out |
+| Wallet | `rfc0001-regtest-only` |
+| Subversion | `/Bitcoin ABC:0.34.2(EB32.0)/` |
+| Chronik listen | only `127.0.0.1:19442`, pid 2794445 |
+| RPC listen | only `127.0.0.1:19443`, pid 2794445 |
+
+`regtest/debug.log` at `2026-10-29T16:57:47Z` records `Loaded best chain: hashBestChain=6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915 height=104` and `Starting Chronik bound to [127.0.0.1:19442]`. Chronik re-synced to that same block. The new log has no second bind and no `Address already in use`.
+
+```sh
+node scripts/rfc0001-regtest-chronik-query.mjs
+```
+
+The query exited 0. It contacted only `http://127.0.0.1:19442`. `verification.ok` is `true` and `problems` is empty. The reported fields are:
+
+- `chronikUrl`: `http://127.0.0.1:19442`
+- `parentConvention`: `display-order-txid`
+- POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585`, block 103, hash `0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17`
+- REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649`, block 104, hash `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915`
+- POST output 1 `spentBy`: `{ "txid": "3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649", "outIdx": 0 }`
+- REPLY input 0 spends POST output 1. Its locking script is `76a914b4aca63fbf60884195ee538475b6840650273d3f88ac`.
+- HASH160: `b4aca63fbf60884195ee538475b6840650273d3f`
+- Author index 0. Sighash byte `65` (`0x41`, `ALL|FORKID`).
+- The 32 parent bytes inside the REPLY OP_RETURN are `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585`, the POST txid in display order.
+
+The lab wallet `gettransaction` reports 2 confirmations for the POST and 1 confirmation for the REPLY, at tip 104. That matches the Chronik block heights. S0 remains `NOT_CLOSED`. The production parser still rejects version `0x02`. Production pid 2075049, ports 8331, 8332, and 8333, and `/home/xolosarmy/.bitcoin` were not changed. No second start was attempted.
