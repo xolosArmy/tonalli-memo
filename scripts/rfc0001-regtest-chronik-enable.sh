@@ -53,6 +53,19 @@ if grep -q 'chronik' "$CONF"; then
   grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Existing Chronik bind is not 127.0.0.1:19442"
 fi
 
+validate_lab_conf() {
+  python3 - "$CONF" <<'PY'
+import pathlib, sys
+lines = pathlib.Path(sys.argv[1]).read_text().splitlines()
+base = ["regtest=1", "server=1", "[regtest]", "listen=0", "connect=0",
+        "dnsseed=0", "rpcbind=127.0.0.1", "rpcallowip=127.0.0.1",
+        "rpcport=19443"]
+chronik = ["chronik=1", "chronikbind=127.0.0.1:19442"]
+if lines not in (base, base + chronik):
+    raise SystemExit("Unsafe or ambiguous lab config; refuse to stop node")
+PY
+}
+
 production_untouched() {
   [[ -d "/proc/$PROD_PID" ]] || return 0
   local cmdline
@@ -98,6 +111,8 @@ assert_chain() {
   [[ "$peers" == "0" ]] || die "Lab node has peers"
   rpc getnetworkinfo | python3 -c 'import json,sys; assert "Bitcoin ABC:0.34.2" in json.load(sys.stdin)["subversion"]'
 }
+
+validate_lab_conf
 
 export RFC0001_POST="$POST_TXID"
 export RFC0001_REPLY="$REPLY_TXID"
@@ -151,21 +166,11 @@ done
 [[ ! -d "/proc/$PID" ]] || die "Lab node did not stop. No signal was sent to any other process."
 production_untouched
 
-python3 - "$CONF" <<'PY'
-import pathlib, sys
-path = pathlib.Path(sys.argv[1])
-text = path.read_text()
-if "chronik" not in text:
-    if not text.endswith("\n"):
-        text += "\n"
-    text += "chronik=1\nchronikbind=127.0.0.1:19442\n"
-    path.write_text(text)
-lines = text.splitlines()
-if lines.count("chronik=1") != 1 or lines.count("chronikbind=127.0.0.1:19442") != 1:
-    raise SystemExit("Chronik config is ambiguous")
-if any("chronik" in line and line not in {"chronik=1", "chronikbind=127.0.0.1:19442"} for line in lines):
-    raise SystemExit("Refusing an unexpected Chronik config line")
-PY
+# Preflight validated the exact configuration before rpc stop.
+if ! grep -qx 'chronik=1' "$CONF"; then
+  printf 'chronik=1\nchronikbind=127.0.0.1:19442\n' >> "$CONF"
+fi
+validate_lab_conf
 
 "$BIN_DIR/bitcoind" \
   "-datadir=$DATADIR" \
