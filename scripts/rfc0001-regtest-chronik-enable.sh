@@ -138,12 +138,12 @@ if [[ "$RUNNING" == 1 ]]; then
   if printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1'; then
     grep -qx 'chronik=1' "$CONF" || die "Chronik is not enabled in config"
     grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Chronik bind is not localhost in config"
-    if printf '%s\\n' "$CMDLINE" | grep -Eq -- '-chronikbind=|-rpcbind='; then
+    if printf '%s\n' "$CMDLINE" | grep -Eq -- '-chronikbind=|-rpcbind='; then
       die "Repeated socket bind in Chronik or RPC command line"
     fi
-    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\\.0\\.0\\.1:19442[[:space:]]' || die "Chronik listener missing"
-    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\\.0\\.0\\.1:19443[[:space:]]' || die "RPC listener missing"
-    printf '{"action":"already-enabled","restart":false,"chain":"regtest","blocks":104,"chronik":"127.0.0.1:19442","s0":"NOT_CLOSED"}\\n'
+    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\.0\.0\.1:19442[[:space:]]' || die "Chronik listener missing"
+    ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") {print}' | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "RPC listener missing"
+    printf '{"action":"already-enabled","restart":false,"chain":"regtest","blocks":104,"chronik":"127.0.0.1:19442","s0":"NOT_CLOSED"}\n'
     exit 0
   fi
 fi
@@ -171,7 +171,7 @@ else
     die "Port 19442 is occupied before enable"
   fi
 
-  CMDLINE="$(tr '\\0' ' ' < "/proc/$PID/cmdline")"
+  CMDLINE="$(tr '\0' ' ' < "/proc/$PID/cmdline")"
   lab_cmdline_ok "$CMDLINE"
   assert_chain
   rpc stop >/dev/null
@@ -185,7 +185,7 @@ else
   # Configuration was checked fully before stopping; append the bind in ONE
   # source only (bitcoin.conf). The new process must not pass -chronikbind.
   if ! grep -qx 'chronik=1' "$CONF"; then
-    printf 'chronik=1\\nchronikbind=127.0.0.1:19442\\n' >> "$CONF"
+    printf 'chronik=1\nchronikbind=127.0.0.1:19442\n' >> "$CONF"
   fi
   validate_lab_conf
 fi
@@ -210,7 +210,7 @@ NEW_PID="$(tr -d '[:space:]' < "$DATADIR/regtest/bitcoind.pid")"
 NEW_CMD="$(tr '\0' ' ' < "/proc/$NEW_PID/cmdline")"
 lab_cmdline_ok "$NEW_CMD"
 printf '%s\n' "$NEW_CMD" | grep -Fq -- '-chronik=1' || die "Restarted node did not enable Chronik"
-if printf '%s\\n' "$NEW_CMD" | grep -Eq -- '-chronikbind=|-rpcbind='; then
+if printf '%s\n' "$NEW_CMD" | grep -Eq -- '-chronikbind=|-rpcbind='; then
   die "Restarted lab process duplicates config-only binding"
 fi
 grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Missing Chronik bind in config"
@@ -227,4 +227,4 @@ rpc listwallets | python3 -c 'import json,sys; assert json.load(sys.stdin)==["rf
 ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19442[[:space:]]' || die "Chronik is not listening on 127.0.0.1:19442"
 ss -ltnp | awk -v pid="$NEW_PID" 'index($0, "pid=" pid ",") { print }' | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "RPC is not listening on 127.0.0.1:19443"
 production_untouched
-printf '{"action":"enabled","restart":%s,"chain":"regtest","block104":"%s","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}\\n' "$([[ "$MODE" == "enable" ]] && echo true || echo false)" "$BLOCK104"
+printf '{"action":"enabled","restart":%s,"chain":"regtest","block104":"%s","chronik":"127.0.0.1:19442","rpc":"127.0.0.1:19443","s0":"NOT_CLOSED"}\n' "$([[ "$MODE" == "enable" ]] && echo true || echo false)" "$BLOCK104"
