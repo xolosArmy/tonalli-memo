@@ -105,7 +105,7 @@ test("signed evaluator accepts a canonical 73-byte POST crossing the PUSHDATA1 b
   assert.equal(report.ok, true, report.problems.join("; "));
   assert.equal(report.authorIndex, 0);
   assert.equal(report.feeSats, fee.toString());
-  assert.equal(signed[unsignedTrial.length - 1], 0); // transaction locktime byte
+  assert.equal(signed.subarray(-4).toString("hex"), "00000000");
 });
 
 test("canonical POST encoder remains the only production payload and rejects a v2 REPLY", () => {
