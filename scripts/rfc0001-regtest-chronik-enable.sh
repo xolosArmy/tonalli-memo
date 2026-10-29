@@ -56,7 +56,10 @@ fi
 validate_lab_conf() {
   python3 - "$CONF" <<'PY'
 import pathlib, sys
-lines = pathlib.Path(sys.argv[1]).read_text().splitlines()
+raw = pathlib.Path(sys.argv[1]).read_bytes()
+if not raw.endswith(b"\\n"):
+    raise SystemExit("Lab config must end with a newline before stopping the node")
+lines = raw.decode("utf-8").splitlines()
 base = ["regtest=1", "server=1", "[regtest]", "listen=0", "connect=0",
         "dnsseed=0", "rpcbind=127.0.0.1", "rpcallowip=127.0.0.1",
         "rpcport=19443"]
