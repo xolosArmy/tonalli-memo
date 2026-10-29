@@ -128,7 +128,7 @@ function signedMaterial(tx: Tx, author: CryptoKey) {
 
 describe("RFC-0001 Social v2: offline real P2PKH/Schnorr signing, no network", () => {
   it.each([
-    ["REPLY", 0x02, false, 0x41, 47],
+    ["REPLY", 0x02, false, 0x41, 59],
     ["REACTION", 0x03, false, 0x41, 43],
     ["REACTION_REMOVE", 0x04, true, 0xc1, 43],
     ["TIP_XEC declaration plus native recipient output", 0x05, false, 0x41, 42]
@@ -140,7 +140,7 @@ describe("RFC-0001 Social v2: offline real P2PKH/Schnorr signing, no network", (
       const material = signedMaterial(decoded, author);
       expect(decoded.txid()).toBe(tx.txid());
       expect(decoded.inputs).toHaveLength(2);
-      expect(social.bytecode.length).toBe(expectedScriptLength);
+      expect(social.toHex().length / 2).toBe(expectedScriptLength);
       expect(decoded.outputs[0]?.script.toHex()).toBe(social.toHex());
       expect(material.sighash).toBe(expectedHashType);
       expect(Buffer.from(shaRmd160(material.publicKey)).toString("hex")).toBe(material.lockingHashHex);
