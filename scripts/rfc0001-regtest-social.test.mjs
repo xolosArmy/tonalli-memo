@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { encodeTm1Post, parseTm1Output } from "../packages/protocol/dist/index.js";
@@ -7,6 +8,7 @@ import {
   hash160,
   offlineFixtureParent,
   parseLabTransaction,
+  readSocialEnvelope,
   replyPayload,
   requiredFeeSats,
   xecToSats
@@ -44,6 +46,66 @@ test("unsigned REPLY fixture spends the recorded regtest coinbase and declares a
 
 test("lab wallet pubkey hashes to the recorded P2PKH prevout", () => {
   assert.equal(hash160(Buffer.from(LAB_PUBKEY, "hex")).toString("hex"), "b4aca63fbf60884195ee538475b6840650273d3f");
+});
+
+
+test("canonical POST envelope supports direct pushes and minimal PUSHDATA1 (72/73/212 bytes)", () => {
+  for (const messageBytes of [72, 73, 212]) {
+    const message = "x".repeat(messageBytes);
+    const post = encodeTm1Post({ authorInputIndex: 0, eventData: message });
+    const script = Buffer.from(post.scriptHex, "hex");
+    assert.equal(script[6], messageBytes <= 72 ? 3 + messageBytes : 0x4c);
+    if (messageBytes > 72) assert.equal(script[7], 3 + messageBytes);
+    const parsed = readSocialEnvelope(script);
+    assert.equal(parsed.version, 1);
+    assert.equal(parsed.eventType, 1);
+    assert.equal(parsed.authorIndex, 0);
+    assert.equal(parsed.envelope.subarray(3).toString("utf8"), message);
+    assert.equal(parseTm1Output({ valueSats: 0n, script: post.script }).eventData, message);
+  }
+  const nonMinimal = Buffer.from([0x6a, 0x04, 0x54, 0x4d, 0x4d, 0x00, 0x4c, 0x04, 0x01, 0x01, 0x00, 0x78]);
+  assert.throws(() => readSocialEnvelope(nonMinimal), /non-minimal PUSHDATA1/u);
+  assert.throws(() => readSocialEnvelope(nonMinimal.subarray(0, 7)), /truncated PUSHDATA1/u);
+});
+
+test("signed evaluator accepts a canonical 73-byte POST crossing the PUSHDATA1 boundary", () => {
+  // Deliberately synthetic scriptSig; this tests the script envelope and
+  // fee/author checks, NOT cryptographic signature or node consensus.
+  const post = encodeTm1Post({ authorInputIndex: 0, eventData: "p".repeat(73) });
+  const pubkey = Buffer.from(LAB_PUBKEY, "hex");
+  const scriptSig = Buffer.concat([
+    Buffer.from([65]),
+    Buffer.alloc(64, 7),
+    Buffer.from([0x41, 33]),
+    pubkey
+  ]);
+  assert.equal(scriptSig.length, 100);
+  const args = {
+    txid: "22a2e1aab313d933fe5659999bbffd704cb4923ae1d559401ed125239a5993e7",
+    vout: 0,
+    payloadScript: Buffer.from(post.scriptHex, "hex"),
+    changeScript: Buffer.from(PREVOUT, "hex")
+  };
+  const unsignedTrial = buildUnsigned({ ...args, changeSats: 5000000000n - 1n });
+  const fee = BigInt(requiredFeeSats(unsignedTrial.length + scriptSig.length, "10.00"));
+  const unsigned = buildUnsigned({ ...args, changeSats: 5000000000n - fee });
+  const signed = Buffer.concat([
+    unsigned.subarray(0, 41),
+    Buffer.from([scriptSig.length]),
+    scriptSig,
+    unsigned.subarray(42)
+  ]);
+  const report = evaluateSigned({
+    rawHex: signed.toString("hex"),
+    prevoutScript: PREVOUT,
+    inputSats: 5000000000n,
+    minRelayXecPerKb: "10.00",
+    payloadScript: args.payloadScript
+  });
+  assert.equal(report.ok, true, report.problems.join("; "));
+  assert.equal(report.authorIndex, 0);
+  assert.equal(report.feeSats, fee.toString());
+  assert.equal(signed[unsignedTrial.length - 1], 0); // transaction locktime byte
 });
 
 test("canonical POST encoder remains the only production payload and rejects a v2 REPLY", () => {
