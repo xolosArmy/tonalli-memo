@@ -57,7 +57,7 @@ test("Chronik startup uses config-only binds and a stopped-node recovery path", 
 
   // Both binds live exactly once in the validated bitcoin.conf. Passing either
   // with bitcoind is additive and produced the documented OS error 98.
-  const start = script.slice(script.lastIndexOf('"$BIN_DIR/bitcoind" \\'));
+  const start = script.slice(script.lastIndexOf('"$BIN_DIR/bitcoind" \\'), script.indexOf('NEW_PID='));
   assert.ok(start.length > 100, "find actual daemon launch");
   assert.doesNotMatch(start, /-chronikbind=/u);
   assert.doesNotMatch(start, /-rpcbind=/u);
