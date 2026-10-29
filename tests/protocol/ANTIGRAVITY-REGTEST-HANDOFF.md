@@ -1,6 +1,15 @@
 # Antigravity execution handoff — RFC-0001 / PR #42
 
-**Status: pending execution; do not claim a regtest node or broadcast exists.**
+**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted by `testmempoolaccept`, broadcast, and mined on this regtest node. S0 is not closed. Chronik was not tested.**
+
+The execution record is `tests/protocol/RFC0001-PR42-REGTEST-EVIDENCE.md`.
+The unsigned-phase rejection stays in that record. The signed phase is the later section of the same file. Confirmed lab txids:
+
+- REPLY with the offline fixture parent `00..1f`: `05e924726fb94cdb8707bb40d00faf69451b479c66dde9544a67b46a1e91ec50`, block `4ac99d72f3e4bc5343a9a65526cd94e4975b8f9a994855f505a6a4f88dd1b0b1`, height 102.
+- Canonical POST `laboratorio RFC-0001 POST`: `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585`, block `0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17`, height 103.
+- REPLY whose 32 parent bytes are that POST txid in display order: `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649`, block `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915`, height 104.
+
+That parent byte order is a lab convention. It is not a standardized TM1 encoding. Thread reconstruction is reserved for a regtest Chronik or indexer. The production parser still rejects version `0x02`. This handoff remains the procedure. Do not treat the offline Vitest suite, or consensus acceptance alone, as Chronik indexing. Do not treat these lab transactions as closing S0.
 
 Use Antigravity's IDE/agent terminal **on a local Linux x86_64 machine with internet access and command-execution permission**. Antigravity is a task orchestrator, **not** an eCash full node or consensus oracle. The exact agent launch command depends on the installed version; do not invent a `antigravity cli` command.
 
@@ -64,8 +73,11 @@ bash scripts/rfc0001-regtest-bootstrap.sh /absolute/path/to/verified/bitcoin-abc
 
 ## Security and evidence boundary
 
-This is **execution guidance**, not proof of execution. The source
-script does not broadcast social transactions and must remain isolated
-from production. No claim is made that an Antigravity agent is already
+This is **execution guidance**, not proof of execution. The proof is the
+execution record. `scripts/rfc0001-regtest-bootstrap.sh` does not sign or
+broadcast. `scripts/rfc0001-regtest-sign.sh` broadcasts only when
+`--broadcast` is passed, `testmempoolaccept` returns `allowed=true`, and
+the regtest guards still pass. Both scripts must remain isolated from
+production. No claim is made that an Antigravity agent is already
 installed, connected to this repo, or authorized to run on the
 operator's machine. PR #42, S0 and S1 remain at their previous gates.
