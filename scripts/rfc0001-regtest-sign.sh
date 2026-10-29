@@ -67,13 +67,38 @@ printf '%s\n' "$CMDLINE" | grep -Fq -- '-listen=0' || die "Running node is liste
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-connect=0' || die "Running node allows outbound peers"
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-rpcbind=127.0.0.1' || die "Running node RPC is not localhost-only"
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-rpcport=19443' || die "Running node is not on port 19443"
-printf '%s\n' "$CMDLINE" | grep -Fq -- 'chronik' && die "Lab node advertises Chronik"
+if grep -q 'chronik' "$CONF"; then
+  grep -qx 'chronik=1' "$CONF" || die "Lab config contains an unexpected Chronik setting"
+  grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Lab config Chronik bind is not 127.0.0.1:19442"
+  printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1' || die "Config enables Chronik but the running node does not"
+else
+  printf '%s\n' "$CMDLINE" | grep -Fq -- 'chronik' && die "Running node enables Chronik without the lab config"
+fi
+if printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1'; then
+  mapfile -t CHRONIK_BINDS < <(printf '%s\n' "$CMDLINE" | grep -oE 'chronikbind=[^[:space:]]+')
+  [[ ${#CHRONIK_BINDS[@]} -eq 1 && "${CHRONIK_BINDS[0]}" == "chronikbind=127.0.0.1:19442" ]] || die "Lab Chronik bind is not exactly 127.0.0.1:19442"
+  printf '%s\n' "$CMDLINE" | grep -Eq -- 'chronikreindex|chronikelectrum|chronikcors|0\.0\.0\.0|:8331' && die "Lab Chronik exposes a non-lab endpoint"
+fi
 printf '%s\n' "$CMDLINE" | grep -Fq -- "$HOME/.bitcoin" && die "Lab cmdline references the default datadir"
 mapfile -t NODE_LISTEN < <(ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") { print }')
 [[ ${#NODE_LISTEN[@]} -ge 1 ]] || die "Lab RPC listener is not visible"
+SEEN_RPC=0
+SEEN_CHRONIK=0
 for row in "${NODE_LISTEN[@]}"; do
-  printf '%s\n' "$row" | grep -Eq '127\.0\.0\.1:19443[[:space:]]' || die "Lab node listens outside 127.0.0.1:19443"
+  if printf '%s\n' "$row" | grep -Eq '127\.0\.0\.1:19443[[:space:]]'; then
+    SEEN_RPC=1
+  elif printf '%s\n' "$row" | grep -Eq '127\.0\.0\.1:19442[[:space:]]'; then
+    SEEN_CHRONIK=1
+  else
+    die "Lab node listens outside 127.0.0.1:19443 and 127.0.0.1:19442"
+  fi
 done
+[[ "$SEEN_RPC" == 1 ]] || die "Lab RPC listener is not visible"
+if printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1'; then
+  [[ "$SEEN_CHRONIK" == 1 ]] || die "Lab Chronik listener is not visible"
+else
+  [[ "$SEEN_CHRONIK" == 0 ]] || die "Port 19442 is open without -chronik=1"
+fi
 
 CLI=("$BIN_DIR/bitcoin-cli" "-datadir=$DATADIR" "-conf=$CONF" "-regtest" "-rpcport=19443")
 rpc() { "${CLI[@]}" "$@"; }

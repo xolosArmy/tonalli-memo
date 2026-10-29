@@ -307,4 +307,56 @@ The block-2 coinbase `502e97cbcd55d2d9e511baab39894d76692921256be9d99e00cc39c3c5
 
 `node --test scripts/rfc0001-regtest-social.test.mjs` covers the fee rule, the unsigned fixture, the lab HASH160, the canonical POST, the production parser's rejection of v2, both scriptSig shapes, and the display-order parent bytes of the confirmed POST/REPLY pair. It does not connect to a node. Together with `scripts/d07-conf-04-historical-audit.test.mjs`, that command passed 14 tests. `@tonalli-memo/verification` passed 118 tests, `@tonalli-memo/protocol` passed 120, `@tonalli-memo/registry` passed 52, and `@tonalli-memo/chronik` passed 92. The root `pnpm -r test` still stops in `@tonalli-memo/web` on this Node v20.19.2: Vitest cannot start its jsdom workers because `webidl.util.markAsUncloneable is not a function`. That failure is outside this regtest change. `apps/web` was not modified.
 
-Still open: author index 1, ALP/eMPP, reorg tests, regtest Chronik, and thread reconstruction. S0 remains open.
+Still open after the signed phase: author index 1, ALP/eMPP, reorg tests, regtest Chronik, and thread reconstruction. S0 remains open.
+
+## Chronik enablement prepared, not started
+
+Checked on 2026-10-29 after fast-forwarding the branch to `27bbe313c1116786e4a34b4d3098a3493c9f91af`. The lab process was still pid 2698929. It was not restarted and the bootstrap was not run again.
+
+| Check | Result |
+| --- | --- |
+| Chain | `regtest` |
+| Height | 104 |
+| Block 104 | `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915` |
+| Block 104 transactions | coinbase `0186e0a6d6bd1c1a7d0d71a4a7d449887de1f33b44ba98aea2ee340de3f64beb`, REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` |
+| Block 103 | `0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17`, containing POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` |
+| Peers / wallet | 0 / only `rfc0001-regtest-only` |
+| Lab listener | `127.0.0.1:19443` only |
+| Port 19442 | not listening |
+| Production pid 2075049 | cmdline unchanged, including its own Chronik on `0.0.0.0:8331` |
+
+Codex review gate, read from GitHub before any restart:
+
+- HEAD `27bbe31` adds a locktime assertion on top of `9478405`. Codex has no completed review of `27bbe31`.
+- A review of `9478405` was still `running` in the Codex review summary. That commit is not HEAD.
+- Four P2 threads were still `isResolved: false`. The bootstrap findings were followed by a Codex review of `91e5b85` that reported no major issues. The PUSHDATA1 finding on `ad09c0a` is outdated in GitHub because `587422a` and `9478405` changed that reader. Those later commits do not yet have a finished Codex review. One bootstrap thread, "Put network-specific RPC settings in a regtest section", was still unresolved and not marked outdated.
+
+The node was therefore not restarted. `chronik-client` was not pointed at the lab chain. No query was sent to port 8331 or 19442. The result remains `CHRONIK_NOT_TESTED`. S0 remains `NOT_CLOSED`.
+
+Prepared, and not executed, restart command:
+
+```sh
+bash scripts/rfc0001-regtest-chronik-enable.sh --bin /home/xolosarmy/bitcoin-abc-0.34.2/bin --enable
+```
+
+The check that was executed does not stop the node:
+
+```sh
+bash scripts/rfc0001-regtest-chronik-enable.sh --bin /home/xolosarmy/bitcoin-abc-0.34.2/bin --check
+```
+
+```text
+{"action":"check","restart":false,"chain":"regtest","block104":"6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915","chronik":"NOT_ENABLED","s0":"NOT_CLOSED"}
+```
+
+`--enable` is the only mode that stops the lab pid, appends `chronik=1` and `chronikbind=127.0.0.1:19442` under `[regtest]`, and starts Bitcoin ABC 0.34.2 again with RPC still on `127.0.0.1:19443`. It refuses another datadir, a public bind, Electrum, `chronikreindex`, and port 8331. It does not delete chain data. After a future clean Codex review it must be run on its own, then:
+
+```sh
+node scripts/rfc0001-regtest-chronik-query.mjs
+```
+
+That query constructs `chronik-client` against `http://127.0.0.1:19442` only. There is no URL argument. It loads the POST and the block-104 REPLY and passes the raw client objects to `scripts/rfc0001-regtest-chronik-verify.mjs`.
+
+The experimental verifier does not modify or call the production TM1 parser. It checks three independent facts: the REPLY input spends POST output 1 and is the lab P2PKH script with sighash `ALL|FORKID` and a matching HASH160; Chronik `spentBy` on that POST output points at the REPLY input 0; the REPLY envelope's 32 parent bytes are the POST txid in display order. That byte order remains a lab convention. The production parser still rejects version `0x02`. The node test covers the accepting fixture and rejected reference, parent, and HASH160 mutations. It does not open a socket.
+
+`scripts/rfc0001-regtest-sign.sh` now allows Chronik only when the config and the running cmdline both say `-chronik=1` and `chronikbind=127.0.0.1:19442`, and only together with the RPC listener. The current process has neither, so the signer still accepts this node. A public or production Chronik bind is refused.

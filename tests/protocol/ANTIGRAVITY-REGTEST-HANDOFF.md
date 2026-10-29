@@ -1,6 +1,6 @@
 # Antigravity execution handoff — RFC-0001 / PR #42
 
-**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted by `testmempoolaccept`, broadcast, and mined on this regtest node. S0 is not closed. Chronik was not tested.**
+**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted by `testmempoolaccept`, broadcast, and mined on this regtest node. S0 is not closed. Chronik enablement is prepared and was not started: Codex has not finished reviewing the latest commit, and P2 review threads are still unresolved. The lab node was not restarted.**
 
 The execution record is `tests/protocol/RFC0001-PR42-REGTEST-EVIDENCE.md`.
 The unsigned-phase rejection stays in that record. The signed phase is the later section of the same file. Confirmed lab txids:
