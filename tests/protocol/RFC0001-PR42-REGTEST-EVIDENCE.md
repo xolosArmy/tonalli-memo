@@ -359,4 +359,34 @@ That query constructs `chronik-client` against `http://127.0.0.1:19442` only. Th
 
 The experimental verifier does not modify or call the production TM1 parser. It checks three independent facts: the REPLY input spends POST output 1 and is the lab P2PKH script with sighash `ALL|FORKID` and a matching HASH160; Chronik `spentBy` on that POST output points at the REPLY input 0; the REPLY envelope's 32 parent bytes are the POST txid in display order. That byte order remains a lab convention. The production parser still rejects version `0x02`. The node test covers the accepting fixture and rejected reference, parent, and HASH160 mutations. It does not open a socket.
 
-`scripts/rfc0001-regtest-sign.sh` now allows Chronik only when the config and the running cmdline both say `-chronik=1` and `chronikbind=127.0.0.1:19442`, and only together with the RPC listener. The current process has neither, so the signer still accepts this node. A public or production Chronik bind is refused.
+`scripts/rfc0001-regtest-sign.sh` now allows Chronik only when the config and the running cmdline both say `-chronik=1` and `chronikbind=127.0.0.1:19442`, and only together with the RPC listener. A public or production Chronik bind is refused.
+
+## Chronik enable attempted at afd455f, node exited
+
+Local HEAD was fast-forwarded to `afd455f3040151adc3d95658a7368dbc611c3e2a`. Before `--enable`, the lab process was still pid 2698929, chain `regtest`, height 104, block `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915`, zero peers, wallet `rfc0001-regtest-only`, and RPC only on `127.0.0.1:19443`. Port 19442 was closed. The config ended with a newline and did not yet contain Chronik. Production pid 2075049 was unchanged.
+
+`--check` exited 0:
+
+```text
+{"action":"check","restart":false,"chain":"regtest","block104":"6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915","chronik":"NOT_ENABLED","s0":"NOT_CLOSED"}
+```
+
+The pid was still 2698929 after that check. `--enable` then stopped that pid, appended `chronik=1` and `chronikbind=127.0.0.1:19442` to the lab config, and started Bitcoin ABC 0.34.2 with the same flags on the command line. `bitcoind` printed `Error during initialization` and exited 1. No second start was attempted. `node scripts/rfc0001-regtest-chronik-query.mjs` was not run.
+
+`regtest/debug.log` records the failed process at `2026-10-29T16:17:24Z`:
+
+- `Binding RPC on address 127.0.0.1 port 19443 failed.` The process continued and later started its HTTP server. The config and the command line both set `rpcbind=127.0.0.1`.
+- `Loaded best chain: hashBestChain=6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915 height=104`.
+- `Starting Chronik bound to [127.0.0.1:19442, 127.0.0.1:19442]`.
+- Chronik synced to that same block at height 104.
+- `Error: Chronik failed binding to 127.0.0.1:19442: Address already in use (os error 98)`.
+- `Shutdown: done`.
+
+The duplicate Chronik address is the config line plus `-chronikbind=127.0.0.1:19442` on the command line. The script writes both. The node treated them as two binds of one socket and shut down. After the exit there is no lab `bitcoind` process and no `bitcoind.pid`. Nothing listens on `19442` or `19443`. The lab config now ends with:
+
+```text
+chronik=1
+chronikbind=127.0.0.1:19442
+```
+
+The block index was not rewound. Production pid 2075049, ports 8331, 8332, and 8333, and `/home/xolosarmy/.bitcoin` were not changed. S0 remains `NOT_CLOSED`. The result is not Chronik acceptance: `CHRONIK_NOT_TESTED`.

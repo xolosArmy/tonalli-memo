@@ -1,6 +1,6 @@
 # Antigravity execution handoff — RFC-0001 / PR #42
 
-**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted by `testmempoolaccept`, broadcast, and mined on this regtest node. S0 is not closed. Chronik enablement is prepared and was not started: Codex has not finished reviewing the latest commit, and P2 review threads are still unresolved. The lab node was not restarted.**
+**Status: local regtest bootstrap executed. Three lab social transactions were later signed, accepted, and mined. On commit `afd455f`, `--enable` stopped the lab node. The replacement process loaded height 104 and then exited because Chronik tried to bind `127.0.0.1:19442` twice. Chronik is not listening. The chronik-client query was not run. S0 is not closed. A second start was not attempted.**
 
 The execution record is `tests/protocol/RFC0001-PR42-REGTEST-EVIDENCE.md`.
 The unsigned-phase rejection stays in that record. The signed phase is the later section of the same file. Confirmed lab txids:
