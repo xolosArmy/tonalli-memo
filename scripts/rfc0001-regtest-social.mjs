@@ -1,4 +1,6 @@
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
+import process from "node:process";
 
 export const SATS_PER_XEC = 100n;
 export const SIGHASH_ALL_FORKID = 0x41;
@@ -109,9 +111,27 @@ export function readSocialEnvelope(script) {
   if (script[0] !== 0x6a || script[1] !== 0x04 || script.subarray(2, 6).equals(LOKAD) === false) {
     throw new Error("output is not a TM1 two-push OP_RETURN");
   }
-  const envelopeLength = script[6];
-  if (envelopeLength < 3 || 7 + envelopeLength !== script.length) throw new Error("OP_RETURN envelope length mismatch");
-  const envelope = script.subarray(7);
+  // v1 POST may contain up to 212 UTF-8 event bytes. Its 3-byte header
+  // pushes envelopes above 75 bytes using minimal OP_PUSHDATA1 (0x4c).
+  // REPLY in this laboratory uses a direct push; never assume one width.
+  const pushOpcode = script[6];
+  let envelopeLength;
+  let dataOffset;
+  if (pushOpcode !== undefined && pushOpcode >= 3 && pushOpcode <= 0x4b) {
+    envelopeLength = pushOpcode;
+    dataOffset = 7;
+  } else if (pushOpcode === 0x4c) {
+    if (script.length < 8) throw new Error("OP_RETURN truncated PUSHDATA1 envelope");
+    envelopeLength = script[7];
+    dataOffset = 8;
+    if (envelopeLength <= 0x4b) throw new Error("OP_RETURN non-minimal PUSHDATA1 envelope");
+  } else {
+    throw new Error("OP_RETURN envelope push is missing or unsupported");
+  }
+  if (envelopeLength < 3 || dataOffset + envelopeLength !== script.length) {
+    throw new Error("OP_RETURN envelope length mismatch");
+  }
+  const envelope = script.subarray(dataOffset);
   return { version: envelope[0], eventType: envelope[1], authorIndex: envelope[2], envelope: Buffer.from(envelope) };
 }
 
