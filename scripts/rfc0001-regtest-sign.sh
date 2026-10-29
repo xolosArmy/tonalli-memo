@@ -65,19 +65,18 @@ printf '%s\n' "$CMDLINE" | grep -Fq -- "-datadir=$DATADIR" || die "Running pid i
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-regtest' || die "Running node is not regtest"
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-listen=0' || die "Running node is listening for peers"
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-connect=0' || die "Running node allows outbound peers"
-printf '%s\n' "$CMDLINE" | grep -Fq -- '-rpcbind=127.0.0.1' || die "Running node RPC is not localhost-only"
+# RPC bind is exclusively in the validated regtest config.
 printf '%s\n' "$CMDLINE" | grep -Fq -- '-rpcport=19443' || die "Running node is not on port 19443"
 if grep -q 'chronik' "$CONF"; then
-  grep -qx 'chronik=1' "$CONF" || die "Lab config contains an unexpected Chronik setting"
-  grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Lab config Chronik bind is not 127.0.0.1:19442"
-  printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1' || die "Config enables Chronik but the running node does not"
+  grep -qx 'chronik=1' "$CONF" || die "Lab config Chronik is not enabled"
+  grep -qx 'chronikbind=127.0.0.1:19442' "$CONF" || die "Lab config Chronik bind is not localhost"
+  printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1' || die "Running node does not enable Chronik"
+  if printf '%s\n' "$CMDLINE" | grep -Eq -- '-chronikbind=|-rpcbind='; then
+    die "Lab node duplicates configuration-only bind flags"
+  fi
+  printf '%s\n' "$CMDLINE" | grep -Eq -- 'chronikreindex|chronikelectrum|chronikcors|0\.0\.0\.0|:8331' && die "Lab Chronik exposes a non-lab endpoint"
 else
   printf '%s\n' "$CMDLINE" | grep -Fq -- 'chronik' && die "Running node enables Chronik without the lab config"
-fi
-if printf '%s\n' "$CMDLINE" | grep -Fq -- '-chronik=1'; then
-  mapfile -t CHRONIK_BINDS < <(printf '%s\n' "$CMDLINE" | grep -oE 'chronikbind=[^[:space:]]+')
-  [[ ${#CHRONIK_BINDS[@]} -eq 1 && "${CHRONIK_BINDS[0]}" == "chronikbind=127.0.0.1:19442" ]] || die "Lab Chronik bind is not exactly 127.0.0.1:19442"
-  printf '%s\n' "$CMDLINE" | grep -Eq -- 'chronikreindex|chronikelectrum|chronikcors|0\.0\.0\.0|:8331' && die "Lab Chronik exposes a non-lab endpoint"
 fi
 printf '%s\n' "$CMDLINE" | grep -Fq -- "$HOME/.bitcoin" && die "Lab cmdline references the default datadir"
 mapfile -t NODE_LISTEN < <(ss -ltnp | awk -v pid="$PID" 'index($0, "pid=" pid ",") { print }')
