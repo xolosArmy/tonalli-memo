@@ -4,9 +4,10 @@ import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { URL } from "node:url";
 
 const script = readFileSync(new URL("./rfc0001-regtest-chronik-enable.sh", import.meta.url), "utf8");
-const match = /validate_lab_conf\(\) \{\n  python3 - "\$CONF" <<'PY'\n([\s\S]*?)\nPY\n\}/u.exec(script);
+const match = /validate_lab_conf\(\) \{\n[ ]{2}python3 - "\$CONF" <<'PY'\n([\s\S]*?)\nPY\n\}/u.exec(script);
 assert.ok(match, "extract real Python pre-stop config validator");
 const preflight = match[1];
 
