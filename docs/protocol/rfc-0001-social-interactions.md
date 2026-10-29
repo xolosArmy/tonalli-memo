@@ -1,6 +1,6 @@
 # RFC-0001 — Tonalli Memo Social Interactions Protocol
 
-- **Status:** DRAFT / PR0 — NON-NORMATIVE, NOT RATIFIED
+- **Status:** PROPOSED — NOT RATIFIED (DRAFT / PR0, non-normative)
 - **Date (proposal):** 2026-10-27 (America/Mexico_City)
 - **Milestone:** M1 / S0 — social protocol architecture
 - **Canonical dependency:** [TM1 Core Protocol v1.0](./tm1-core-v1.0-ratification-candidate.md), ratified in [PR #39](https://github.com/xolosArmy/tonalli-memo/pull/39), merge `228d1f036643ca9be8ba85e91f8200536f3242da`
@@ -15,14 +15,14 @@
 | 0 | Scope, compatibility and activation boundary | Draft |
 | M1.1 | Historical comparison: Memo.cash, Member, BlockPress | Initial notes; evidence review pending |
 | M1.2 | Versioning, event types and activation | Proposed |
-| M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed |
+| M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed; one regtest display-order vector recorded, not ratified |
 | M1.4 | Author identity and authorization | Proposed; Codex reviewed |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
-| M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified |
-| M1.7 | Canonical vectors and byte-boundary tests | Synthetic byte examples and test matrix documented; executable corpus pending |
+| M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified; no transfer executed |
+| M1.7 | Canonical vectors and byte-boundary tests | Synthetic corpus plus one regtest reference pair; M1.7.4 remainder pending |
 | M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; mitigation evidence pending |
 | M1.9 | Compatibility, migration and staged activation | Proposed; operational proof pending |
-| M1.10 | S0 acceptance gates and S1 hand-off | Proposed; gates unfulfilled |
+| M1.10 | S0 acceptance gates and S1 hand-off | Proposed; S0 OPEN; S1 NOT AUTHORIZED |
 
 ## 0. Scope and invariants
 
@@ -63,6 +63,8 @@ This comparison is **architectural background**, not a wire-level claim of cross
 `0x02` is the proposed **envelope version**, not a retroactive change to TM1 Core v1.0 and not a ratified activation assignment. The `event_type=0x02` value was reserved by Core v1.0 and remains inactive in production until an independently authorized change to social-aware verifiers.
 
 The new parser MUST dispatch by the *pair* `(version, event_type)`, not by event type alone. It MUST maintain the Core candidate-cardinality policy and canonical minimal push encoding. A v1 parser remains conforming if it rejects the proposed v2 message as unsupported.
+
+TM1 Core v1.0, section 2, requires **exactly one TM1 candidate** in a transaction. An output remains a candidate once its first data push is the TM1 LOKAD ID, including when the rest of the envelope is malformed. A transaction with more than one such output MUST be rejected as `MULTIPLE_MEMOS`. A verifier MUST NOT keep the first candidate and ignore another. Unrelated `OP_RETURN` outputs whose first push is not the TM1 LOKAD ID MAY coexist. This cardinality rule is already normative for Core v1.0. Restating it here does not activate social v2.
 
 **Two-stage social validation (proposed v2):**
 
@@ -123,15 +125,37 @@ These are **proposed protocol compatibility limits**, not eCash consensus guaran
 
 ### M1.3.3. TXID serialization and endianness
 
-**Chosen RFC proposal:** `parent_txid` uses **32 bytes in human-facing display order**: take the usual 64-character TXID hex string, decode pairs from left to right into 32 bytes, and place those bytes directly on-chain. This is commonly called display/big-endian order. This rule is a *format decision* and does not assume every Chronik API field is returned in the same byte order.
+**Chosen RFC proposal, still PROPOSED — NOT RATIFIED:** `parent_txid` is **32 binary bytes in the display order of the hexadecimal TXID**. Take the usual 64-character TXID hex string, decode pairs from left to right into 32 bytes, and place those bytes directly on-chain. This is commonly called display/big-endian order. This rule is a *format decision* and does not assume every Chronik API field is returned in the same byte order.
 
-An adapter MUST explicitly identify the representation of its Chronik/client input:
+An adapter MUST identify the representation of each input before copying it:
 
-- A standard displayed 64-hex TXID is decoded directly into `parent_txid`; **no reversal**.
-- Only where a given upstream API supplies a documented 32-byte little-endian buffer does the adapter reverse that buffer **once** to obtain display-order bytes.
-- Comparison, storage and query interfaces MUST normalize to one documented representation to prevent accidental double reversal.
+- When the source already provides a TXID in display order, including a canonical 64-character lowercase hex string or a Chronik `txid` field in that order, decode or copy it into `parent_txid` with **no byte reversal**.
+- When an adapter receives a hash that its source documents as an internal little-endian buffer, such as the 32-byte prevout hash inside a serialized transaction, reverse that buffer **exactly once** to obtain display-order bytes.
+- A second reversal is an error. Reversing a value that is already in display order is also an error.
+- Comparison, storage and query interfaces MUST normalize to one documented representation so the two cases above cannot be applied twice.
 
-Round-trip tests MUST cover TXIDs with non-palindromic byte sequences, mixed-case input normalization, invalid hex and zero/incorrect lengths. The canonical external TXID text representation is lowercase hex of the 32 stored display-order bytes.
+Round-trip tests MUST cover TXIDs with non-palindromic byte sequences, mixed-case input normalization, invalid hex and zero/incorrect lengths. The canonical external TXID text representation is lowercase hex of the 32 stored display-order bytes. Uppercase hex, a `0x` prefix, internal whitespace and any length other than 64 hex characters are non-canonical and MUST NOT be stored as-is.
+
+#### Confirmed regtest vector
+
+This vector was observed on an isolated regtest chain, not on mainnet. It is evidence for the byte order above. It does not ratify RFC-0001, does not authorize S1, and does not change the production parser. The production parser still rejects version `0x02`.
+
+| Field | Value |
+| --- | --- |
+| Network | `regtest` |
+| Evidence | PR #42 commit `081d75a762889207283ab7d4434030db30c79b41` |
+| Executable corpus | PR #41 commit `efe60360b4a276465975b603b833a8eb15f8e080` |
+| Parent POST TXID | `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` |
+| Parent block | height 103, `0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17` |
+| Child REPLY TXID | `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` |
+| Child block | height 104, `6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915` |
+| Parent wire bytes | `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` |
+| `author_input_index` | `0` |
+| Author HASH160 | `b4aca63fbf60884195ee538475b6840650273d3f` |
+| Sighash | `0x41` (`ALL\|FORKID`) |
+| Link | Chronik `spentBy` on POST output 1 is the REPLY input 0 |
+
+The wire bytes are the POST TXID read left to right. They are not the reversed internal prevout encoding. At tip height 104 the lab wallet reported 2 confirmations for the POST and 1 confirmation for the REPLY. Those confirmation counts are an observation at that tip, not a permanent constant.
 
 ### M1.3.4. Author verification and parent eligibility
 
@@ -796,6 +820,12 @@ security review, reproducible fixtures and independent
 governance are REQUIRED before any activation, signature,
 broadcast or use of funds.
 
+The regtest pair in M1.3.3 is a POST and a REPLY. It did not
+create a TIP, transfer XEC as a tip, or transfer RMZ. The
+ALP/eMPP requirements in M1.6.4 and M1.6.7 stay in force as
+design and validation requirements. This draft does not
+implement that container and does not authorize a transfer.
+
 ## M1.7. Deterministic conformance vectors and acceptance specification — DRAFT
 
 **Normative status:** this section specifies the **test contract** that
@@ -811,7 +841,8 @@ to a verified social event or a settled payment.
 - Network: **eCash mainnet** for the proposed production profile;
   synthetic unit vectors use no real funds and MUST NOT be broadcast.
   Each fixture carries a separate `network` field; other network
-  contexts MUST NOT be silently treated as mainnet.
+  contexts MUST NOT be silently treated as mainnet. The confirmed
+  pair in M1.3.3 is `network=regtest` and MUST stay labeled as such.
 - Canonical synthetic displayed target TXID (non-palindromic):
   `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f`.
   Its on-wire bytes MUST match this left-to-right display order.
@@ -991,6 +1022,18 @@ reviewed output must include the test command, CI run
 reference and reviewed commit SHA. Any incomplete token
 encoding or signature tests MUST remain listed as a
 blocking gate rather than passed by inspection.
+
+The regtest POST/REPLY raw transactions recorded from PR #42
+are one executable reference for display-order parent bytes,
+a single P2PKH author at input 0, and the spent output link.
+They do **not** close M1.7.4. The following remain explicit
+S0 blockers: ALP/eMPP SEND plus one TMM entry and its token
+ancestry; XEC and RMZ tip settlement fixtures, including the
+ambiguous-funding counterexample; reaction and unlike replay;
+reorg rollback and restart idempotence; author indices other
+than the single observed index 0; and any change that would
+make the production parser accept version `0x02`. None of
+those items is authorized by this draft.
 
 ## M1.8. Threat model and required mitigations — DRAFT
 
@@ -1303,15 +1346,15 @@ for every required item.
 | ID | S0 acceptance criterion | Current PR0 evidence / disposition |
 | --- | --- | --- |
 | `S0-01` | Scope and historical M1.1 comparison sourced and reviewed | Initial comparison exists; external source verification **pending** |
-| `S0-02` | Core v1.0 boundary and type-by-type v2 binary schema unambiguous | M1.2/M1.3/M1.5 drafted; independent fixture proof **pending** |
-| `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | M1.4 drafted, review received; executable proofs **pending** |
-| `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | M1.3/M1.5/M1.6 drafted; ALP/eMPP integration **pending** |
-| `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic structural hex and matrix documented; executable corpus **pending** |
+| `S0-02` | Core v1.0 boundary and type-by-type v2 binary schema unambiguous | M1.2/M1.3/M1.5 drafted. One regtest REPLY shows display-order parent bytes. Other v2 payloads and a production-parser acceptance test are **not** this evidence. Production v2 activation **pending** and not authorized |
+| `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | Regtest POST and REPLY use `author_input_index=0`, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. Index 1, P2SH rejection and delegated signing **pending** |
+| `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | REPLY link observed on regtest: POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` output 1 is spent by REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` input 0 (PR #42 `081d75a762889207283ab7d4434030db30c79b41`). Reaction/unlike replay not executed. XEC/RMZ TIP and ALP/eMPP integration **pending**; no transfer |
+| `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic corpus remains on PR #41. Commit `efe60360b4a276465975b603b833a8eb15f8e080` adds a separate regtest reference for this pair, with negative serialization cases, and does not modify the production parser. Local command `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs` passed, 43 tests. ALP/eMPP, reorg, reaction and tip raw fixtures **pending** |
 | `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | Threat matrix written; mitigation proofs/owner review **pending** |
 | `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | **Pending** |
 | `S0-08` | M1.9 activation flags, isolated staging and rollback rehearsed or independently verified to the extent required by the approved gate | Proposed controls only; execution evidence **pending** |
-| `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Previous heads reviewed; final head review **pending** |
-| `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **NOT ratification** |
+| `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Earlier heads were reviewed. This evidence update needs its own Codex review and a recorded CI result before S0-09 can be claimed. **Pending** |
+| `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **PROPOSED — NOT RATIFIED** |
 
 The acceptance authority MAY approve a documented
 alternative for an item **only through a separate
@@ -1323,14 +1366,14 @@ only with a traceable correction commit; this
 does not imply all architectural risks are closed.
 
 **Current status at PR0:** the architecture text has
-been drafted, but M1.7.4 explicitly requires
-machine-readable, independently reproducible
-fixtures **before RFC acceptance**. Therefore
-this PR MUST NOT assert "S0 complete" merely
-because M1.1–M1.10 have headings, the Codex
-review is favorable, or CI is green. The S0
-gate remains **OPEN** pending the evidence and
-final governance review above.
+been drafted. One regtest POST/REPLY pair now supplies
+display-order parent bytes, P2PKH authorship and a
+`spentBy` link. M1.7.4 still requires the remaining
+machine-readable fixtures listed in that section.
+This PR MUST NOT assert "S0 complete" because those
+fixtures, ALP/eMPP validation, Codex review of this
+head, or CI are unfinished. The S0 gate remains
+**OPEN**. S1 is **NOT AUTHORIZED**.
 
 ### M1.10.3. S1 requirements and acceptance tests
 
