@@ -13,14 +13,14 @@
 | Section | Deliverable | PR0 status |
 | --- | --- | --- |
 | 0 | Scope, compatibility and activation boundary | Draft |
-| M1.1 | Historical comparison: Memo.cash, Member, BlockPress | Initial notes; evidence review pending |
+| M1.1 | Historical comparison: Memo.cash, Member, BlockPress | Memo and Lokad pages fetched; Member and BlockPress known from the 2021 compilation; BlockPress origin unreachable; review of this head pending |
 | M1.2 | Versioning, event types and activation | Proposed |
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed; one regtest display-order vector recorded, not ratified |
 | M1.4 | Author identity and authorization | Proposed; Codex reviewed |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
 | M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified; no transfer executed |
 | M1.7 | Canonical vectors and byte-boundary tests | Synthetic corpus plus one regtest reference pair; M1.7.4 remainder pending |
-| M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; mitigation evidence pending |
+| M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; SEC-01..SEC-14 not demonstrated by the POST/REPLY pair |
 | M1.9 | Compatibility, migration and staged activation | Proposed; operational proof pending |
 | M1.10 | S0 acceptance gates and S1 hand-off | Proposed; S0 OPEN; S1 NOT AUTHORIZED |
 
@@ -34,16 +34,50 @@ The new binary payload rule below applies **only** to a future `version=0x02 / e
 
 An approved RFC, by itself, would not automatically enable signing, broadcasting, wallet support, a production indexer or economic transfers; these require separate implementation and release authorizations. Each on-chain action has potential network fees, relay/miner-policy constraints and indexing costs; this design does not promise zero-cost likes.
 
-## M1.1. Comparative background (initial draft)
+## M1.1. Comparative background
 
-| Precedent | Relevant design pattern | Design implication for Tonalli |
+This section records a sourced comparison among Memo.cash, Member, BlockPress, and this proposal. It is architectural background. It is not a wire-level compatibility claim, not a ratification of RFC-0001, and not permission to emit another protocol's opcodes. S0-01 stays partial until an independent review accepts this text on an unchanged head.
+
+An on-chain social design is proposed: both REPLY and REACTION/REACTION_REMOVE are eCash transactions authenticated by a designated P2PKH input; RMZ tips require independently verifiable on-chain token settlement. A feed or database may be derived off-chain, but no off-chain reaction signature by itself counts as a published like. M1.4 remains in force: any in-range `author_input_index` is valid when it designates a verifiable P2PKH input. Index 0 is a creation convention, not a rule that other indices are invalid.
+
+### M1.1.1. Source classes
+
+The pages below were retrieved on 2026-10-29. A later reader MUST treat a moved page as a new retrieval, not as this record.
+
+| Source | Class | Retrieval |
 | --- | --- | --- |
-| Memo.cash | On-chain posts, references/replies and social operations | Use explicit, stable references to on-chain messages |
-| Member | Social conventions including moderation/reputation | Keep discovery and moderation separate from cryptographic validity |
-| BlockPress | Compact transaction-encoded social actions | Keep the wire small, deterministic and versioned |
-| Tonalli Memo Core v1.0 | Explicit P2PKH author input, bounded UTF-8 POST, verified transaction linkage | Preserve Core semantics while isolating social extensions |
+| [Memo.cash protocol](https://memo.cash/protocol) | Original protocol page | The action table in M1.1.2 was read from that page. The footer says © 2024 Memo Technology, Inc. The page has no git commit to pin. |
+| [Lokad OP_RETURN prefix guideline](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/op_return-prefix-guideline.md) | Original specification | Commit `91861ab9e947e28f8a3cacdc112e204b6278a777` (2018-12-09). The text is dated 23 May 2018 and revised November 2018. The page names Joannes Vermorel, Amaury Séchet, and Shammah Chancellor. |
+| [`etc/protocols.csv`](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/etc/protocols.csv) | Optional registry attached to that guideline | Commit `c2d1cc255d7b387abe8ab7dba66fbe67054ca56e` (2020-04-17). A search of that file found no row for Memo, Member, BlockPress, Tonalli, or `544d4d00`. The guideline describes registration as a courtesy, not a requirement. |
+| [memberapp/protocol](https://github.com/memberapp/protocol) | Historical compilation | Commit `ecc55f98be4bce1c9e2e204ae00ca87aa3d119a9` (2021-08-16, "Update README.md"). One README gathers Memo, Member, BlockPress, Wewo, and Matter, and links to other pages. |
+| `https://www.blockpress.com/developers/blockpress-protocol` | Documentation not accessible | The compilation calls this the BlockPress official protocol. On 2026-10-29 the URL returned a 114-byte HTML page that redirects to `/lander`, and `/lander` redirected to a domain for-sale page. No protocol text was retrieved. |
 
-This comparison is **architectural background**, not a wire-level claim of cross-protocol compatibility. Authoritative references, exact historical opcodes and trade-offs require separate M1.1 source review before RFC approval. An on-chain social design is proposed: both REPLY and REACTION/REACTION_REMOVE are eCash transactions authenticated by a designated P2PKH input; RMZ tips require independently verifiable on-chain token settlement. A feed or database may be derived off-chain, but no off-chain reaction signature by itself counts as a published like.
+Where the compilation disagrees with the original Memo page, the original page is the Memo source. One checked divergence: the official page defines `0x6d24` Send money as a 20-byte address hash plus a 1–194 byte message. The compilation lists `0x6d24` as `message(217)`. The compilation also lists Quote Repost `0x6d0f`, which the fetched official page does not list, and it omits official actions that the fetched page does list, including `0x6d20`–`0x6d22`, `0x6d26`, `0x6d30`–`0x6d32`, and `0x6d35`. Member and BlockPress wire codes in this section are compilation records. They are not a second original specification.
+
+### M1.1.2. A 32-byte transaction reference is older than Tonalli
+
+| Design | Reply | Like or reaction | Identity on the retrieved source | Prefix |
+| --- | --- | --- | --- | --- |
+| Memo.cash | `0x6d03`: a 32-byte `tx_hash`, then a 1–184 byte UTF-8 message. The page marks it Implemented. | `0x6d04`: a 32-byte `tx_hash`. The page names the action "Like / tip memo" and marks it Implemented. | "Protocol uses P2PKH addresses." The page specifies no author-index byte. | 2-byte action codes beginning `0x6d`, carried in `OP_RETURN`. |
+| Member | The compilation records rating `0x6da4` with a 32-byte tx hash and marks that row Planned. | Dislike post `0x6db4`: a 32-byte tx hash. The compilation says "Implemented on Member". | The same compilation. Block, hide, and moderator actions are separate codes. They do not replace the author's signature. | 2-byte codes beginning `0x6d`, as recorded by the compilation. |
+| BlockPress | Compilation only: `0x8d03`, a 32-byte tx hash, then 45 bytes of reply text. The row says a reply can target a post or another reply. | Compilation only: `0x8d04`, a 32-byte tx hash, with an optional tip. A further 45 bytes are marked unused or reserved. | The compilation header says P2PKH addresses and `OP_RETURN`. | 2-byte codes beginning `0x8d`, compilation only. "Create Media Post" says "See website". That website did not serve a specification. |
+| Tonalli Memo, this RFC | Proposed `(version=0x02, event_type=0x02)`: a 32-byte `parent_txid`, then 1–180 bytes of strict UTF-8, plus an explicit `author_input_index`. | Proposed `REACTION` and `REACTION_REMOVE` events, separate from TIP. | Designated P2PKH input under M1.4. | 4-byte LOKAD `544d4d00`, already ratified for Core v1.0 POST. |
+
+Memo's implemented reply and like/tip actions already carry a 32-byte transaction hash inside `OP_RETURN`. The Member and BlockPress rows in the 2021 compilation repeat that pattern. RFC-0001 uses the same kind of reference for a proposed eCash social layer. The 32-byte parent field is an inherited pattern. Tonalli Memo does not originate it.
+
+The fetched Memo page does not state the byte order of `tx_hash`. The BlockPress compilation does not state it either. This audit assigns no endianness to those historical fields. Tonalli's display-order rule remains the separate proposal in M1.3.3. The Lokad guideline's little-endian rule applies to a 4-byte protocol identifier on the stack. It does not define a parent TXID and it does not amend M1.3.3.
+
+Memo's 2-byte action prefix, and the 2-byte BlockPress prefix recorded by the compilation, differ from the Lokad recommendation of a 4-byte protocol identifier. That is a difference of prefix length. A Memo transaction is not a TM1 POST.
+
+### M1.1.3. `parent_txid` is the semantic link
+
+`parent_txid` is the proposed semantic edge. Its 32 display-order bytes name the transaction that contains the message being answered. Memo's `0x6d03` and the compiled BlockPress `0x8d03` use that same kind of edge. The reply author is the key that authorizes the reply transaction. M1.3.4 and M1.4 already allow that author to differ from the parent author.
+
+`spentBy` is additional indexer evidence that one input spends one output. The regtest REPLY spends output 1 of its parent POST. That observation records how the laboratory transaction was funded and which P2PKH input authorized it. A REPLY under this proposal MAY name a parent whose outputs it does not spend. Spending a parent output, spending a different output, or spending nothing from the parent does not create, erase, or replace `parent_txid`. Thread reconstruction in M1.3 follows the semantic parent field and the parent-eligibility rules. `spentBy` is not a universal requirement for REPLY.
+
+### M1.1.4. Disposition against S0-01
+
+S0-01 asks for a historical comparison that is both sourced and reviewed. The sources above are cited, and the missing BlockPress origin text is labeled inaccessible. Review of this wording is a separate act on a later unchanged head. Until that review exists, S0-01 stays **partial**. S0 stays **OPEN**. S1 stays **NOT AUTHORIZED**.
 
 ## M1.2. Versioning and event types
 
@@ -1345,16 +1379,55 @@ for every required item.
 
 | ID | S0 acceptance criterion | Current PR0 evidence / disposition |
 | --- | --- | --- |
-| `S0-01` | Scope and historical M1.1 comparison sourced and reviewed | Initial comparison exists; external source verification **pending** |
+| `S0-01` | Scope and historical M1.1 comparison sourced and reviewed | M1.1 now cites the Memo page, the Lokad guideline at `91861ab9e947e28f8a3cacdc112e204b6278a777`, `protocols.csv` at `c2d1cc255d7b387abe8ab7dba66fbe67054ca56e`, and the memberapp compilation at `ecc55f98be4bce1c9e2e204ae00ca87aa3d119a9`. The BlockPress origin URL did not serve a specification on 2026-10-29. The criterion also requires independent review of this comparison. That review is not this commit. **Partial** |
 | `S0-02` | Core v1.0 boundary and type-by-type v2 binary schema unambiguous | M1.2/M1.3/M1.5 drafted. One regtest REPLY shows display-order parent bytes. Other v2 payloads and a production-parser acceptance test are **not** this evidence. Production v2 activation **pending** and not authorized |
 | `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | Regtest POST and REPLY use `author_input_index=0`, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. Index 1, P2SH rejection and delegated signing **pending** |
 | `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | REPLY link observed on regtest: POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` output 1 is spent by REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` input 0 (PR #42 `081d75a762889207283ab7d4434030db30c79b41`). Reaction/unlike replay not executed. XEC/RMZ TIP and ALP/eMPP integration **pending**; no transfer |
 | `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic corpus remains on PR #41. Commit `efe60360b4a276465975b603b833a8eb15f8e080` adds a separate regtest reference for this pair, with negative serialization cases, and does not modify the production parser. Local command `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs` passed, 43 tests. ALP/eMPP, reorg, reaction and tip raw fixtures **pending** |
-| `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | Threat matrix written; mitigation proofs/owner review **pending** |
+| `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | M1.8 documents SEC-01 through SEC-14. The traceability subsection separates each documented control from what the regtest POST/REPLY pair shows. That pair does not prove those mitigations. No residual risk has an owner and a date. **Pending** |
 | `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | **Pending** |
 | `S0-08` | M1.9 activation flags, isolated staging and rollback rehearsed or independently verified to the extent required by the approved gate | Proposed controls only; execution evidence **pending** |
-| `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Earlier heads were reviewed. This evidence update needs its own Codex review and a recorded CI result before S0-09 can be claimed. **Pending** |
+| `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Prior receipts are listed below, including `698609fd787d85cd461aa9d70bc32cb8a4583a01` (no major issues; CI run [40920502706](https://github.com/xolosArmy/tonalli-memo/actions/runs/40920502706) passed). Two earlier inline P2 threads are resolved on those older heads. This head changes the document, so it needs its own Codex review and its own CI result. **Pending** |
 | `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **PROPOSED — NOT RATIFIED** |
+
+#### S0-06 traceability for SEC-01 through SEC-14
+
+M1.8 writes a control for each identifier. The regtest POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` and REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` are one funded laboratory pair. The columns below keep that observation separate from a passing mitigation. M1.7.4's blockers for ALP/eMPP, tips, reactions, and reorgs stay in force. A row with no owner and no date is not an accepted residual risk.
+
+| ID | Documented control | What the POST/REPLY pair shows | Residual |
+| --- | --- | --- | --- |
+| SEC-01 | The wallet derives the target-author HASH160 and refuses a substituted recipient (X-03). | No wallet preview and no tip. | Pending. No owner or date. |
+| SEC-02 | Check the selected in-range index, P2PKH HASH160, unlocking script, signature, and sighash (A-01–A-05). A nonzero index stays valid when it designates a verifiable P2PKH input. | Both transactions use index 0, sighash `0x41`, and HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. That is one happy path. | Pending. No substituted index, no unrelated fee input, and no A-01 index-1 fixture. |
+| SEC-03 | Require an approved `SIGHASH_ALL` variant and a fresh preview before signing (A-04, X-07). | Both transactions use sighash `0x41`. | Pending. No mutated-output test. |
+| SEC-04 | Keep an idempotent reaction key and a deterministic last event (R-01–R-05). | No `REACTION` or `REACTION_REMOVE`. | Pending. |
+| SEC-05 | Every `TIP_XEC` funding prevout belongs to the designated tipper (X-05, X-06). | No tip. The `spentBy` edge funds the laboratory REPLY. | Pending. That edge is not a tip-attribution test. |
+| SEC-06 | Check ALP ancestry, the exact RMZ id, decimals, and the receiver (T-01–T-04). | No token transfer. | Pending. |
+| SEC-07 | Parse eMPP strictly and accept a single TMM entry (T-05, C-02). | No ALP/eMPP transaction. | Pending. |
+| SEC-08 | Roll back on reorg, stay idempotent, and keep `PENDING`, `SETTLED`, and `REORGED` distinct (T-06, C-04). | No reorg and no replay. Tip-104 confirmation counts are an observation. | Pending. |
+| SEC-09 | Require an eligible parent message on the same network (P-02–P-05). | The parent POST existed and was the referenced message. | Pending. No missing, non-TM1, or reorged parent was executed. |
+| SEC-10 | Enforce script limits, bounded traversal, and pagination (S-02–S-04, P-04, C-02). | Both scripts are small. | Pending. Bounds, duplicate candidates, and deep threads were not run as security tests. The PR #41 synthetic corpus is not this control's proof. |
+| SEC-11 | Keep the profile on canonical P2PKH. Delegation and a P2SH author input stay outside it (A-03–A-05). | The observed author input is P2PKH. | Pending. No P2SH designated input and no compromise case. |
+| SEC-12 | Give a self-tip zero social credit (X-04, T-04). | No tip. | Pending. |
+| SEC-13 | Keep a mempool view provisional (P-05, T-06). | Both transactions were confirmed. | Pending. No conflicting mempool case. |
+| SEC-14 | Sign only in the noncustodial wallet, and show recipient, amount, token, network, and fee (X-07). | No wallet UI test. | Pending. Omitting secrets from this document is not a passing control. |
+
+SEC-15 and SEC-16 remain in the M1.8 matrix. This pass does not close them. The display-order vector is one observation beside SEC-15. It is not the mismatched-parent suite. M1.8.4 still requires a passing fixture or an accepted residual, with owner and date, before S0-06 can be satisfied.
+
+#### S0-09 prior Codex receipts
+
+Each receipt below applies only to the commit it names. "No major issues" is the reviewer's summary for that commit. M1.10.1 still treats that summary as short of protocol proof. A new head requires a new review and a new CI result.
+
+| Commit | Receipt | Recorded result |
+| --- | --- | --- |
+| `b29208a41d6eebe66f2b8665a21101165f385460` | [comment 6459904041](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6459904041) | No major issues. 2026-10-28. |
+| `2812905817750cd670492e2e3c03185b2e0cd11e` | [comment 6473461801](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6473461801) | No major issues. 2026-10-28. |
+| `dc7ce32fd48b3827b883d712bba0f2fa693eb12c` | [comment 6473755606](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6473755606) | No major issues. The same review opened inline P2 [4402833710](https://github.com/xolosArmy/tonalli-memo/pull/40#discussion_r4402833710) on reaction checks that still required REPLY UTF-8. |
+| `0e8a666af5371e53a3ee7ab592bab15a2b4c0454` | [comment 6474010615](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6474010615) | No major issues after that P2. Thread `PRRT_kwDOTgbL9s6xM9AG` is resolved. |
+| `091d5514d176bf317071b9a5392a45113af59e9f` | [comment 6480549528](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6480549528) | No major issues. This follows inline P2 [4405990197](https://github.com/xolosArmy/tonalli-memo/pull/40#discussion_r4405990197) on recipient-funded `TIP_XEC`. Thread `PRRT_kwDOTgbL9s6xUVNd` is resolved. |
+| `fc2c492938c2b2209a4dcbdca42664cabe00099b` | [comment 6480675468](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6480675468) | No major issues. 2026-10-28. |
+| `698609fd787d85cd461aa9d70bc32cb8a4583a01` | [comment 6503612297](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6503612297) | No major issues. 2026-10-29. CI run [40920502706](https://github.com/xolosArmy/tonalli-memo/actions/runs/40920502706) passed on that commit. |
+
+A review was requested for `0fad3b1de6bfcd69c80abec081e85c1f60a7e01c` in [comment 6480433261](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6480433261). The completed receipt that follows in the thread is the `091d5514d176bf317071b9a5392a45113af59e9f` row, not a receipt naming `0fad3b1`. This document does not invent one.
 
 The acceptance authority MAY approve a documented
 alternative for an item **only through a separate
@@ -1366,14 +1439,21 @@ only with a traceable correction commit; this
 does not imply all architectural risks are closed.
 
 **Current status at PR0:** the architecture text has
-been drafted. One regtest POST/REPLY pair now supplies
-display-order parent bytes, P2PKH authorship and a
-`spentBy` link. M1.7.4 still requires the remaining
-machine-readable fixtures listed in that section.
-This PR MUST NOT assert "S0 complete" because those
-fixtures, ALP/eMPP validation, Codex review of this
-head, or CI are unfinished. The S0 gate remains
-**OPEN**. S1 is **NOT AUTHORIZED**.
+been drafted. M1.1 now records the fetched historical
+sources and leaves S0-01 **partial** until this
+comparison is reviewed. One regtest POST/REPLY pair
+supplies display-order parent bytes, P2PKH authorship
+at index 0, and a `spentBy` observation. That
+observation is not a universal REPLY rule. M1.7.4
+still requires the remaining machine-readable fixtures
+listed in that section, including ALP/eMPP, tips,
+reactions, and reorgs. S0-06 stays pending because
+SEC-01 through SEC-14 have no passing mitigation
+proof and no accepted residual. This PR MUST NOT
+assert "S0 complete". The head that contains this
+paragraph still needs its own Codex review and CI
+result. The S0 gate remains **OPEN**. S1 is
+**NOT AUTHORIZED**.
 
 ### M1.10.3. S1 requirements and acceptance tests
 
