@@ -16,12 +16,12 @@
 | M1.1 | Historical comparison: Memo.cash, Member, BlockPress | Memo and Lokad pages fetched; Member and BlockPress known from the 2021 compilation; BlockPress origin unreachable; review of this head pending |
 | M1.2 | Versioning, event types and activation | Proposed |
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed; one regtest display-order vector recorded, not ratified |
-| M1.4 | Author identity and authorization | Proposed; Codex reviewed |
+| M1.4 | Author identity and authorization | Proposed; production helper stops before the digest; review of this head pending |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
 | M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; ALP/eMPP integration unratified; no transfer executed |
-| M1.7 | Canonical vectors and byte-boundary tests | Synthetic corpus plus one regtest reference pair; M1.7.4 remainder pending |
+| M1.7 | Canonical vectors and byte-boundary tests | Synthetic corpus plus one regtest reference pair; multi-push authorization fixtures are not canonical TM1; M1.7.4 remainder pending |
 | M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; SEC-01..SEC-14 not demonstrated by the POST/REPLY pair |
-| M1.9 | Compatibility, migration and staged activation | Proposed; operational proof pending |
+| M1.9 | Compatibility, migration and staged activation | Proposed; TM0/TM1 application profile undecided; operational proof pending |
 | M1.10 | S0 acceptance gates and S1 hand-off | Proposed; S0 OPEN; S1 NOT AUTHORIZED |
 
 ## 0. Scope and invariants
@@ -347,6 +347,31 @@ Applications MUST NOT attribute an altered payload to the original signature.
 This proof is transaction-level authorization, **not an independent
 signature embedded inside `event_data`**.
 
+**Current production boundary.** Step 7 remains a proposed requirement
+for an eventual social verifier. The function `verifyTm1DesignatedInput`
+checks the designated index, prevout availability, standard P2PKH
+locking script, two-push `scriptSig`, `HASH160` equality, and sighash
+`0x41` or `0xc1`. It does not reconstruct or independently verify the
+signature digest. A `valid: true` result from that function is not an
+independent cryptographic verification.
+
+The label `trustModel: "trusted-chronik"` requires that transaction and
+script validity actually come from a trusted eCash full node or Chronik
+source. TM1 Core v1.0 section 8.6 and section 11 item 3 state that
+delegation. A synthetic normalized transaction is not, by itself,
+evidence that Chronik or a full node validated those bytes. `VERIFIED_TM1`
+results obtained from synthetic fixtures are tests of verifier behavior.
+They are not on-chain confirmations. An independent verifier MUST check
+the authorizing P2PKH signature under the applicable eCash script rules.
+Recording this boundary does not remove that check from S0. M1.7.4 still
+requires reproducible signed positive fixtures and signed negative
+fixtures.
+
+PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` classifies the
+stop-before-digest behavior as `trusted-chronik-gap`. Citing that
+comparison does not change the function and does not authorize a new
+capability.
+
 ### M1.4.3. Unauthorized authorship claims and failure handling
 
 | Attempt or condition | Required disposition under proposed social v2 profile |
@@ -364,6 +389,13 @@ All error labels above reference the Core v1.0 validation taxonomy where
 available. An application-specific pending state MUST remain distinguishable
 from a definitive invalid author signature. The thread linkage state in
 M1.3 MUST NOT upgrade an unverified author to verified.
+
+The rows that require `INVALID_AUTHOR_SIGNATURE` for a bad signature
+remain proposed requirements. `verifyTm1DesignatedInput` does not return
+that code for a digest failure, because it does not verify the digest.
+A caller that trusts Chronik still depends on that trusted source for
+the check Core section 8.6 assigns to the source. An independent
+verifier MUST perform the check itself.
 
 ### M1.4.4. Funding, replay, revocation and key rotation
 
@@ -426,6 +458,10 @@ Before ratification, independent fixtures and tests MUST cover:
   P2SH funding inputs do not invalidate the author rule.
 - Author prevout unavailable, source untrusted, and correct distinction
   between `trusted-chronik` and independently verified signatures.
+- Synthetic `VERIFIED_TM1` results under `trusted-chronik` labeled as
+  verifier-behavior tests. Those results are not Chronik validation
+  evidence and are not on-chain confirmations. An independent verifier
+  still checks the signature digest.
 - Reply to a parent written by a different valid author, including
   malicious text impersonation attempts that do not change the author hash.
 - Valid full-output signature commitment to each event's typed fields
@@ -1069,6 +1105,19 @@ than the single observed index 0; and any change that would
 make the production parser accept version `0x02`. None of
 those items is authorized by this draft.
 
+**Historical authorization-fixture shape.** The authorship fixtures
+used by the S0-07 comparison push the version, the event type, the
+author index, and the event data as separate pushes. TM1 Core v1.0
+section 3 requires exactly two data pushes after `OP_RETURN`: the
+LOKAD ID and the complete envelope. Those historical fixtures may be
+kept as cryptographic evidence or as negative format cases. They
+MUST NOT be presented as valid canonical TM1 transactions. Preparing
+additional fixtures that carry canonical envelopes and verifiable
+signatures is **pending**. This note does not modify the original
+fixtures, does not withdraw the S0-07 findings, and does not close
+M1.7.4. Commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` records the
+shape as `fixture-envelope-shape`.
+
 ## M1.8. Threat model and required mitigations — DRAFT
 
 ### M1.8.1. Assets, actors and security boundaries
@@ -1101,7 +1150,7 @@ non-coercion, or economic reputation.
 | ID | Threat / failure mode | Severity | Mandatory proposed defense / evidence |
 | --- | --- | --- | --- |
 | SEC-01 | **Recipient phishing:** modified profile or deeplink substitutes attacker wallet for post author | Critical | Wallet independently derives verified target-author HASH160 from target TXID; displays recipient and network; refuses mismatched script (X-03) |
-| SEC-02 | **Author spoofing:** attacker substitutes `author_input_index=0` or selects unrelated fee input | High | Verify selected in-range index, prevout P2PKH HASH160, unlocking script, signature and supported sighash (A-01–A-05) |
+| SEC-02 | **Author spoofing:** attacker substitutes `author_input_index=0` or selects unrelated fee input | High | Verify selected in-range index, prevout P2PKH HASH160, unlocking script, signature and supported sighash (A-01–A-05). The present helper `verifyTm1DesignatedInput` checks index, prevout, P2PKH, scriptSig, HASH160 and sighash, and does not verify the digest. An independent verifier MUST still check that signature under Core v1.0 §8.6 |
 | SEC-03 | **Mutating signed social intent:** change target/reaction/amount/output after user preview | Critical | Require approved full-output SIGHASH_ALL variants; recalculate and re-preview final raw transaction before signing (A-04, X-07) |
 | SEC-04 | **Like/unlike replay or duplicates:** count repeated events as multiple active likes | Medium | Immutable history + idempotent key `(network, author, target, kind)` derived from selected chain, deterministic last event (R-01–R-05) |
 | SEC-05 | **Recipient-funded XEC spoof:** count recipient's own input/change as tip | Critical | For TIP_XEC require ALL funding prevouts owned by designated tipper, no recipient inputs, no third-party/ambiguous inputs (X-05, X-06) |
@@ -1139,6 +1188,18 @@ because the current indexer's cache contains a matching
 display address. If trust is delegated to Chronik, clients
 MUST disclose that trust model and MUST NOT claim
 offline independent cryptographic verification.
+
+`verifyTm1DesignatedInput` enforces the index, prevout, P2PKH,
+`scriptSig`, `HASH160` and sighash checks and stops before the
+signature digest. `trustModel: "trusted-chronik"` is accurate only
+when transaction validity comes from a trusted eCash source. A
+synthetic normalized transaction does not supply that source. A
+`VERIFIED_TM1` result from such a fixture MUST be identified as a
+test of the verifier, not as an on-chain confirmation. An
+independent verifier MUST check the signature under the eCash rules
+in Core v1.0 section 8.6. Stating this limit does not retire that
+independent check as an S0 requirement. M1.7.4 still requires the
+signed positive and negative fixtures.
 
 ### M1.8.4. Testable security exit criteria
 
@@ -1244,6 +1305,51 @@ this certified corpus MUST preserve its prior canonical
 verification verdict and bytes. A finite corpus does
 **not** prove compatibility with every possible historic
 transaction; coverage limitations MUST be disclosed.
+
+**Observed cardinality, kept separate from Core.** TM1 Core v1.0
+section 2 requires exactly one TM1 candidate per transaction. An
+unrelated `OP_RETURN` may coexist and does not by itself invalidate
+that single TM1 candidate. A second TM1 candidate is `MULTIPLE_MEMOS`.
+The current Tonalli verifier applies a stricter application policy.
+When `verifyNormalizedTransaction` detects a TM0 candidate and a TM1
+candidate in the same transaction, it returns `MULTIPLE_MEMOS`.
+PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` classifies
+that combined case as `application-policy`. The same comparison
+keeps a non-TM0 unrelated output (`6a04deadbeef`) beside one TM1
+candidate without that application rejection. Ratification section
+11 item 2 already records the difference as an implementation/profile
+difference. Restating it here is not a retroactive modification of
+TM1 Core v1.0 and is not a silent promotion into the wire protocol.
+
+**Proposed resolution for the project owner — not ratified.** This
+draft proposes that, if social v2 is later approved, the social
+application profile retain the current Tonalli rule: a transaction
+that contains both a TM0 candidate and a TM1 candidate is
+`MULTIPLE_MEMOS`. Core v1.0 would remain as ratified. One TM1
+candidate is required. A second TM1 candidate stays `MULTIPLE_MEMOS`.
+An unrelated `OP_RETURN` may still coexist. The project owner has
+not accepted, rejected, or narrowed this proposal. This paragraph
+is the proposal submitted for that review. It is not the decision.
+It does not close S0-07 and does not authorize an implementation
+change. The Core cardinality rule restated in M1.2 stays unchanged.
+
+**What the S0-07 comparison does and does not prove.** In that
+comparison the protected trees `packages/protocol`,
+`packages/verification`, `packages/chronik` and `packages/registry`
+were byte-identical to baseline
+`228d1f036643ca9be8ba85e91f8200536f3242da`. That identity means the
+parser bytes executed for the corpus are the ratified bytes. It is
+not exhaustive proof of every historical transaction. The historical
+mainnet samples cited by the ratification were not re-executed
+there. Harness items in this section remain open for confirmed
+historical transactions, for the distinction between
+`trusted-chronik` and an independent signature check, and for
+eMPP/ALP container compatibility. M1.4.2 and M1.8.3 state the digest
+boundary: a synthetic normalized transaction labeled
+`trusted-chronik` is not Chronik evidence, and a synthetic
+`VERIFIED_TM1` is a verifier-behavior result. M1.7.4 still requires
+the signed fixtures. Documenting the limit does not drop that S0
+requirement.
 
 Unknown v2 formats MUST be distinguishable from invalid
 v1 POSTs. A v1-only node or indexer MUST NOT be required
@@ -1383,9 +1489,9 @@ for every required item.
 | `S0-02` | Core v1.0 boundary and type-by-type v2 binary schema unambiguous | M1.2/M1.3/M1.5 drafted. One regtest REPLY shows display-order parent bytes. Other v2 payloads and a production-parser acceptance test are **not** this evidence. Production v2 activation **pending** and not authorized |
 | `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | Regtest POST and REPLY use `author_input_index=0`, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. Index 1, P2SH rejection and delegated signing **pending** |
 | `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | REPLY link observed on regtest: POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` output 1 is spent by REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` input 0 (PR #42 `081d75a762889207283ab7d4434030db30c79b41`). Reaction/unlike replay not executed. XEC/RMZ TIP and ALP/eMPP integration **pending**; no transfer |
-| `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic corpus remains on PR #41. Commit `efe60360b4a276465975b603b833a8eb15f8e080` adds a separate regtest reference for this pair, with negative serialization cases, and does not modify the production parser. Local command `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs` passed, 43 tests. ALP/eMPP, reorg, reaction and tip raw fixtures **pending** |
+| `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic corpus remains on PR #41. Commit `efe60360b4a276465975b603b833a8eb15f8e080` adds a separate regtest reference for this pair, with negative serialization cases, and does not modify the production parser. Local command `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs` passed, 43 tests. ALP/eMPP, reorg, reaction and tip raw fixtures **pending**. Historical authorization fixtures push version, event, index, and data separately. Core v1.0 requires two pushes after `OP_RETURN`: the LOKAD ID and the full envelope. Commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` classifies that shape as `fixture-envelope-shape`. Those fixtures may be kept as cryptographic evidence or as negative format cases and MUST NOT be presented as valid canonical TM1 transactions. Additional fixtures with canonical envelopes and verifiable signatures are **pending**. The originals are unchanged, and the S0-07 findings are not withdrawn |
 | `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | M1.8 documents SEC-01 through SEC-14. The traceability subsection separates each documented control from what the regtest POST/REPLY pair shows. That pair does not prove those mitigations. No residual risk has an owner and a date. **Pending** |
-| `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | **Pending** |
+| `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` compares the protected trees with baseline `228d1f036643ca9be8ba85e91f8200536f3242da`. It records `application-policy` for a combined TM0 and TM1 candidate (`MULTIPLE_MEMOS`), `trusted-chronik-gap` for the missing digest check, and `fixture-envelope-shape` for multi-push authorization fixtures. Byte-identity of those trees is not exhaustive proof of every historical transaction. M1.9.2 proposes retaining the stricter combined-candidate policy for a later social profile. That proposal is not an owner decision and does not amend Core. The historical corpus, the signed fixtures required by M1.7.4, and the M1.9.2 container and compatibility profiles remain open. The PR #41 Codex receipt [6528344102](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6528344102) found no major issues on that comparison commit. That receipt does not decide the profile and does not close this gate. **Pending** |
 | `S0-08` | M1.9 activation flags, isolated staging and rollback rehearsed or independently verified to the extent required by the approved gate | Proposed controls only; execution evidence **pending** |
 | `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Prior receipts are listed below, including `698609fd787d85cd461aa9d70bc32cb8a4583a01` (no major issues; CI run [40920502706](https://github.com/xolosArmy/tonalli-memo/actions/runs/40920502706) passed). Two earlier inline P2 threads are resolved on those older heads. This head changes the document, so it needs its own Codex review and its own CI result. **Pending** |
 | `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **PROPOSED — NOT RATIFIED** |
@@ -1397,7 +1503,7 @@ M1.8 writes a control for each identifier. The regtest POST `754527245d63d478d10
 | ID | Documented control | What the POST/REPLY pair shows | Residual |
 | --- | --- | --- | --- |
 | SEC-01 | The wallet derives the target-author HASH160 and refuses a substituted recipient (X-03). | No wallet preview and no tip. | Pending. No owner or date. |
-| SEC-02 | Check the selected in-range index, P2PKH HASH160, unlocking script, signature, and sighash (A-01–A-05). A nonzero index stays valid when it designates a verifiable P2PKH input. | Both transactions use index 0, sighash `0x41`, and HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. That is one happy path. | Pending. No substituted index, no unrelated fee input, and no A-01 index-1 fixture. |
+| SEC-02 | Check the selected in-range index, P2PKH HASH160, unlocking script, signature, and sighash (A-01–A-05). A nonzero index stays valid when it designates a verifiable P2PKH input. `verifyTm1DesignatedInput` stops before the digest. An independent verifier MUST still check the signature under Core v1.0 §8.6. | Both transactions use index 0, sighash `0x41`, and HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. That is one happy path. It is not an independent digest verification. | Pending. No substituted index, no unrelated fee input, and no A-01 index-1 fixture. The production helper does not check the signature digest. Synthetic `VERIFIED_TM1` results are verifier tests, not on-chain confirmations. M1.7.4 signed fixtures remain required. |
 | SEC-03 | Require an approved `SIGHASH_ALL` variant and a fresh preview before signing (A-04, X-07). | Both transactions use sighash `0x41`. | Pending. No mutated-output test. |
 | SEC-04 | Keep an idempotent reaction key and a deterministic last event (R-01–R-05). | No `REACTION` or `REACTION_REMOVE`. | Pending. |
 | SEC-05 | Every `TIP_XEC` funding prevout belongs to the designated tipper (X-05, X-06). | No tip. The `spentBy` edge funds the laboratory REPLY. | Pending. That edge is not a tip-attribution test. |
@@ -1412,6 +1518,19 @@ M1.8 writes a control for each identifier. The regtest POST `754527245d63d478d10
 | SEC-14 | Sign only in the noncustodial wallet, and show recipient, amount, token, network, and fee (X-07). | No wallet UI test. | Pending. Omitting secrets from this document is not a passing control. |
 
 SEC-15 and SEC-16 remain in the M1.8 matrix. This pass does not close them. The display-order vector is one observation beside SEC-15. It is not the mismatched-parent suite. M1.8.4 still requires a passing fixture or an accepted residual, with owner and date, before S0-06 can be satisfied.
+
+#### S0-07 traceability
+
+S0-07 stays open. PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` is a finite comparison against ratification baseline `228d1f036643ca9be8ba85e91f8200536f3242da`. It is not a profile decision and it is not closure of this gate. The Codex receipt on that commit, [comment 6528344102](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6528344102), reports no major issues. M1.10.1 still treats that summary as short of protocol proof. It does not accept the application profile below.
+
+| Open item | Why S0-07 stays open |
+| --- | --- |
+| Combined TM0/TM1 profile | Core v1.0 requires exactly one TM1 candidate. An unrelated `OP_RETURN` may coexist and does not by itself invalidate that candidate. The current Tonalli verifier returns `MULTIPLE_MEMOS` when it sees a TM0 candidate and a TM1 candidate together. Ratification section 11 item 2 records that stricter rule as an application-profile difference. M1.9.2 proposes retaining it for a later social v2 profile. The project owner has not decided. The proposal is not a retroactive change to TM1 Core. |
+| Incomplete historical corpus | Authorization fixtures push version, event, index, and data separately. Core v1.0 requires two pushes after `OP_RETURN`: LOKAD and the full envelope. Those fixtures may remain as cryptographic evidence or as negative format cases. They are not valid canonical TM1 transactions. Additional canonical-envelope fixtures with verifiable signatures are pending. The originals stay unmodified. Mainnet samples cited by the ratification were not re-executed in the comparison. |
+| Cryptographic verification limits and required tests | `verifyTm1DesignatedInput` checks index, prevout, P2PKH, `scriptSig`, `HASH160`, and sighash. It does not reconstruct or independently verify the signature digest. `trustModel: "trusted-chronik"` requires validity from a trusted eCash source. A synthetic normalized transaction is not that evidence. Synthetic `VERIFIED_TM1` results are verifier-behavior tests, not on-chain confirmations. An independent verifier MUST check signatures under the applicable eCash rules. That independent check remains an S0 requirement. M1.7.4 still requires reproducible signed positive and negative fixtures, and those fixtures are not complete. |
+| Container and compatibility profiles in M1.9.2 | The pre-activation harness still calls for historical confirmed transactions with `trusted-chronik` distinguished from independent signature verification, for documented TM0/TM1 cardinality behavior, and for independent eMPP/TMM handling. ALP/eMPP coverage was not executed. Those profiles stay pending. |
+
+Byte-identity of `packages/protocol`, `packages/verification`, `packages/chronik`, and `packages/registry` with baseline `228d1f036643ca9be8ba85e91f8200536f3242da` shows that the comparison executed the ratified parser bytes on its corpus. That identity is not exhaustive proof of every historical transaction. No finding from the comparison is withdrawn by this section.
 
 #### S0-09 prior Codex receipts
 
@@ -1449,8 +1568,16 @@ still requires the remaining machine-readable fixtures
 listed in that section, including ALP/eMPP, tips,
 reactions, and reorgs. S0-06 stays pending because
 SEC-01 through SEC-14 have no passing mitigation
-proof and no accepted residual. This PR MUST NOT
-assert "S0 complete". The head that contains this
+proof and no accepted residual. S0-07 stays open.
+The combined TM0/TM1 profile has no owner decision.
+The historical corpus is incomplete. The digest limit
+is documented here, and the signed tests M1.7.4
+requires are still incomplete. The container and compatibility
+profiles in M1.9.2 are uncovered. Byte-identity of
+the protected code trees with the ratification
+baseline is not exhaustive proof of every historical
+transaction. This PR MUST NOT assert "S0 complete"
+or "S0-07 satisfied". The head that contains this
 paragraph still needs its own Codex review and CI
 result. The S0 gate remains **OPEN**. S1 is
 **NOT AUTHORIZED**.
