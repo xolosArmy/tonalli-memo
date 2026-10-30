@@ -1,0 +1,931 @@
+{
+  "schemaVersion": 1,
+  "protocol": "TM1-CORE-V1.0",
+  "version": "0x01",
+  "eventType": "POST-0x01",
+  "purpose": "Canonical two-push envelopes with independently checked P2PKH signatures. Synthetic fixtures, not Chronik validation and not on-chain confirmation.",
+  "generator": {
+    "library": "ecash-lib",
+    "version": "4.13.0",
+    "sighashSerializer": "tests/protocol/canonical-tm1-independent-verify.mjs"
+  },
+  "testKeys": {
+    "authorA": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2",
+      "publicKeyHashHex": "3d02acb8e612f1c277793a232f20b693e87700e3"
+    },
+    "authorB": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486",
+      "publicKeyHashHex": "8030268a04488647a9bc64a8f5bf1cc6db27d300"
+    },
+    "observer": {
+      "warning": "Deterministic test key only; derived from insecure fixtures and never for funds.",
+      "publicKeyHex": "021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59",
+      "publicKeyHashHex": "eddbb9fb072abd539d36829cb11211a85e25479e"
+    }
+  },
+  "positive": [
+    {
+      "id": "canonical-schnorr-author0-sighash-41",
+      "polarity": "positive",
+      "description": "Canonical two-push POST, author input 0, Schnorr, SIGHASH_ALL|FORKID (0x41). Synthetic; not a Chronik result.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b9b932e56142e8ba5f2808e480493adb18053e3279979cd5ed54761958b833c2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": "02000000321189225198a773545a55dd93a0bc3643c5bc748e061e86c2f932a4d337b8cf3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504427729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb7000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffd0904ddbd0e355f64e188fd0ce00faa7b6d6d871a40bb85a108e9c9fb0886fd80000000041000000",
+      "libDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "canonical-schnorr-author1-sighash-41",
+      "polarity": "positive",
+      "description": "Canonical two-push POST, author input 1, Schnorr, 0x41, with a separate funding input.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "02000000028362d61af06995a73b5c02f890733a015dc6229ba1137693e132e01d1c10d47d000000006441000019d47e9141ed25c86f6cc7883a78c148e1e9a9deb8af6600bb92dc289177e4e46d2844dccc5b40fc65dbe91fc66734b54d27f08824e1310fad03a6d4e2b24121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff9e8bcd55a3b366a780441d5e678139356bb3610c28b0f8b8e82099e3fd9ffa59000000006441e4ee7b89dd3693e60fe6fe86360d010baf92212ba3420703d5fd9f7fc19a5b653129418b19a4d0c5472cfef691c26f77c6099fb7b5ab3954d51713d8a81d0dab4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010163616e6f6e3120616c6c68420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "888396e266f37b7c4f5479dc9aec067b08a99a3106955b79f75e70be0a86cd78",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "7dd4101c1de032e1937613a19b22c65d013a7390f8025c3ba79569f01ad66283",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "59fa9ffde39920e8b8f8b0280c61b36b353981675e1d4480a766b3a355cd8b9e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010163616e6f6e3120616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "17000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon1 all",
+      "libPreimageHex": "0200000096157925ee9381b3b2a2d53229b5f54b83b0eb484be66bcab03d06e6c307855b752adad0a7b9ceca853768aebb6965eca126a62965f698a0c1bc43d83db632ad9e8bcd55a3b366a780441d5e678139356bb3610c28b0f8b8e82099e3fd9ffa59000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff4dc1388f19b0a5494e91975d3859819f11874a3d5cc380c933bc72140c92570e0000000041000000",
+      "libDigestHex": "da08eb95a964153cc186f93fff8058201d4d08f5a6e940419a63174b62bbae5b",
+      "preimageInputIndex": 1,
+      "signedDigestHex": "da08eb95a964153cc186f93fff8058201d4d08f5a6e940419a63174b62bbae5b",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "canonical-schnorr-author0-sighash-c1",
+      "polarity": "positive",
+      "description": "Canonical two-push POST, author input 0, Schnorr, SIGHASH_ALL|ANYONECANPAY|FORKID (0xc1). All outputs are committed.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000024cdacc955a6785d0556be307e0c77d7090f418ba6a572e3d573e6faad0df0490000000006441379a55d425d5c6eefff3b0bbfd72052dd51436afdd9658365180f7585cbc444a04c101e92947db37ba8aca4e6bb4b69cb84b66ba658956c5e40003ced29535e2c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffb18d94dd2b8e17df27b8b1ff9ee19aaeec5c2b0b766b407bcbcd4003a9e4e6d80000000064412b9ffdc3e1b9de37ff77c5b118d0e77d7350fa682ce5eeee1df3d95658de139c175d4349f0092dcc89a852302e2ddd7c319668236fe7322f38e114dcc44f22ad4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000001d6a04544d4d001601010063616e6f6e3020616e796f6e6563616e70617922020000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac5e3c0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "28f82570b60a59ce18ab219170fae2591d8a7be2f53ffa53b3f75de53e6cdb52",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "9004dfd0aa6f3e573d2e576aba18f490707dc7e007e36b55d085675a95ccda4c",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "d8e6e4a90340cdcb7b406b760b2b5cecae9ae19effb1b827df178e2bdd948db1",
+            "outIdx": 0
+          },
+          "prevoutSats": "7000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d001601010063616e6f6e3020616e796f6e6563616e706179"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "546",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac"
+        },
+        {
+          "outputIndex": 2,
+          "sats": "15454",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 anyonecanpay",
+      "libPreimageHex": "02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004cdacc955a6785d0556be307e0c77d7090f418ba6a572e3d573e6faad0df0490000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff1cc664c156c9a91c0b95d1d7da931ba7f60fbd3c56c5ede3b64b5deea04e017d00000000c1000000",
+      "libDigestHex": "3ca233c4b9c833a115dfb80b7f7bc87c674a3578e91b3f0ebdb0fffcb30b3ec8",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "3ca233c4b9c833a115dfb80b7f7bc87c674a3578e91b3f0ebdb0fffcb30b3ec8",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "canonical-schnorr-author2-sighash-c1",
+      "polarity": "positive",
+      "description": "Canonical two-push POST, author input 2, Schnorr, 0xc1. Nonzero index and anyone-can-pay together.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 2,
+      "rawTransactionHex": "0200000003c46ba2c41de0c6ff1bbbe29a735dae18f19b03362365188626f1d98591e183290000000064413fd20da8f0e1c8b5fd0bd1f0b7c0fb723bf1920a1373b45e3f849707b5aacdc9f2d1e762f15690a5bbed652cd8f8f6da9b11db61e1705f87fc85915637afc2bf4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff7d9ab5ff5300b98658bbd7f5ab50e875907bd79d66bcee88744e4c3997efc1ba00000000644179c3d0ea76a9638cc56e7a6e6e74900e35084d2b28479e1d1e57f60b54aa25cf11e12d24301e70a03a52e7e289c6c664b79111c91406f8240819316353c3d24c4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff5a756edd65be20d4fb86852016db5b3a51196c4e5eef15039bd90433d5554b8800000000644103068fa96d787cc92ff75296fd15ac0001d37ea9311565b5d5971b8b043fd06134ab7c0380bd24c3c6cecdfe9fd4f1e35b720e09714319c29ecffff36f4a1206c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000001d6a04544d4d001601010263616e6f6e3220616e796f6e6563616e706179384a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "da44e710a7609fb8047a0dd186643bedc851bb042f3ca47097e9d58f1346a0ed",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2983e19185d9f1268618652336039bf118ae5d739ae2bb1bffc6e01dc4a26bc4",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "bac1ef97394c4e7488eebc669dd77b9075e850abf5d7bb5886b90053ffb59a7d",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "884b55d53304d99b0315ef5e4e6c19513a5bdb16208586fbd420be65dd6e755a",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d001601010263616e6f6e3220616e796f6e6563616e706179"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "19000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon2 anyonecanpay",
+      "libPreimageHex": "02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005a756edd65be20d4fb86852016db5b3a51196c4e5eef15039bd90433d5554b88000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff942633e6bd324f3c74dd8b0e08b4e575d827ffecee6932a8b92b3558bd06d95f00000000c1000000",
+      "libDigestHex": "93db980dc4bdddc13431a3b5a44e08db3ab59c9ec7b57c10eef039c5373e081c",
+      "preimageInputIndex": 2,
+      "signedDigestHex": "93db980dc4bdddc13431a3b5a44e08db3ab59c9ec7b57c10eef039c5373e081c",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "canonical-ecdsa-author0-sighash-41",
+      "polarity": "positive",
+      "description": "Canonical two-push POST, author input 0, ECDSA DER with sighash 0x41. BIP143 digest, not a legacy sighash.",
+      "signatureAlgorithm": "ecdsa",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001c10e55c2721ebb40ddcb48de5a286adbae3b20566a294803c15c04cca369b6d0000000006a473044022023e05e938aeb6690f012d6fab7dddff2f2c4ccb7061e84efb940045ea166e4d10220239daadc5264ce832aa8f1ca46881a2ed27a8810012ae83b2ab3cad178bc99514121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000166a04544d4d000f01010063616e6f6e3020656364736128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d1adcf754eb03ef918f83364c5a843521c1382de15a02ab14d73b8793a9b5d98",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "d0b669a3cc045cc10348296a56203baedb6a285ade48cbdd40bb1e72c2550ec1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000f01010063616e6f6e30206563647361"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 ecdsa",
+      "libPreimageHex": "02000000dedace4d5834d7f48057ad064f10814988cbffc97572cc1105d9f89cf3d0241e3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e70665044c10e55c2721ebb40ddcb48de5a286adbae3b20566a294803c15c04cca369b6d0000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffb89453cf30249a820d7a9c4ba7182b6a3f1e76e97cfb4f1f419a3b4f962d54c60000000041000000",
+      "libDigestHex": "488acb28e2f747442d86c858a25cd67f3ae44cb468f531649fd6837faba4ae8d",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "488acb28e2f747442d86c858a25cd67f3ae44cb468f531649fd6837faba4ae8d",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    }
+  ],
+  "negative": [
+    {
+      "id": "negative-signature-altered",
+      "polarity": "negative",
+      "description": "Schnorr signature byte flipped after signing. Envelope and outputs stay canonical. Independent digest check rejects; the production helper does not.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865a516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f6eca532bdd98aea7f8a2b2fd8d8d3792d914a221f41a5364d9baa47b60101e9",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": "02000000321189225198a773545a55dd93a0bc3643c5bc748e061e86c2f932a4d337b8cf3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504427729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb7000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffd0904ddbd0e355f64e188fd0ce00faa7b6d6d871a40bb85a108e9c9fb0886fd80000000041000000",
+      "libDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-post-mutated",
+      "polarity": "negative",
+      "description": "POST text changed inside the canonical two-push envelope after signing. Format stays valid. The new digest does not match the old signature.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020414c4c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f4c5a32e27ec9983a0e506cb77bfe7603e2701946df9de5f559ed8de0092b0f2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020414c4c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 ALL",
+      "libPreimageHex": "02000000321189225198a773545a55dd93a0bc3643c5bc748e061e86c2f932a4d337b8cf3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504427729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb7000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff5f2666eb4f5f393ddaba5d3d056a30200a9120b7571653266c26b32ffed319f90000000041000000",
+      "libDigestHex": "d1333168ca7d6fcbe5f24681d0efeb26a20108ac52133ae2f8c351fa0658e5eb",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-sighash-all-output-mutated",
+      "polarity": "negative",
+      "description": "Change output value changed after a 0x41 signature. SIGHASH_ALL commits every output, including that change.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c27230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "40438268b649e25ded1382712cd806f7f4ad8764f153327c9868a4cdf8f7d62a",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "8999",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": "02000000321189225198a773545a55dd93a0bc3643c5bc748e061e86c2f932a4d337b8cf3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504427729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb7000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffbbf546b06a880e00f21885d3672ea7195f82cf00c8dd41771ba6fbf09a9fef4d0000000041000000",
+      "libDigestHex": "e35daa7d5f082b1e21d93480be18d67c8b73f697cc4cb92d08fe65704b95e3d7",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-prevout-amount",
+      "polarity": "negative",
+      "description": "Raw transaction is the valid author-0 signature. The recorded prevout amount is 10001 sats instead of the signed 10000.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b9b932e56142e8ba5f2808e480493adb18053e3279979cd5ed54761958b833c2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10001",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": "02000000321189225198a773545a55dd93a0bc3643c5bc748e061e86c2f932a4d337b8cf3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504427729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb7000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1127000000000000ffffffffd0904ddbd0e355f64e188fd0ce00faa7b6d6d871a40bb85a108e9c9fb0886fd80000000041000000",
+      "libDigestHex": "f40a90c8dc235267661ad6b24a53e45fdad4c4a67508c2de629333d460956bbd",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "errorCode": null,
+          "trustModel": "trusted-chronik"
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-pubkey-hash-mismatch",
+      "polarity": "negative",
+      "description": "ScriptSig pubkey replaced with another test key. HASH160 no longer matches the designated P2PKH prevout.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3fec7cf6101362aa690a3a36afbe69fc28abd41c44cfb0a9c2da60ca384ce3c3",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": null,
+      "libDigestHex": null,
+      "preimageInputIndex": null,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "pubkey-hash-match",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": false,
+          "stage": "pubkey-hash-match",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-author-index-out-of-range",
+      "polarity": "negative",
+      "description": "Canonical envelope declares author index 5. The signature on input 0 is valid. Rejection is AUTHOR_INPUT_OUT_OF_RANGE, not the digest.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 5,
+      "rawTransactionHex": "02000000010e9897e9cb5824a1dc0784195111cd09bbdd045770ae5363cacecd5c4af137e90000000064413a3ec711d48ce45cd59f7a4f162236a0367f3df82b12d772ebd2ecc6ce9fe706a284cff5ccfbd94a1367199545206b30ae8182e540ec9dcb1192192395cd8c864121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000001a6a04544d4d001301010563616e6f6e20696e646578206669766528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "af56e5e590f9d40d0809abde4d63118721e0f5e7178afcc413a0dd51e683393c",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "e937f14a5ccdceca6353ae705704ddbb09cd1151198407dca12458cbe997980e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d001301010563616e6f6e20696e6465782066697665"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon index five",
+      "libPreimageHex": "02000000eba830f11024fb0a2d41546b539638023a5127f9d91708177b61513d849a65263bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650440e9897e9cb5824a1dc0784195111cd09bbdd045770ae5363cacecd5c4af137e9000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff9387a0845857895fe00adec50c4059f7cb71139100ce75790f2695b3b5a0e8a90000000041000000",
+      "libDigestHex": "760edb13068a10419c4ca266c4fe2a9e8beb6b53de3afc7bad078a69d8e55905",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "760edb13068a10419c4ca266c4fe2a9e8beb6b53de3afc7bad078a69d8e55905",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "author-index",
+          "errorCode": "AUTHOR_INPUT_OUT_OF_RANGE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": false,
+          "stage": "author-index",
+          "errorCode": "AUTHOR_INPUT_OUT_OF_RANGE"
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": {
+          "index": 0,
+          "algorithm": "schnorr"
+        }
+      }
+    },
+    {
+      "id": "negative-prevout-missing",
+      "polarity": "negative",
+      "description": "The signed transaction is unchanged and the designated prevout metadata is absent.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b9b932e56142e8ba5f2808e480493adb18053e3279979cd5ed54761958b833c2",
+      "inputs": [],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": null,
+      "libDigestHex": null,
+      "preimageInputIndex": null,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "prevout-availability",
+          "errorCode": "PREVOUT_UNAVAILABLE"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": false,
+          "stage": "prevout-availability",
+          "errorCode": "PREVOUT_UNAVAILABLE"
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "PREVOUT_UNAVAILABLE",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-designated-p2sh",
+      "polarity": "negative",
+      "description": "Designated prevout replaced with P2SH. The canonical envelope is untouched. Rejection is the prevout script type.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b9b932e56142e8ba5f2808e480493adb18053e3279979cd5ed54761958b833c2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "a914ecd2cbd8262d2c361b93bf89c4f0a78d76a16e7087",
+          "scriptType": "p2sh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon0 all",
+      "libPreimageHex": null,
+      "libDigestHex": null,
+      "preimageInputIndex": null,
+      "signedDigestHex": "fe8caa3bb43db1da7ceb0fce0be7b102ad78d6cd17efdeec071eaeed59c2da14",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "prevout-script-type",
+          "errorCode": "UNSUPPORTED_AUTHOR_SCRIPT"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": false,
+          "stage": "prevout-script-type",
+          "errorCode": "UNSUPPORTED_AUTHOR_SCRIPT"
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "UNSUPPORTED_AUTHOR_SCRIPT",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": null
+      }
+    },
+    {
+      "id": "negative-sighash-none-forkid",
+      "polarity": "negative",
+      "description": "Signed with 0x42. Independent verification accepts that signature under NONE|FORKID, and TM1 policy rejects the sighash before the digest stage.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000010893ac41cb078f62874b5ec074b37ece8b859b04354b072dd37d33a953482ea3000000006441d5551e2e185e330f0b1616e9f10902b16dc3ea73b727729d074d54968ac0dbc5d8c70e12c495a354fb81f3ce55eaad05b543577f2ea64573d97632aa7242727a4221036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000146a04544d4d000d01010063616e6f6e206e6f6e6528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "621468dd7ff969cc87a2e1564ab867f1420f31de565a3997e96cae03f1c5fa32",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a32e4853a9337dd32d074b35049b858bce7eb374c05e4b87628f07cb41ac9308",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000d01010063616e6f6e206e6f6e65"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": "canon none",
+      "libPreimageHex": "0200000054860a6f7219ed28a8485eb8709af0f6079d480211186b999b8921516d7c393000000000000000000000000000000000000000000000000000000000000000000893ac41cb078f62874b5ec074b37ece8b859b04354b072dd37d33a953482ea3000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff00000000000000000000000000000000000000000000000000000000000000000000000042000000",
+      "libDigestHex": "1bd12fbdcf327e6b37c62847c73f313059662b90965bd1c62eba6598f5b65fe9",
+      "preimageInputIndex": 0,
+      "signedDigestHex": "1bd12fbdcf327e6b37c62847c73f313059662b90965bd1c62eba6598f5b65fe9",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "sighash-policy",
+          "errorCode": "UNSUPPORTED_SIGHASH"
+        },
+        "parseOk": true,
+        "parseErrorCode": null,
+        "designated": {
+          "valid": false,
+          "stage": "sighash-policy",
+          "errorCode": "UNSUPPORTED_SIGHASH"
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "UNSUPPORTED_SIGHASH",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": {
+          "index": 0,
+          "algorithm": "schnorr"
+        }
+      }
+    },
+    {
+      "id": "negative-multipush-envelope",
+      "polarity": "negative",
+      "description": "Version, event, index and data are separate pushes. This is a format rejection. Historical authorization fixtures stay unmodified and are the same shape.",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000127729032fd103c3a776459517ba1409cfc2bc31d95b097032d5908721814aeb70000000064415602410078a77b6691865b516be6b6c8f173c54c5662ded757df96f10065b44404bdc50510d2946851f65752f7778033ec70b1768828dfe8b8643cffc5240ebd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000176a04544d4d000101010101000a63616e6f6e3020616c6c28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e123893b33ec1bfa55ac2b43e627390f810c8b3c3f05ce359f6b6eb58164d13e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b7ae14187208592d0397b0951dc32bfc9c40a17b515964773a3c10fd32907227",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d000101010101000a63616e6f6e3020616c6c"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "9000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac"
+        }
+      ],
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "eventDataUtf8": null,
+      "libPreimageHex": null,
+      "libDigestHex": null,
+      "preimageInputIndex": null,
+      "signedDigestHex": null,
+      "expected": {
+        "independent": null,
+        "parseOk": false,
+        "parseErrorCode": "INVALID_FORMAT",
+        "designated": {
+          "valid": true
+        },
+        "normalized": {
+          "status": "INVALID_TM1",
+          "errorCode": "INVALID_FORMAT",
+          "trustModel": null
+        },
+        "signatureValidAtIndex": null
+      }
+    }
+  ]
+}

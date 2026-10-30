@@ -57,10 +57,24 @@ Ratification section 11 item 2 permits an unrelated `OP_RETURN` beside
 exactly one TM1 candidate, and it records that the Tonalli verifier may
 also reject a combined TM0 plus TM1 transaction as an
 implementation/profile difference. That sentence documents the difference.
-It is not a decision that closes S0-07. Section 11 item 7 keeps RFC-0001
+It is not itself the later governance act. Section 11 item 7 keeps RFC-0001
 outside Core. The Draft 0.2 instruction not to emit production TM1 was
 superseded prospectively by that ratification; this suite does not reopen
 it and does not activate version `0x02`.
+
+Comment `6529195032` on PR #40, written by `xolosArmy` at
+2026-10-30T17:33:45Z, approves the combined profile as an RFC-0001
+application policy. S0-07-PROFILE-DECISION is approved. The approval
+does not modify the TM1 Core v1.0 contract and does not satisfy S0-07.
+The three outcomes, already executed by this suite, are:
+
+- TM0 and TM1 in one transaction: `MULTIPLE_MEMOS`. The application must not select one candidate.
+- Two TM1 candidates: `MULTIPLE_MEMOS` under Core.
+- One TM1 candidate plus an unrelated `OP_RETURN` that is neither TM0 nor TM1: allowed when the other rules pass.
+
+The comment was left on PR #40 so that HEAD
+`19d3b4dd336d497391a036fd4ae6e8f0c2ffe176` and its review receipts stay
+put. This file cites that comment. It does not edit the RFC.
 
 `author_input_index` has two different stages. `parseTm1Output` accepts any
 byte 0 through 255 inside a well-formed version `0x01` POST. That acceptance
@@ -79,6 +93,7 @@ vector document:
 - `packages/protocol/tm1-test-vectors.json`
 - `packages/verification/tm1-authorization-vectors.json`
 - `tests/fixtures/rfc0001_regtest_reference.json`
+- `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json`
 
 Stored TM0 rows cover valid envelopes, invalid structure, bad UTF-8, an
 unknown marker, and the `TM1|` marker rejected as `UNSUPPORTED_VERSION`.
@@ -120,6 +135,65 @@ envelope (`6a04544d4d000401010061`) or with `encodeTm1Post` for author bytes
 1, 2 and 255. That composition is labeled as such. It is not a claim that the
 original raw output parsed.
 
+## Canonical P2PKH corpus
+
+`tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` is a synthetic TM1 Core
+v1.0 corpus. `tests/protocol/generate-canonical-tm1-fixtures.mjs` builds
+the canonical two-push `OP_RETURN` and every other output, then signs with
+`ecash-lib` 4.13.0. It does not modify
+`packages/verification/scripts/generate-authorization-vectors.mjs`.
+`tests/protocol/canonical-tm1-independent-verify.mjs` does not import
+`TxBuilder` or `UnsignedTx.sigHashPreimage`. It rebuilds the BIP143
+preimage locally and checks Schnorr or ECDSA with the ECC verify
+primitives only. The generator refuses a row whose preimage differs from
+that checker. The suite runs the generator with `--check` and repeats the
+reconstruction, a separate `sha256d` of the stored preimage, and the
+signature check.
+
+Every row uses `source: synthetic-fixture` and `chronikValidated: false`.
+A `VERIFIED_TM1` result here is `trustModel: trusted-chronik` on a
+synthetic normalized transaction. It is not a Chronik response, not a node
+validation, and not an on-chain confirmation.
+
+Positive rows are version `0x01` POST, exactly two pushes, LOKAD
+`544d4d00`, with author index 0 and nonzero indexes, and sighash `0x41`
+and `0xc1`:
+
+| Id | Author | Sighash | Algorithm |
+| --- | --- | --- | --- |
+| `canonical-schnorr-author0-sighash-41` | 0 | `0x41` | Schnorr |
+| `canonical-schnorr-author1-sighash-41` | 1 | `0x41` | Schnorr |
+| `canonical-schnorr-author0-sighash-c1` | 0 | `0xc1` | Schnorr |
+| `canonical-schnorr-author2-sighash-c1` | 2 | `0xc1` | Schnorr |
+| `canonical-ecdsa-author0-sighash-41` | 0 | `0x41` | ECDSA |
+
+ECDSA coverage is the one `0x41` DER fixture above. The independent
+checker verifies that signature. The production designated-input function
+still does not check the digest; it accepts the two-push scriptSig only
+structurally. No other ECDSA sighash is claimed. The private keys are
+deterministic insecure test keys inside the generator and are marked never
+for funds. The JSON stores public keys only.
+
+Negative rows name the stage that rejects. A digest case is signed first
+and mutated afterward, and it still passes the structural stages:
+
+| Id | Rejecting stage |
+| --- | --- |
+| `negative-signature-altered` | Independent `cryptographic-signature`. Production still returns `VERIFIED_TM1` / `trusted-chronik`. |
+| `negative-post-mutated` | Same production gap. The signed digest changes. |
+| `negative-sighash-all-output-mutated` | Same production gap. The committed output value changes. |
+| `negative-prevout-amount` | Same production gap. The raw transaction is unchanged and the prevout amount used in the preimage is wrong. |
+| `negative-pubkey-hash-mismatch` | `pubkey-hash-match` on both checkers, before the digest. |
+| `negative-author-index-out-of-range` | `author-index`. The input 0 signature still verifies. |
+| `negative-prevout-missing` | `prevout-availability`. |
+| `negative-designated-p2sh` | `prevout-script-type`. |
+| `negative-sighash-none-forkid` | `sighash-policy` for signed `0x42`. The signature still verifies under that sighash. |
+| `negative-multipush-envelope` | `INVALID_FORMAT` at parse time. No independent digest stage is claimed. `verifyTm1DesignatedInput` can still be structurally valid because it does not parse the envelope. |
+
+`negative-multipush-envelope` is a format negative of the same shape as
+the historical authorization file. That historical file stays unmodified
+and remains `fixture-envelope-shape`.
+
 The regtest fixture is lab evidence. Its POST output is parsed as a version
 `0x01` POST. Its REPLY output is rejected with `UNSUPPORTED_VERSION`. The
 experimental harness in `tests/protocol/rfc0001_regtest_reference.test.mjs`
@@ -135,7 +209,7 @@ of the ratified parser.
 | `match` | The production function returns the stored verdict at the stage that function owns. |
 | `application-policy` | Normative TM1 count and the TM0/TM1 application verdict differ as described in ratification section 11 item 2. |
 | `expected-v2-rejection` | The production parser rejects version `0x02` with `UNSUPPORTED_VERSION`. The experimental harness can still count the LOKAD. |
-| `trusted-chronik-gap` | `verifyTm1DesignatedInput` returns `valid: true` for a vector whose stored failure is `cryptographic-signature`. With a canonical two-push envelope, `verifyNormalizedTransaction` then returns `VERIFIED_TM1`. |
+| `trusted-chronik-gap` | `verifyTm1DesignatedInput` returns `valid: true` for a vector whose stored failure is `cryptographic-signature`. With a canonical two-push envelope, `verifyNormalizedTransaction` then returns `VERIFIED_TM1`. The new corpus repeats that gap on four digest failures. `chronikValidated` stays false. |
 | `fixture-envelope-shape` | Authorization vectors store version, event, author and event data as separate pushes. The production parser rejects those outputs as `INVALID_FORMAT` before authorship. The suite does not rewrite them. |
 
 No protected-tree change is classified as an expected protocol change. The
@@ -155,6 +229,7 @@ is not `VERIFIED_TM1`.
 
 ```sh
 git diff --exit-code 228d1f036643ca9be8ba85e91f8200536f3242da -- packages/protocol packages/verification packages/chronik packages/registry
+node tests/protocol/generate-canonical-tm1-fixtures.mjs --check
 pnpm exec vitest run --config tests/protocol/vitest.s0-07.config.ts
 pnpm --filter @xolosarmy/tonalli-memo-protocol test
 pnpm --filter @tonalli-memo/verification test
@@ -165,17 +240,29 @@ The root `pnpm test` script includes the vitest command, so GitHub Actions
 runs this suite in the test step. CI typecheck emits `dist` before `pnpm test`.
 This suite still imports the TypeScript sources through the aliases above.
 
+## Historical mainnet
+
+HISTORICAL-MAINNET remains blocked.
+`docs/operations/d07-conf-04-mainnet-candidates.json` lists three TXIDs and
+source URLs. It has no raw transaction, prevouts, amounts, or scriptSigs.
+This suite does not connect to a node, so the comparison is not complete:
+
+- `fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd`
+- `8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8`
+- `0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150`
+
 ## Pending evidence
 
-S0-07 stays open while any of these remain:
+S0-07 remains unsatisfied while any of these remain. Adding this canonical
+corpus does not close S0-07.
 
 | Id | Why it is still open |
 | --- | --- |
-| `S0-07-PROFILE-DECISION` | Ratification section 11 item 2 records the TM0/TM1 application difference. No later decision closes S0-07 on that profile. |
-| `S0-07-INDEPENDENT-REVIEW` | This evidence has no independent review of its own HEAD. A review request is not a receipt. |
-| `CRYPTOGRAPHIC-DIGEST` | `verifyTm1DesignatedInput` does not check a Schnorr or ECDSA digest. The lab POST can reach `VERIFIED_TM1` on structural checks alone. The vector oracle in `packages/verification/test/tm1-authorization-vectors.test.ts` is not a production export, and this suite does not copy it. |
+| `S0-07-INDEPENDENT-REVIEW` | The Codex receipt on `907ba8a2b5f68d346e863187508f7ea5fa3ec070` does not review the commit that adds this corpus. A review request is not a receipt. |
+| `CRYPTOGRAPHIC-DIGEST` | Production `verifyTm1DesignatedInput` returns before any Schnorr or ECDSA digest check. The canonical corpus checks those digests independently. On the four digest-failure fixtures, production still returns `VERIFIED_TM1` with `trustModel: trusted-chronik`. That label is not Chronik validation. |
 | `EMPP-ALP` | No production eMPP parser is called, and no ALP or eMPP fixture is executed. eMPP must not be treated as an ordinary two-push TM1 output. |
-| `HISTORICAL-MAINNET` | The historical mainnet samples cited by the ratification were not re-executed here. |
+| `HISTORICAL-MAINNET` | Blocked. The catalog has TXIDs and URLs only. |
+| `M1.7.4` | ALP/eMPP SEND with token ancestry, XEC and RMZ tip settlement, reaction and unlike replay, and reorg rollback remain unexecuted. Author indexes 1 and 2 in this synthetic POST corpus do not close that gate. |
 
 Regtest confirmation counts are observations in the fixture, not part of this
 comparison. This suite does not restart a node, spend coins, or change the

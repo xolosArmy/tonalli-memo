@@ -1,7 +1,17 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import {
+  classifyAuthor,
+  digestHex,
+  preimageHex,
+  sighashByteAt,
+  signatureMatches,
+  txidOf
+} from "./canonical-tm1-independent-verify.mjs";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -54,11 +64,18 @@ const CRYPTO_GAP_IDS = [
   "invalid-designated-input-fails-nondesignated-valid"
 ] as const;
 const PENDING_IDS = [
-  "S0-07-PROFILE-DECISION",
   "S0-07-INDEPENDENT-REVIEW",
   "CRYPTOGRAPHIC-DIGEST",
   "EMPP-ALP",
-  "HISTORICAL-MAINNET"
+  "HISTORICAL-MAINNET",
+  "M1.7.4"
+] as const;
+const DECIDED_IDS = ["S0-07-PROFILE-DECISION"] as const;
+const CANONICAL_FIXTURE = "tests/fixtures/rfc0001-canonical-tm1-p2pkh.json";
+const MAINNET_TXIDS = [
+  "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
+  "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
+  "0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150"
 ] as const;
 
 interface Tm0Valid {
@@ -128,6 +145,70 @@ interface LabFixture {
   author: { authorInputIndex: number; p2pkhScript: string };
   post: { raw: string; txid: string };
   reply: { raw: string; txid: string };
+}
+
+interface CanonicalPrevout {
+  prevOut: { txid: string; outIdx: number };
+  prevoutSats: string;
+  outputScriptHex: string | null;
+  scriptType: string;
+}
+
+interface CanonicalOutput {
+  outputIndex: number;
+  sats: string;
+  outputScriptHex: string;
+}
+
+interface AuthorVerdict {
+  valid: boolean;
+  stage: string;
+  errorCode: string | null;
+}
+
+interface CanonicalFixture {
+  id: string;
+  polarity: "positive" | "negative";
+  description: string;
+  signatureAlgorithm: "schnorr" | "ecdsa";
+  authorInputIndex: number;
+  rawTransactionHex: string;
+  txid: string;
+  inputs: CanonicalPrevout[];
+  outputs: CanonicalOutput[];
+  source: string;
+  chronikValidated: boolean;
+  eventDataUtf8: string | null;
+  libPreimageHex: string | null;
+  libDigestHex: string | null;
+  preimageInputIndex: number | null;
+  signedDigestHex: string | null;
+  expected: {
+    independent: AuthorVerdict | null;
+    parseOk: boolean;
+    parseErrorCode: string | null;
+    designated: { valid: boolean; stage?: string; errorCode?: string };
+    normalized: { status: string; errorCode: string | null; trustModel: string | null };
+    signatureValidAtIndex: { index: number; algorithm: "schnorr" | "ecdsa" } | null;
+  };
+}
+
+interface CanonicalCorpus {
+  schemaVersion: number;
+  protocol: string;
+  version: string;
+  eventType: string;
+  positive: CanonicalFixture[];
+  negative: CanonicalFixture[];
+  testKeys: Record<string, { warning: string; publicKeyHex: string; publicKeyHashHex: string }>;
+}
+
+interface MainnetCatalogEntry {
+  txid: string;
+  label: string;
+  sourceUrl: string;
+  rawTransactionHex?: string;
+  inputs?: unknown;
 }
 
 interface RawInput {
@@ -301,6 +382,31 @@ function transactionFromAuthorization(vector: AuthVector): NormalizedTransaction
   });
 }
 
+function transactionFromCanonical(vector: CanonicalFixture): NormalizedTransaction {
+  const raw = parseRawTransaction(vector.rawTransactionHex);
+  const inputs: NormalizedInput[] = raw.inputs.map((rawInput, index) => {
+    const meta = vector.inputs[index];
+    return {
+      index,
+      prevOut: meta?.prevOut ?? { txid: rawInput.prevTxid, outIdx: rawInput.outIdx },
+      inputScriptHex: rawInput.scriptHex,
+      outputScriptHex: meta?.outputScriptHex ?? null,
+      address: null
+    };
+  });
+  return normalizedTransaction({
+    txid: vector.txid,
+    inputs,
+    opReturnOutputs: opReturnOutputsFromRaw(raw.outputs),
+    adapter: `s0-07:canonical-fixture:${vector.id}`
+  });
+}
+
+function sha256dHex(hex: string): string {
+  const first = createHash("sha256").update(Buffer.from(hex, "hex")).digest();
+  return createHash("sha256").update(first).digest("hex");
+}
+
 function transactionFromOutputs(
   txid: string,
   outputs: readonly Tm1TransactionOutput[],
@@ -410,7 +516,25 @@ describe("S0-07 baseline identity", () => {
     for (const id of PENDING_IDS) {
       expect(evidence).toContain(id);
     }
+    for (const id of DECIDED_IDS) {
+      expect(evidence).toContain(id);
+    }
     expect(PENDING_IDS.length).toBeGreaterThan(0);
+    const pendingSection = evidence.slice(evidence.indexOf("## Pending evidence"));
+    expect(pendingSection).not.toContain("S0-07-PROFILE-DECISION");
+    expect(evidence).toContain("6529195032");
+    expect(evidence).toContain("S0-07-PROFILE-DECISION is approved");
+    expect(evidence).toContain("does not modify the TM1 Core v1.0 contract");
+    expect(evidence).toContain("does not satisfy S0-07");
+    expect(evidence).toContain("907ba8a2b5f68d346e863187508f7ea5fa3ec070");
+    expect(evidence).toContain(CANONICAL_FIXTURE);
+    expect(evidence).toContain("synthetic-fixture");
+    expect(evidence).toContain("chronikValidated");
+    expect(evidence).toContain("canonical-ecdsa-author0-sighash-41");
+    for (const txid of MAINNET_TXIDS) {
+      expect(evidence).toContain(txid);
+    }
+    expect(evidence).toContain("HISTORICAL-MAINNET remains blocked");
 
     const ratification = readFileSync(
       join(REPO_ROOT, "docs/protocol/tm1-core-v1.0-ratification-candidate.md"),
@@ -821,5 +945,246 @@ describe("lab fixture and experimental harness", () => {
     expect(source).toContain("assert.equal(replyCandidate.status, 'ONE_CANDIDATE');");
     expect(source).toContain("assert.equal(replyEnv[0], 0x02);");
     expect(source).toContain("assert.equal(replyEnv[1], 0x02);");
+  });
+});
+
+describe("canonical TM1 P2PKH fixtures", () => {
+  const corpus = readJson<CanonicalCorpus>(join(REPO_ROOT, CANONICAL_FIXTURE));
+  const fixtures = [...corpus.positive, ...corpus.negative];
+
+  function requireFixture(id: string): CanonicalFixture {
+    const found = fixtures.find((fixture) => fixture.id === id);
+    if (found === undefined) {
+      throw new Error(`Missing canonical fixture ${id}.`);
+    }
+    return found;
+  }
+
+  it("rechecks the committed JSON against the isolated generator", () => {
+    execFileSync(process.execPath, [join(REPO_ROOT, "tests/protocol/generate-canonical-tm1-fixtures.mjs"), "--check"], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  });
+
+  it("keeps historical multi-push authorization fixtures unchanged", () => {
+    expect(git(["diff", "--name-only", BASELINE, "--", "packages/verification/tm1-authorization-vectors.json"])).toBe("");
+    expect(git(["diff", "--name-only", BASELINE, "--", "packages/verification/scripts/generate-authorization-vectors.mjs"])).toBe("");
+  });
+
+  it("checks serialization, envelope, structure, trusted-chronik, and the independent signature", () => {
+    expect(corpus.schemaVersion).toBe(1);
+    expect(corpus.protocol).toBe("TM1-CORE-V1.0");
+    expect(corpus.version).toBe("0x01");
+    expect(corpus.eventType).toBe("POST-0x01");
+    expect(corpus.positive.length).toBe(5);
+    expect(corpus.negative.map((fixture) => fixture.id)).toEqual([
+      "negative-signature-altered",
+      "negative-post-mutated",
+      "negative-sighash-all-output-mutated",
+      "negative-prevout-amount",
+      "negative-pubkey-hash-mismatch",
+      "negative-author-index-out-of-range",
+      "negative-prevout-missing",
+      "negative-designated-p2sh",
+      "negative-sighash-none-forkid",
+      "negative-multipush-envelope"
+    ]);
+    expect(corpus.positive.map((fixture) => fixture.authorInputIndex)).toEqual(expect.arrayContaining([0, 1, 2]));
+    expect(corpus.positive.map((fixture) => sighashByteAt(fixture.rawTransactionHex, fixture.authorInputIndex))).toEqual(
+      expect.arrayContaining([0x41, 0xc1])
+    );
+    expect(corpus.positive.filter((fixture) => fixture.signatureAlgorithm === "schnorr").length).toBe(4);
+    expect(corpus.positive.filter((fixture) => fixture.signatureAlgorithm === "ecdsa").map((fixture) => fixture.id)).toEqual([
+      "canonical-ecdsa-author0-sighash-41"
+    ]);
+    const stored = readFileSync(join(REPO_ROOT, CANONICAL_FIXTURE), "utf8");
+    expect(stored).not.toContain("privateKey");
+    expect(stored).toContain("never for funds");
+    for (const key of Object.values(corpus.testKeys)) {
+      expect(key.warning).toContain("never for funds");
+      expect(key.publicKeyHex).toMatch(/^(02|03)[0-9a-f]{64}$/u);
+    }
+
+    for (const fixture of fixtures) {
+      expect(fixture.source).toBe("synthetic-fixture");
+      expect(fixture.chronikValidated).toBe(false);
+      expect(txidOf(fixture.rawTransactionHex)).toBe(fixture.txid);
+
+      const raw = parseRawTransaction(fixture.rawTransactionHex);
+      expect(raw.outputs.map((output) => ({ sats: output.valueSats.toString(), script: output.scriptHex }))).toEqual(
+        fixture.outputs.map((output) => ({ sats: output.sats, script: output.outputScriptHex }))
+      );
+      raw.inputs.forEach((input, index) => {
+        const meta = fixture.inputs[index];
+        if (meta !== undefined) {
+          expect(meta.prevOut).toEqual({ txid: input.prevTxid, outIdx: input.outIdx });
+        }
+      });
+
+      const transaction = transactionFromCanonical(fixture);
+      expect(transaction.rawResponse).toEqual({ adapter: `s0-07:canonical-fixture:${fixture.id}` });
+      const memoOutput = transaction.opReturnOutputs[0];
+      if (memoOutput === undefined) {
+        throw new Error(`${fixture.id} has no OP_RETURN output.`);
+      }
+      const parsed = tm1Result(bytesFromHex(memoOutput.outputScriptHex), memoOutput.valueSats);
+      if (fixture.expected.parseOk) {
+        expect(typeof parsed).not.toBe("string");
+        if (typeof parsed !== "string") {
+          expect(parsed.version).toBe(1);
+          expect(parsed.eventType).toBe("POST");
+          expect(parsed.authorInputIndex).toBe(fixture.authorInputIndex);
+          expect(parsed.eventData).toBe(fixture.eventDataUtf8);
+        }
+        expect(memoOutput.pushes).toHaveLength(2);
+        expect(Buffer.from(memoOutput.pushes[0] ?? new Uint8Array()).toString("hex")).toBe("544d4d00");
+      } else {
+        expect(parsed).toBe(fixture.expected.parseErrorCode);
+        expect(fixture.expected.independent).toBeNull();
+      }
+
+      const designated = verifyTm1DesignatedInput(transaction, fixture.authorInputIndex);
+      expect(designated.valid).toBe(fixture.expected.designated.valid);
+      if (designated.valid) {
+        expect(designated.sighashByte === 0x41 || designated.sighashByte === 0xc1).toBe(true);
+      } else {
+        expect(designated.stage).toBe(fixture.expected.designated.stage);
+        expect(designated.errorCode).toBe(fixture.expected.designated.errorCode);
+      }
+
+      const normalized = verifyNormalizedTransaction(transaction);
+      expect(normalized.status).toBe(fixture.expected.normalized.status);
+      if (normalized.status === "VERIFIED_TM1") {
+        expect(fixture.expected.normalized.trustModel).toBe("trusted-chronik");
+        expect(normalized.trustModel).toBe("trusted-chronik");
+        expect(fixture.chronikValidated).toBe(false);
+      } else if (normalized.status === "INVALID_TM1") {
+        expect(normalized.protocolError.code).toBe(fixture.expected.normalized.errorCode);
+        expect(fixture.expected.normalized.trustModel).toBeNull();
+      } else {
+        throw new Error(`${fixture.id} returned ${normalized.status}.`);
+      }
+
+      if (fixture.expected.independent === null) {
+        expect(fixture.libPreimageHex).toBeNull();
+      } else {
+        expect(classifyAuthor(fixture)).toEqual(fixture.expected.independent);
+      }
+
+      if (fixture.libPreimageHex !== null && fixture.preimageInputIndex !== null) {
+        const sighash = sighashByteAt(fixture.rawTransactionHex, fixture.preimageInputIndex);
+        expect(preimageHex(fixture.rawTransactionHex, fixture.inputs, fixture.preimageInputIndex, sighash)).toBe(
+          fixture.libPreimageHex
+        );
+        expect(digestHex(fixture.rawTransactionHex, fixture.inputs, fixture.preimageInputIndex, sighash)).toBe(
+          fixture.libDigestHex
+        );
+        expect(sha256dHex(fixture.libPreimageHex)).toBe(fixture.libDigestHex);
+      }
+
+      if (fixture.polarity === "positive") {
+        expect(signatureMatches(fixture.rawTransactionHex, fixture.inputs, fixture.authorInputIndex, fixture.signatureAlgorithm)).toBe(
+          true
+        );
+        expect(fixture.expected.independent).toEqual({
+          valid: true,
+          stage: "cryptographic-signature",
+          errorCode: null
+        });
+      }
+
+      if (fixture.expected.signatureValidAtIndex !== null) {
+        expect(
+          signatureMatches(
+            fixture.rawTransactionHex,
+            fixture.inputs,
+            fixture.expected.signatureValidAtIndex.index,
+            fixture.expected.signatureValidAtIndex.algorithm
+          )
+        ).toBe(true);
+        expect(fixture.expected.independent?.valid).toBe(false);
+      }
+    }
+
+    const altered = requireFixture("negative-signature-altered");
+    const mutatedPost = requireFixture("negative-post-mutated");
+    const mutatedOutput = requireFixture("negative-sighash-all-output-mutated");
+    const wrongAmount = requireFixture("negative-prevout-amount");
+    const canonical = requireFixture("canonical-schnorr-author0-sighash-41");
+    expect(altered.libDigestHex).toBe(canonical.libDigestHex);
+    expect(altered.signedDigestHex).toBe(canonical.signedDigestHex);
+    expect(mutatedPost.libDigestHex).not.toBe(mutatedPost.signedDigestHex);
+    expect(mutatedOutput.libDigestHex).not.toBe(mutatedOutput.signedDigestHex);
+    expect(wrongAmount.libDigestHex).not.toBe(wrongAmount.signedDigestHex);
+    expect(wrongAmount.rawTransactionHex).toBe(canonical.rawTransactionHex);
+    expect(wrongAmount.inputs[0]?.prevoutSats).toBe("10001");
+    expect(canonical.inputs[0]?.prevoutSats).toBe("10000");
+    for (const fixture of [altered, mutatedPost, mutatedOutput, wrongAmount]) {
+      expect(fixture.expected.independent?.stage).toBe("cryptographic-signature");
+      expect(fixture.expected.designated.valid).toBe(true);
+      expect(fixture.expected.normalized).toEqual({
+        status: "VERIFIED_TM1",
+        errorCode: null,
+        trustModel: "trusted-chronik"
+      });
+    }
+  });
+
+  it("records the approved TM0/TM1 policy without treating it as Core or as S0-07 closure", () => {
+    const evidence = readFileSync(EVIDENCE_PATH, "utf8");
+    expect(evidence).toContain("6529195032");
+    expect(evidence).toContain("TM0 and TM1 in one transaction: `MULTIPLE_MEMOS`");
+    expect(evidence).toContain("Two TM1 candidates: `MULTIPLE_MEMOS` under Core");
+    expect(evidence).toContain("unrelated `OP_RETURN`");
+
+    const tm1 = readJson<{
+      transactionVectors: { valid: Tm1TransactionVector[]; invalid: Tm1TransactionVector[] };
+    }>(join(REPO_ROOT, "packages/protocol/tm1-test-vectors.json"));
+    const author = transactionFromAuthorization(
+      readJson<{ valid: AuthVector[] }>(join(REPO_ROOT, "packages/verification/tm1-authorization-vectors.json")).valid[0] as AuthVector
+    ).inputs[0];
+    if (author === undefined) {
+      throw new Error("Authorization vector 0 has no designated input.");
+    }
+    const mixed = tm1.transactionVectors.invalid.find((vector) => vector.name === "Multiple candidate outputs mixing TM0 and TM1");
+    const twoTm1 = tm1.transactionVectors.invalid.find((vector) => vector.name === "Duplicate TM1 candidate outputs in same transaction");
+    const single = tm1.transactionVectors.valid[0];
+    if (mixed === undefined || twoTm1 === undefined || single === undefined) {
+      throw new Error("Missing a cardinality vector for the approved profile.");
+    }
+
+    const mixedTransaction = transactionFromOutputs("66".repeat(32), mixed.outputs, [author]);
+    expect(mixed.outputs.map((output) => bytesFromHex(output.scriptHex)).filter((script) => isTm1CandidateScript(script))).toHaveLength(1);
+    expect(findMemoCandidates(mixedTransaction).map((candidate) => candidate.protocol ?? "TM0")).toEqual(["TM0", "TM1"]);
+    expect(verifyNormalizedTransaction(mixedTransaction).status).toBe("MULTIPLE_MEMOS");
+
+    const duplicateTransaction = transactionFromOutputs("77".repeat(32), twoTm1.outputs, [author]);
+    expect(twoTm1.outputs.map((output) => bytesFromHex(output.scriptHex)).filter((script) => isTm1CandidateScript(script))).toHaveLength(2);
+    expect(verifyNormalizedTransaction(duplicateTransaction).status).toBe("MULTIPLE_MEMOS");
+
+    const withUnrelated = transactionFromOutputs(
+      "88".repeat(32),
+      [...single.outputs, { outputIndex: 2, valueSats: 0, scriptHex: "6a04deadbeef" }],
+      [author]
+    );
+    expect(findTm1Candidates(withUnrelated)).toHaveLength(1);
+    expect(findMemoCandidates(withUnrelated)).toHaveLength(1);
+    const verified = expectStatus(verifyNormalizedTransaction(withUnrelated), "VERIFIED_TM1");
+    expect(verified.trustModel).toBe("trusted-chronik");
+  });
+
+  it("records the mainnet catalog as blocked when only TXIDs are present", () => {
+    const catalog = readJson<{ entries: MainnetCatalogEntry[] }>(
+      join(REPO_ROOT, "docs/operations/d07-conf-04-mainnet-candidates.json")
+    );
+    expect(catalog.entries.map((entry) => entry.txid)).toEqual([...MAINNET_TXIDS]);
+    for (const entry of catalog.entries) {
+      expect(entry.sourceUrl.startsWith("https://")).toBe(true);
+      expect(entry.rawTransactionHex).toBeUndefined();
+      expect(entry.inputs).toBeUndefined();
+    }
+    expect(readFileSync(EVIDENCE_PATH, "utf8")).toContain("HISTORICAL-MAINNET remains blocked");
   });
 });
