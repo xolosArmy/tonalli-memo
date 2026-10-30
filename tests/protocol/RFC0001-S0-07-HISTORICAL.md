@@ -94,6 +94,7 @@ vector document:
 - `packages/verification/tm1-authorization-vectors.json`
 - `tests/fixtures/rfc0001_regtest_reference.json`
 - `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json`
+- `tests/fixtures/rfc0001-mainnet-tm1-d07.json`
 
 Stored TM0 rows cover valid envelopes, invalid structure, bad UTF-8, an
 unknown marker, and the `TM1|` marker rejected as `UNSUPPORTED_VERSION`.
@@ -242,14 +243,44 @@ This suite still imports the TypeScript sources through the aliases above.
 
 ## Historical mainnet
 
-HISTORICAL-MAINNET remains blocked.
-`docs/operations/d07-conf-04-mainnet-candidates.json` lists three TXIDs and
-source URLs. It has no raw transaction, prevouts, amounts, or scriptSigs.
-This suite does not connect to a node, so the comparison is not complete:
+HISTORICAL-MAINNET remains open.
+`docs/operations/d07-conf-04-mainnet-candidates.json` stays an editorial
+catalog of three TXIDs and HTTPS source URLs. It still has no raw
+transaction. The recovered bytes are `tests/fixtures/rfc0001-mainnet-tm1-d07.json`.
 
-- `fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd`
-- `8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8`
-- `0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150`
+GitHub Actions artifact `12744812743`
+(`d07-conf-04-mainnet-audit-c446d2f7cf0af44fe2b45b024b2c7ec623b0c8b5`,
+2026-10-27) records the same three block hashes and a
+`STRUCTURALLY_COMPATIBLE` verdict under `trusted-chronik`. That artifact
+has no raw transaction, scriptSig, or prevout amount. On 2026-10-30 the
+read-only script `scripts/d07-conf-04-historical-audit.mjs` was run once
+against `https://chronik.e.cash`. It returned
+`SAMPLE_COMPATIBLE_NOT_RATIFICATION`. That rerun is a trusted-Chronik
+structural result. It is not `INDEPENDENT_SIGNATURE_VERIFIED`.
+
+The fixture stores the three transactions serialized from the public
+Chronik fields. Each computed TXID and byte length matched Chronik. No
+mainnet byte was edited. This suite does not call Chronik, an authenticated
+RPC, a private node, or a Tonalli production service. Block metadata remains
+Chronik provenance. The prevout script and amount were supplied by Chronik
+and are checked by the independent signature, because the BIP143 preimage
+commits to both.
+
+Each observation is version `0x01` POST, one two-push candidate, author
+index 0, Schnorr, sighash `0x41`, and the same P2PKH HASH160. The production
+verifier returns `VERIFIED_TM1` with `trustModel: trusted-chronik`, recorded
+as `STRUCTURALLY_COMPATIBLE`. The independent checker returns
+`INDEPENDENT_SIGNATURE_VERIFIED`. A confirmed transaction is not treated as
+that signature result. These September 2026 samples do not prove which
+software revision produced them.
+
+- `fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd`, block `965957`, `00000000000000003b25b96ec23a48cfb9adc5c32f6a17854c4a1e48635e9d49`, 2026-09-09T03:09:04Z
+- `8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8`, block `966182`, `000000000000000014df2a71da2969462991f7f10faf59bfd8b6ca19e54424b5`, 2026-09-10T16:59:46Z
+- `0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150`, block `966215`, `000000000000000057ab28172e7fe03ec76f05629b1a47d6435ded377dfe2b6c`, 2026-09-10T22:25:41Z
+
+The third label says Memo + NFT. Chronik reports `TOKEN_STATUS_NON_TOKEN`
+and the transaction has no token output. The `nft1` reference is text inside
+the POST. That label is not an ALP transfer.
 
 ## Pending evidence
 
@@ -261,7 +292,7 @@ corpus does not close S0-07.
 | `S0-07-INDEPENDENT-REVIEW` | The Codex receipt on `907ba8a2b5f68d346e863187508f7ea5fa3ec070` does not review the commit that adds this corpus. A review request is not a receipt. |
 | `CRYPTOGRAPHIC-DIGEST` | Production `verifyTm1DesignatedInput` returns before any Schnorr or ECDSA digest check. The canonical corpus checks those digests independently. On the four digest-failure fixtures, production still returns `VERIFIED_TM1` with `trustModel: trusted-chronik`. That label is not Chronik validation. |
 | `EMPP-ALP` | No production eMPP parser is called, and no ALP or eMPP fixture is executed. eMPP must not be treated as an ordinary two-push TM1 output. |
-| `HISTORICAL-MAINNET` | Blocked. The catalog has TXIDs and URLs only. |
+| `HISTORICAL-MAINNET` | The three catalog TXIDs now have recovered bytes, a Core parse, and an independent Schnorr check. The sample is not the chain, does not prove the producing software revision, and does not close S0-07. |
 | `M1.7.4` | ALP/eMPP SEND with token ancestry, XEC and RMZ tip settlement, reaction and unlike replay, and reorg rollback remain unexecuted. Author indexes 1 and 2 in this synthetic POST corpus do not close that gate. |
 
 Regtest confirmation counts are observations in the fixture, not part of this

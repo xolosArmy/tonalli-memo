@@ -72,6 +72,7 @@ const PENDING_IDS = [
 ] as const;
 const DECIDED_IDS = ["S0-07-PROFILE-DECISION"] as const;
 const CANONICAL_FIXTURE = "tests/fixtures/rfc0001-canonical-tm1-p2pkh.json";
+const MAINNET_FIXTURE = "tests/fixtures/rfc0001-mainnet-tm1-d07.json";
 const MAINNET_TXIDS = [
   "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
   "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
@@ -528,13 +529,16 @@ describe("S0-07 baseline identity", () => {
     expect(evidence).toContain("does not satisfy S0-07");
     expect(evidence).toContain("907ba8a2b5f68d346e863187508f7ea5fa3ec070");
     expect(evidence).toContain(CANONICAL_FIXTURE);
+    expect(evidence).toContain(MAINNET_FIXTURE);
+    expect(evidence).toContain("INDEPENDENT_SIGNATURE_VERIFIED");
+    expect(evidence).toContain("https://chronik.e.cash");
     expect(evidence).toContain("synthetic-fixture");
     expect(evidence).toContain("chronikValidated");
     expect(evidence).toContain("canonical-ecdsa-author0-sighash-41");
     for (const txid of MAINNET_TXIDS) {
       expect(evidence).toContain(txid);
     }
-    expect(evidence).toContain("HISTORICAL-MAINNET remains blocked");
+    expect(evidence).toContain("HISTORICAL-MAINNET remains open");
 
     const ratification = readFileSync(
       join(REPO_ROOT, "docs/protocol/tm1-core-v1.0-ratification-candidate.md"),
@@ -1175,7 +1179,7 @@ describe("canonical TM1 P2PKH fixtures", () => {
     expect(verified.trustModel).toBe("trusted-chronik");
   });
 
-  it("records the mainnet catalog as blocked when only TXIDs are present", () => {
+  it("keeps the editorial catalog as TXIDs and URLs", () => {
     const catalog = readJson<{ entries: MainnetCatalogEntry[] }>(
       join(REPO_ROOT, "docs/operations/d07-conf-04-mainnet-candidates.json")
     );
@@ -1185,6 +1189,164 @@ describe("canonical TM1 P2PKH fixtures", () => {
       expect(entry.rawTransactionHex).toBeUndefined();
       expect(entry.inputs).toBeUndefined();
     }
-    expect(readFileSync(EVIDENCE_PATH, "utf8")).toContain("HISTORICAL-MAINNET remains blocked");
+    expect(readFileSync(EVIDENCE_PATH, "utf8")).toContain("HISTORICAL-MAINNET remains open");
+  });
+});
+
+describe("recovered D-07 mainnet observations", () => {
+  interface MainnetInput {
+    prevOut: { txid: string; outIdx: number };
+    prevoutSats: string;
+    outputScriptHex: string;
+    scriptType: string;
+  }
+
+  interface MainnetEntry {
+    txid: string;
+    label: string;
+    sourceUrl: string;
+    editorialNote: string | null;
+    blockHeight: number;
+    blockHash: string;
+    blockTimestamp: number;
+    timeFirstSeen: number;
+    tokenStatus: string;
+    tokenEntryCount: number;
+    rawTransactionHex: string;
+    inputs: MainnetInput[];
+    outputs: CanonicalOutput[];
+    eventDataUtf8: string;
+    signatureAlgorithm: "schnorr" | "ecdsa";
+    authorInputIndex: number;
+    sighashByte: number;
+    observedDigestHex: string;
+    expected: {
+      structural: "STRUCTURALLY_COMPATIBLE" | "REVIEW_REQUIRED" | "INCONCLUSIVE";
+      independent: "INDEPENDENT_SIGNATURE_VERIFIED" | "REVIEW_REQUIRED" | "INCONCLUSIVE";
+      normalized: { status: string; trustModel: string | null };
+    };
+  }
+
+  interface MainnetDocument {
+    retrieval: {
+      chronikUrl: string;
+      retrievedAt: string;
+      auditVerdict: string;
+      auditTrust: string;
+    };
+    entries: MainnetEntry[];
+  }
+
+  const document = readJson<MainnetDocument>(join(REPO_ROOT, MAINNET_FIXTURE));
+
+  function transactionFromMainnet(entry: MainnetEntry): NormalizedTransaction {
+    const raw = parseRawTransaction(entry.rawTransactionHex);
+    const inputs: NormalizedInput[] = raw.inputs.map((rawInput, index) => {
+      const meta = entry.inputs[index];
+      return {
+        index,
+        prevOut: meta?.prevOut ?? { txid: rawInput.prevTxid, outIdx: rawInput.outIdx },
+        inputScriptHex: rawInput.scriptHex,
+        outputScriptHex: meta?.outputScriptHex ?? null,
+        address: null
+      };
+    });
+    return {
+      ...normalizedTransaction({
+        txid: entry.txid,
+        inputs,
+        opReturnOutputs: opReturnOutputsFromRaw(raw.outputs),
+        adapter: `s0-07:mainnet-d07:${entry.txid}`
+      }),
+      blockHeight: entry.blockHeight,
+      blockHash: entry.blockHash,
+      blockTimestamp: entry.blockTimestamp
+    };
+  }
+
+  it("checks the three recovered transactions without treating confirmation as authorship", () => {
+    expect(document.retrieval.chronikUrl).toBe("https://chronik.e.cash");
+    expect(document.retrieval.retrievedAt).toBe("2026-10-30T23:02:05Z");
+    expect(document.retrieval.auditVerdict).toBe("SAMPLE_COMPATIBLE_NOT_RATIFICATION");
+    expect(document.retrieval.auditTrust).toBe("trusted-chronik");
+    expect(document.entries.map((entry) => entry.txid)).toEqual([...MAINNET_TXIDS]);
+
+    const authorHashes: string[] = [];
+    for (const entry of document.entries) {
+      expect(entry.sourceUrl.startsWith("https://")).toBe(true);
+      expect(txidOf(entry.rawTransactionHex)).toBe(entry.txid);
+      const raw = parseRawTransaction(entry.rawTransactionHex);
+      expect(raw.outputs.map((output) => ({ sats: output.valueSats.toString(), script: output.scriptHex }))).toEqual(
+        entry.outputs.map((output) => ({ sats: output.sats, script: output.outputScriptHex }))
+      );
+      raw.inputs.forEach((input, index) => {
+        const meta = entry.inputs[index];
+        expect(meta?.prevOut).toEqual({ txid: input.prevTxid, outIdx: input.outIdx });
+      });
+
+      const transaction = transactionFromMainnet(entry);
+      expect(transaction.blockHeight).toBe(entry.blockHeight);
+      expect(transaction.blockHash).toBe(entry.blockHash);
+      const memoOutputs = transaction.opReturnOutputs;
+      expect(memoOutputs).toHaveLength(1);
+      const memoOutput = memoOutputs[0];
+      if (memoOutput === undefined) {
+        throw new Error(`${entry.txid} has no OP_RETURN.`);
+      }
+      expect(memoOutput.valueSats).toBe(0n);
+      expect(memoOutput.pushes).toHaveLength(2);
+      expect(Buffer.from(memoOutput.pushes[0] ?? new Uint8Array()).toString("hex")).toBe("544d4d00");
+      expect(findTm1Candidates(transaction)).toHaveLength(1);
+      expect(findMemoCandidates(transaction)).toHaveLength(1);
+
+      const parsed = tm1Result(bytesFromHex(memoOutput.outputScriptHex), memoOutput.valueSats);
+      expect(typeof parsed).not.toBe("string");
+      if (typeof parsed === "string") {
+        throw new Error(`${entry.txid} did not parse.`);
+      }
+      expect(parsed.version).toBe(1);
+      expect(parsed.eventType).toBe("POST");
+      expect(parsed.authorInputIndex).toBe(entry.authorInputIndex);
+      expect(parsed.eventData).toBe(entry.eventDataUtf8);
+      expect(parsed.eventDataByteLength).toBe(Buffer.byteLength(entry.eventDataUtf8, "utf8"));
+      expect(parsed.eventDataByteLength).toBeLessThanOrEqual(212);
+
+      const designated = verifyTm1DesignatedInput(transaction, parsed.authorInputIndex);
+      expect(designated.valid).toBe(true);
+      if (!designated.valid) {
+        throw new Error(`${entry.txid} failed the structural author check.`);
+      }
+      expect(designated.sighashByte).toBe(0x41);
+      expect(designated.publicKeyHashHex).toBe(entry.inputs[0]?.outputScriptHex.slice(6, 46));
+      authorHashes.push(designated.publicKeyHashHex);
+
+      const normalized = expectStatus(verifyNormalizedTransaction(transaction), "VERIFIED_TM1");
+      expect(normalized.trustModel).toBe("trusted-chronik");
+      expect(entry.expected.structural).toBe("STRUCTURALLY_COMPATIBLE");
+      expect(entry.expected.normalized).toEqual({ status: "VERIFIED_TM1", trustModel: "trusted-chronik" });
+      expect(entry.tokenStatus).toBe("TOKEN_STATUS_NON_TOKEN");
+      expect(entry.tokenEntryCount).toBe(0);
+
+      const independent = classifyAuthor({
+        rawTransactionHex: entry.rawTransactionHex,
+        authorInputIndex: entry.authorInputIndex,
+        signatureAlgorithm: entry.signatureAlgorithm,
+        inputs: entry.inputs
+      });
+      expect(independent).toEqual({ valid: true, stage: "cryptographic-signature", errorCode: null });
+      expect(entry.expected.independent).toBe("INDEPENDENT_SIGNATURE_VERIFIED");
+      expect(signatureMatches(entry.rawTransactionHex, entry.inputs, entry.authorInputIndex, entry.signatureAlgorithm)).toBe(true);
+      expect(sighashByteAt(entry.rawTransactionHex, entry.authorInputIndex)).toBe(entry.sighashByte);
+      const sighash = sighashByteAt(entry.rawTransactionHex, entry.authorInputIndex);
+      expect(digestHex(entry.rawTransactionHex, entry.inputs, entry.authorInputIndex, sighash)).toBe(entry.observedDigestHex);
+      expect(sha256dHex(preimageHex(entry.rawTransactionHex, entry.inputs, entry.authorInputIndex, sighash))).toBe(
+        entry.observedDigestHex
+      );
+    }
+
+    expect(new Set(authorHashes).size).toBe(1);
+    const nft = document.entries.find((entry) => entry.txid === MAINNET_TXIDS[2]);
+    expect(nft?.editorialNote).toContain("TOKEN_STATUS_NON_TOKEN");
+    expect(nft?.eventDataUtf8.startsWith("@nft1:")).toBe(true);
   });
 });
