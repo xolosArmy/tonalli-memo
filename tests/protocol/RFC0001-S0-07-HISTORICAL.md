@@ -232,6 +232,7 @@ is not `VERIFIED_TM1`.
 git diff --exit-code 228d1f036643ca9be8ba85e91f8200536f3242da -- packages/protocol packages/verification packages/chronik packages/registry
 node tests/protocol/generate-canonical-tm1-fixtures.mjs --check
 node tests/protocol/generate-empp-tmm-fixtures.mjs --check
+node tests/protocol/generate-empp-sec17-decisions.mjs --check
 pnpm exec vitest run --config tests/protocol/vitest.s0-07.config.ts
 pnpm --filter @xolosarmy/tonalli-memo-protocol test
 pnpm --filter @tonalli-memo/verification test
@@ -372,6 +373,152 @@ action, a truncated SEND, a wrong token id, a reversed or truncated target,
 a non-minimal push, and a zero-atom SEND are structural rejects even when
 production's only visible result is the false TM0 status.
 
+## SEC-17 decision characterization
+
+`tests/fixtures/rfc0001-empp-sec17-decisions.json` characterizes decisions
+C, D, and E on the current production functions. Its SHA-256 is
+`76776bd3403b59ca69aac9328d9d3ff5d14a0fc396c5e302d35c603eabaec1ca`.
+It has 21 cases. The frozen 29-case corpus stays at
+`3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8`.
+Decisions A and B keep those 29 cases as their witnesses. This file does
+not replace them.
+
+The reference for the decision text is PR #40 at
+`4d52ebf23c7fdf6cc485cf40cff2a7c414e79784`. None of decisions A-E is adopted. Each of decisions A-E requires a project-owner decision before
+any production change. `adoptedOption` is null. Comment `6529195032`
+remains the approved application policy for one real TM0 beside one real
+TM1. This matrix does not reopen it. No container dispatch is implemented.
+Writing this matrix does not satisfy SEC-17. The SEC-17 criteria remain
+unsatisfied. It does not satisfy S0-07, S0-05, S0-06, M1.7.4, or EMPP-ALP.
+RFC-0001 remains PROPOSED — NOT RATIFIED. S0: OPEN. S1: NOT AUTHORIZED.
+Social version `0x02` stays inactive.
+
+The suite calls `getStackArray`, `normalizeOpReturnOutput`,
+`findTm0Candidates`, `findTm1Candidates`, `findMemoCandidates`,
+`decodeMemo`, `validateMemo`, `parseTm1Output`, and
+`verifyNormalizedTransaction`. `describeMemoPush` is a layout label only.
+It does not assign the production error code, and the suite does not
+replace the decoder with a prefix comparison. Every transaction in this
+corpus has empty inputs and block height 1. Content recognition is not
+authorization. Authorship stays `NOT_DEMONSTRATED`. No row returns
+`VERIFIED` or `VERIFIED_TM1`.
+
+Regenerate and re-execute with:
+
+```sh
+node tests/protocol/generate-empp-sec17-decisions.mjs --check
+pnpm exec vitest run --config tests/protocol/vitest.s0-07.config.ts
+node --test scripts/d07-conf-04-historical-audit.test.mjs
+```
+
+### Decision C, executed
+
+`c-empp-tm0-text` places ASCII `TM0|p|xa|hi` inside an ALP SEND eMPP
+script of 64 bytes. `getStackArray` returns the `OP_RESERVED` byte `50`,
+the ALP SEND push, and `544d307c707c78617c6869`. `findTm0Candidates` and
+`findMemoCandidates` keep output 0 push 2. `decodeMemo` and `validateMemo`
+accept that payload. `verifyNormalizedTransaction` returns `UNAUTHORIZED`
+with no protocol code, because no input can authorize it. The independent
+reader reports container `CANONICAL`, flags `EXTRA_PUSH` and `TMM_ABSENT`,
+and layout `TM0_TEXT_LAYOUT`. That recognition is not an accepted memo.
+
+`c-conventional-tm0` is the same text on an ordinary `OP_RETURN`. The
+reader reports `NOT_EMPP`. The candidate is output 0 push 0. The verifier
+again returns `UNAUTHORIZED`.
+
+`c-empp-tmm-binary` repeats the 92-byte ALP SEND plus binary TMM control.
+One TM0 candidate at push 2. The verifier returns `INVALID_MEMO` with
+`INVALID_FORMAT`. There is no text payload to recognize.
+
+`c-empp-tmm-and-tm0-text` puts the binary TMM and the TM0 text in one
+container. `c-empp-tmm-beside-conventional-tm0` puts the 92-byte eMPP
+beside the conventional TM0 output. Both return `MULTIPLE_MEMOS` before
+authorization. A direct decode of the text payload still succeeds. The
+verifier does not select it. This corpus does not claim that an inside-eMPP
+`TM0|…` transaction exists on mainnet.
+
+### Decision D, executed precedence
+
+Production `decodeMemo` runs before `validateMemo`. The codes below are
+those function results, then the transaction verdict.
+
+1. `d-empp-invalid-utf8` is bytes `54 4d ff 7c 70`. `INVALID_UTF8` precedes the pipe check. The verifier returns `INVALID_MEMO` with `INVALID_UTF8`.
+   The push is still a TM0 candidate because it starts with `TM`.
+2. `d-empp-tm2-no-pipes` is ASCII `TM2`. Fewer than three pipes yield
+   `INVALID_FORMAT` before the marker class. The verifier returns
+   `INVALID_MEMO` with `INVALID_FORMAT`.
+3. `d-empp-tm1-pipe`, `d-empp-tm2-pipe`, and `d-empp-tm9-pipe` use
+   `TM1|p|xa|hi`, `TM2|p|xa|hi`, and `TM9|p|xa|hi`. Decode and the verifier
+   return `UNSUPPORTED_VERSION`. `isTm1CandidateScript` is false,
+   `parseTm1Output` throws `INVALID_MARKER`, and `findTm1Candidates` is
+   empty. A pipe-shaped `TM1` is not a TM1 POST.
+4. `d-empp-tm-no-digit` is `TM|p|xa|hi`. The marker does not match
+   `/^TM\d+$/`, so the code is `INVALID_MARKER`.
+5. `d-empp-marker-not-tm` is `NO|p|xa|hi`. The candidate scan is empty, so
+   the verifier returns `NO_MEMO` and does not call the decoder. A direct
+   `decodeMemo` on the same payload returns `INVALID_MARKER`. The scan and decoder precedence differ.
+6. `d-empp-tm0-bad-type` is `TM0|9|xa|hi`. Decode succeeds. `validateMemo`
+   returns `INVALID_TYPE_FORMAT`. The verifier returns `INVALID_MEMO` with
+   `INVALID_TYPE_FORMAT`.
+
+The binary TMM entry is not this marker class. NUL is valid UTF-8, the
+entry has fewer than three pipes, and the false TM0 path returns
+`INVALID_FORMAT` or, for the non-UTF-8 targets in the 29-case corpus,
+`INVALID_UTF8`.
+
+### Decision E, three axes
+
+| Case | Independent reader | Normalizer and `getStackArray` | Verifier and direct payload |
+| --- | --- | --- | --- |
+| `e-tm0-text-budget-223` | `CANONICAL`, `EXTRA_PUSH`, `TMM_ABSENT` | parsed; four pushes; the third is the TM0 text; the fourth is 157 bytes of `0x01` | one TM0 candidate; `UNAUTHORIZED`; direct payload recognized |
+| `e-tm0-text-budget-224` | `CANONICAL`, `BYTE_BUDGET_EXCEEDED`, `EXTRA_PUSH`, `TMM_ABSENT` | `malformed`, `MALFORMED_OP_RETURN`; `getStackArray` throws | `NO_MEMO`; direct `decodeMemo` and `validateMemo` still recognize the text |
+| `e-tm0-text-budget-225` | same flags as 224 | same disappearance as 224 | same `NO_MEMO`, with the direct payload still recognized |
+| `e-truncated-tm0-push` | `INVALID`, `TRUNCATED_PUSH` | `malformed`; stack throws | `NO_MEMO`; no direct text payload |
+| `e-non-minimal-tm0-push` | `PARSEABLE`, `NON_MINIMAL_PUSH`, `EXTRA_PUSH`, `TMM_ABSENT` | parsed; the TM0 data is still push 2 | `UNAUTHORIZED`; direct payload recognized |
+| `e-alp-only-no-tmm` | `CANONICAL`, `TMM_ABSENT` | parsed; `OP_RESERVED` and the ALP SEND | `NO_MEMO` |
+| `e-unrecognized-two-push-v2` | `NOT_EMPP`; script `6a04544d4d000402050161` | parsed; pushes `544d4d00` and `02050161` | `isTm1` true; `INVALID_TM1` / `UNSUPPORTED_VERSION`; `expected-v2-rejection` |
+| `e-unrelated-no-memo` | `NOT_EMPP`; script `6a04deadbeef` | parsed; push `deadbeef` | `NO_MEMO` |
+
+`parseTm1Output` throws `INVALID_MARKER` on the eMPP scripts in this table,
+including the scripts of 224 and 225 bytes. Core does not gain a byte-budget
+code from this record.
+
+The three classes that production currently collapses, and the options for
+separating them, are not a new status vocabulary. None is adopted.
+
+1. Keep the production status vocabulary. Leave the malformed container,
+   the unrecognized container, and the absence of a memo in the independent
+   reader. This option does not change historical Core responses.
+2. Add a verifier status only for scripts the normalizer already marks
+   malformed. That option is Decision E and requires a project-owner
+   decision. It must not change in-budget TM0 or TM1 Core responses. The
+   223-byte script that still contains `TM0|p|xa|hi` stays a TM0 candidate.
+3. Do not reclassify the ordinary two-push version `0x02` script as
+   `NO_MEMO` or as eMPP. It stays `UNSUPPORTED_VERSION` and
+   `expected-v2-rejection`.
+
+Witnesses, as executed: a malformed container is `e-truncated-tm0-push`
+and the 224-byte and 225-byte scripts. An unrecognized container is
+`e-unrecognized-two-push-v2`. Absence of a memo is `e-alp-only-no-tmm` and
+`e-unrelated-no-memo`. Over-budget scripts share `NO_MEMO` with absence of
+a memo and with the truncated script. That shared status is recorded. It
+is not repaired.
+
+### Compatibility matrix
+
+Every row requires a project-owner decision. None of decisions A-E is adopted. An indiscriminate exclusion of every eMPP push is not an offered
+option. Core v1.0 verdicts on an ordinary two-push POST, and
+`INVALID_MARKER` on an eMPP output, stay. This matrix does not modify the
+TM1 Core v1.0 contract.
+
+| Decision | Current behavior | Proposed behavior | Core v1.0 impact | TM0 impact | Regression tests |
+| --- | --- | --- | --- | --- | --- |
+| Decision A. TMM prefix | `alp-send-plus-one-tmm` and `c-empp-tmm-binary` are one TM0 candidate at push 2. The verifier returns `INVALID_MEMO` / `INVALID_FORMAT`. Non-UTF-8 TMM targets in the 29-case corpus return `INVALID_UTF8`. Core throws `INVALID_MARKER`. | Not adopted. Stop treating a structurally recognized TMM entry as TM0 and report an explicit non-TM0 status. | Ordinary two-push POST verdicts stay. eMPP remains `INVALID_MARKER` at Core. | A conventional `TM0\|p\|xa\|hi` still decodes. Dropping every eMPP push would also change Decision C, whose inside-eMPP text is a candidate and returns `UNAUTHORIZED` when inputs are empty. | 29-case SHA `3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8`, `c-empp-tmm-binary`, `pnpm exec vitest run --config tests/protocol/vitest.s0-07.config.ts`, and `node --test scripts/d07-conf-04-historical-audit.test.mjs`. |
+| Decision B. TMM beside one real POST | `empp-beside-one-tm1` is `MULTIPLE_MEMOS`. `findTm1Candidates` returns output 1. The false TM0 push hides the POST. | Not adopted. A container-first reading that stops counting that TMM push as TM0 would leave exactly one TM1 candidate when no real TM0 memo is also present. Comment `6529195032` stays in force. | The POST stays a Core candidate. The eMPP output stays `INVALID_MARKER`. Core cardinality is unchanged. | One real TM0 and one real TM1 remain `MULTIPLE_MEMOS`. The application does not pick one. | `empp-beside-one-tm1`, the historical application-policy case, the 29-case SHA, and the D-07 suite named above. |
+| Decision C. TM0 text inside eMPP | Executed above. One inside-eMPP `TM0\|p\|xa\|hi` is `UNAUTHORIZED`. Binary TMM is `INVALID_MEMO` / `INVALID_FORMAT`. Both together, or the eMPP beside a conventional TM0, are `MULTIPLE_MEMOS` before authorization. | Not adopted. Either recognize a well-formed TM0 text entry only after the container is parsed, or refuse eMPP entries as TM0 only after historical occurrences of that shape are enumerated. | `parseTm1Output` still throws `INVALID_MARKER` on these eMPP scripts. This row is not a Core contract change. | The conventional envelope still decodes and, with empty inputs, returns `UNAUTHORIZED`. Dropping every eMPP push would change `c-empp-tm0-text`. | The five C cases, `empp-beside-tm0`, the 29-case SHA, and the D-07 suite. |
+| Decision D. Unknown `TM` markers | Executed precedence above: `INVALID_UTF8`, then `INVALID_FORMAT`, then `UNSUPPORTED_VERSION` or `INVALID_MARKER`, then `validateMemo`. A non-`TM` marker is `NO_MEMO` at the verifier and `INVALID_MARKER` on a direct decode. | Not adopted. Ignoring those pushes would turn `INVALID_MEMO` into `NO_MEMO` or into an unrecognized-container status. | Pipe-shaped `TM1`, `TM2`, and `TM9` stay `INVALID_MARKER` at Core. The ordinary two-push version `0x02` control stays `UNSUPPORTED_VERSION`. | A real `TM0` marker still reaches `validateMemo`. A marker that does not start with `TM` never becomes a candidate. | The eight D cases, the 29-case SHA, and the D-07 suite. |
+| Decision E. Scripts of 223, 224, and 225 bytes, truncated pushes, non-minimal pushes, and containers with no memo | Executed in the three-axis table. 223 stays a TM0 candidate. 224, 225, and a truncated push become `malformed` and `NO_MEMO` even when a direct payload call still recognizes the text. | Not adopted. An explicit byte-budget status, kept distinct from a malformed container, an unrecognized container, and absence of a memo. | In-budget Core responses stay. Over-budget scripts are not given a new Core code here. Version `0x02` in two-push framing stays `expected-v2-rejection`. | A 223-byte script that still contains `TM0\|p\|xa\|hi` remains a candidate. A 224-byte or 225-byte script with the same text disappears as `NO_MEMO`. | The eight E cases, `budget-exact-224`, `budget-natural-225`, `truncated-script`, `alp-send-only`, the 29-case SHA, and the D-07 suite. |
+
 ## Pending evidence
 
 S0-07 remains unsatisfied while any of these remain. Adding this canonical
@@ -382,7 +529,7 @@ It does not complete S0-06. It does not complete S0-07 or S0.
 | --- | --- |
 | `S0-07-INDEPENDENT-REVIEW` | The Codex receipt on `907ba8a2b5f68d346e863187508f7ea5fa3ec070` does not review the commit that adds this corpus. A review request is not a receipt. |
 | `CRYPTOGRAPHIC-DIGEST` | Production `verifyTm1DesignatedInput` returns before any Schnorr or ECDSA digest check. The canonical corpus checks those digests independently. On the four digest-failure fixtures, production still returns `VERIFIED_TM1` with `trustModel: trusted-chronik`. That label is not Chronik validation. |
-| `EMPP-ALP` | The structural corpus in `tests/fixtures/rfc0001-empp-tmm.json` is executed, and it records FALSE-TM0-CLASSIFICATION as a compatibility block. Core returns `INVALID_MARKER` on the positive eMPP script while the application verifier returns `INVALID_MEMO`. Ancestry, attributable RMZ transfer, settlement, and social version `0x02` activation remain unproved. eMPP is still not a two-push TM1 POST. |
+| `EMPP-ALP` | The structural corpus in `tests/fixtures/rfc0001-empp-tmm.json` is executed, and it records FALSE-TM0-CLASSIFICATION as a compatibility block. Core returns `INVALID_MARKER` on the positive eMPP script while the application verifier returns `INVALID_MEMO`. Ancestry, attributable RMZ transfer, settlement, and social version `0x02` activation remain unproved. eMPP is still not a two-push TM1 POST. Decisions C, D, and E are characterized in `tests/fixtures/rfc0001-empp-sec17-decisions.json`. No container dispatch is implemented. The SEC-17 criteria remain unsatisfied. |
 | `HISTORICAL-MAINNET` | The three catalog TXIDs now have recovered bytes, a correct Core envelope, and an independent Schnorr check under the recovered prevout data. The sample is 3/3 on those points only. It is not full-chain coverage, does not claim cryptographically independent prevout provenance, does not prove the producing software revision, and does not close S0-07. |
 | `M1.7.4` | The structural corpus does not satisfy this gate. Still unexecuted: ALP ancestry and token validity; real RMZ atom transfer and attribution; XEC tips and ambiguous funding; TIP signatures and authorship; reactions and reaction removal; reorgs and idempotence; settlement states and double-count prevention. Author indexes in the synthetic POST corpus, and author index 255 in an unsigned TMM entry, do not close it. |
 

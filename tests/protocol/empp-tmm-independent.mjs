@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { TextDecoder } from "node:util";
 
 /**
  * Hand-rolled eMPP / ALP SEND / proposed TMM reader.
@@ -566,5 +567,57 @@ function finish(script, container, pushes, flags, options) {
       tokenHistory: "NOT_CHECKED",
       wireShape: proposedShape ? "PROPOSED_SHAPE" : "NOT_PROPOSED_SHAPE"
     }
+  };
+}
+
+/**
+ * Structural description of one push. It does not decode a memo, does not
+ * assign an error code, and does not decide authorship. Production
+ * decodeMemo remains the source of the error code.
+ * @param {Uint8Array} bytes
+ */
+export function describeMemoPush(bytes) {
+  const data = Buffer.from(bytes);
+  const startsWithTm = data.length >= 2 && data[0] === 0x54 && data[1] === 0x4d;
+  let text = null;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(data);
+  } catch {
+    return {
+      utf8: false,
+      text: null,
+      marker: null,
+      layout: "INVALID_UTF8",
+      startsWithTm
+    };
+  }
+  const pipes = [];
+  for (let index = 0; index < text.length; index += 1) {
+    if (text[index] === "|") {
+      pipes.push(index);
+    }
+  }
+  if (pipes.length < 3) {
+    return {
+      utf8: true,
+      text,
+      marker: null,
+      layout: "NO_PIPE_LAYOUT",
+      startsWithTm
+    };
+  }
+  const marker = text.slice(0, pipes[0]);
+  let layout = "OTHER_MARKER_LAYOUT";
+  if (marker === "TM0") {
+    layout = "TM0_TEXT_LAYOUT";
+  } else if (/^TM\d+$/.test(marker)) {
+    layout = "TM_DIGIT_MARKER_LAYOUT";
+  }
+  return {
+    utf8: true,
+    text,
+    marker,
+    layout,
+    startsWithTm
   };
 }
