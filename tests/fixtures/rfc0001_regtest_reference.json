@@ -1,0 +1,62 @@
+{
+  "schema": "rfc0001-regtest-reference-v1",
+  "status": "OBSERVED_LAB_EVIDENCE_NOT_RATIFICATION",
+  "proposalStatus": "PROPOSED — NOT RATIFIED",
+  "s0": "OPEN",
+  "s1": "NOT_AUTHORIZED",
+  "network": "regtest",
+  "source": {
+    "pullRequest": 42,
+    "evidenceCommit": "081d75a762889207283ab7d4434030db30c79b41",
+    "chronik": "http://127.0.0.1:19442",
+    "observedAt": "2026-10-29T16:57:47Z",
+    "tipHeight": 104
+  },
+  "limitations": [
+    "These bytes were read from the isolated regtest node after the PR #42 recovery. They are not mainnet transactions.",
+    "The production TM1 parser is not invoked and is not changed. Version 0x02 remains unsupported there.",
+    "Confirmation counts were observed at tip 104 and are not a permanent property of the transactions.",
+    "ALP/eMPP, reactions, reorgs and tip settlement are not represented by this pair."
+  ],
+  "author": {
+    "authorInputIndex": 0,
+    "sighash": "41",
+    "pubkey": "0298220b1c7b916f6ae579c5388fa66a7db7da3315dea33bea6ece46d4811eed99",
+    "hash160": "b4aca63fbf60884195ee538475b6840650273d3f",
+    "p2pkhScript": "76a914b4aca63fbf60884195ee538475b6840650273d3f88ac"
+  },
+  "post": {
+    "txid": "754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585",
+    "blockHash": "0a2c875fd169f22f301dbb5ad1953bdc51cd3541dafea5199cebb30a77a87d17",
+    "height": 103,
+    "confirmationsAtObservedTip": 2,
+    "raw": "020000000150ec911e6ab4674a54e9dd669c471b4569af0fd040bb0787db4cb96f7224e905010000006a47304402205bbe0532d81c5e1680e80e13ff105ea0ddfa51a71aac99ed7b260dddd260af0a02206dc8ee0c40fec0466cfe8bf84b8d583422f59323cbc84e8d9b7e1e6285f93de141210298220b1c7b916f6ae579c5388fa66a7db7da3315dea33bea6ece46d4811eed99ffffffff020000000000000000236a04544d4d001c0101006c61626f7261746f72696f205246432d3030303120504f535412f0052a010000001976a914b4aca63fbf60884195ee538475b6840650273d3f88ac00000000"
+  },
+  "reply": {
+    "txid": "3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649",
+    "blockHash": "6291e6097625d93b2f4a8da7ffeca8e545e97c6372544750c7698bf952581915",
+    "height": 104,
+    "confirmationsAtObservedTip": 1,
+    "parentWireHex": "754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585",
+    "raw": "020000000185351287037952dc4dd7f2b8b404a6b9ba435770f4f70dd178d4635d24274575010000006a4730440220594813028429951572491cb41a2627c5d3575d5ee3e6a15ec02d18cb8fe44fbd02205595b3004e60bffbab9f6ef3d63445b06f45701cae8600d4e646a51cdabb319f41210298220b1c7b916f6ae579c5388fa66a7db7da3315dea33bea6ece46d4811eed99ffffffff020000000000000000446a04544d4d003d020200754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc527903871235856c61626f7261746f72696f205246432d30303031205245504c5906ef052a010000001976a914b4aca63fbf60884195ee538475b6840650273d3f88ac00000000"
+  },
+  "spentBy": {
+    "postOutput": 1,
+    "replyInput": 0,
+    "replyTxid": "3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649"
+  },
+  "s0Pending": [
+    { "id": "M1.7.4-ALP-EMPP", "reason": "No fixed raw transaction contains an ALP SEND plus one TMM tip entry, token ancestry or atom mapping." },
+    { "id": "M1.7.4-TIP-SETTLEMENT", "reason": "No XEC or RMZ tip settlement fixture, including the ambiguous-funding counterexample, is present." },
+    { "id": "M1.7.4-REACTIONS", "reason": "Reaction and reaction-remove replay were not executed on the regtest chain." },
+    { "id": "M1.7.4-REORG", "reason": "Reorg rollback and restart idempotence were not executed." },
+    { "id": "M1.7.4-AUTHOR-INDEX-BEYOND-0", "reason": "This pair uses author_input_index 0 only. Index 1 and P2SH rejection remain unverified here." },
+    { "id": "PRODUCTION-V2-PARSER", "reason": "The production parser still rejects version 0x02. This corpus must not activate it." },
+    { "id": "S0-01", "reason": "External historical source verification is still pending." },
+    { "id": "S0-06", "reason": "Threat mitigations have no approved residual-risk owner and date." },
+    { "id": "S0-07", "reason": "The v1.0 compatibility corpus and TM0/TM1 application-profile decision are pending." },
+    { "id": "S0-08", "reason": "Activation flags, isolated staging and rollback have not been rehearsed." },
+    { "id": "S0-09", "reason": "Codex review of the final unchanged head and its CI result are still required." },
+    { "id": "S0-10", "reason": "No governance record ratifies the RFC. S0 stays OPEN and S1 is NOT AUTHORIZED." }
+  ]
+}
