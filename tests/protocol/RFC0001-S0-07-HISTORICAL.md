@@ -231,6 +231,7 @@ is not `VERIFIED_TM1`.
 ```sh
 git diff --exit-code 228d1f036643ca9be8ba85e91f8200536f3242da -- packages/protocol packages/verification packages/chronik packages/registry
 node tests/protocol/generate-canonical-tm1-fixtures.mjs --check
+node tests/protocol/generate-empp-tmm-fixtures.mjs --check
 pnpm exec vitest run --config tests/protocol/vitest.s0-07.config.ts
 pnpm --filter @xolosarmy/tonalli-memo-protocol test
 pnpm --filter @tonalli-memo/verification test
@@ -266,6 +267,11 @@ Chronik provenance. The prevout script and amount were supplied by Chronik
 and are checked by the independent signature, because the BIP143 preimage
 commits to both.
 
+The D-07 sample is 3/3 on two narrower points: each transaction has a
+correct Core envelope, and each signature verifies independently under the
+recovered prevout data. That is not full-chain coverage. It does not claim
+cryptographically independent prevout provenance.
+
 Each observation is version `0x01` POST, one two-push candidate, author
 index 0, Schnorr, sighash `0x41`, and the same P2PKH HASH160. The production
 verifier returns `VERIFIED_TM1` with `trustModel: trusted-chronik`, recorded
@@ -282,18 +288,103 @@ The third label says Memo + NFT. Chronik reports `TOKEN_STATUS_NON_TOKEN`
 and the transaction has no token output. The `nft1` reference is text inside
 the POST. That label is not an ALP transfer.
 
+## ALP/eMPP structural corpus
+
+`tests/fixtures/rfc0001-empp-tmm.json` is a structural corpus. Its SHA-256 is
+`3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8`. It has 29
+cases. `ecash-lib` 4.13.0 builds the ALP SEND, BURN, and MINT pushes.
+`tests/protocol/empp-tmm-independent.mjs` reads the same bytes without
+importing `parseEmppScript`, `parseAlp`, `getStackArray`, or the production
+parser. The generator requires those two readings to agree before it writes
+the file. `PROPOSED_SHAPE` is that independent structural label. It is not
+an application acceptance code, not authorship, and not settlement.
+
+The RMZ token id under test is
+`c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908`.
+The positive script sends integer 125 atoms to output 1. That quantity is
+not a settled RMZ amount and does not prove token decimals. The proposed
+TMM entry is the 39-byte sample
+`544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f`:
+version `0x02`, event `0x05`, author index 1, and the display target TXID.
+No case in this corpus is a signed transaction.
+
+### FALSE-TM0-CLASSIFICATION
+
+`normalizeOpReturnOutput` calls `getStackArray`. That function treats
+`OP_RESERVED` as a one-byte stack item, then returns each following data
+push. `findTm0Candidates` then keeps every push of at least two bytes that
+starts with `54 4d`. The proposed TMM push starts with `544d4d00`, so it is
+classified as TM0. `isTm1CandidateScript` does not match, because the byte
+after `OP_RETURN` is `OP_RESERVED` rather than a LOKAD data push.
+`parseTm1Output` returns `INVALID_MARKER`. Those are different results. The
+suite records both and does not change production.
+
+Reproducible positive script, 92 bytes:
+
+```text
+6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
+```
+
+Observed candidates on that script alone: one TM0 candidate at output 0,
+push 2. Its bytes are the 39-byte TMM entry. There is no TM1 candidate.
+`verifyNormalizedTransaction` returns `INVALID_MEMO` with `INVALID_FORMAT`.
+The same candidate set with author index 255, or with a target byte `0xff`,
+returns `INVALID_MEMO` with `INVALID_UTF8`. The verifier status is therefore
+not stable across binary targets that are well formed as TMM entries.
+
+Under the current profiles the expected result is narrower than that
+observation. An eMPP container is not a TM0 memo and not a TM1 POST.
+Social version `0x02` stays inactive. The ordinary two-push control
+`two-push-social-v2-inactive` is a TM1 candidate and is rejected with
+`UNSUPPORTED_VERSION`. A raw `findTm0Candidates` call also matches a real
+TM1 LOKAD, because that push starts with `TM`. `findMemoCandidates` then
+excludes outputs already claimed as TM1. The eMPP output is not claimed as
+TM1, so the exclusion does not apply and the TMM push survives as TM0.
+
+Consequences for historical compatibility: an eMPP transaction that reached
+this verifier would be reported as an invalid TM0 memo, as `MULTIPLE_MEMOS`
+when another TM0 or TM1 output is present, or as `NO_MEMO` when the script
+exceeds 223 bytes and `getStackArray` drops it. A real TM1 POST beside the
+container is hidden by `MULTIPLE_MEMOS`. None of those statuses is a social
+tip. Consequences for a future social v2 profile: activation cannot proceed
+while this prefix scan treats the TMM push as TM0. A later profile would
+have to recognize the eMPP container before that scan, without weakening
+the rule that one real TM0 and one real TM1 together are `MULTIPLE_MEMOS`.
+This corpus does not implement that dispatch. The behavior stays a
+compatibility block until an independent decision. It is not a production
+patch.
+
+A canonical ALP SEND plus one 39-byte TMM cannot hit 223 or 224 bytes by
+output count alone. Twenty-two SEND outputs produce 219 bytes and still
+take the false TM0 path. Twenty-three produce 225 bytes: the independent
+reader still describes the SEND and the TMM and flags
+`BYTE_BUDGET_EXCEEDED`, while production normalizes the script as malformed
+and returns `NO_MEMO`. The exact 223-byte and 224-byte scripts add a
+non-protocol push to the 219-byte script. 223 still produces the false TM0
+candidate. 224 follows the 225-byte disappearance.
+
+The six recorded axes stay separate. A proposed structural shape can have a
+valid container, a structurally valid ALP SEND, and a structurally valid
+TMM entry while authorship stays `NOT_DEMONSTRATED`, the atom map stays a
+structural output index rather than an attributable transfer, and settlement
+stays `PENDING`. Token history is not checked. ALP BURN, MINT, an unknown
+action, a truncated SEND, a wrong token id, a reversed or truncated target,
+a non-minimal push, and a zero-atom SEND are structural rejects even when
+production's only visible result is the false TM0 status.
+
 ## Pending evidence
 
 S0-07 remains unsatisfied while any of these remain. Adding this canonical
-corpus does not close S0-07.
+corpus does not close S0-07. The ALP/eMPP corpus does not complete S0-05.
+It does not complete S0-06. It does not complete S0-07 or S0.
 
 | Id | Why it is still open |
 | --- | --- |
 | `S0-07-INDEPENDENT-REVIEW` | The Codex receipt on `907ba8a2b5f68d346e863187508f7ea5fa3ec070` does not review the commit that adds this corpus. A review request is not a receipt. |
 | `CRYPTOGRAPHIC-DIGEST` | Production `verifyTm1DesignatedInput` returns before any Schnorr or ECDSA digest check. The canonical corpus checks those digests independently. On the four digest-failure fixtures, production still returns `VERIFIED_TM1` with `trustModel: trusted-chronik`. That label is not Chronik validation. |
-| `EMPP-ALP` | No production eMPP parser is called, and no ALP or eMPP fixture is executed. eMPP must not be treated as an ordinary two-push TM1 output. |
-| `HISTORICAL-MAINNET` | The three catalog TXIDs now have recovered bytes, a Core parse, and an independent Schnorr check. The sample is not the chain, does not prove the producing software revision, and does not close S0-07. |
-| `M1.7.4` | ALP/eMPP SEND with token ancestry, XEC and RMZ tip settlement, reaction and unlike replay, and reorg rollback remain unexecuted. Author indexes 1 and 2 in this synthetic POST corpus do not close that gate. |
+| `EMPP-ALP` | The structural corpus in `tests/fixtures/rfc0001-empp-tmm.json` is executed, and it records FALSE-TM0-CLASSIFICATION as a compatibility block. Core returns `INVALID_MARKER` on the positive eMPP script while the application verifier returns `INVALID_MEMO`. Ancestry, attributable RMZ transfer, settlement, and social version `0x02` activation remain unproved. eMPP is still not a two-push TM1 POST. |
+| `HISTORICAL-MAINNET` | The three catalog TXIDs now have recovered bytes, a correct Core envelope, and an independent Schnorr check under the recovered prevout data. The sample is 3/3 on those points only. It is not full-chain coverage, does not claim cryptographically independent prevout provenance, does not prove the producing software revision, and does not close S0-07. |
+| `M1.7.4` | The structural corpus does not satisfy this gate. Still unexecuted: ALP ancestry and token validity; real RMZ atom transfer and attribution; XEC tips and ambiguous funding; TIP signatures and authorship; reactions and reaction removal; reorgs and idempotence; settlement states and double-count prevention. Author indexes in the synthetic POST corpus, and author index 255 in an unsigned TMM entry, do not close it. |
 
 Regtest confirmation counts are observations in the fixture, not part of this
 comparison. This suite does not restart a node, spend coins, or change the

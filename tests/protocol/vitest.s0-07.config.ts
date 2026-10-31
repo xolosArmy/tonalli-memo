@@ -23,7 +23,10 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["tests/protocol/rfc0001_s0_07_historical.test.ts"],
+    include: [
+      "tests/protocol/rfc0001_s0_07_historical.test.ts",
+      "tests/protocol/rfc0001_empp_tmm.test.ts"
+    ],
     hookTimeout: 120000,
     testTimeout: 120000
   }
