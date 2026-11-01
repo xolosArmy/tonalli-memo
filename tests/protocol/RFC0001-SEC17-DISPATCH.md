@@ -76,6 +76,13 @@ still a TM1 candidate keeps that candidate, so Core can still return
 `PAYLOAD_TOO_LARGE`. `two-push-social-v2-inactive` stays
 `UNSUPPORTED_VERSION`.
 
+An A or B label also requires the public verdict to match the memos that
+remain. Zero retained memos must be `NO_MEMO`. One retained TM1 must be
+`INVALID_TM1` with a protocol code, and only when production had counted
+that POST inside `MULTIPLE_MEMOS`. One retained TM0 must be `UNAUTHORIZED`
+or `INVALID_MEMO`. More than one retained memo must stay `MULTIPLE_MEMOS`.
+A `NO_MEMO` result that still has a candidate is `BLOCKED`.
+
 When the filtered candidate set matches production, the experimental
 status is a copy of `verifyNormalizedTransaction`. The three archived D-07
 transactions stay `VERIFIED_TM1` with `trustModel: trusted-chronik`. That

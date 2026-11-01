@@ -402,6 +402,23 @@ describe("SEC-17 experimental container dispatch", () => {
     expect(identical.afterStatus).toBe("MULTIPLE_MEMOS");
   });
 
+  it("blocks an authorized label that hides a memo the dispatch still retains", () => {
+    const besideTm1 = requireRow(rows, "empp-beside-one-tm1");
+    expect(classifyDispatchChange({
+      ...besideTm1,
+      afterStatus: "NO_MEMO",
+      afterCode: null
+    })).toBe("BLOCKED");
+    const besideTm0 = requireRow(rows, "empp-beside-tm0");
+    expect(besideTm0.afterCandidates).toEqual([{ protocol: "TM0", outputIndex: 1, pushIndex: 0 }]);
+    expect(besideTm0.afterStatus).toBe("UNAUTHORIZED");
+    expect(classifyDispatchChange({
+      ...besideTm0,
+      afterStatus: "NO_MEMO",
+      afterCode: null
+    })).toBe("BLOCKED");
+  });
+
   it("preserves the three archived D-07 transactions", () => {
     const document = readJson<{ entries: Array<{
       txid: string;

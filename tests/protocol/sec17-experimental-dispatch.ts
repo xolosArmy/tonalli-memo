@@ -415,6 +415,32 @@ const DIAGNOSTIC_E = new Set([
 ]);
 
 /**
+ * A removal is authorized only when the public verdict still describes the
+ * memos that remain. NO_MEMO with a retained candidate, or MULTIPLE_MEMOS
+ * with one candidate, is a regression outside A-E.
+ */
+function verdictMatchesRetained(input: ChangeInput): boolean {
+  const tm1 = input.afterCandidates.filter((candidate) => candidate.protocol === "TM1").length;
+  const tm0 = input.afterCandidates.length - tm1;
+  if (input.afterCandidates.length === 0) {
+    return input.afterStatus === "NO_MEMO" && input.afterCode === null;
+  }
+  if (input.afterCandidates.length > 1) {
+    return input.afterStatus === "MULTIPLE_MEMOS" && input.afterCode === null;
+  }
+  if (tm1 === 1) {
+    return input.afterStatus === "INVALID_TM1" && input.afterCode !== null;
+  }
+  if (tm0 === 1) {
+    if (input.afterStatus === "UNAUTHORIZED" || input.afterStatus === "MEMPOOL_TIP_REQUIRED") {
+      return input.afterCode === null;
+    }
+    return input.afterStatus === "INVALID_MEMO" && input.afterCode !== null;
+  }
+  return false;
+}
+
+/**
  * Explain a before/after difference. Anything outside A-E is BLOCKED.
  * VERIFIED results are accepted only when production already returned them
  * for the same candidates and the transaction has inputs.
@@ -458,16 +484,25 @@ export function classifyDispatchChange(input: ChangeInput): string {
     }
     return "UNCHANGED";
   }
+  if (!verdictMatchesRetained(input)) {
+    return "BLOCKED";
+  }
   if (input.afterStatus === "VERIFIED" || input.afterStatus === "VERIFIED_TM1") {
     return "BLOCKED";
   }
   const afterTm0 = input.afterCandidates.filter((candidate) => candidate.protocol === "TM0").length;
   const afterTm1 = input.afterCandidates.filter((candidate) => candidate.protocol === "TM1").length;
-  if (input.internalDiagnosis.includes("GENUINE_TM0_INSIDE_EMPP") && afterTm0 === 1 && afterTm1 === 0) {
-    return "AUTHORIZED_A_C";
+  if (afterTm1 === 1 && afterTm0 === 0) {
+    if (input.beforeStatus === "MULTIPLE_MEMOS" && input.afterStatus === "INVALID_TM1") {
+      return "AUTHORIZED_B";
+    }
+    return "BLOCKED";
   }
-  if (afterTm1 === 1 && afterTm0 === 0 && input.beforeStatus === "MULTIPLE_MEMOS") {
-    return "AUTHORIZED_B";
+  if (input.internalDiagnosis.includes("GENUINE_TM0_INSIDE_EMPP") && afterTm0 === 1 && afterTm1 === 0) {
+    if (input.afterStatus === "UNAUTHORIZED" && input.afterCode === null) {
+      return "AUTHORIZED_A_C";
+    }
+    return "BLOCKED";
   }
   return "AUTHORIZED_A";
 }
