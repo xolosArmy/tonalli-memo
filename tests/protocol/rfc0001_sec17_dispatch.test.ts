@@ -12,6 +12,7 @@ import type { NormalizedInput, NormalizedTransaction } from "../../packages/chro
 import { isTm1CandidateScript, isTm1ProtocolError, parseTm1Output } from "../../packages/protocol/src/index.ts";
 import { verifyNormalizedTransaction } from "../../packages/verification/src/verify-normalized.ts";
 import { classifyAuthor, digestHex, txidOf } from "./canonical-tm1-independent-verify.mjs";
+import { coexistenceMatrixRows } from "./sec17-coexistence-rows.ts";
 import {
   classifyDispatchChange,
   dispatchSec17,
@@ -26,6 +27,7 @@ const EVIDENCE_PATH = join(REPO_ROOT, "tests/protocol/RFC0001-SEC17-DISPATCH.md"
 const PRIOR_EMPP_SHA = "3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8";
 const PRIOR_SEC17_SHA = "76776bd3403b59ca69aac9328d9d3ff5d14a0fc396c5e302d35c603eabaec1ca";
 const GOVERNANCE = "6559174591";
+const LEGACY_ROW_SHA256 = "5f0a801d218a40624646a6fef7c8bfff3ebead122fdc81fecbd9288c93e4d3f2";
 const D07_TXIDS = [
   "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
   "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
@@ -288,6 +290,7 @@ function collectRows(): MatrixRow[] {
       blockTimestamp: entry.blockTimestamp
     }));
   }
+  rows.push(...coexistenceMatrixRows());
   return rows;
 }
 
@@ -323,6 +326,17 @@ describe("SEC-17 experimental container dispatch", () => {
     for (const row of rows) {
       if (row.inputCount === 0) {
         expect(row.afterStatus === "VERIFIED" || row.afterStatus === "VERIFIED_TM1").toBe(false);
+      }
+      if (row.change === "AUTHORIZED_B_LAB_CRYPTO") {
+        expect(row.afterStatus).toBe("VERIFIED_TM1");
+        expect(row.authorship).toBe("LAB_CRYPTOGRAPHIC");
+        expect(row.inputCount).toBeGreaterThan(0);
+        continue;
+      }
+      if (row.change === "B_TRUSTED_CHRONIK_UNPROVEN") {
+        expect(row.afterStatus).toBe("VERIFIED_TM1");
+        expect(row.authorship).toBe("NOT_DEMONSTRATED");
+        continue;
       }
       if (row.change !== "UNCHANGED" && row.change !== "AUTHORIZED_C" && row.change !== "AUTHORIZED_D" && row.change !== "AUTHORIZED_E") {
         expect(row.afterStatus === "VERIFIED" || row.afterStatus === "VERIFIED_TM1").toBe(false);
@@ -471,6 +485,10 @@ describe("SEC-17 experimental container dispatch", () => {
     if (process.env.SEC17_MATRIX_WRITE === "1") {
       writeFileSync(MATRIX_PATH, serialized);
     }
+    const legacy = rows.filter((row) => row.corpus !== "sec17-coexistence");
+    expect(legacy).toHaveLength(113);
+    expect(createHash("sha256").update(JSON.stringify(legacy)).digest("hex")).toBe(LEGACY_ROW_SHA256);
+    expect(rows.filter((row) => row.corpus === "d07").map((row) => row.id)).toEqual([...D07_TXIDS]);
     expect(readFileSync(MATRIX_PATH, "utf8")).toBe(serialized);
     expect(serialized).not.toContain("\"SETTLED\"");
     expect(serialized).not.toMatch(/"VALID_FORMAT"/u);

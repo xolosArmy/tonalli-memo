@@ -90,6 +90,47 @@ copy is not an independent signature, and this prototype does not replace
 the independent reader. Their TXIDs, raw bytes, and digests stay in
 `tests/fixtures/rfc0001-mainnet-tm1-d07.json`.
 
+## Signed coexistence, laboratory evidence only
+
+`tests/fixtures/rfc0001-sec17-coexistence.json` adds signed synthetic
+transactions. Each one fixes every output before the digest is computed:
+the frozen ALP SEND + TMM script from `alp-send-plus-one-tmm`, one
+two-push TM1 Core v1.0 POST, and the change output. The signer is
+`tests/protocol/generate-canonical-tm1-fixtures.mjs`. The preimage check
+is `tests/protocol/canonical-tm1-independent-verify.mjs`, compared with
+ecash-lib. No output is added after the signature. Negative cases edit a
+transaction that has already been signed.
+
+The corpus covers Schnorr and ECDSA, sighash `0x41` and `0xc1`, and author
+indexes 0 and nonzero. Keys are the published synthetic fixtures. The file
+is not a Chronik response. `chronikValidated` is false. Network validity is
+`NOT_DEMONSTRATED`. Tip settlement is `NOT_DEMONSTRATED`.
+
+`AUTHORIZED_B_LAB_CRYPTO` is the only new transition that records
+laboratory authorship (`LAB_CRYPTOGRAPHIC`). It requires all of the
+following: production had counted the structural TMM inside
+`MULTIPLE_MEMOS`; exactly that TMM candidate was removed; one TM1 remains;
+production's trusted-chronik check returns `VERIFIED_TM1`; and the
+independent oracle returns `cryptographic-signature` with no error, a
+preimage that matches ecash-lib, sighash `0x41` or `0xc1`, and the author
+index parsed from the POST. Missing evidence stays `BLOCKED`.
+`verdictMatchesRetained` is unchanged: a `NO_MEMO` result that still has a
+candidate stays `BLOCKED`.
+
+`B_TRUSTED_CHRONIK_UNPROVEN` records the opposite. Production still returns
+`VERIFIED_TM1` because `verifyTm1DesignatedInput` does not check the
+digest, and the independent oracle rejects the signature. Authorship stays
+`NOT_DEMONSTRATED`. A flipped signature, a changed outpoint, a changed
+prevout amount, an author byte rewritten after signing, a changed change
+output, and a changed eMPP byte are in this class. A prevout script whose
+HASH160 does not match, and an author index outside the input range, stay
+`AUTHORIZED_B` with `INVALID_TM1`. A real TM0 beside a real TM1, and two
+TM1 candidates, stay `MULTIPLE_MEMOS` even when one Schnorr signature
+verifies. That signature is not applied as POST authorship.
+
+The original 113 matrix rows and the three D-07 samples stay in place.
+This corpus does not modify `packages/` and does not satisfy SEC-17.
+
 ## Limits that remain open
 
 Container classification is an interpretation step. It is not evidence of
@@ -98,10 +139,14 @@ An eMPP script with a structurally valid ALP SEND and a structurally valid
 TMM entry is not a valid RMZ tip. The prototype never sets
 `socialEventCredited`, and its settlement field stays `PENDING`. It does
 not emit `VERIFIED`, `VERIFIED_TM1`, or `SETTLED` for a fixture with no
-inputs. A `VERIFIED_TM1` row appears only when production already returned
-that status for the same candidates and the transaction has inputs. The
-authorship label on that row is `PRODUCTION_TRUSTED_CHRONIK`.
-`verifyTm1DesignatedInput` still does not check the sighash digest.
+inputs. On an unchanged candidate set, a `VERIFIED_TM1` row appears only
+when production already returned that status and the transaction has
+inputs. That authorship label is `PRODUCTION_TRUSTED_CHRONIK`.
+`verifyTm1DesignatedInput` still does not check the sighash digest. A
+changed candidate set may record `LAB_CRYPTOGRAPHIC` only through
+`AUTHORIZED_B_LAB_CRYPTO`, and only with the independent signature
+evidence in the coexistence section. Production `VERIFIED_TM1` without
+that evidence is not laboratory authorship.
 
 The prototype does not search mainnet, does not connect to a node, and
 does not spend or broadcast. It does not activate social version `0x02`.

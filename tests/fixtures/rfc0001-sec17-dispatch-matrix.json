@@ -3853,6 +3853,980 @@
       "settlement": "PENDING",
       "socialEventCredited": false,
       "inputCount": 1
+    },
+    {
+      "id": "coex-schnorr-author0-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-schnorr-author1-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 1,
+        "preimageInputIndex": 1,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author0-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "ecdsa",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author2-sighash-c1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 3,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "ecdsa",
+        "sighashByte": 193,
+        "authorInputIndex": 2,
+        "preimageInputIndex": 2,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-negative-signature",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-outpoint",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-amount",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-script",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_AUTHOR_SIGNATURE",
+      "change": "AUTHORIZED_B",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "pubkey-hash-match",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "INVALID_TM1",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index-out-of-range",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "AUTHORIZED_B",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "author-index",
+        "independentErrorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 5,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "INVALID_TM1",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-output",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-empp",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-tm0-and-tm1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM0+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "MULTIPLE_MEMOS",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-two-tm1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "MULTIPLE_MEMOS",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
     }
   ]
 }

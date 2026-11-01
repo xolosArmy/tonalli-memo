@@ -392,6 +392,31 @@ function containerLabel(containers: readonly string[]): string {
   return unique.join("+");
 }
 
+/**
+ * Independent laboratory evidence for one signed synthetic transaction.
+ * Production VERIFIED_TM1 is not this evidence. Chronik and settlement
+ * stay unclaimed.
+ */
+export interface LabCryptoEvidence {
+  source: "synthetic-fixture";
+  chronikValidated: false;
+  networkValidity: "NOT_DEMONSTRATED";
+  tipSettlement: "NOT_DEMONSTRATED";
+  structuralPost: true;
+  cryptographicAuthorship: "LAB_VALID" | "LAB_REJECTED";
+  independentStage: string;
+  independentErrorCode: string | null;
+  signatureAlgorithm: "schnorr" | "ecdsa";
+  sighashByte: 0x41 | 0xc1;
+  authorInputIndex: number;
+  preimageInputIndex: number;
+  preimageAgreesWithLibrary: true;
+  productionBeforeStatus: string;
+  productionStatus: string;
+  productionTrustModel: "trusted-chronik" | null;
+  appliedAsPostAuthorship: boolean;
+}
+
 export interface ChangeInput {
   beforeCandidates: readonly CandidateRef[];
   afterCandidates: readonly CandidateRef[];
@@ -404,6 +429,10 @@ export interface ChangeInput {
   inputCount: number;
   socialEventCredited: boolean;
   settlement: string;
+  /** Set only for the coexistence corpus. Absent on the original 113 rows. */
+  labEvidence?: LabCryptoEvidence;
+  /** Author index parsed from the retained TM1 envelope. */
+  designatedAuthorIndex?: number;
 }
 
 const DIAGNOSTIC_E = new Set([
@@ -441,9 +470,86 @@ function verdictMatchesRetained(input: ChangeInput): boolean {
 }
 
 /**
- * Explain a before/after difference. Anything outside A-E is BLOCKED.
- * VERIFIED results are accepted only when production already returned them
- * for the same candidates and the transaction has inputs.
+ * A removed TMM may leave one TM1 whose production status is VERIFIED_TM1.
+ * That status does not check the sighash digest. Accept it as laboratory
+ * authorship only with independent BIP143 evidence bound to this input.
+ * Rejected evidence stays an explained non-authorization. Missing evidence
+ * falls through and remains BLOCKED.
+ */
+function classifyLabCoexistence(input: ChangeInput): string | null {
+  if (input.beforeStatus !== "MULTIPLE_MEMOS" || input.afterStatus !== "VERIFIED_TM1" || input.afterCode !== null) {
+    return null;
+  }
+  if (input.inputCount < 1 || input.dropped.length !== 1 || input.dropped[0]?.reason !== "STRUCTURAL_TMM") {
+    return null;
+  }
+  if (input.afterCandidates.length !== 1 || input.afterCandidates[0]?.protocol !== "TM1") {
+    return null;
+  }
+  const evidence = input.labEvidence;
+  if (evidence === undefined) {
+    return null;
+  }
+  if (!labEvidenceIsBound(evidence, input)) {
+    return "BLOCKED";
+  }
+  if (
+    evidence.cryptographicAuthorship === "LAB_VALID" &&
+    evidence.independentStage === "cryptographic-signature" &&
+    evidence.independentErrorCode === null &&
+    evidence.productionStatus === "VERIFIED_TM1" &&
+    evidence.productionTrustModel === "trusted-chronik" &&
+    evidence.appliedAsPostAuthorship === true
+  ) {
+    return "AUTHORIZED_B_LAB_CRYPTO";
+  }
+  if (
+    evidence.cryptographicAuthorship === "LAB_REJECTED" &&
+    evidence.independentErrorCode !== null &&
+    evidence.productionStatus === "VERIFIED_TM1" &&
+    evidence.productionTrustModel === "trusted-chronik" &&
+    evidence.appliedAsPostAuthorship === false
+  ) {
+    return "B_TRUSTED_CHRONIK_UNPROVEN";
+  }
+  return "BLOCKED";
+}
+
+function labEvidenceIsBound(evidence: LabCryptoEvidence, input: ChangeInput): boolean {
+  if (evidence.source !== "synthetic-fixture" || evidence.chronikValidated !== false) {
+    return false;
+  }
+  if (evidence.networkValidity !== "NOT_DEMONSTRATED" || evidence.tipSettlement !== "NOT_DEMONSTRATED") {
+    return false;
+  }
+  if (evidence.structuralPost !== true || evidence.preimageAgreesWithLibrary !== true) {
+    return false;
+  }
+  if (evidence.signatureAlgorithm !== "schnorr" && evidence.signatureAlgorithm !== "ecdsa") {
+    return false;
+  }
+  if (evidence.sighashByte !== 0x41 && evidence.sighashByte !== 0xc1) {
+    return false;
+  }
+  if (!Number.isSafeInteger(evidence.authorInputIndex) || evidence.authorInputIndex < 0) {
+    return false;
+  }
+  if (evidence.authorInputIndex >= input.inputCount || evidence.preimageInputIndex !== evidence.authorInputIndex) {
+    return false;
+  }
+  if (input.designatedAuthorIndex !== evidence.authorInputIndex) {
+    return false;
+  }
+  if (evidence.productionBeforeStatus !== input.beforeStatus || evidence.productionStatus !== input.afterStatus) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Explain a before/after difference. Anything outside A-E, or outside the
+ * one laboratory signature transition, is BLOCKED. Production VERIFIED_TM1
+ * on a changed candidate set is not accepted by itself.
  */
 export function classifyDispatchChange(input: ChangeInput): string {
   if (input.socialEventCredited || input.settlement !== "PENDING") {
@@ -483,6 +589,10 @@ export function classifyDispatchChange(input: ChangeInput): string {
       return "AUTHORIZED_D";
     }
     return "UNCHANGED";
+  }
+  const lab = classifyLabCoexistence(input);
+  if (lab !== null) {
+    return lab;
   }
   if (!verdictMatchesRetained(input)) {
     return "BLOCKED";

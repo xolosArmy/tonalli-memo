@@ -4,7 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   classifyAuthor,
@@ -86,7 +86,7 @@ function pushBytes(bytes) {
   throw new Error("Fixture push too large.");
 }
 
-function canonicalTm1Script(authorInputIndex, eventData) {
+export function canonicalTm1Script(authorInputIndex, eventData) {
   const payload = Buffer.from(eventData, "utf8");
   const envelope = Buffer.concat([Buffer.from([0x01, 0x01, authorInputIndex]), payload]);
   return new Script(Uint8Array.from([0x6a, ...pushBytes(fromHex("544d4d00")), ...pushBytes(envelope)]));
@@ -110,7 +110,7 @@ function deterministicTxid(label) {
   return hex(Uint8Array.from(sha256(Buffer.from(`tm1-canonical:${label}`, "utf8"))).reverse());
 }
 
-function inputSpec({ keyName = "authorA", sats = 10000n, label, outIdx = 0 }) {
+export function inputSpec({ keyName = "authorA", sats = 10000n, label, outIdx = 0 }) {
   return {
     keyName,
     sats,
@@ -183,7 +183,7 @@ function libPreimage(rawTransactionHex, inputs, inputIndex, sighashByte) {
   return toHex(preimage);
 }
 
-function agree(rawTransactionHex, inputs, inputIndex, sighashByte, id) {
+export function agree(rawTransactionHex, inputs, inputIndex, sighashByte, id) {
   const fromLib = libPreimage(rawTransactionHex, inputs, inputIndex, sighashByte);
   const independent = preimageHex(rawTransactionHex, inputs, inputIndex, sighashByte);
   if (fromLib !== independent) {
@@ -272,7 +272,7 @@ function record({
   return fixture;
 }
 
-function signedFixture(spec) {
+export function signedFixture(spec) {
   const built = buildSigned(spec);
   const rawTransactionHex = built.tx.toHex();
   const inputs = built.inputs.map(fixtureInput);
@@ -691,22 +691,44 @@ function buildFixtures() {
   };
 }
 
-const fixtures = buildFixtures();
-const canonical = `${JSON.stringify(fixtures, null, 2)}\n`;
-for (const secret of PRIVATE_KEY_HEX) {
-  if (canonical.includes(secret)) {
-    throw new Error("Refusing to write a fixture file that contains a test private key.");
+export function testOutputScript(name) {
+  const key = keys[name];
+  if (key === undefined) {
+    throw new Error(`Unknown synthetic test key ${name}.`);
   }
-}
-if (fixtures.positive.length < 4 || fixtures.negative.length < 10) {
-  throw new Error("Canonical corpus is missing required positive or negative fixtures.");
+  return key.outputScript;
 }
 
-if (checkMode) {
-  const current = await readFile(fixturePath, "utf8");
-  if (current !== canonical) {
-    throw new Error("rfc0001-canonical-tm1-p2pkh.json is not canonical. Regenerate it with the isolated generator.");
+export function assertFixtureHasNoPrivateKeys(text) {
+  for (const secret of PRIVATE_KEY_HEX) {
+    if (text.includes(secret)) {
+      throw new Error("Refusing to write a fixture file that contains a test private key.");
+    }
   }
-} else {
-  await writeFile(fixturePath, canonical, "utf8");
+}
+
+function invokedDirectly() {
+  const entry = process.argv[1];
+  if (entry === undefined) {
+    return false;
+  }
+  return import.meta.url === pathToFileURL(entry).href;
+}
+
+if (invokedDirectly()) {
+  const fixtures = buildFixtures();
+  const canonical = `${JSON.stringify(fixtures, null, 2)}\n`;
+  assertFixtureHasNoPrivateKeys(canonical);
+  if (fixtures.positive.length < 4 || fixtures.negative.length < 10) {
+    throw new Error("Canonical corpus is missing required positive or negative fixtures.");
+  }
+
+  if (checkMode) {
+    const current = await readFile(fixturePath, "utf8");
+    if (current !== canonical) {
+      throw new Error("rfc0001-canonical-tm1-p2pkh.json is not canonical. Regenerate it with the isolated generator.");
+    }
+  } else {
+    await writeFile(fixturePath, canonical, "utf8");
+  }
 }
