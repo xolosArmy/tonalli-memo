@@ -26,7 +26,8 @@ export default defineConfig({
     include: [
       "tests/protocol/rfc0001_s0_07_historical.test.ts",
       "tests/protocol/rfc0001_empp_tmm.test.ts",
-      "tests/protocol/rfc0001_empp_sec17_decisions.test.ts"
+      "tests/protocol/rfc0001_empp_sec17_decisions.test.ts",
+      "tests/protocol/rfc0001_sec17_dispatch.test.ts"
     ],
     hookTimeout: 120000,
     testTimeout: 120000
