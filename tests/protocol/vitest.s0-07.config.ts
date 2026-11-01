@@ -28,7 +28,8 @@ export default defineConfig({
       "tests/protocol/rfc0001_empp_tmm.test.ts",
       "tests/protocol/rfc0001_empp_sec17_decisions.test.ts",
       "tests/protocol/rfc0001_sec17_dispatch.test.ts",
-      "tests/protocol/rfc0001_sec17_coexistence.test.ts"
+      "tests/protocol/rfc0001_sec17_coexistence.test.ts",
+      "tests/protocol/rfc0001_alp_ancestry.test.ts"
     ],
     hookTimeout: 120000,
     testTimeout: 120000
