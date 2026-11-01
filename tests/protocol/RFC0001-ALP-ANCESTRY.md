@@ -19,7 +19,7 @@ broadcast.
 The synthetic token ticker is `LAB`. Its token id is the TXID of
 `lab-genesis`:
 
-`7dc17163d484ab593104c4833cfaf710548abdacb8f1ee821e45a4903b1fcd20`
+`6ecfb85cd0b3b1da30ec6dedb8ca42dd0092693d8a674b67181922c0e38ab560`
 
 That id is not the public RMZ id. Genesis metadata records decimals `2` and
 creates one mint baton. Mint authority in this laboratory is the live baton
@@ -47,6 +47,7 @@ SEND. These rows keep `tmmStructurallyValid: true` and
 | Missing prevout | `PREVOUT_NOT_IN_CHAIN` | `INVALID_ASSET` |
 | Amount raised from 5000 to 5001 | `INFLATED` | `INVALID_ASSET` |
 | Second spend of the same colored output | `ALREADY_SPENT` | `INVALID_ASSET` |
+| Two inputs in one transaction spend the same prevout | `DUPLICATE_PREVOUT` | `INVALID_ASSET` |
 | SEND of `LAB` spending the `FOR` output | `FOREIGN_TOKEN` | `INVALID_ASSET` |
 | Public RMZ id, no genesis in this chain | `NOT_DEMONSTRATED` | `INVALID_ASSET` |
 | SEND that spends a mint baton | `BATON_NOT_TRANSFERABLE` | `INVALID_ASSET` |

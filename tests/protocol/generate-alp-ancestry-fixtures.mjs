@@ -190,7 +190,8 @@ const labAtoms = [
   ["authorA", 125n],
   ["authorB", 10000n],
   ["authorA", 5000n],
-  ["authorB", 5000n]
+  ["authorB", 5000n],
+  ["authorA", 5000n]
 ];
 
 const layout = {
@@ -209,8 +210,12 @@ const layout = {
   ambiguousB: 13,
   multiA: 14,
   multiB: 15,
-  baton: 16
+  duplicatePrevout: 16,
+  baton: 17
 };
+
+assert(labAtoms.length === 16, "Genesis atom outputs drifted.");
+assert(layout.baton === labAtoms.length + 1, "Mint baton index drifted.");
 
 function buildFixtures() {
   const records = [];
@@ -496,6 +501,16 @@ function buildFixtures() {
   const batonParts = [spend(mint, 2, "authorA"), fee("authorA")];
   tipShape("lab-baton-not-send", batonParts, 0, [1n], ["authorB"]);
   tip("lab-baton-not-send", "lab-baton-not-send", 0, "authorB");
+
+  const repeated = spend(genesis, layout.duplicatePrevout, "authorA");
+  tipShape(
+    "lab-duplicate-prevout",
+    [repeated, repeated, fee("authorA")],
+    0,
+    [10000n],
+    ["authorB"]
+  );
+  tip("lab-duplicate-prevout", "lab-duplicate-prevout", 0, "authorB");
 
   const firstPush = alpSend(labId, ALP_STANDARD, [2000n]);
   const firstParts = [spend(genesis, layout.doubleSpend, "authorA"), fee("authorA")];

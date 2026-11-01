@@ -360,9 +360,15 @@ export function evaluateChain(document) {
     const resolved = [];
     let unresolved = false;
     let alreadySpent = false;
+    let duplicatePrevout = false;
+    const seenKeys = new Set();
     for (let index = 0; index < tx.inputs.length; index += 1) {
       const input = tx.inputs[index];
       const key = `${input.prevTxid}:${input.outIdx}`;
+      if (seenKeys.has(key)) {
+        duplicatePrevout = true;
+      }
+      seenKeys.add(key);
       const utxo = utxos.get(key);
       if (utxo === undefined) {
         if (record.inputs[index]?.externalUncolored === true) {
@@ -384,13 +390,18 @@ export function evaluateChain(document) {
       }
       resolved.push({ key, external: false, ...utxo });
     }
-    if (unresolved || alreadySpent) {
+    if (duplicatePrevout || unresolved || alreadySpent) {
       for (const input of resolved) {
         if (input.key !== null) {
           utxos.get(input.key).spent = true;
         }
       }
-      reject(record, txid, [unresolved ? "PREVOUT_NOT_IN_CHAIN" : "ALREADY_SPENT"], {
+      const reason = duplicatePrevout
+        ? "DUPLICATE_PREVOUT"
+        : unresolved
+          ? "PREVOUT_NOT_IN_CHAIN"
+          : "ALREADY_SPENT";
+      reject(record, txid, [reason], {
         consumed: resolved.filter((input) => !input.external).map(consumedView)
       });
       continue;

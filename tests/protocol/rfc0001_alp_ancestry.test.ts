@@ -70,7 +70,11 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       realRmzGenealogy: "NOT_DEMONSTRATED"
     });
     expect(genesis.coloredOutputs[0]).toMatchObject({ outputIndex: 1, atoms: "10000", baton: false });
-    expect(genesis.coloredOutputs.at(-1)).toMatchObject({ outputIndex: 16, atoms: "0", baton: true });
+    expect(genesis.coloredOutputs.at(-1)).toMatchObject({
+      outputIndex: fixture.layout.baton,
+      atoms: "0",
+      baton: true
+    });
     expect(mint).toMatchObject({
       ancestry: "LABORATORY_VALID",
       tokenId: genesis.txid,
@@ -81,7 +85,12 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       conservation: "ISSUANCE"
     });
     expect(mint.consumed).toEqual([
-      expect.objectContaining({ outIdx: 16, baton: true, tokenId: genesis.txid, owner: fixture.identities.authorA })
+      expect.objectContaining({
+        outIdx: fixture.layout.baton,
+        baton: true,
+        tokenId: genesis.txid,
+        owner: fixture.identities.authorA
+      })
     ]);
     expect(send).toMatchObject({
       ancestry: "LABORATORY_VALID",
@@ -150,7 +159,8 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       "lab-foreign-token",
       "lab-public-rmz-structural",
       "lab-baton-not-send",
-      "lab-decimal-mismatch"
+      "lab-decimal-mismatch",
+      "lab-duplicate-prevout"
     ];
     for (const id of repaired) {
       const tip = tipById(transcript, id);
@@ -167,6 +177,17 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
     });
     expect(transcript.chain.byId["lab-altered-amount"].outputAtoms).toBe("5001");
     expect(transcript.chain.byId["lab-altered-amount"].inputAtoms).toBe("5000");
+    expect(transcript.chain.byId["lab-duplicate-prevout"]).toMatchObject({
+      ancestry: "INVALID",
+      reasons: ["DUPLICATE_PREVOUT"],
+      conservation: "NOT_APPLICABLE",
+      inputAtoms: "0",
+      coloredOutputs: []
+    });
+    expect(transcript.chain.byId["lab-duplicate-prevout"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.duplicatePrevout,
+      fixture.layout.duplicatePrevout
+    ]);
     expect(tipById(transcript, "lab-double-spend").layers.alpChainReasons).toContain("ALREADY_SPENT");
     expect(transcript.chain.byId["lab-double-first"].ancestry).toBe("LABORATORY_VALID");
     expect(tipById(transcript, "lab-wrong-recipient").receiptState).toBe("INVALID_RECIPIENT");
