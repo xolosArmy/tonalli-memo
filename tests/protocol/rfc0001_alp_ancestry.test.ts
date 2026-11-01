@@ -160,7 +160,9 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       "lab-public-rmz-structural",
       "lab-baton-not-send",
       "lab-decimal-mismatch",
-      "lab-duplicate-prevout"
+      "lab-duplicate-prevout",
+      "lab-reuse-after-invalid",
+      "lab-malformed-action"
     ];
     for (const id of repaired) {
       const tip = tipById(transcript, id);
@@ -188,6 +190,16 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       fixture.layout.duplicatePrevout,
       fixture.layout.duplicatePrevout
     ]);
+    expect(transcript.chain.byId["lab-duplicate-section"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.duplicate
+    ]);
+    expect(tipById(transcript, "lab-reuse-after-invalid").layers.alpChainReasons).toEqual(["ALREADY_SPENT"]);
+    expect(transcript.chain.byId["lab-malformed-action"]).toMatchObject({
+      ancestry: "INVALID",
+      reasons: ["MALFORMED"],
+      conservation: "NOT_APPLICABLE",
+      coloredOutputs: []
+    });
     expect(tipById(transcript, "lab-double-spend").layers.alpChainReasons).toContain("ALREADY_SPENT");
     expect(transcript.chain.byId["lab-double-first"].ancestry).toBe("LABORATORY_VALID");
     expect(tipById(transcript, "lab-wrong-recipient").receiptState).toBe("INVALID_RECIPIENT");

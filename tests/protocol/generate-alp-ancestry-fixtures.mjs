@@ -110,6 +110,17 @@ function tmmEntry(author) {
   return body;
 }
 
+function corruptSendAction(rawTransactionHex) {
+  const tx = Tx.fromHex(rawTransactionHex);
+  const script = Buffer.from(tx.outputs[0].script.toHex(), "hex");
+  const marker = Buffer.from("000453454e44", "hex");
+  const at = script.indexOf(marker);
+  assert(at >= 0, "Could not find the SEND action bytes.");
+  script[at + 2] = 0xd3;
+  tx.outputs[0].script = new Script(Uint8Array.from(script));
+  return tx.toHex();
+}
+
 function flipSignature(rawTransactionHex, inputIndex) {
   const tx = Tx.fromHex(rawTransactionHex);
   const script = Buffer.from(tx.inputs[inputIndex].script.toHex(), "hex");
@@ -191,6 +202,7 @@ const labAtoms = [
   ["authorB", 10000n],
   ["authorA", 5000n],
   ["authorB", 5000n],
+  ["authorA", 5000n],
   ["authorA", 5000n]
 ];
 
@@ -211,10 +223,11 @@ const layout = {
   multiA: 14,
   multiB: 15,
   duplicatePrevout: 16,
-  baton: 17
+  malformed: 17,
+  baton: 18
 };
 
-assert(labAtoms.length === 16, "Genesis atom outputs drifted.");
+assert(labAtoms.length === 17, "Genesis atom outputs drifted.");
 assert(layout.baton === labAtoms.length + 1, "Mint baton index drifted.");
 
 function buildFixtures() {
@@ -469,6 +482,21 @@ function buildFixtures() {
     ])
   ));
   tip("lab-duplicate-section", "lab-duplicate-section", 0, "authorB");
+
+  const reuseParts = [spend(genesis, layout.duplicate, "authorA"), fee("authorA")];
+  tipShape("lab-reuse-after-invalid", reuseParts, 0, [5000n], ["authorB"]);
+  tip("lab-reuse-after-invalid", "lab-reuse-after-invalid", 0, "authorB");
+
+  tipShape(
+    "lab-malformed-action",
+    [spend(genesis, layout.malformed, "authorA"), fee("authorA")],
+    0,
+    [5000n],
+    ["authorA"],
+    labId,
+    corruptSendAction
+  );
+  tip("lab-malformed-action", "lab-malformed-action", 0, "authorA");
 
   const multiParts = [
     spend(genesis, layout.multiA, "authorA"),

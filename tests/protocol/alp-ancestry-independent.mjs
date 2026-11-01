@@ -136,6 +136,11 @@ export function parseAlpSection(data) {
   if (action === null) {
     return { ok: false, reason: "MALFORMED" };
   }
+  for (const value of action.bytes) {
+    if (value < 0x20 || value > 0x7e) {
+      return { ok: false, reason: "MALFORMED" };
+    }
+  }
   const name = Buffer.from(action.bytes).toString("ascii");
   if (name === "GENESIS") {
     const ticker = readVar(data, action.cursor);
@@ -328,32 +333,53 @@ export function evaluateChain(document) {
     });
   };
 
+  const consumeKnown = (tx) => {
+    const consumed = [];
+    const seen = new Set();
+    for (const input of tx.inputs) {
+      const key = `${input.prevTxid}:${input.outIdx}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      const utxo = utxos.get(key);
+      if (utxo === undefined) {
+        continue;
+      }
+      utxo.spent = true;
+      consumed.push(consumedView(utxo));
+    }
+    return consumed;
+  };
+
   for (const record of document.transactions) {
     const tx = parseTx(record.rawTransactionHex);
     const txid = txidOf(record.rawTransactionHex);
     const script = tx.outputs[0]?.script;
     const parsedPushes = script === undefined ? { error: "NOT_EMPP", pushes: [] } : readPushes(script);
     if (parsedPushes.error !== null) {
-      reject(record, txid, [parsedPushes.error]);
+      reject(record, txid, [parsedPushes.error], { consumed: consumeKnown(tx) });
       continue;
     }
     const alpPushes = parsedPushes.pushes.filter((push) => hex(push.subarray(0, 4)) === ALP_LOKAD);
     if (alpPushes.length !== 1) {
-      reject(record, txid, [alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"]);
+      reject(record, txid, [alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"], {
+        consumed: consumeKnown(tx)
+      });
       continue;
     }
     const section = parseAlpSection(alpPushes[0]);
     if (!section.ok) {
-      reject(record, txid, [section.reason]);
+      reject(record, txid, [section.reason], { consumed: consumeKnown(tx) });
       continue;
     }
     if (section.kind === "GENESIS" && parsedPushes.pushes[0] !== alpPushes[0]) {
-      reject(record, txid, ["GENESIS_NOT_FIRST"]);
+      reject(record, txid, ["GENESIS_NOT_FIRST"], { consumed: consumeKnown(tx) });
       continue;
     }
     const plan = colorPlan(section, tx.outputs.length);
     if (!plan.ok) {
-      reject(record, txid, [plan.reason]);
+      reject(record, txid, [plan.reason], { consumed: consumeKnown(tx) });
       continue;
     }
 
