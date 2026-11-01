@@ -18,10 +18,10 @@
 | M1.3 | Binary REPLY format, TXID order and thread reconstruction | Proposed; one regtest display-order vector recorded, not ratified |
 | M1.4 | Author identity and authorization | Proposed; production helper stops before the digest; review of this head pending |
 | M1.5 | On-chain likes, reactions and revocation transactions | Proposed |
-| M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; container dispatch recorded after FALSE-TM0-CLASSIFICATION and left unratified; ALP/eMPP integration unratified; no transfer executed |
+| M1.6 | Atomic on-chain XEC/RMZ tips and derived TipReceipt | Proposed; container-dispatch design approved by comment 6559174591; isolated prototype validated on the PR #41 corpus; production mitigation pending; ALP/eMPP integration unratified; no transfer executed |
 | M1.7 | Canonical vectors and byte-boundary tests | Synthetic corpus, one regtest pair, and a 29-case structural ALP/eMPP corpus on PR #41; M1.7.4 remainder pending |
-| M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; SEC-17 proposed with unsatisfied criteria; SEC-01..SEC-17 not demonstrated |
-| M1.9 | Compatibility, migration and staged activation | Proposed; TM0/TM1 application policy approved by comment 6529195032; container isolation proposed and unratified; operational proof pending |
+| M1.8 | Threat model: spam, reorgs, phishing, replay | Threat register documented; SEC-17 design approved and isolated prototype validated on the corpus; production mitigation pending; SEC-01..SEC-17 not demonstrated |
+| M1.9 | Compatibility, migration and staged activation | Proposed; TM0/TM1 application policy approved by comment 6529195032; decisions A–E approved as design by comment 6559174591; production mitigation pending; operational proof pending |
 | M1.10 | S0 acceptance gates and S1 hand-off | Proposed; S0 OPEN; S1 NOT AUTHORIZED |
 
 ## 0. Scope and invariants
@@ -106,7 +106,7 @@ TM1 Core v1.0, section 2, requires **exactly one TM1 candidate** in a transactio
    - `(0x02, 0x02)` **REPLY**: `event_data = parent_txid[32] || reply_text[1..180]` (33–212 bytes). Treat the first 32 bytes as binary; ONLY `reply_text` MUST decode as strict UTF-8.
    - `(0x02, 0x03)` **REACTION** and `(0x02, 0x04)` **REACTION_REMOVE**: `event_data = target_txid[32] || reaction_kind[1]` (EXACTLY 33 bytes). Both fields are binary and MUST NOT be UTF-8 decoded, normalized or replacement-decoded. Require an approved `reaction_kind`, currently proposed `0x01` for LIKE only.
    - `(0x02, 0x05)` **TIP_XEC**: in the **ordinary two-push TM1 framing**, `event_data = target_txid[32]` (EXACTLY 32 binary bytes); ALSO verify XEC outputs according to M1.6. No UTF-8 decoding of the target TXID.
-   - **TIP_RMZ** `(0x02, 0x05)`: this variant is only proposed **inside a distinct ALP/eMPP container** with a TMM-tagged eMPP app entry as defined by M1.6, *not* the ordinary two-push TM1 script. Parsing MUST first dispatch by the actual OP_RETURN container and verify an ALP SEND and a single TMM app entry; this is an additional opt-in indexer/parser profile, not a change to Core v1.0. A legacy TM1 parser MUST NOT treat an eMPP output as a valid TM1 two-push output. The further rule that a TMM entry MUST NOT be classified as TM0 is the unratified proposal in M1.6.8. This sentence does not change the current verifier and does not activate version `0x02`.
+   - **TIP_RMZ** `(0x02, 0x05)`: this variant is only proposed **inside a distinct ALP/eMPP container** with a TMM-tagged eMPP app entry as defined by M1.6, *not* the ordinary two-push TM1 script. Parsing MUST first dispatch by the actual OP_RETURN container and verify an ALP SEND and a single TMM app entry; this is an additional opt-in indexer/parser profile, not a change to Core v1.0. A legacy TM1 parser MUST NOT treat an eMPP output as a valid TM1 two-push output. The further rule that a structurally recognized TMM entry MUST NOT be classified as TM0 is the design approved in M1.6.8. Production still classifies that entry as TM0. This sentence does not change the current verifier and does not activate version `0x02`.
    - `(0x01, 0x01)` **POST**: retain Core v1.0 validation, including strict UTF-8 over its ENTIRE `event_data`. The proposed v2 dispatch MUST NOT loosen this v1.0 requirement.
 2. **Shared author verification:** AFTER the correct event-specific payload validation passes, execute the common designated P2PKH author-input checks in M1.4.2. These checks MUST NOT re-interpret an event's typed payload or impose REPLY UTF-8 rules on binary reactions.
 
@@ -796,11 +796,11 @@ through a separate, reviewed protocol decision. It MUST NOT
 fall back to two unlinked transactions while claiming atomic
 linkage. The proposal does not change TM1 Core v1.0 or imply
 that its legacy indexer understands eMPP/TMM entries.
-The executed classification failure, and the unratified
-dispatch that would separate this container from a
-conventional TM0 memo and from a TM1 Core v1.0 POST, are
-recorded in M1.6.8. That record does not activate the
-container.
+The executed classification failure is recorded in M1.6.8.
+Comment `6559174591` approves the container dispatch as
+design. The isolated prototype cited there validates that
+design on its corpus. Production mitigation remains
+pending. That record does not activate the container.
 
 ### M1.6.5. TipIntent, TipReceipt and verification states
 
@@ -890,8 +890,10 @@ Before any ratification or release, M1.7 MUST include:
   TM1 Core v1.0 LOKAD; and `OP_RETURN OP_RESERVED` carrying
   eMPP entries, including ALP and a proposed TMM entry.
   The 29-case corpus cited in M1.6.8 is the executable
-  reference for the current divergence. It does not
-  implement this dispatch and does not satisfy this bullet.
+  reference for the current production divergence. The
+  isolated prototype on PR #41 checks the approved design
+  under `tests/protocol/` only. It does not put this
+  dispatch into `packages/` and does not satisfy this bullet.
 
 **No on-chain TIP exists as an approved Tonalli Memo event
 yet.** M1.6 is a design candidate only. Integration with the
@@ -905,10 +907,11 @@ create a TIP, transfer XEC as a tip, or transfer RMZ. The
 ALP/eMPP requirements in M1.6.4 and M1.6.7 stay in force as
 design and validation requirements. This draft does not
 implement that container and does not authorize a transfer.
-M1.6.8 records the classification proposal. It is not an
-implementation of that container.
+M1.6.8 records the approved design and the isolated
+prototype. It is not a production implementation of that
+container.
 
-### M1.6.8. Proposed container dispatch — not ratified
+### M1.6.8. Container dispatch — design approved, production mitigation pending
 
 PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272`
 executes `FALSE-TM0-CLASSIFICATION` against production
@@ -920,8 +923,11 @@ is `tests/fixtures/rfc0001-empp-tmm.json`, schema
 29 cases, built with `ecash-lib` 4.13.0. `PROPOSED_SHAPE`
 in that corpus is an independent structural label. It is
 not an acceptance code, not authorship, and not settlement.
-This subsection proposes a later dispatch. It does not
-implement one. Social version `0x02` stays inactive.
+Three layers stay separate in this subsection. Comment
+`6559174591` approves the dispatch as design. PR #41 commit
+`a8130df67b46af2b0a589352d81c132ead3cb551` validates an
+isolated prototype on its corpus. Production mitigation
+remains pending. Social version `0x02` stays inactive.
 
 **Current divergence.** `normalizeOpReturnOutput` calls
 `getStackArray`. `OP_RESERVED` is handled as a one-byte
@@ -1005,10 +1011,18 @@ the over-budget scripts are `malformed`. Absence of a
 memo is not the same status as a malformed container,
 and neither is `UNSUPPORTED_VERSION`.
 
-**Proposed dispatch, unratified.** A future social
-profile, and only after an independent approval, MUST
-classify each output by its container before any TM0
-prefix scan:
+**Approved design.** Comment `6559174591` on this PR,
+written by `xolosArmy` at 2026-11-01T14:18:44Z, approves
+decisions A–E as design. The comment names this document
+at `4d52ebf23c7fdf6cc485cf40cff2a7c414e79784` and the
+then-current PR #41 evidence at
+`dd32ca5ba987b83e7501c44a2fa853d863e2a9a6`. It is an
+architectural mitigation strategy. It is not an
+implemented mitigation, not a ratification of RFC-0001,
+and not permission to change `packages/`. Comment
+`6529195032` stays in force. A social profile that
+implements this design MUST classify each output by its
+container before any TM0 prefix scan:
 
 1. **Conventional `OP_RETURN` with TM0.** The payload is
    TM0 text under the current decoder. It is not an eMPP
@@ -1017,38 +1031,39 @@ prefix scan:
    first data push is LOKAD `544d4d00` in the ratified
    two-push framing. A version `0x01` POST stays on the
    Core contract. Version `0x02` in this same framing
-   stays `UNSUPPORTED_VERSION` until a separate approval.
-   Social version `0x02` stays inactive.
+   stays `UNSUPPORTED_VERSION`. Social version `0x02`
+   stays inactive.
 3. **`OP_RETURN OP_RESERVED` with eMPP entries.** ALP, a
-   proposed TMM entry, and any other eMPP push are
-   container entries. A future TMM classification MUST
-   NOT create a false TM0 candidate and MUST NOT hide a
-   legitimate TM1 POST. The same output MUST NOT be
-   reported as a TM1 POST. Core continues to throw
-   `INVALID_MARKER` on this container until an approved
-   social parser exists.
+   TMM entry, and any other eMPP push are container
+   entries. A structurally recognized TMM entry MUST NOT
+   be a TM0 candidate and MUST NOT hide a legitimate TM1
+   POST. The same output MUST NOT be reported as a TM1
+   POST. Core continues to throw `INVALID_MARKER` on this
+   container. No approved social parser exists.
 
-This proposal does not exclude eMPP indiscriminately.
-It does not simplify the detector in a way that would
-silently change historical verdicts. Which current
-behaviors stay, and which changes need an explicit
-compatibility decision, are listed in M1.9.2. The
-approved real-TM0 plus real-TM1 rule stays in force.
-This text does not modify the TM1 Core v1.0 contract,
-does not change production code, and does not satisfy
-SEC-17, S0-05, S0-06, S0-07, M1.7.4, or `EMPP-ALP`.
+The approved design does not exclude eMPP
+indiscriminately. It does not replace the detector with
+a prefix comparison that would silently change historical
+verdicts. M1.9.2 records decisions A–E. The approved
+real-TM0 plus real-TM1 rule stays in force. This text
+does not modify the TM1 Core v1.0 contract, does not
+change production code, and does not satisfy SEC-17,
+S0-05, S0-06, S0-07, M1.7.4, or `EMPP-ALP`.
 
-**SEC-17 mitigation criteria. None is satisfied.** A
-later change may claim progress only by re-executing
-these 29 cases, or a successor corpus that preserves
-the case identities below, and only after a separate
-governance record accepts the dispatch. Until both
-exist, every item is unsatisfied:
+**SEC-17 production criteria. None is satisfied in
+production.** The governance record now exists. The
+production before-state above is unchanged. A later
+production change may claim progress only by
+re-executing these 29 cases, or a successor corpus that
+preserves the case identities below, against the
+production packages. Until that production change
+exists, every item below is unsatisfied in `packages/`:
 
 1. On `alp-send-plus-one-tmm`, the TMM push MUST NOT
    appear as a TM0 candidate. This item does not
    authorize dropping every eMPP entry from the scan.
-   Decision C in M1.9.2 remains open.
+   Decision C preserves a genuine TM0 text entry and
+   does not treat that recognition as authorship.
 2. That same script MUST remain outside
    `isTm1CandidateScript`, and `parseTm1Output` MUST
    still throw `INVALID_MARKER`, for as long as social
@@ -1066,14 +1081,19 @@ exist, every item is unsatisfied:
    and MUST NOT take the TM0 `INVALID_UTF8` or
    `INVALID_FORMAT` path only because a prefix scan
    selected them.
-6. Malformed eMPP, an unrecognized container, and absence
-   of a memo MUST be distinct statuses. `truncated-script`
+6. Malformed eMPP, an unrecognized container, absence of
+   a memo, and a script past the 223-byte budget MUST be
+   distinguishable in a diagnostic layer. Decision E
+   approves that distinction as an internal diagnosis and
+   does not approve a new public code. `truncated-script`
    is the malformed-eMPP witness. `two-push-social-v2-inactive`
    is the unrecognized ordinary container and stays
    `expected-v2-rejection`. `alp-send-only` is absence of
    a memo entry. `budget-natural-225` and `budget-exact-224`
-   MUST NOT share the no-memo status merely because
-   normalization dropped the script.
+   stay public `NO_MEMO` because `getStackArray` throws.
+   Their internal diagnosis is `BYTE_BUDGET_EXCEEDED`.
+   A 223-byte script that still contains TM0 text stays
+   a candidate.
 7. `two-push-social-v2-inactive` MUST continue to be
    rejected by Core v1.0 with `UNSUPPORTED_VERSION`.
    Social version `0x02` stays inactive.
@@ -1091,6 +1111,78 @@ found no major issues on `72bd470df8` at 2026-10-31T20:07:20Z.
 That receipt is not protocol proof. It does not satisfy
 these criteria and does not close S0-07, `EMPP-ALP`,
 M1.7.4, S0-05, S0-06, or S0.
+
+**Isolated prototype, validated on its corpus.** PR #41
+commit `a8130df67b46af2b0a589352d81c132ead3cb551` adds
+`tests/protocol/sec17-experimental-dispatch.ts`. The
+function is deterministic and has no side effects. It
+imports the production functions and does not replace
+them. The before/after matrix is
+`tests/fixtures/rfc0001-sec17-dispatch-matrix.json`,
+schema `tonalli-memo.rfc0001.sec17-dispatch-matrix.s0`.
+It has 113 rows and zero `BLOCKED` rows: 63 unchanged,
+25 decision A, 7 decision D, 13 decision E, 3 decision C,
+1 decision A with C, and 1 decision B. The frozen corpora
+stay at the SHA-256 values
+`3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8`
+and
+`76776bd3403b59ca69aac9328d9d3ff5d14a0fc396c5e302d35c603eabaec1ca`.
+`packages/protocol`, `packages/verification`,
+`packages/chronik`, and `packages/registry` stay
+byte-identical to baseline
+`228d1f036643ca9be8ba85e91f8200536f3242da`.
+
+On that corpus the prototype reads:
+
+- `alp-send-plus-one-tmm` keeps no TM0 candidate and
+  returns `NO_MEMO`. Core still throws `INVALID_MARKER`.
+  The structural TMM is not a social event and not a
+  settled tip.
+- `empp-beside-one-tm1` keeps one TM1 candidate at output
+  1. It does not return `MULTIPLE_MEMOS`. The fixture has
+  no inputs, so the experimental verdict is `INVALID_TM1`
+  with `AUTHOR_INPUT_OUT_OF_RANGE`. It is not
+  `VERIFIED_TM1`. Cryptographic authorship of a genuine
+  POST that coexists with TMM remains pending.
+- `c-empp-tm0-text` keeps the genuine TM0 text and returns
+  `UNAUTHORIZED`. Authorship stays `NOT_DEMONSTRATED`.
+- `c-empp-tmm-and-tm0-text` keeps only that genuine TM0
+  text. The TMM entry is not a second memo.
+- `d-empp-tm1-pipe`, `d-empp-tm2-pipe`, and
+  `d-empp-tm9-pipe` stay `UNSUPPORTED_VERSION`. A
+  pipe-shaped marker is not a TM1 POST.
+- The 223-byte TM0 text stays a candidate. The 224-byte
+  and 225-byte scripts stay public `NO_MEMO`, with
+  internal `BYTE_BUDGET_EXCEEDED`.
+- `two-push-social-v2-inactive` stays
+  `UNSUPPORTED_VERSION`.
+- A real TM0 beside a real TM1, and two TM1 candidates,
+  stay `MULTIPLE_MEMOS`.
+- The three archived D-07 transactions stay
+  `VERIFIED_TM1` with `trustModel: trusted-chronik`.
+  Their TXID, raw bytes, digest, and
+  `INDEPENDENT_SIGNATURE_VERIFIED` result stay in the
+  local fixture. The prototype settlement field stays
+  `PENDING`.
+
+CI run [41318134086](https://github.com/xolosArmy/tonalli-memo/actions/runs/41318134086)
+completed successfully on that HEAD at 2026-11-01T14:51:03Z.
+Job `test` is `124882444910`. Codex review
+[comment 6559547625](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6559547625)
+reviewed `a8130df67b` at 2026-11-01T14:51:23Z and found
+no major issues. An earlier review of
+`b4ba187bad512f14694a9db2e8087a9053e2e714` required the
+authorization gate to reject a `NO_MEMO` result that
+still retained a memo. That gate is in `a8130df`. Neither
+receipt is protocol proof. The prototype does not satisfy
+the production criteria above and does not close SEC-17,
+S0-07, `EMPP-ALP`, M1.7.4, S0-05, S0-06, or S0.
+
+ALP ancestry, attributable tips, reactions, reorgs, and
+settlement remain pending. A structurally valid ALP SEND
+plus a structurally valid TMM entry is not a valid RMZ
+tip. RFC-0001 remains **PROPOSED — NOT RATIFIED**. S0
+stays **OPEN**. S1 stays **NOT AUTHORIZED**.
 
 ## M1.7. Deterministic conformance vectors and acceptance specification — DRAFT
 
@@ -1305,7 +1397,12 @@ any change that would make the production parser accept
 version `0x02`. An unsigned TMM author byte 255 does not
 close the author-index requirement. None of those items is
 authorized by this draft. The structural corpus is cited
-from M1.6.8. It is not settlement and it is not activation.
+from M1.6.8. The isolated prototype validates the approved
+dispatch on that corpus and does not close M1.7.4.
+Cryptographic authorship of a genuine POST that coexists
+with TMM remains pending, as do ALP ancestry, tips,
+reactions, and reorgs. The corpus is not settlement and
+it is not activation.
 
 **Historical authorization-fixture shape.** The authorship fixtures
 used by the S0-07 comparison push the version, the event type, the
@@ -1367,7 +1464,7 @@ non-coercion, or economic reputation.
 | SEC-14 | **Private-key exfiltration / fee drain:** fake social tip prompt requests seed or hides high fees | Critical | Signing only in noncustodial wallet; display final recipient, amount, token, network and fee; no seed export to web UI (X-07) |
 | SEC-15 | **Cross-network and byte-order confusion:** valid-looking target links to another chain or reversed TXID | High | Key by network+TXID; display-order serialization with exact-once conversion and mismatched-parent tests (C-03) |
 | SEC-16 | **Privacy correlation:** immutable P2PKH activity reveals common authors/funders and transfer history | Medium | Client disclosures and opt-in visibility; avoid false anonymity promises; protect local browsing metadata; no retroactive on-chain deletion |
-| SEC-17 | **Protocol confusion and candidate contamination:** a TMM entry inside `OP_RETURN OP_RESERVED` is scanned as TM0 because its bytes start with `TM`; a binary TMM entry is then decoded as UTF-8 memo text; that false candidate hides a real TM1 POST behind `MULTIPLE_MEMOS`; malformed eMPP, an unrecognized container, and absence of a memo collapse into one visible result | High | Container-first dispatch proposed in M1.6.8 and M1.9.2. The 29 executable cases on PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272` are the reference. The M1.6.8 criteria are stated and are not satisfied. No residual risk is accepted |
+| SEC-17 | **Protocol confusion and candidate contamination:** a TMM entry inside `OP_RETURN OP_RESERVED` is scanned as TM0 because its bytes start with `TM`; a binary TMM entry is then decoded as UTF-8 memo text; that false candidate hides a real TM1 POST behind `MULTIPLE_MEMOS`; malformed eMPP, an unrecognized container, and absence of a memo collapse into one visible result | High | Design approved by comment `6559174591` and recorded in M1.6.8 and M1.9.2. The isolated prototype at PR #41 `a8130df67b46af2b0a589352d81c132ead3cb551` validates that design on a 113-row matrix with zero `BLOCKED` rows. Production packages still show the contamination. The M1.6.8 production criteria are not satisfied. No residual risk is accepted |
 
 Severity is a security triage proposal; it is **not** a claim
 of measured attack likelihood or completed penetration
@@ -1421,10 +1518,13 @@ writing this threat model nor a green documentation CI
 establishes that the listed mitigations have been
 implemented or independently tested.
 
-SEC-17 is part of this matrix. Its checkable criteria
-are written in M1.6.8. Writing them does not satisfy
-SEC-17, does not satisfy S0-06, and does not accept a
-residual risk. SEC-17 has no owner and no date.**
+SEC-17 is part of this matrix. Comment `6559174591`
+approves its container dispatch as design. The isolated
+prototype in M1.6.8 validates that design on its corpus.
+The production criteria in M1.6.8 are not satisfied.
+Writing them does not satisfy SEC-17, does not satisfy
+S0-06, and does not accept a residual risk. SEC-17 has
+no owner and no date.**
 
 ## M1.9. Compatibility, deployment isolation and activation gates — DRAFT
 
@@ -1567,16 +1667,19 @@ change. The approved policy is:
 Social version `0x02` stays inactive. The Core cardinality rule
 restated in M1.2 stays unchanged.
 
-**Proposed container isolation — not ratified.** M1.6.8 proposes,
-and this subsection does not adopt as a norm, a dispatch that
+**Approved container isolation — design only.** Comment
+`6559174591` approves, and M1.6.8 records, a dispatch that
 distinguishes three containers before the TM0 prefix scan:
 conventional `OP_RETURN` with TM0; conventional `OP_RETURN` with
 TM1 Core v1.0; and `OP_RETURN OP_RESERVED` carrying eMPP, ALP, and
-TMM entries. A future TMM classification must not create a false
-TM0 candidate and must not hide a legitimate TM1 POST. The proposal
+TMM entries. A structurally recognized TMM entry must not be a
+TM0 candidate and must not hide a legitimate TM1 POST. The design
 does not exclude eMPP indiscriminately and does not replace the
 detector with a simplification that would silently change historical
-results. No code change is authorized by stating it.
+results. Approving the design does not change production code.
+The isolated prototype validates the design on its corpus.
+Production mitigation remains pending. RFC-0001 remains
+**PROPOSED — NOT RATIFIED**.
 
 **Behaviors the current profiles must preserve.** These results are
 already executed or already approved. A later dispatch MUST keep
@@ -1605,65 +1708,67 @@ them. Preserving them does not meet the SEC-17 criteria.
    as TM1. A raw prefix match on a real TM1 LOKAD therefore does not
    become a second memo candidate.
 
-**Compatibility decisions required before any code change.** The
-29-case corpus shows what the current prefix scan does. It does not
-choose the replacements below. None of these options is ratified.
-An indiscriminate exclusion of every eMPP push is not one of the
-options offered for adoption, because that exclusion would change
-historical results without enumerating them.
+**Decisions A–E — approved as design.** Comment `6559174591`
+approves the five decisions below. The current prefix scan is
+still the production behavior. An indiscriminate exclusion of
+every eMPP push is not approved, because that exclusion would
+change historical results without enumerating them. The isolated
+prototype at PR #41
+`a8130df67b46af2b0a589352d81c132ead3cb551` checks these decisions
+on 113 rows with zero `BLOCKED` rows. That check is corpus
+validation of the design. It is not a production mitigation.
+A production code change is still not authorized.
 
-- **Decision A — TMM prefix.** Stopping the scan from treating a
-  structurally recognized TMM entry as TM0 would replace today's
-  `INVALID_MEMO` (`INVALID_FORMAT` or `INVALID_UTF8`) with a new
-  explicit status. `alp-send-plus-one-tmm` is the witness. The
-  change is verifier-visible. It is not authorized here.
-- **Decision B — TMM beside one real POST.** `empp-beside-one-tm1`
-  is `MULTIPLE_MEMOS` today because the TMM push is a false TM0
-  candidate beside one real TM1 candidate. A container-first
-  dispatch that stops counting that TMM push as TM0 would make the
-  POST visible again, as exactly one TM1 candidate, provided no
-  real TM0 memo is also present. The approved real-TM0 plus real-TM1
-  rule stays. Choosing this visibility change is a compatibility
-  decision because it changes the current verdict. It is not
-  authorized here.
-- **Decision C — historical TM0 text inside eMPP.** The current
-  rule keeps a push of length at least 2 that starts with `TM`
-  when the output is not a TM1 candidate. A well-formed `TM0|…`
-  text entry placed inside an eMPP push would therefore be a TM0
-  candidate today, and a text that passes `decodeMemo` and
-  `validateMemo` would verify as TM0. The 29-case corpus does not
-  contain that shape and does not prove that such a transaction
-  exists on mainnet. Two options remain open, and this draft
-  adopts neither: recognize a well-formed TM0 text entry only
-  after the container has been parsed, or refuse to treat eMPP
-  entries as TM0 only after historical occurrences of that shape
-  have been enumerated. Dropping every eMPP push before that
-  enumeration would silently change the verdict of any such memo.
-- **Decision D — unknown markers that start with `TM`.** Inside
-  an eMPP push, a UTF-8 string that has the TM0 pipe layout and
-  whose marker matches `/^TM\d+$/` but is not the TM0 marker,
-  including a pipe-shaped `TM1`, `TM2`, or `TM9`, follows the
-  current decoder to `UNSUPPORTED_VERSION`, wrapped as
-  `INVALID_MEMO`. A pipe-shaped `TM1` marker is not a binary
-  TM1 POST. A marker that
-  does not match that pattern is `INVALID_MARKER`, after the UTF-8
-  and pipe checks. Invalid UTF-8 stops at `INVALID_UTF8` before
-  the pipes are inspected. Ignoring those pushes would turn
-  `INVALID_MEMO` into `NO_MEMO` or into an unrecognized-container
-  status. That change needs an explicit compatibility decision.
-  It is not made here. The binary TMM entry is not this marker
-  case: its failure today is the false TM0 path in M1.6.8, not a
-  successful unknown-marker classification.
-- **Decision E — scripts over 223 bytes.** `getStackArray` throws
-  when the script hex length is greater than `2 * 223`.
-  Normalization then reports `malformed`, and the verifier returns
-  `NO_MEMO`. `budget-natural-225` and `budget-exact-224` are the
-  witnesses. An explicit byte-budget status would be a
-  verifier-visible change. It must stay distinct from absence of
-  a memo (`alp-send-only`) and from a truncated container
-  (`truncated-script`), which today also returns `NO_MEMO` with
-  normalization `malformed`. The separation is proposed in the
-  SEC-17 criteria and is not satisfied.
+- **Decision A — TMM prefix. Design approved.** A structurally
+  recognized TMM entry inside eMPP is not a TM0 candidate.
+  Binary TMM data is not TM0 text. A malformed recognized TMM
+  entry stays distinct from a structurally valid one, and neither
+  becomes a credited tip. Production today still returns
+  `INVALID_MEMO` (`INVALID_FORMAT` or `INVALID_UTF8`) for
+  `alp-send-plus-one-tmm`. The prototype returns `NO_MEMO` and
+  keeps no TM0 candidate. Production mitigation remains pending.
+- **Decision B — TMM beside one real POST. Design approved.**
+  `empp-beside-one-tm1` is `MULTIPLE_MEMOS` in production because
+  the TMM push is a false TM0 candidate beside one real TM1
+  candidate. The approved design keeps that POST visible and does
+  not create the false `MULTIPLE_MEMOS`. A real TM0 beside a real
+  TM1, and two TM1 candidates, stay `MULTIPLE_MEMOS` under comment
+  `6529195032`. The prototype keeps one TM1 candidate. The fixture
+  has no inputs, so the experimental verdict is `INVALID_TM1`, not
+  `VERIFIED_TM1`. Cryptographic authorship and verification of a
+  genuine POST that coexists with TMM remain pending. Production
+  mitigation remains pending.
+- **Decision C — historical TM0 text inside eMPP. Design
+  approved, provisional.** A well-formed `TM0|…` text entry inside
+  eMPP stays recognizable and stays distinct from TMM. Recognition
+  is not authorship and does not claim a confirmed mainnet
+  occurrence. The prototype keeps that candidate:
+  `c-empp-tm0-text` returns `UNAUTHORIZED` with empty inputs, and
+  `c-empp-tmm-and-tm0-text` keeps only the genuine text. A later
+  restriction requires a historical audit and a new governance
+  decision. Production still counts the TMM entry in the combined
+  case as a second memo.
+- **Decision D — unknown markers that start with `TM`. Design
+  approved as preservation.** Inside an eMPP push, the current
+  decoder order stays: `INVALID_UTF8`, then `INVALID_FORMAT`, then
+  `UNSUPPORTED_VERSION` or `INVALID_MARKER`, then TM0 validation.
+  A pipe-shaped `TM1`, `TM2`, or `TM9` is `UNSUPPORTED_VERSION`
+  and is not a binary TM1 POST. The prototype preserves those
+  codes. Ignoring those pushes is not approved. The binary TMM
+  entry is decision A, not this marker class.
+- **Decision E — budget, malformed container, unrecognized
+  container, and absence of a memo. Design approved as internal
+  diagnosis.** `getStackArray` throws when the script hex length
+  is greater than `2 * 223`. Production then returns `NO_MEMO`.
+  The approved diagnosis distinguishes `BYTE_BUDGET_EXCEEDED`, a
+  malformed or truncated eMPP container, an unrecognized
+  container, and real absence of a memo. It does not add a public
+  code and does not change the ratified Core parser. The prototype
+  keeps the 223-byte TM0 text as a candidate and keeps the
+  224-byte and 225-byte scripts at public `NO_MEMO` with internal
+  `BYTE_BUDGET_EXCEEDED`. `two-push-social-v2-inactive` stays
+  `UNSUPPORTED_VERSION`. A later public status needs a separate
+  authorization. Production mitigation remains pending.
 
 **What the S0-07 comparison does and does not prove.** In the
 comparison at PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070`
@@ -1721,8 +1826,10 @@ reviewed `72bd470df8` and found no major issues. M1.10.1 still treats
 that summary as short of protocol proof. The receipt does not close
 S0-07, `EMPP-ALP`, M1.7.4, S0-05, S0-06, or S0. The same head leaves
 RMZ attribution, ALP ancestry, TIP authorship, reactions, reorgs,
-and settlement pending. FALSE-TM0-CLASSIFICATION is a compatibility
-block, not a resolved dispatch.
+and settlement pending. FALSE-TM0-CLASSIFICATION remains the
+production behavior. Comment `6559174591` approves the design
+that would remove it, and the isolated prototype validates that
+design on its corpus. Production mitigation remains pending.
 
 Unknown v2 formats MUST be distinguishable from invalid
 v1 POSTs. A v1-only node or indexer MUST NOT be required
@@ -1863,8 +1970,8 @@ for every required item.
 | `S0-03` | Designated P2PKH authorship; no silent delegated/P2SH authoring | Regtest POST and REPLY use `author_input_index=0`, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`. Index 1, P2SH rejection and delegated signing **pending** |
 | `S0-04` | On-chain REPLY, reaction/unlike replay, atomic XEC/RMZ TIP schemas specified | REPLY link observed on regtest: POST `754527245d63d478d10df7f4705743bab9a604b4b8f2d74ddc52790387123585` output 1 is spent by REPLY `3f68c65d3b3a92c46b093b25459411ac549fc74b547bcbbff4e53d528e3d4649` input 0 (PR #42 `081d75a762889207283ab7d4434030db30c79b41`). Reaction/unlike replay not executed. XEC/RMZ TIP and ALP/eMPP integration **pending**. The 29-case structural corpus on PR #41 does not perform a transfer |
 | `S0-05` | M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 | Synthetic corpus remains on PR #41. Commit `efe60360b4a276465975b603b833a8eb15f8e080` adds a separate regtest reference for this pair, with negative serialization cases, and does not modify the production parser. Local command `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs` passed, 43 tests. PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272` adds 29 structural ALP/eMPP cases in `tests/fixtures/rfc0001-empp-tmm.json`. They are unsigned, record FALSE-TM0-CLASSIFICATION, and do not complete S0-05. Reorg, reaction, and signed tip fixtures remain **pending**. Historical authorization fixtures push version, event, index, and data separately. Core v1.0 requires two pushes after `OP_RETURN`: the LOKAD ID and the full envelope. Commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` classifies that shape as `fixture-envelope-shape`. Those fixtures may be kept as cryptographic evidence or as negative format cases and MUST NOT be presented as valid canonical TM1 transactions. Additional fixtures with canonical envelopes and verifiable signatures are **pending**. The originals are unchanged, and the S0-07 findings are not withdrawn |
-| `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | M1.8 documents SEC-01 through SEC-17. SEC-17 states verifiable criteria for protocol confusion and candidate contamination. Those criteria are not satisfied. SEC-15, SEC-16, and SEC-17 are not closed by this text. The traceability subsection separates each documented control from what the regtest POST/REPLY pair shows. That pair does not prove those mitigations. No residual risk has an owner and a date. **Pending** |
-| `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` compares the protected trees with baseline `228d1f036643ca9be8ba85e91f8200536f3242da`. It records `application-policy` for a combined TM0 and TM1 candidate (`MULTIPLE_MEMOS`), `trusted-chronik-gap` for the missing digest check, and `fixture-envelope-shape` for multi-push authorization fixtures. Byte-identity of those trees is not exhaustive proof of every historical transaction. Comment `6529195032` approves `S0-07-PROFILE-DECISION` as application policy. The approval does not modify the TM1 Core v1.0 contract and does not satisfy S0-07. PR #41 commit `7796b3364a762013baa313b15e94ce48bfeacd88` records the D-07 sample as 3/3 under the limits in M1.9.2. `HISTORICAL-MAINNET` remains open. PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272` executes 29 structural ALP/eMPP cases and records FALSE-TM0-CLASSIFICATION. The container dispatch in M1.6.8 is an unratified proposal. Its SEC-17 criteria are not satisfied. RMZ attribution, ALP ancestry, TIP authorship, reactions, reorgs, and settlement remain pending. The PR #41 Codex receipt [6528344102](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6528344102) reviews the earlier comparison commit only. Receipt [6548510244](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6548510244) reviews `72bd470df8` and is not protocol proof. Neither receipt closes this gate. **Pending** |
+| `S0-06` | M1.8 threats reviewed with test evidence or approved residual risks, owner and date | M1.8 documents SEC-01 through SEC-17. Comment `6559174591` approves the SEC-17 container dispatch as design. The isolated prototype at PR #41 `a8130df67b46af2b0a589352d81c132ead3cb551` validates that design on 113 matrix rows with zero `BLOCKED` rows. The production criteria are not satisfied. SEC-15, SEC-16, and SEC-17 are not closed by this text. The traceability subsection separates each documented control from what the regtest POST/REPLY pair shows. That pair does not prove those mitigations. No residual risk has an owner and a date. **Pending** |
+| `S0-07` | v1.0 backward-compatibility regression corpus and TM0/TM1 application-profile decision | PR #41 commit `907ba8a2b5f68d346e863187508f7ea5fa3ec070` compares the protected trees with baseline `228d1f036643ca9be8ba85e91f8200536f3242da`. It records `application-policy` for a combined TM0 and TM1 candidate (`MULTIPLE_MEMOS`), `trusted-chronik-gap` for the missing digest check, and `fixture-envelope-shape` for multi-push authorization fixtures. Byte-identity of those trees is not exhaustive proof of every historical transaction. Comment `6529195032` approves `S0-07-PROFILE-DECISION` as application policy. The approval does not modify the TM1 Core v1.0 contract and does not satisfy S0-07. PR #41 commit `7796b3364a762013baa313b15e94ce48bfeacd88` records the D-07 sample as 3/3 under the limits in M1.9.2. `HISTORICAL-MAINNET` remains open. PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272` executes 29 structural ALP/eMPP cases and records FALSE-TM0-CLASSIFICATION. Comment `6559174591` approves decisions A–E as design. PR #41 commit `a8130df67b46af2b0a589352d81c132ead3cb551` validates the isolated dispatch on 113 matrix rows with zero `BLOCKED` rows. Production mitigation remains pending, and the SEC-17 production criteria are not satisfied. Cryptographic authorship of a genuine POST beside TMM, ALP ancestry, tips, reactions, reorgs, and settlement remain pending. The PR #41 Codex receipt [6528344102](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6528344102) reviews the earlier comparison commit only. Receipt [6548510244](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6548510244) reviews `72bd470df8`. Receipt [6559547625](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6559547625) reviews `a8130df67b` and is not protocol proof. None of these receipts closes this gate. **Pending** |
 | `S0-08` | M1.9 activation flags, isolated staging and rollback rehearsed or independently verified to the extent required by the approved gate | Proposed controls only; execution evidence **pending** |
 | `S0-09` | Codex/technical review of the **final, unchanged** PR0 head and all inline P1/P2 findings addressed; CI result recorded | Prior receipts are listed below, including `698609fd787d85cd461aa9d70bc32cb8a4583a01` (no major issues; CI run [40920502706](https://github.com/xolosArmy/tonalli-memo/actions/runs/40920502706) passed). Two earlier inline P2 threads are resolved on those older heads. This head changes the document, so it needs its own Codex review and its own CI result. **Pending** |
 | `S0-10` | Explicit governance decision records exact final RFC SHA, accepted residual risks, ratification date, future scope and effective boundary | **Pending**; Draft PR and document are **PROPOSED — NOT RATIFIED** |
@@ -1890,7 +1997,7 @@ M1.8 writes a control for each identifier from SEC-01 through SEC-17. The table 
 | SEC-13 | Keep a mempool view provisional (P-05, T-06). | Both transactions were confirmed. | Pending. No conflicting mempool case. |
 | SEC-14 | Sign only in the noncustodial wallet, and show recipient, amount, token, network, and fee (X-07). | No wallet UI test. | Pending. Omitting secrets from this document is not a passing control. |
 
-SEC-15, SEC-16, and SEC-17 remain in the M1.8 matrix. This pass does not close them. The display-order vector is one observation beside SEC-15. It is not the mismatched-parent suite. SEC-17 names FALSE-TM0-CLASSIFICATION and states checkable criteria against the 29 PR #41 cases. Those criteria are not satisfied. The structural corpus is not a passing mitigation. M1.8.4 still requires a passing fixture or an accepted residual, with owner and date, before S0-06 can be satisfied.
+SEC-15, SEC-16, and SEC-17 remain in the M1.8 matrix. This pass does not close them. The display-order vector is one observation beside SEC-15. It is not the mismatched-parent suite. SEC-17 names FALSE-TM0-CLASSIFICATION. Comment `6559174591` approves the design. The isolated prototype at `a8130df67b46af2b0a589352d81c132ead3cb551` validates that design on 113 rows with zero `BLOCKED` rows. CI run [41318134086](https://github.com/xolosArmy/tonalli-memo/actions/runs/41318134086) passed, and Codex receipt [6559547625](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6559547625) found no major issues on that HEAD. The production criteria are not satisfied. The prototype is not a passing production mitigation. M1.8.4 still requires a production fixture or an accepted residual, with owner and date, before S0-06 can be satisfied. ALP ancestry, tips, reactions, and reorgs stay pending.
 
 #### S0-07 traceability
 
@@ -1900,14 +2007,16 @@ Comment `6529195032` on this PR, written by `xolosArmy` at 2026-10-30T17:33:45Z,
 
 PR #41 commit `72bd470df8e24eacdaaca59e83d9bea98badf272` is later evidence on the same protected trees. It records the D-07 sample as 3/3 under the limits in M1.9.2, and it records FALSE-TM0-CLASSIFICATION. Codex review [comment 6548510244](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6548510244) found no major issues on `72bd470df8`. M1.10.1 still treats that summary as short of protocol proof. The receipt does not close S0-07, `EMPP-ALP`, M1.7.4, S0-05, S0-06, or S0.
 
+Comment `6559174591` on this PR, written by `xolosArmy` at 2026-11-01T14:18:44Z, approves decisions A–E as design. It does not ratify RFC-0001 and does not authorize a production change. PR #41 commit `a8130df67b46af2b0a589352d81c132ead3cb551` then validates the isolated prototype: 113 matrix rows, zero `BLOCKED` rows, CI run [41318134086](https://github.com/xolosArmy/tonalli-memo/actions/runs/41318134086) successful at 2026-11-01T14:51:03Z, and Codex receipt [comment 6559547625](https://github.com/xolosArmy/tonalli-memo/pull/41#issuecomment-6559547625) on `a8130df67b`. That receipt is not protocol proof. Production mitigation remains pending. The production criteria in M1.6.8 are not satisfied. Cryptographic authorship of a genuine POST that coexists with TMM remains pending, together with ALP ancestry, tips, reactions, and reorgs. The prototype does not close S0-07, `EMPP-ALP`, M1.7.4, S0-05, S0-06, or S0.
+
 | Open item | Why S0-07 stays open |
 | --- | --- |
 | Combined TM0/TM1 profile | Comment `6529195032` approves `S0-07-PROFILE-DECISION`. A TM0 candidate and a TM1 candidate together are `MULTIPLE_MEMOS`. The application does not select one. Two or more TM1 candidates are `MULTIPLE_MEMOS`. An unrelated `OP_RETURN` that is neither TM0 nor TM1 may coexist with one TM1 candidate. The choice is application policy. It does not modify the TM1 Core v1.0 contract and does not satisfy S0-07. |
 | D-07 sample | The sample is 3/3 on a correct Core envelope and on `INDEPENDENT_SIGNATURE_VERIFIED` under the recovered prevout data. Retrieval used `https://chronik.e.cash`, chronik-client 4.3.0, at 2026-10-30T23:02:05Z. Production returns `VERIFIED_TM1` with `trustModel: trusted-chronik`, recorded as `STRUCTURALLY_COMPATIBLE`. The independent checker returns `INDEPENDENT_SIGNATURE_VERIFIED`. Artifact `12744812743` has no raw transaction. The sample is not full-chain coverage, does not claim cryptographically independent prevout provenance, and the September 2026 timestamps do not prove the producing software revision. `HISTORICAL-MAINNET` remains open. |
-| FALSE-TM0-CLASSIFICATION | The 29-case corpus was executed. A canonical eMPP ALP SEND plus one TMM entry is a TM0 candidate and `INVALID_MEMO`, while Core throws `INVALID_MARKER`. M1.6.8 proposes a container dispatch and does not adopt it. The SEC-17 criteria are not satisfied. |
+| FALSE-TM0-CLASSIFICATION | The 29-case corpus was executed. In production, a canonical eMPP ALP SEND plus one TMM entry is a TM0 candidate and `INVALID_MEMO`, while Core throws `INVALID_MARKER`. Comment `6559174591` approves the design that stops counting that TMM entry as TM0. The isolated prototype validates that reading on the corpus. Production mitigation remains pending. The SEC-17 production criteria are not satisfied. |
 | Canonical envelope coverage | Authorization fixtures push version, event, index, and data separately. They are not valid canonical TM1 transactions. Commit `af445925031630918cfdff3399be629a3b95793e` adds `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json`. Those fixtures do not close S0-07. The originals stay unmodified. |
 | Cryptographic verification limits and required tests | `verifyTm1DesignatedInput` checks index, prevout, P2PKH, `scriptSig`, `HASH160`, and sighash. It does not reconstruct or independently verify the signature digest. `trustModel: "trusted-chronik"` requires validity from a trusted eCash source. A synthetic normalized transaction is not that evidence. Synthetic `VERIFIED_TM1` results are verifier-behavior tests, not on-chain confirmations. An independent verifier MUST check signatures under the applicable eCash rules. The independent check of the three D-07 samples does not remove that production gap. M1.7.4 still requires reproducible signed positive and negative fixtures for the open TIP, reaction, and reorg cases. |
-| Container and compatibility profiles in M1.9.2 | Structural ALP/eMPP coverage was executed and records FALSE-TM0-CLASSIFICATION. Decisions A through E are not made. Ancestry, attributable RMZ transfer, TIP authorship, reactions, reorgs, settlement, and social version `0x02` activation remain unproved. The dispatch proposal is not a ratified profile. |
+| Container and compatibility profiles in M1.9.2 | Structural ALP/eMPP coverage was executed and records FALSE-TM0-CLASSIFICATION. Comment `6559174591` approves decisions A through E as design. The isolated prototype at `a8130df67b46af2b0a589352d81c132ead3cb551` validates them on 113 rows with zero `BLOCKED` rows. Production mitigation remains pending. Cryptographic authorship of a genuine POST beside TMM, ALP ancestry, attributable RMZ transfer, TIP authorship, reactions, reorgs, settlement, and social version `0x02` activation remain unproved. The approved design is not a ratified profile and is not a production dispatch. |
 
 Byte-identity of `packages/protocol`, `packages/verification`, `packages/chronik`, and `packages/registry` with baseline `228d1f036643ca9be8ba85e91f8200536f3242da` shows that the cited PR #41 comparisons executed the ratified parser bytes on their corpora. That identity is not exhaustive proof of every historical transaction. No finding from those comparisons is withdrawn by this section. The D-07 3/3 result does not close `HISTORICAL-MAINNET`. The structural corpus does not close `EMPP-ALP` or M1.7.4.
 
@@ -1948,23 +2057,27 @@ authorship, reactions, reorgs, and settlement. The
 29-case structural corpus does not close that gate.
 S0-06 stays pending because SEC-01 through SEC-17
 have no passing mitigation proof and no accepted
-residual. SEC-17 states its criteria and does not
-satisfy them. S0-07 stays open. S0-07 remains
-unsatisfied. Comment `6529195032` approves the
+residual. Comment `6559174591` approves the SEC-17
+design. The isolated prototype validates that design
+on its corpus. Production mitigation remains pending,
+so SEC-17 is not satisfied. S0-07 stays open. S0-07
+remains unsatisfied. Comment `6529195032` approves the
 combined TM0/TM1 application policy and does not
 close this gate. The D-07 sample is 3/3 under the
 limits in M1.9.2. `HISTORICAL-MAINNET` remains open.
 The digest limit is documented here.
-FALSE-TM0-CLASSIFICATION is recorded. The container
-dispatch in M1.6.8 is an unratified proposal.
-Byte-identity of the protected code trees with the
-ratification baseline is not exhaustive proof of
-every historical transaction. This PR MUST NOT assert
-"S0 complete" or "S0-07 satisfied". The head that
-contains this paragraph still needs its own Codex
-review and CI result. The S0 gate remains **OPEN**.
-S1 is **NOT AUTHORIZED**. Social version `0x02` stays
-inactive. RFC-0001 remains **PROPOSED — NOT RATIFIED**.
+FALSE-TM0-CLASSIFICATION remains the production
+behavior. Cryptographic authorship of a genuine POST
+that coexists with TMM, ALP ancestry, tips, reactions,
+and reorgs remain pending. Byte-identity of the
+protected code trees with the ratification baseline
+is not exhaustive proof of every historical
+transaction. This PR MUST NOT assert "S0 complete"
+or "S0-07 satisfied". The head that contains this
+paragraph still needs its own Codex review and CI
+result. The S0 gate remains **OPEN**. S1 is **NOT
+AUTHORIZED**. Social version `0x02` stays inactive.
+RFC-0001 remains **PROPOSED — NOT RATIFIED**.
 
 ### M1.10.3. S1 requirements and acceptance tests
 
