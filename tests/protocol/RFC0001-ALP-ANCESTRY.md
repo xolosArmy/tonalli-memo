@@ -19,7 +19,7 @@ broadcast.
 The synthetic token ticker is `LAB`. Its token id is the TXID of
 `lab-genesis`:
 
-`d884f68291d6168e89b3b483e1ef12c87f18541ca991d81b449fad9767712b56`
+`0c057793012276e1385a60fb06a8b7eae603a55ad9403c7d0a961e48495e1d5d`
 
 That id is not the public RMZ id. Genesis metadata records decimals `2` and
 creates one mint baton. Mint authority in this laboratory is the live baton
@@ -89,9 +89,21 @@ spend of the duplicate-section output is `ALREADY_SPENT`. A consensus-invalid
 transaction is not applied and does not consume UTXOs. `lab-duplicate-prevout`
 repeats one prevout, and `lab-bad-authorship` fails a signature. Later valid
 sends of those same outputs, `lab-after-duplicate-prevout` and
-`lab-after-invalid-signature`, are `LABORATORY_VALID`. None of these local
-applications is a network confirmation. Tip confirmation and settlement stay
-`NOT_DEMONSTRATED`.
+`lab-after-invalid-signature`, are `LABORATORY_VALID`.
+
+A digest match against the pubkey inside scriptSig is not ownership of the
+prevout. `lab-wrong-key-token` puts A's signature on the designated fee input
+and B's signature on a LAB prevout locked to A. `signatureMatches` accepts
+input 1. The prevout HASH160 check rejects it as `CONSENSUS_INVALID`, so the
+output stays spendable by A in `lab-after-wrong-key`. The row is not
+`LABORATORY_ATTRIBUTED`.
+
+A signature-valid transaction that spends one already-consumed output and one
+fresh output is `ALREADY_SPENT` and consensus-invalid. It does not mark the
+fresh output spent, including when the ALP action itself would fail to parse.
+`lab-after-conflict` and `lab-after-conflict-malformed` spend those fresh
+outputs and are `LABORATORY_VALID`. None of these local applications is a
+network confirmation. Tip confirmation and settlement stay `NOT_DEMONSTRATED`.
 A detached claim that the laboratory token has 8 decimals is
 `DECIMAL_MISMATCH`. A claim that the public RMZ id has 2 decimals finds no
 genesis in this chain.

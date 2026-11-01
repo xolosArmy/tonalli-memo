@@ -288,6 +288,42 @@ export function sighashByteAt(rawTransactionHex, inputIndex) {
   return pushes[0].data[pushes[0].data.length - 1];
 }
 
+/**
+ * A digest match against the scriptSig pubkey is not enough. The pubkey
+ * must also be the key committed by that input's P2PKH prevout.
+ */
+export function inputUnlockMatchesPrevout(rawTransactionHex, prevouts, inputIndex, algorithm) {
+  const tx = parseTx(rawTransactionHex);
+  const input = tx.inputs[inputIndex];
+  const prevout = prevouts[inputIndex];
+  if (input === undefined || prevout === undefined || prevout.outputScriptHex == null) {
+    return false;
+  }
+  if (prevout.scriptType !== undefined && prevout.scriptType !== "p2pkh") {
+    return false;
+  }
+  const expectedHash = p2pkhHash(prevout.outputScriptHex);
+  const pushes = parsePushes(input.script);
+  if (
+    expectedHash === null ||
+    pushes === null ||
+    pushes.length !== 2 ||
+    pushes.some((push) => !push.minimal) ||
+    pushes[0].data.length < 2 ||
+    !isCompressedOrUncompressed(pushes[1].data)
+  ) {
+    return false;
+  }
+  if (toHex(hash160(pushes[1].data)) !== toHex(expectedHash)) {
+    return false;
+  }
+  const sighashByte = pushes[0].data[pushes[0].data.length - 1];
+  if (sighashByte !== 0x41 && sighashByte !== 0xc1) {
+    return false;
+  }
+  return signatureMatches(rawTransactionHex, prevouts, inputIndex, algorithm);
+}
+
 export function signatureMatches(rawTransactionHex, prevouts, inputIndex, algorithm) {
   const tx = parseTx(rawTransactionHex);
   const input = tx.inputs[inputIndex];

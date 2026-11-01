@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { evaluateLaboratory } from "./alp-ancestry-independent.mjs";
-import { signatureMatches } from "./canonical-tm1-independent-verify.mjs";
+import { inputUnlockMatchesPrevout, signatureMatches } from "./canonical-tm1-independent-verify.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_PATH = join(REPO_ROOT, "tests/fixtures/rfc0001-alp-ancestry.json");
@@ -176,7 +176,10 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       "lab-duplicate-prevout",
       "lab-reuse-after-invalid",
       "lab-malformed-action",
-      "lab-sponsor-signs-foreign-tokens"
+      "lab-sponsor-signs-foreign-tokens",
+      "lab-wrong-key-token",
+      "lab-conflict-fresh",
+      "lab-conflict-malformed"
     ];
     for (const id of repaired) {
       const tip = tipById(transcript, id);
@@ -235,7 +238,68 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       applied: false
     });
     expect(tipById(transcript, "lab-double-spend").layers.alpChainReasons).toContain("ALREADY_SPENT");
+    expect(transcript.chain.byId["lab-double-spend"].consensus).toBe("INVALID");
     expect(transcript.chain.byId["lab-double-first"].ancestry).toBe("LABORATORY_VALID");
+    expect(transcript.chain.byId["lab-conflict-fresh"]).toMatchObject({
+      ancestry: "INVALID",
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["ALREADY_SPENT"]
+    });
+    expect(transcript.chain.byId["lab-conflict-fresh"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.doubleSpend,
+      fixture.layout.collateral
+    ]);
+    expect(transcript.chain.byId["lab-after-conflict"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true
+    });
+    expect(transcript.chain.byId["lab-after-conflict"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.collateral
+    ]);
+    expect(transcript.chain.byId["lab-conflict-malformed"]).toMatchObject({
+      ancestry: "INVALID",
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["ALREADY_SPENT"],
+      coloredOutputs: []
+    });
+    expect(transcript.chain.byId["lab-after-conflict-malformed"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      applied: true
+    });
+    expect(transcript.chain.byId["lab-after-conflict-malformed"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.collateralMalformed
+    ]);
+    const wrongKey = fixture.transactions.find((item) => item.id === "lab-wrong-key-token");
+    expect(signatureMatches(wrongKey.rawTransactionHex, wrongKey.inputs, 0, "schnorr")).toBe(true);
+    expect(signatureMatches(wrongKey.rawTransactionHex, wrongKey.inputs, 1, "schnorr")).toBe(true);
+    expect(inputUnlockMatchesPrevout(wrongKey.rawTransactionHex, wrongKey.inputs, 0, "schnorr")).toBe(true);
+    expect(inputUnlockMatchesPrevout(wrongKey.rawTransactionHex, wrongKey.inputs, 1, "schnorr")).toBe(false);
+    expect(transcript.chain.byId["lab-wrong-key-token"]).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["CONSENSUS_INVALID"],
+      coloredOutputs: []
+    });
+    expect(tipById(transcript, "lab-wrong-key-token")).toMatchObject({
+      receiptState: "INVALID_ASSET",
+      laboratoryTransfer: "REJECTED",
+      layers: {
+        container: "VALID",
+        authorship: "LAB_VALID",
+        alpChain: "INVALID",
+        attributableAtoms: "0"
+      }
+    });
+    expect(transcript.chain.byId["lab-after-wrong-key"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      applied: true
+    });
+    expect(transcript.chain.byId["lab-after-wrong-key"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.wrongKey
+    ]);
     expect(tipById(transcript, "lab-wrong-recipient").receiptState).toBe("INVALID_RECIPIENT");
     expect(tipById(transcript, "lab-zero-atoms")).toMatchObject({
       receiptState: "NO_VALUE_TRANSFER",

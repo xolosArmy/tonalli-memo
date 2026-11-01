@@ -2,9 +2,9 @@ import { Buffer } from "node:buffer";
 
 import {
   classifyAuthor,
+  inputUnlockMatchesPrevout,
   p2pkhHash,
   parseTx,
-  signatureMatches,
   toHex,
   txidOf
 } from "./canonical-tm1-independent-verify.mjs";
@@ -382,7 +382,7 @@ export function evaluateChain(document) {
         return false;
       }
       try {
-        if (!signatureMatches(record.rawTransactionHex, record.inputs, index, "schnorr")) {
+        if (!inputUnlockMatchesPrevout(record.rawTransactionHex, record.inputs, index, "schnorr")) {
           return false;
         }
       } catch {
@@ -397,8 +397,13 @@ export function evaluateChain(document) {
     const txid = txidOf(record.rawTransactionHex);
     const outpointKeys = tx.inputs.map((input) => `${input.prevTxid}:${input.outIdx}`);
     const duplicatePrevout = outpointKeys.some((key, index) => outpointKeys.indexOf(key) !== index);
-    if (duplicatePrevout || !signaturesHold(record)) {
-      reject(record, txid, [duplicatePrevout ? "DUPLICATE_PREVOUT" : "CONSENSUS_INVALID"], {
+    const spentConflict = tx.inputs.some((input) => {
+      const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
+      return utxo !== undefined && utxo.spent === true;
+    });
+    if (duplicatePrevout || !signaturesHold(record) || spentConflict) {
+      const reason = duplicatePrevout ? "DUPLICATE_PREVOUT" : spentConflict ? "ALREADY_SPENT" : "CONSENSUS_INVALID";
+      reject(record, txid, [reason], {
         consensus: "INVALID",
         applied: false,
         consumed: referenced(tx)
@@ -467,7 +472,7 @@ export function evaluateChain(document) {
       resolved.push({ key, external: false, ...utxo });
     }
     if (repeatedPrevout || unresolved || alreadySpent) {
-      if (!repeatedPrevout) {
+      if (!repeatedPrevout && !alreadySpent) {
         for (const input of resolved) {
           if (input.key !== null) {
             utxos.get(input.key).spent = true;
@@ -480,7 +485,7 @@ export function evaluateChain(document) {
           ? "PREVOUT_NOT_IN_CHAIN"
           : "ALREADY_SPENT";
       reject(record, txid, [reason], {
-        consensus: repeatedPrevout ? "INVALID" : "VALID",
+        consensus: repeatedPrevout || alreadySpent ? "INVALID" : "VALID",
         applied: false,
         consumed: resolved.filter((input) => !input.external).map(consumedView)
       });

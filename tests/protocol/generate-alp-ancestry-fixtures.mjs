@@ -7,7 +7,14 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { evaluateLaboratory, parseAlpSection, RMZ_TOKEN_ID } from "./alp-ancestry-independent.mjs";
-import { p2pkhHash, parseTx, signatureMatches, toHex, txidOf } from "./canonical-tm1-independent-verify.mjs";
+import {
+  inputUnlockMatchesPrevout,
+  p2pkhHash,
+  parseTx,
+  signatureMatches,
+  toHex,
+  txidOf
+} from "./canonical-tm1-independent-verify.mjs";
 import {
   agree,
   assertFixtureHasNoPrivateKeys,
@@ -87,11 +94,15 @@ function fee(owner, sats = 100000n) {
 }
 
 function spend(snapshot, outIdx, owner) {
+  return spendSignedBy(snapshot, outIdx, owner);
+}
+
+function spendSignedBy(snapshot, outIdx, signer) {
   const output = snapshot.outputs[outIdx];
   return {
     external: false,
     spec: {
-      keyName: owner,
+      keyName: signer,
       sats: BigInt(output.sats),
       prevOut: { txid: snapshot.txid, outIdx },
       outputScript: new Script(fromHex(output.scriptHex)),
@@ -203,6 +214,9 @@ const labAtoms = [
   ["authorA", 5000n],
   ["authorA", 5000n],
   ["authorB", 5000n],
+  ["authorA", 5000n],
+  ["authorA", 5000n],
+  ["authorA", 5000n],
   ["authorA", 5000n]
 ];
 
@@ -226,10 +240,13 @@ const layout = {
   malformed: 17,
   foreignOwner: 18,
   sponsored: 19,
-  baton: 20
+  wrongKey: 20,
+  collateral: 21,
+  collateralMalformed: 22,
+  baton: 23
 };
 
-assert(labAtoms.length === 19, "Genesis atom outputs drifted.");
+assert(labAtoms.length === 22, "Genesis atom outputs drifted.");
 assert(layout.baton === labAtoms.length + 1, "Mint baton index drifted.");
 
 function buildFixtures() {
@@ -619,6 +636,118 @@ function buildFixtures() {
     afterDuplicateParts,
     finalize(afterDuplicateParts.map((part) => part.spec), [
       { sats: 0n, script: emppScript([afterDuplicatePush]) },
+      carrier("authorB")
+    ])
+  ));
+
+  const wrongKeyPush = alpSend(labId, ALP_STANDARD, [125n, 4875n]);
+  expectSection(wrongKeyPush, "SEND");
+  const wrongKeyParts = [fee("authorA"), spendSignedBy(genesis, layout.wrongKey, "authorB")];
+  const wrongKey = publish(
+    "lab-wrong-key-token",
+    0,
+    wrongKeyParts,
+    finalize(wrongKeyParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([wrongKeyPush, tmmEntry(0)]) },
+      carrier("observer"),
+      carrier("authorA")
+    ])
+  );
+  remember(wrongKey);
+  assert(
+    signatureMatches(wrongKey.record.rawTransactionHex, wrongKey.record.inputs, 1, "schnorr"),
+    "Wrong-key token input did not produce a digest match."
+  );
+  assert(
+    inputUnlockMatchesPrevout(wrongKey.record.rawTransactionHex, wrongKey.record.inputs, 1, "schnorr") === false,
+    "Wrong-key token input matched the prevout lock."
+  );
+  assert(
+    inputUnlockMatchesPrevout(wrongKey.record.rawTransactionHex, wrongKey.record.inputs, 0, "schnorr"),
+    "Designated fee input did not unlock its own prevout."
+  );
+  tip("lab-wrong-key-token", "lab-wrong-key-token", 0, "observer");
+
+  const afterWrongKeyPush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(afterWrongKeyPush, "SEND");
+  const afterWrongKeyParts = [spend(genesis, layout.wrongKey, "authorA"), fee("authorA")];
+  remember(publish(
+    "lab-after-wrong-key",
+    0,
+    afterWrongKeyParts,
+    finalize(afterWrongKeyParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([afterWrongKeyPush]) },
+      carrier("authorB")
+    ])
+  ));
+
+  const conflictPush = alpSend(labId, ALP_STANDARD, [7000n]);
+  expectSection(conflictPush, "SEND");
+  const conflictParts = [
+    spend(genesis, layout.doubleSpend, "authorA"),
+    spend(genesis, layout.collateral, "authorA"),
+    fee("authorA")
+  ];
+  remember(publish(
+    "lab-conflict-fresh",
+    0,
+    conflictParts,
+    finalize(conflictParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([conflictPush, tmmEntry(0)]) },
+      carrier("authorB")
+    ])
+  ));
+  tip("lab-conflict-fresh", "lab-conflict-fresh", 0, "authorB");
+
+  const afterConflictPush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(afterConflictPush, "SEND");
+  const afterConflictParts = [spend(genesis, layout.collateral, "authorA"), fee("authorA")];
+  remember(publish(
+    "lab-after-conflict",
+    0,
+    afterConflictParts,
+    finalize(afterConflictParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([afterConflictPush]) },
+      carrier("authorB")
+    ])
+  ));
+
+  const conflictMalformedPush = withHighBitAction(alpSend(labId, ALP_STANDARD, [5000n]));
+  const conflictMalformedParts = [
+    spend(genesis, layout.doubleSpend, "authorA"),
+    spend(genesis, layout.collateralMalformed, "authorA"),
+    fee("authorA")
+  ];
+  const conflictMalformed = publish(
+    "lab-conflict-malformed",
+    0,
+    conflictMalformedParts,
+    finalize(conflictMalformedParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([conflictMalformedPush, tmmEntry(0)]) },
+      carrier("authorA")
+    ])
+  );
+  remember(conflictMalformed);
+  assert(
+    inputUnlockMatchesPrevout(
+      conflictMalformed.record.rawTransactionHex,
+      conflictMalformed.record.inputs,
+      0,
+      "schnorr"
+    ),
+    "Malformed conflict did not unlock its spent prevout."
+  );
+  tip("lab-conflict-malformed", "lab-conflict-malformed", 0, "authorA");
+
+  const afterMalformedConflictPush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(afterMalformedConflictPush, "SEND");
+  const afterMalformedConflictParts = [spend(genesis, layout.collateralMalformed, "authorA"), fee("authorA")];
+  remember(publish(
+    "lab-after-conflict-malformed",
+    0,
+    afterMalformedConflictParts,
+    finalize(afterMalformedConflictParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([afterMalformedConflictPush]) },
       carrier("authorB")
     ])
   ));
