@@ -4,6 +4,7 @@ import {
   classifyAuthor,
   p2pkhHash,
   parseTx,
+  signatureMatches,
   toHex,
   txidOf
 } from "./canonical-tm1-independent-verify.mjs";
@@ -274,6 +275,8 @@ function ownerOf(script) {
 function finishEntry(partial) {
   return {
     realRmzGenealogy: "NOT_DEMONSTRATED",
+    consensus: "VALID",
+    applied: false,
     ...partial,
     issuedAtoms: atoms(partial.issuedAtoms),
     inputAtoms: atoms(partial.inputAtoms),
@@ -333,6 +336,17 @@ export function evaluateChain(document) {
     });
   };
 
+  const referenced = (tx) => {
+    const consumed = [];
+    for (const input of tx.inputs) {
+      const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
+      if (utxo !== undefined) {
+        consumed.push(consumedView(utxo));
+      }
+    }
+    return consumed;
+  };
+
   const consumeKnown = (tx) => {
     const consumed = [];
     const seen = new Set();
@@ -352,9 +366,45 @@ export function evaluateChain(document) {
     return consumed;
   };
 
+  const signaturesHold = (record) => {
+    let tx;
+    try {
+      tx = parseTx(record.rawTransactionHex);
+    } catch {
+      return false;
+    }
+    if (!Array.isArray(record.inputs) || record.inputs.length !== tx.inputs.length) {
+      return false;
+    }
+    for (let index = 0; index < tx.inputs.length; index += 1) {
+      const prevout = record.inputs[index];
+      if (prevout?.outputScriptHex == null || prevout.prevoutSats == null) {
+        return false;
+      }
+      try {
+        if (!signatureMatches(record.rawTransactionHex, record.inputs, index, "schnorr")) {
+          return false;
+        }
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+
   for (const record of document.transactions) {
     const tx = parseTx(record.rawTransactionHex);
     const txid = txidOf(record.rawTransactionHex);
+    const outpointKeys = tx.inputs.map((input) => `${input.prevTxid}:${input.outIdx}`);
+    const duplicatePrevout = outpointKeys.some((key, index) => outpointKeys.indexOf(key) !== index);
+    if (duplicatePrevout || !signaturesHold(record)) {
+      reject(record, txid, [duplicatePrevout ? "DUPLICATE_PREVOUT" : "CONSENSUS_INVALID"], {
+        consensus: "INVALID",
+        applied: false,
+        consumed: referenced(tx)
+      });
+      continue;
+    }
     const script = tx.outputs[0]?.script;
     const parsedPushes = script === undefined ? { error: "NOT_EMPP", pushes: [] } : readPushes(script);
     if (parsedPushes.error !== null) {
@@ -386,13 +436,13 @@ export function evaluateChain(document) {
     const resolved = [];
     let unresolved = false;
     let alreadySpent = false;
-    let duplicatePrevout = false;
+    let repeatedPrevout = false;
     const seenKeys = new Set();
     for (let index = 0; index < tx.inputs.length; index += 1) {
       const input = tx.inputs[index];
       const key = `${input.prevTxid}:${input.outIdx}`;
       if (seenKeys.has(key)) {
-        duplicatePrevout = true;
+        repeatedPrevout = true;
       }
       seenKeys.add(key);
       const utxo = utxos.get(key);
@@ -416,18 +466,22 @@ export function evaluateChain(document) {
       }
       resolved.push({ key, external: false, ...utxo });
     }
-    if (duplicatePrevout || unresolved || alreadySpent) {
-      for (const input of resolved) {
-        if (input.key !== null) {
-          utxos.get(input.key).spent = true;
+    if (repeatedPrevout || unresolved || alreadySpent) {
+      if (!repeatedPrevout) {
+        for (const input of resolved) {
+          if (input.key !== null) {
+            utxos.get(input.key).spent = true;
+          }
         }
       }
-      const reason = duplicatePrevout
+      const reason = repeatedPrevout
         ? "DUPLICATE_PREVOUT"
         : unresolved
           ? "PREVOUT_NOT_IN_CHAIN"
           : "ALREADY_SPENT";
       reject(record, txid, [reason], {
+        consensus: repeatedPrevout ? "INVALID" : "VALID",
+        applied: false,
         consumed: resolved.filter((input) => !input.external).map(consumedView)
       });
       continue;
@@ -553,6 +607,8 @@ export function evaluateChain(document) {
       id: record.id,
       txid,
       ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true,
       reasons: [],
       tokenId,
       genesisReference: section.kind === "GENESIS" ? txid : parent.txid,
@@ -660,7 +716,7 @@ function inspectContainer(rawTransactionHex, authorInputIndex, targetTxid) {
   };
 }
 
-function attributeAmount(chainEntry, rawTransactionHex, recipient, sectionTokenId) {
+function attributeAmount(chainEntry, rawTransactionHex, recipient, sectionTokenId, authorOwner) {
   const tx = parseTx(rawTransactionHex);
   const declared = chainEntry.declaredAtomMap.map((entry) => ({
     ...entry,
@@ -683,10 +739,11 @@ function attributeAmount(chainEntry, rawTransactionHex, recipient, sectionTokenI
   }
   const funding = chainEntry.consumed.filter((input) => input.tokenId === sectionTokenId && input.baton === false && BigInt(input.atoms) > 0n);
   const owners = new Set(funding.map((input) => input.owner));
+  const soleOwner = owners.size === 1 ? [...owners][0] : null;
   let fundingState = "UNATTRIBUTED";
-  if (funding.length === 0 || owners.size !== 1) {
+  if (funding.length === 0 || soleOwner === null || soleOwner !== authorOwner) {
     fundingState = "AMBIGUOUS";
-  } else if ([...owners][0] === recipient) {
+  } else if (soleOwner === recipient) {
     fundingState = "SELF";
   } else {
     fundingState = "SINGLE_OWNER";
@@ -727,7 +784,17 @@ export function attributeTip(document, chain, tip) {
     alpChain = "INVALID";
     alpChainReasons.push("DECIMAL_MISMATCH");
   }
-  const amount = attributeAmount(chainEntry, record.rawTransactionHex, tip.recipient, chainEntry.tokenId);
+  const designated = record.inputs[tip.authorInputIndex];
+  const authorOwner = designated?.outputScriptHex === undefined
+    ? null
+    : ownerOf(Buffer.from(designated.outputScriptHex, "hex"));
+  const amount = attributeAmount(
+    chainEntry,
+    record.rawTransactionHex,
+    tip.recipient,
+    chainEntry.tokenId,
+    authorOwner
+  );
   const layers = {
     container: container.valid ? "VALID" : "INVALID",
     containerReasons: container.reasons,

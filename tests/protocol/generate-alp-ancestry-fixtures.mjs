@@ -110,15 +110,13 @@ function tmmEntry(author) {
   return body;
 }
 
-function corruptSendAction(rawTransactionHex) {
-  const tx = Tx.fromHex(rawTransactionHex);
-  const script = Buffer.from(tx.outputs[0].script.toHex(), "hex");
+function withHighBitAction(push) {
+  const bytes = Buffer.from(push);
   const marker = Buffer.from("000453454e44", "hex");
-  const at = script.indexOf(marker);
+  const at = bytes.indexOf(marker);
   assert(at >= 0, "Could not find the SEND action bytes.");
-  script[at + 2] = 0xd3;
-  tx.outputs[0].script = new Script(Uint8Array.from(script));
-  return tx.toHex();
+  bytes[at + 2] = 0xd3;
+  return bytes;
 }
 
 function flipSignature(rawTransactionHex, inputIndex) {
@@ -203,6 +201,8 @@ const labAtoms = [
   ["authorA", 5000n],
   ["authorB", 5000n],
   ["authorA", 5000n],
+  ["authorA", 5000n],
+  ["authorB", 5000n],
   ["authorA", 5000n]
 ];
 
@@ -224,10 +224,12 @@ const layout = {
   multiB: 15,
   duplicatePrevout: 16,
   malformed: 17,
-  baton: 18
+  foreignOwner: 18,
+  sponsored: 19,
+  baton: 20
 };
 
-assert(labAtoms.length === 17, "Genesis atom outputs drifted.");
+assert(labAtoms.length === 19, "Genesis atom outputs drifted.");
 assert(layout.baton === labAtoms.length + 1, "Mint baton index drifted.");
 
 function buildFixtures() {
@@ -487,14 +489,23 @@ function buildFixtures() {
   tipShape("lab-reuse-after-invalid", reuseParts, 0, [5000n], ["authorB"]);
   tip("lab-reuse-after-invalid", "lab-reuse-after-invalid", 0, "authorB");
 
-  tipShape(
+  const malformedPush = withHighBitAction(alpSend(labId, ALP_STANDARD, [5000n]));
+  const malformedParsed = parseAlpSection(Uint8Array.from(malformedPush));
+  assert(malformedParsed.ok === false && malformedParsed.reason === "MALFORMED", "High-bit action was admitted.");
+  const malformedParts = [spend(genesis, layout.malformed, "authorA"), fee("authorA")];
+  const malformed = publish(
     "lab-malformed-action",
-    [spend(genesis, layout.malformed, "authorA"), fee("authorA")],
     0,
-    [5000n],
-    ["authorA"],
-    labId,
-    corruptSendAction
+    malformedParts,
+    finalize(malformedParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([malformedPush, tmmEntry(0)]) },
+      carrier("authorA")
+    ])
+  );
+  remember(malformed);
+  assert(
+    signatureMatches(malformed.record.rawTransactionHex, malformed.record.inputs, 0, "schnorr"),
+    "A base-valid malformed SEND must still carry a verifying signature."
   );
   tip("lab-malformed-action", "lab-malformed-action", 0, "authorA");
 
@@ -555,6 +566,62 @@ function buildFixtures() {
   tipShape("lab-double-spend", secondParts, 0, [2000n], ["observer"]);
   tip("lab-double-spend", "lab-double-spend", 0, "observer");
   assert(first.txid !== genesis.txid, "Double-spend fixture did not build a distinct first spend.");
+
+  const sponsored = tipShape(
+    "lab-sponsor-signs-foreign-tokens",
+    [fee("authorA"), spend(genesis, layout.foreignOwner, "authorB")],
+    0,
+    [125n, 4875n],
+    ["observer", "authorB"]
+  );
+  for (const index of [0, 1]) {
+    assert(
+      signatureMatches(sponsored.record.rawTransactionHex, sponsored.record.inputs, index, "schnorr"),
+      `Sponsor counterexample input ${index} did not verify.`
+    );
+  }
+  tip("lab-sponsor-signs-foreign-tokens", "lab-sponsor-signs-foreign-tokens", 0, "observer");
+
+  const ownedWithForeignXec = tipShape(
+    "lab-author-owns-tokens-foreign-xec",
+    [fee("authorB"), spend(genesis, layout.sponsored, "authorA")],
+    1,
+    [125n, 4875n],
+    ["observer", "authorA"]
+  );
+  for (const index of [0, 1]) {
+    assert(
+      signatureMatches(ownedWithForeignXec.record.rawTransactionHex, ownedWithForeignXec.record.inputs, index, "schnorr"),
+      `Foreign-XEC control input ${index} did not verify.`
+    );
+  }
+  tip("lab-author-owns-tokens-foreign-xec", "lab-author-owns-tokens-foreign-xec", 1, "observer");
+
+  const afterSignaturePush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(afterSignaturePush, "SEND");
+  const afterSignatureParts = [spend(genesis, layout.badAuthor, "authorA"), fee("authorA")];
+  remember(publish(
+    "lab-after-invalid-signature",
+    0,
+    afterSignatureParts,
+    finalize(afterSignatureParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([afterSignaturePush]) },
+      carrier("authorB")
+    ])
+  ));
+
+  const afterDuplicatePush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(afterDuplicatePush, "SEND");
+  const afterDuplicateParts = [spend(genesis, layout.duplicatePrevout, "authorA"), fee("authorA")];
+  remember(publish(
+    "lab-after-duplicate-prevout",
+    0,
+    afterDuplicateParts,
+    finalize(afterDuplicateParts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([afterDuplicatePush]) },
+      carrier("authorB")
+    ])
+  ));
 
   const document = {
     schema: "tonalli-memo.rfc0001.alp-ancestry.s0",

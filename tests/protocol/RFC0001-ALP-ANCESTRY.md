@@ -19,7 +19,7 @@ broadcast.
 The synthetic token ticker is `LAB`. Its token id is the TXID of
 `lab-genesis`:
 
-`d5a9b0bb32a035da2d7deeefa8a6ed00e74059d02a27c6c46a8d40ccc560d816`
+`d884f68291d6168e89b3b483e1ef12c87f18541ca991d81b449fad9767712b56`
 
 That id is not the public RMZ id. Genesis metadata records decimals `2` and
 creates one mint baton. Mint authority in this laboratory is the live baton
@@ -32,10 +32,27 @@ ticker `DEC`, records decimals `0`.
 
 Two locally consistent tip transactions, author input 0 and author input 1,
 attribute `125` laboratory atoms to the other key. Their receipt state is
-`PENDING`. Confirmation and settlement are `NOT_DEMONSTRATED`. The synthetic
-target TXID is not a verified post. `socialEventCredited` stays false.
-`realRmzTip` stays false. The laboratory transfer label is
-`LABORATORY_ATTRIBUTED`, which is not a settled payment.
+`PENDING`. A third positive control, `lab-author-owns-tokens-foreign-xec`,
+keeps that result when author B adds an XEC fee input and author A, designated
+at input 1, still owns the only LAB prevout. Confirmation and settlement are
+`NOT_DEMONSTRATED`. The synthetic target TXID is not a verified post.
+`socialEventCredited` stays false. `realRmzTip` stays false. The laboratory
+transfer label is `LABORATORY_ATTRIBUTED`, which is not a settled payment.
+
+The designated author HASH160 must own every fungible input of the token
+being transferred. An XEC input from another sponsor is not token ownership.
+A valid signature by A does not attribute B's atoms to A. Foreign or
+ambiguous funding stays `AMBIGUOUS_TIP_FUNDING` and credits `0`. That label
+is experimental. It is not a new public receipt code.
+
+Before this binding rule, the signed counterexample
+`lab-sponsor-signs-foreign-tokens` was evaluated on the previous oracle.
+A signs input 0 and pays the fee. B signs input 1 and owns the only LAB
+prevout, genesis output 18, 5000 atoms. Observer C receives 125 atoms. The
+SEND conserves atoms and both Schnorr signatures verify. The observed
+receipt was `PENDING` / `LABORATORY_ATTRIBUTED` with `125` attributable
+atoms. That observation is the gap. The same transaction now stays
+`AMBIGUOUS_TIP_FUNDING` with attributable `0` and naive `125`.
 
 The same container with a correct 39-byte TMM entry does not repair a bad
 SEND. These rows keep `tmmStructurallyValid: true` and
@@ -47,15 +64,16 @@ SEND. These rows keep `tmmStructurallyValid: true` and
 | Missing prevout | `PREVOUT_NOT_IN_CHAIN` | `INVALID_ASSET` |
 | Amount raised from 5000 to 5001 | `INFLATED` | `INVALID_ASSET` |
 | Second spend of the same colored output | `ALREADY_SPENT` | `INVALID_ASSET` |
-| Two inputs in one transaction spend the same prevout | `DUPLICATE_PREVOUT` | `INVALID_ASSET` |
+| Two inputs in one transaction spend the same prevout | `DUPLICATE_PREVOUT`, consensus invalid, UTXO not consumed | `INVALID_ASSET` |
 | SEND after a token-invalid spend of the same output | `ALREADY_SPENT` | `INVALID_ASSET` |
-| Action byte `0xD3` accepted by a lossy ASCII decode | `MALFORMED` | `INVALID_ASSET` |
+| Action byte `0xD3` inside a signature-valid transaction | `MALFORMED`, consensus valid, input burned | `INVALID_ASSET` |
+| A signs the designated fee input; B owns the LAB prevout; C receives 125 | chain exact, both signatures valid | `AMBIGUOUS_TIP_FUNDING` |
 | SEND of `LAB` spending the `FOR` output | `FOREIGN_TOKEN` | `INVALID_ASSET` |
 | Public RMZ id, no genesis in this chain | `NOT_DEMONSTRATED` | `INVALID_ASSET` |
 | SEND that spends a mint baton | `BATON_NOT_TRANSFERABLE` | `INVALID_ASSET` |
 | `DEC` token presented as decimals 2 | `DECIMAL_MISMATCH` | `INVALID_ASSET` |
 | Two ALP sections beside one TMM | `MULTIPLE_ALP_SECTIONS` | rejected |
-| Flipped Schnorr signature | chain still valid | `INVALID_AUTHOR` |
+| Flipped Schnorr signature | `CONSENSUS_INVALID`, UTXO not consumed | `INVALID_AUTHOR` |
 | Atoms paid to the observer | chain still valid | `INVALID_RECIPIENT` |
 | Explicit zero atoms on the recipient output | chain still exact | `NO_VALUE_TRANSFER` |
 | Sender and recipient are the same HASH160 | chain still exact | `SELF_TIP_UNCREDITED` |
@@ -63,6 +81,17 @@ SEND. These rows keep `tmmStructurallyValid: true` and
 
 The ambiguous row records a naive recipient sum of `10000` and an attributable
 sum of `0`. XEC carrier sats on a zero-atom output are not counted as atoms.
+
+A consensus-valid transaction whose ALP SEND is invalid can still burn the
+known colored inputs. `lab-duplicate-section` and `lab-malformed-action` do
+that: their signatures verify, their token effect is rejected, and a later
+spend of the duplicate-section output is `ALREADY_SPENT`. A consensus-invalid
+transaction is not applied and does not consume UTXOs. `lab-duplicate-prevout`
+repeats one prevout, and `lab-bad-authorship` fails a signature. Later valid
+sends of those same outputs, `lab-after-duplicate-prevout` and
+`lab-after-invalid-signature`, are `LABORATORY_VALID`. None of these local
+applications is a network confirmation. Tip confirmation and settlement stay
+`NOT_DEMONSTRATED`.
 A detached claim that the laboratory token has 8 decimals is
 `DECIMAL_MISMATCH`. A claim that the public RMZ id has 2 decimals finds no
 genesis in this chain.

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { evaluateLaboratory } from "./alp-ancestry-independent.mjs";
+import { signatureMatches } from "./canonical-tm1-independent-verify.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_PATH = join(REPO_ROOT, "tests/fixtures/rfc0001-alp-ancestry.json");
@@ -129,7 +130,7 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       expect(tip.targetMessage).toBe("NOT_DEMONSTRATED");
       expect(tip.socialEventCredited).toBe(false);
     }
-    for (const id of ["lab-tip-author0", "lab-tip-author1"]) {
+    for (const id of ["lab-tip-author0", "lab-tip-author1", "lab-author-owns-tokens-foreign-xec"]) {
       expect(tipById(transcript, id)).toMatchObject({
         receiptState: "PENDING",
         laboratoryTransfer: "LABORATORY_ATTRIBUTED",
@@ -145,6 +146,18 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
         sectionTokenId: fixture.laboratoryTokenId
       });
     }
+    expect(fixture.tips.find((item) => item.id === "lab-author-owns-tokens-foreign-xec").authorInputIndex).toBe(1);
+    const sponsored = fixture.transactions.find((item) => item.id === "lab-author-owns-tokens-foreign-xec");
+    expect(sponsored.inputs[0].externalUncolored).toBe(true);
+    expect(signatureMatches(sponsored.rawTransactionHex, sponsored.inputs, 0, "schnorr")).toBe(true);
+    expect(signatureMatches(sponsored.rawTransactionHex, sponsored.inputs, 1, "schnorr")).toBe(true);
+    expect(transcript.chain.byId["lab-author-owns-tokens-foreign-xec"].consumed).toEqual([
+      expect.objectContaining({
+        outIdx: fixture.layout.sponsored,
+        owner: fixture.identities.authorA,
+        atoms: "5000"
+      })
+    ]);
     expect(tipById(transcript, "lab-tip-author1").transactionId).toBe("lab-tip-author1");
     const authorIndex = fixture.tips.find((item) => item.id === "lab-tip-author1").authorInputIndex;
     expect(authorIndex).toBe(1);
@@ -162,7 +175,8 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       "lab-decimal-mismatch",
       "lab-duplicate-prevout",
       "lab-reuse-after-invalid",
-      "lab-malformed-action"
+      "lab-malformed-action",
+      "lab-sponsor-signs-foreign-tokens"
     ];
     for (const id of repaired) {
       const tip = tipById(transcript, id);
@@ -181,6 +195,8 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
     expect(transcript.chain.byId["lab-altered-amount"].inputAtoms).toBe("5000");
     expect(transcript.chain.byId["lab-duplicate-prevout"]).toMatchObject({
       ancestry: "INVALID",
+      consensus: "INVALID",
+      applied: false,
       reasons: ["DUPLICATE_PREVOUT"],
       conservation: "NOT_APPLICABLE",
       inputAtoms: "0",
@@ -190,15 +206,33 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       fixture.layout.duplicatePrevout,
       fixture.layout.duplicatePrevout
     ]);
+    expect(transcript.chain.byId["lab-after-duplicate-prevout"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true,
+      conservation: "EXACT"
+    });
+    expect(transcript.chain.byId["lab-after-duplicate-prevout"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.duplicatePrevout
+    ]);
     expect(transcript.chain.byId["lab-duplicate-section"].consumed.map((input) => input.outIdx)).toEqual([
       fixture.layout.duplicate
     ]);
     expect(tipById(transcript, "lab-reuse-after-invalid").layers.alpChainReasons).toEqual(["ALREADY_SPENT"]);
     expect(transcript.chain.byId["lab-malformed-action"]).toMatchObject({
       ancestry: "INVALID",
+      consensus: "VALID",
+      applied: false,
       reasons: ["MALFORMED"],
       conservation: "NOT_APPLICABLE",
       coloredOutputs: []
+    });
+    expect(transcript.chain.byId["lab-malformed-action"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.malformed
+    ]);
+    expect(transcript.chain.byId["lab-duplicate-section"]).toMatchObject({
+      consensus: "VALID",
+      applied: false
     });
     expect(tipById(transcript, "lab-double-spend").layers.alpChainReasons).toContain("ALREADY_SPENT");
     expect(transcript.chain.byId["lab-double-first"].ancestry).toBe("LABORATORY_VALID");
@@ -227,12 +261,56 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       receiptState: "INVALID_AUTHOR",
       layers: {
         container: "VALID",
-        alpChain: "LABORATORY_VALID",
+        alpChain: "INVALID",
+        alpChainReasons: ["CONSENSUS_INVALID"],
         authorship: "INVALID",
         authorshipError: "INVALID_AUTHOR_SIGNATURE",
         attributableAtoms: "0"
       },
       tmmStructurallyValid: true
+    });
+    expect(transcript.chain.byId["lab-bad-authorship"]).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      coloredOutputs: []
+    });
+    expect(transcript.chain.byId["lab-after-invalid-signature"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true,
+      conservation: "EXACT"
+    });
+    expect(transcript.chain.byId["lab-after-invalid-signature"].consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.badAuthor
+    ]);
+    expect(fixture.tips.find((item) => item.id === "lab-sponsor-signs-foreign-tokens").authorInputIndex).toBe(0);
+    const unbound = fixture.transactions.find((item) => item.id === "lab-sponsor-signs-foreign-tokens");
+    expect(signatureMatches(unbound.rawTransactionHex, unbound.inputs, 0, "schnorr")).toBe(true);
+    expect(signatureMatches(unbound.rawTransactionHex, unbound.inputs, 1, "schnorr")).toBe(true);
+    expect(transcript.chain.byId["lab-sponsor-signs-foreign-tokens"]).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true,
+      conservation: "EXACT"
+    });
+    expect(transcript.chain.byId["lab-sponsor-signs-foreign-tokens"].consumed).toEqual([
+      expect.objectContaining({
+        outIdx: fixture.layout.foreignOwner,
+        owner: fixture.identities.authorB,
+        atoms: "5000"
+      })
+    ]);
+    expect(tipById(transcript, "lab-sponsor-signs-foreign-tokens")).toMatchObject({
+      receiptState: "AMBIGUOUS_TIP_FUNDING",
+      laboratoryTransfer: "REJECTED",
+      tmmStructurallyValid: true,
+      layers: {
+        container: "VALID",
+        alpChain: "LABORATORY_VALID",
+        authorship: "LAB_VALID",
+        attributableAtoms: "0",
+        naiveRecipientAtoms: "125"
+      }
     });
     expect(tipById(transcript, "lab-duplicate-section")).toMatchObject({
       laboratoryTransfer: "REJECTED",
