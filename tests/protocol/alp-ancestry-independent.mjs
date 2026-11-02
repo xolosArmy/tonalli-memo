@@ -334,8 +334,8 @@ function satsOf(value) {
 }
 
 /**
- * A prevout whose parent transaction was applied in this chain is read from
- * that parent's immutable bytes. Fixture metadata can contradict that output,
+ * A prevout whose parent was retained in this chain is read from that
+ * parent's immutable bytes. Fixture metadata can contradict that output,
  * but it cannot replace it. An explicit external fee prevout is not a local
  * chain output and is not a mainnet observation.
  * @param {{ rawTransactionHex: string, inputs: Array<{ outputScriptHex?: string, prevoutSats?: string, scriptType?: string, externalUncolored?: boolean }> }} record
@@ -435,15 +435,75 @@ function resolvePrevouts(record, tx, parents) {
 }
 
 /**
- * @param {{ transactions: Array<{ id: string, rawTransactionHex: string, inputs: Array<{ externalUncolored?: boolean }> }> }} document
+ * @returns {{
+ *   utxos: Map<string, { txid: string, outIdx: number, tokenId: string | null, atoms: bigint, baton: boolean, owner: string | null, spent: boolean }>,
+ *   genesis: Map<string, { txid: string, decimals: number, ticker: string, tokenName: string, authPubkey: string }>,
+ *   byId: Record<string, ReturnType<typeof finishEntry>>,
+ *   parents: Map<string, string>,
+ *   authorInputs: Record<string, Array<{ outputScriptHex?: string | null, prevoutSats?: string | null, scriptType?: string }>>,
+ *   seenTxids: Set<string>,
+ *   idempotentSkips: Array<{ id: string, txid: string }>
+ * }}
  */
-export function evaluateChain(document) {
-  const utxos = new Map();
-  const genesis = new Map();
-  const byId = {};
+export function openChain() {
+  return {
+    utxos: new Map(),
+    genesis: new Map(),
+    byId: {},
+    parents: new Map(),
+    authorInputs: {},
+    seenTxids: new Set(),
+    idempotentSkips: []
+  };
+}
 
-  const reject = (record, txid, reasons, extra = {}) => {
-    byId[record.id] = finishEntry({
+/**
+ * Consensus-valid transactions keep their raw bytes and their outputs.
+ * Outputs created by an ALP rejection carry no laboratory token. A
+ * consensus-invalid transaction is not a spendable parent.
+ * @param {ReturnType<typeof openChain>} state
+ * @param {{ rawTransactionHex: string }} record
+ * @param {string} txid
+ */
+function retainUncolored(state, record, txid) {
+  if (state.parents.has(txid)) {
+    return;
+  }
+  const parsed = parseTx(record.rawTransactionHex);
+  for (let index = 0; index < parsed.outputs.length; index += 1) {
+    const key = `${txid}:${index}`;
+    if (state.utxos.has(key)) {
+      continue;
+    }
+    state.utxos.set(key, {
+      txid,
+      outIdx: index,
+      tokenId: null,
+      atoms: 0n,
+      baton: false,
+      owner: ownerOf(parsed.outputs[index].script),
+      spent: false
+    });
+  }
+  state.parents.set(txid, record.rawTransactionHex);
+}
+
+/**
+ * @param {ReturnType<typeof openChain>} state
+ * @param {{ id: string, rawTransactionHex: string, inputs: Array<{ outputScriptHex?: string, externalUncolored?: boolean }> }} record
+ */
+export function applyRecord(state, record) {
+  const tx = parseTx(record.rawTransactionHex);
+  const txid = txidOf(record.rawTransactionHex);
+  if (state.seenTxids.has(txid)) {
+    state.idempotentSkips.push({ id: record.id, txid });
+    return;
+  }
+  state.seenTxids.add(txid);
+  const { utxos, genesis, byId, parents, authorInputs } = state;
+
+  const reject = (reasons, extra = {}) => {
+    const entry = finishEntry({
       id: record.id,
       txid,
       ancestry: extra.ancestry ?? "INVALID",
@@ -454,9 +514,13 @@ export function evaluateChain(document) {
       inputAtoms: extra.inputAtoms ?? 0n,
       outputAtoms: extra.outputAtoms ?? 0n
     });
+    byId[record.id] = entry;
+    if (entry.consensus !== "INVALID") {
+      retainUncolored(state, record, txid);
+    }
   };
 
-  const referenced = (tx) => {
+  const referenced = () => {
     const consumed = [];
     for (const input of tx.inputs) {
       const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
@@ -467,7 +531,7 @@ export function evaluateChain(document) {
     return consumed;
   };
 
-  const consumeKnown = (tx) => {
+  const consumeKnown = () => {
     const consumed = [];
     const seen = new Set();
     for (const input of tx.inputs) {
@@ -486,254 +550,252 @@ export function evaluateChain(document) {
     return consumed;
   };
 
-  const parents = new Map();
-  const authorInputs = {};
-
-  for (const record of document.transactions) {
-    const tx = parseTx(record.rawTransactionHex);
-    const txid = txidOf(record.rawTransactionHex);
-    const resolution = resolvePrevouts(record, tx, parents);
-    authorInputs[record.id] = resolution.authorInputs;
-    const rejectHere = (reasons, extra = {}) => {
-      reject(record, txid, reasons, { prevoutSources: resolution.sources, ...extra });
-    };
-    const outpointKeys = tx.inputs.map((input) => `${input.prevTxid}:${input.outIdx}`);
-    const duplicatePrevout = outpointKeys.some((key, index) => outpointKeys.indexOf(key) !== index);
-    const spentConflict = tx.inputs.some((input) => {
-      const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
-      return utxo !== undefined && utxo.spent === true;
+  const resolution = resolvePrevouts(record, tx, parents);
+  authorInputs[record.id] = resolution.authorInputs;
+  const rejectHere = (reasons, extra = {}) => {
+    reject(reasons, { prevoutSources: resolution.sources, ...extra });
+  };
+  const outpointKeys = tx.inputs.map((input) => `${input.prevTxid}:${input.outIdx}`);
+  const duplicatePrevout = outpointKeys.some((key, index) => outpointKeys.indexOf(key) !== index);
+  const spentConflict = tx.inputs.some((input) => {
+    const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
+    return utxo !== undefined && utxo.spent === true;
+  });
+  if (duplicatePrevout || spentConflict || resolution.consensusFail) {
+    const reasons = duplicatePrevout
+      ? ["DUPLICATE_PREVOUT"]
+      : spentConflict
+        ? ["ALREADY_SPENT"]
+        : resolution.reasons;
+    rejectHere(reasons, {
+      consensus: "INVALID",
+      applied: false,
+      consumed: referenced()
     });
-    if (duplicatePrevout || spentConflict || resolution.consensusFail) {
-      const reasons = duplicatePrevout
-        ? ["DUPLICATE_PREVOUT"]
-        : spentConflict
-          ? ["ALREADY_SPENT"]
-          : resolution.reasons;
-      rejectHere(reasons, {
-        consensus: "INVALID",
-        applied: false,
-        consumed: referenced(tx)
-      });
-      continue;
-    }
-    const script = tx.outputs[0]?.script;
-    const parsedPushes = script === undefined ? { error: "NOT_EMPP", pushes: [] } : readPushes(script);
-    if (parsedPushes.error !== null) {
-      rejectHere([parsedPushes.error], { consumed: consumeKnown(tx) });
-      continue;
-    }
-    const alpPushes = parsedPushes.pushes.filter((push) => hex(push.subarray(0, 4)) === ALP_LOKAD);
-    if (alpPushes.length !== 1) {
-      rejectHere([alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"], {
-        consumed: consumeKnown(tx)
-      });
-      continue;
-    }
-    const section = parseAlpSection(alpPushes[0]);
-    if (!section.ok) {
-      rejectHere([section.reason], { consumed: consumeKnown(tx) });
-      continue;
-    }
-    if (section.kind === "GENESIS" && parsedPushes.pushes[0] !== alpPushes[0]) {
-      rejectHere(["GENESIS_NOT_FIRST"], { consumed: consumeKnown(tx) });
-      continue;
-    }
-    const plan = colorPlan(section, tx.outputs.length);
-    if (!plan.ok) {
-      rejectHere([plan.reason], { consumed: consumeKnown(tx) });
-      continue;
-    }
+    return;
+  }
+  const script = tx.outputs[0]?.script;
+  const parsedPushes = script === undefined ? { error: "NOT_EMPP", pushes: [] } : readPushes(script);
+  if (parsedPushes.error !== null) {
+    rejectHere([parsedPushes.error], { consumed: consumeKnown() });
+    return;
+  }
+  const alpPushes = parsedPushes.pushes.filter((push) => hex(push.subarray(0, 4)) === ALP_LOKAD);
+  if (alpPushes.length !== 1) {
+    rejectHere([alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"], {
+      consumed: consumeKnown()
+    });
+    return;
+  }
+  const section = parseAlpSection(alpPushes[0]);
+  if (!section.ok) {
+    rejectHere([section.reason], { consumed: consumeKnown() });
+    return;
+  }
+  if (section.kind === "GENESIS" && parsedPushes.pushes[0] !== alpPushes[0]) {
+    rejectHere(["GENESIS_NOT_FIRST"], { consumed: consumeKnown() });
+    return;
+  }
+  const plan = colorPlan(section, tx.outputs.length);
+  if (!plan.ok) {
+    rejectHere([plan.reason], { consumed: consumeKnown() });
+    return;
+  }
 
-    const resolved = [];
-    let unresolved = false;
-    let alreadySpent = false;
-    let repeatedPrevout = false;
-    const seenKeys = new Set();
-    for (let index = 0; index < tx.inputs.length; index += 1) {
-      const input = tx.inputs[index];
-      const key = `${input.prevTxid}:${input.outIdx}`;
-      if (seenKeys.has(key)) {
-        repeatedPrevout = true;
-      }
-      seenKeys.add(key);
-      const utxo = utxos.get(key);
-      if (utxo === undefined) {
-        if (record.inputs[index]?.externalUncolored === true) {
-          resolved.push({
-            key: null,
-            external: true,
-            tokenId: null,
-            atoms: 0n,
-            baton: false,
-            owner: ownerOf(Buffer.from(record.inputs[index].outputScriptHex, "hex"))
-          });
-          continue;
-        }
-        unresolved = true;
+  const resolved = [];
+  let unresolved = false;
+  let alreadySpent = false;
+  let repeatedPrevout = false;
+  const seenKeys = new Set();
+  for (let index = 0; index < tx.inputs.length; index += 1) {
+    const input = tx.inputs[index];
+    const key = `${input.prevTxid}:${input.outIdx}`;
+    if (seenKeys.has(key)) {
+      repeatedPrevout = true;
+    }
+    seenKeys.add(key);
+    const utxo = utxos.get(key);
+    if (utxo === undefined) {
+      if (record.inputs[index]?.externalUncolored === true) {
+        resolved.push({
+          key: null,
+          external: true,
+          tokenId: null,
+          atoms: 0n,
+          baton: false,
+          owner: ownerOf(Buffer.from(record.inputs[index].outputScriptHex, "hex"))
+        });
         continue;
       }
-      if (utxo.spent) {
-        alreadySpent = true;
-      }
-      resolved.push({ key, external: false, ...utxo });
-    }
-    if (repeatedPrevout || unresolved || alreadySpent) {
-      const reason = repeatedPrevout
-        ? "DUPLICATE_PREVOUT"
-        : unresolved
-          ? "PREVOUT_NOT_IN_CHAIN"
-          : "ALREADY_SPENT";
-      rejectHere([reason], {
-        consensus: "INVALID",
-        applied: false,
-        consumed: resolved.filter((input) => !input.external).map(consumedView)
-      });
+      unresolved = true;
       continue;
     }
-
-    const tokenId = section.kind === "GENESIS" ? txid : section.tokenId;
-    if (tokenId === RMZ_TOKEN_ID) {
-      for (const input of resolved) {
-        if (input.key !== null) {
-          utxos.get(input.key).spent = true;
-        }
-      }
-      rejectHere(["PUBLIC_RMZ_GENESIS_ABSENT"], {
-        ancestry: "NOT_DEMONSTRATED",
-        tokenId,
-        consumed: resolved.filter((input) => !input.external).map(consumedView)
-      });
-      continue;
+    if (utxo.spent) {
+      alreadySpent = true;
     }
+    resolved.push({ key, external: false, ...utxo });
+  }
+  if (repeatedPrevout || unresolved || alreadySpent) {
+    const reason = repeatedPrevout
+      ? "DUPLICATE_PREVOUT"
+      : unresolved
+        ? "PREVOUT_NOT_IN_CHAIN"
+        : "ALREADY_SPENT";
+    rejectHere([reason], {
+      consensus: "INVALID",
+      applied: false,
+      consumed: resolved.filter((input) => !input.external).map(consumedView)
+    });
+    return;
+  }
 
-    const parent = section.kind === "GENESIS" ? null : genesis.get(tokenId);
-    if (section.kind !== "GENESIS" && parent === undefined) {
-      for (const input of resolved) {
-        if (input.key !== null) {
-          utxos.get(input.key).spent = true;
-        }
-      }
-      rejectHere(["GENESIS_NOT_IN_CHAIN"], {
-        tokenId,
-        consumed: resolved.filter((input) => !input.external).map(consumedView)
-      });
-      continue;
-    }
-
-    const sameToken = resolved.filter((input) => !input.external && input.tokenId === tokenId);
-    const foreign = resolved.filter((input) => !input.external && input.tokenId !== null && input.tokenId !== tokenId);
-    const fungible = sameToken.filter((input) => !input.baton);
-    const batons = sameToken.filter((input) => input.baton);
-    const inputAtoms = fungible.reduce((sum, input) => sum + input.atoms, 0n);
-    const outputAtoms = plan.colored.filter((entry) => !entry.baton).reduce((sum, entry) => sum + entry.atoms, 0n);
-    const reasons = [];
-    if (foreign.length > 0) {
-      reasons.push("FOREIGN_TOKEN");
-    }
-    if (section.kind === "GENESIS") {
-      if (sameToken.length > 0 || foreign.length > 0) {
-        reasons.push("GENESIS_SPENDS_COLORED_INPUT");
-      }
-      if (txid !== tokenId) {
-        reasons.push("GENESIS_REFERENCE_MISMATCH");
-      }
-    } else if (section.kind === "MINT") {
-      if (batons.length < 1) {
-        reasons.push("MINT_BATON_REQUIRED");
-      }
-      if (fungible.length > 0) {
-        reasons.push("UNACCOUNTED_FUNGIBLE_INPUTS");
-      }
-    } else {
-      if (batons.length > 0) {
-        reasons.push("BATON_NOT_TRANSFERABLE");
-      }
-      if (foreign.length === 0 && outputAtoms > inputAtoms) {
-        reasons.push("INFLATED");
-      }
-      if (foreign.length === 0 && outputAtoms < inputAtoms) {
-        reasons.push("SHORT");
-      }
-      if (foreign.length > 0 && outputAtoms !== inputAtoms) {
-        reasons.push("INFLATED");
-      }
-    }
-
+  const tokenId = section.kind === "GENESIS" ? txid : section.tokenId;
+  if (tokenId === RMZ_TOKEN_ID) {
     for (const input of resolved) {
       if (input.key !== null) {
         utxos.get(input.key).spent = true;
       }
     }
-    if (reasons.length > 0) {
-      rejectHere(reasons, {
-        tokenId,
-        genesisReference: section.kind === "GENESIS" ? txid : parent.txid,
-        decimals: section.kind === "GENESIS" ? section.decimals : parent.decimals,
-        ticker: section.kind === "GENESIS" ? section.ticker : parent.ticker,
-        inputAtoms,
-        outputAtoms,
-        consumed: resolved.filter((input) => !input.external).map(consumedView),
-        declaredAtomMap: plan.declared
-      });
-      continue;
-    }
-
-    const coloredOutputs = plan.colored.map((entry) => ({
-      outputIndex: entry.outputIndex,
-      atoms: entry.atoms,
-      baton: entry.baton,
+    rejectHere(["PUBLIC_RMZ_GENESIS_ABSENT"], {
+      ancestry: "NOT_DEMONSTRATED",
       tokenId,
-      owner: ownerOf(tx.outputs[entry.outputIndex].script)
-    }));
-    for (let index = 0; index < tx.outputs.length; index += 1) {
-      const colored = coloredOutputs.find((entry) => entry.outputIndex === index) ?? null;
-      utxos.set(`${txid}:${index}`, {
-        txid,
-        outIdx: index,
-        tokenId: colored === null ? null : tokenId,
-        atoms: colored === null ? 0n : colored.atoms,
-        baton: colored?.baton ?? false,
-        owner: ownerOf(tx.outputs[index].script),
-        spent: false
-      });
+      consumed: resolved.filter((input) => !input.external).map(consumedView)
+    });
+    return;
+  }
+
+  const parent = section.kind === "GENESIS" ? null : genesis.get(tokenId);
+  if (section.kind !== "GENESIS" && parent === undefined) {
+    for (const input of resolved) {
+      if (input.key !== null) {
+        utxos.get(input.key).spent = true;
+      }
     }
-    if (section.kind === "GENESIS") {
-      genesis.set(tokenId, {
-        txid,
-        decimals: section.decimals,
-        ticker: section.ticker,
-        tokenName: section.tokenName,
-        authPubkey: section.authPubkey
-      });
+    rejectHere(["GENESIS_NOT_IN_CHAIN"], {
+      tokenId,
+      consumed: resolved.filter((input) => !input.external).map(consumedView)
+    });
+    return;
+  }
+
+  const sameToken = resolved.filter((input) => !input.external && input.tokenId === tokenId);
+  const foreign = resolved.filter((input) => !input.external && input.tokenId !== null && input.tokenId !== tokenId);
+  const fungible = sameToken.filter((input) => !input.baton);
+  const batons = sameToken.filter((input) => input.baton);
+  const inputAtoms = fungible.reduce((sum, input) => sum + input.atoms, 0n);
+  const outputAtoms = plan.colored.filter((entry) => !entry.baton).reduce((sum, entry) => sum + entry.atoms, 0n);
+  const reasons = [];
+  if (foreign.length > 0) {
+    reasons.push("FOREIGN_TOKEN");
+  }
+  if (section.kind === "GENESIS") {
+    if (sameToken.length > 0 || foreign.length > 0) {
+      reasons.push("GENESIS_SPENDS_COLORED_INPUT");
     }
-    const issuedAtoms = section.kind === "SEND" ? 0n : outputAtoms;
-    byId[record.id] = finishEntry({
-      id: record.id,
-      txid,
-      ancestry: "LABORATORY_VALID",
-      consensus: "VALID",
-      applied: true,
-      reasons: [],
+    if (txid !== tokenId) {
+      reasons.push("GENESIS_REFERENCE_MISMATCH");
+    }
+  } else if (section.kind === "MINT") {
+    if (batons.length < 1) {
+      reasons.push("MINT_BATON_REQUIRED");
+    }
+    if (fungible.length > 0) {
+      reasons.push("UNACCOUNTED_FUNGIBLE_INPUTS");
+    }
+  } else {
+    if (batons.length > 0) {
+      reasons.push("BATON_NOT_TRANSFERABLE");
+    }
+    if (foreign.length === 0 && outputAtoms > inputAtoms) {
+      reasons.push("INFLATED");
+    }
+    if (foreign.length === 0 && outputAtoms < inputAtoms) {
+      reasons.push("SHORT");
+    }
+    if (foreign.length > 0 && outputAtoms !== inputAtoms) {
+      reasons.push("INFLATED");
+    }
+  }
+
+  for (const input of resolved) {
+    if (input.key !== null) {
+      utxos.get(input.key).spent = true;
+    }
+  }
+  if (reasons.length > 0) {
+    rejectHere(reasons, {
       tokenId,
       genesisReference: section.kind === "GENESIS" ? txid : parent.txid,
       decimals: section.kind === "GENESIS" ? section.decimals : parent.decimals,
       ticker: section.kind === "GENESIS" ? section.ticker : parent.ticker,
-      issuedAtoms,
       inputAtoms,
       outputAtoms,
-      batonsConsumed: batons.length,
-      batonsCreated: plan.colored.filter((entry) => entry.baton).length,
-      conservation: section.kind === "SEND" ? "EXACT" : "ISSUANCE",
-      coloredOutputs,
       consumed: resolved.filter((input) => !input.external).map(consumedView),
-      declaredAtomMap: plan.declared,
-      prevoutSources: resolution.sources
+      declaredAtomMap: plan.declared
     });
-    parents.set(txid, record.rawTransactionHex);
+    return;
   }
 
+  const coloredOutputs = plan.colored.map((entry) => ({
+    outputIndex: entry.outputIndex,
+    atoms: entry.atoms,
+    baton: entry.baton,
+    tokenId,
+    owner: ownerOf(tx.outputs[entry.outputIndex].script)
+  }));
+  for (let index = 0; index < tx.outputs.length; index += 1) {
+    const colored = coloredOutputs.find((entry) => entry.outputIndex === index) ?? null;
+    utxos.set(`${txid}:${index}`, {
+      txid,
+      outIdx: index,
+      tokenId: colored === null ? null : tokenId,
+      atoms: colored === null ? 0n : colored.atoms,
+      baton: colored?.baton ?? false,
+      owner: ownerOf(tx.outputs[index].script),
+      spent: false
+    });
+  }
+  if (section.kind === "GENESIS") {
+    genesis.set(tokenId, {
+      txid,
+      decimals: section.decimals,
+      ticker: section.ticker,
+      tokenName: section.tokenName,
+      authPubkey: section.authPubkey
+    });
+  }
+  const issuedAtoms = section.kind === "SEND" ? 0n : outputAtoms;
+  byId[record.id] = finishEntry({
+    id: record.id,
+    txid,
+    ancestry: "LABORATORY_VALID",
+    consensus: "VALID",
+    applied: true,
+    reasons: [],
+    tokenId,
+    genesisReference: section.kind === "GENESIS" ? txid : parent.txid,
+    decimals: section.kind === "GENESIS" ? section.decimals : parent.decimals,
+    ticker: section.kind === "GENESIS" ? section.ticker : parent.ticker,
+    issuedAtoms,
+    inputAtoms,
+    outputAtoms,
+    batonsConsumed: batons.length,
+    batonsCreated: plan.colored.filter((entry) => entry.baton).length,
+    conservation: section.kind === "SEND" ? "EXACT" : "ISSUANCE",
+    coloredOutputs,
+    consumed: resolved.filter((input) => !input.external).map(consumedView),
+    declaredAtomMap: plan.declared,
+    prevoutSources: resolution.sources
+  });
+  parents.set(txid, record.rawTransactionHex);
+}
+
+/**
+ * @param {ReturnType<typeof openChain>} state
+ */
+export function projectChain(state) {
   const supply = {};
-  for (const entry of Object.values(byId)) {
+  for (const entry of Object.values(state.byId)) {
     if (entry.ancestry !== "LABORATORY_VALID" || entry.tokenId === null) {
       continue;
     }
@@ -744,7 +806,30 @@ export function evaluateChain(document) {
       supply[entry.tokenId] = "0";
     }
   }
-  return { byId, supply, genesis: Object.fromEntries(genesis), authorInputs };
+  return {
+    byId: state.byId,
+    supply,
+    genesis: Object.fromEntries(state.genesis),
+    authorInputs: state.authorInputs
+  };
+}
+
+/**
+ * @param {ReturnType<typeof openChain>} state
+ */
+export function checkpointChain(state) {
+  return globalThis.structuredClone(state);
+}
+
+/**
+ * @param {{ transactions: Array<{ id: string, rawTransactionHex: string, inputs: Array<{ externalUncolored?: boolean }> }> }} document
+ */
+export function evaluateChain(document) {
+  const state = openChain();
+  for (const record of document.transactions) {
+    applyRecord(state, record);
+  }
+  return projectChain(state);
 }
 
 function consumedView(input) {

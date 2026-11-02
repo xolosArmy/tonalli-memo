@@ -1,0 +1,341 @@
+{
+  "schema": "tonalli-memo.rfc0001.alp-replay.s0",
+  "status": {
+    "rfc0001": "PROPOSED — NOT RATIFIED",
+    "sec17": "DESIGN_APPROVED_VALIDATION_PENDING",
+    "s0": "OPEN",
+    "s1": "NOT AUTHORIZED",
+    "m174": "OPEN",
+    "confirmation": "NOT_DEMONSTRATED",
+    "settlement": "NOT_DEMONSTRATED",
+    "reorgFinality": "NOT_DEMONSTRATED",
+    "externalPrevoutEvidence": "NOT_DEMONSTRATED",
+    "networkReorg": "NOT_DEMONSTRATED",
+    "productiveTips": false
+  },
+  "publicRmzTokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+  "laboratoryTokenId": "d83bc0e899c233e34fec614d5843cb3f20911fd8b450bf2bff48a99df88eac5a",
+  "mintTransactionId": "replay-mint",
+  "targetTxid": "e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f4",
+  "identities": {
+    "authorA": "3d02acb8e612f1c277793a232f20b693e87700e3",
+    "authorB": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+    "observer": "eddbb9fb072abd539d36829cb11211a85e25479e"
+  },
+  "layout": {
+    "branchPoint": 1,
+    "rejectedSignature": 2,
+    "alternateSend": 3,
+    "baton": 4,
+    "minted": 1
+  },
+  "blocks": {
+    "note": "Synthetic laboratory order only. A block index is not a confirmation or network height.",
+    "ancestor": [
+      {
+        "index": 0,
+        "transactions": [
+          "replay-genesis"
+        ]
+      },
+      {
+        "index": 1,
+        "transactions": [
+          "replay-mint"
+        ]
+      }
+    ],
+    "branchA": [
+      {
+        "index": 2,
+        "transactions": [
+          "replay-send-a"
+        ]
+      },
+      {
+        "index": 3,
+        "transactions": [
+          "replay-hop-a"
+        ]
+      }
+    ],
+    "branchB": [
+      {
+        "index": 2,
+        "transactions": [
+          "replay-malformed",
+          "replay-external-claim"
+        ]
+      },
+      {
+        "index": 3,
+        "transactions": [
+          "replay-unissued",
+          "replay-badsig",
+          "replay-absent-parent",
+          "replay-send-b"
+        ]
+      }
+    ]
+  },
+  "branches": {
+    "ancestor": [
+      "replay-genesis",
+      "replay-mint"
+    ],
+    "branchA": [
+      "replay-send-a",
+      "replay-hop-a"
+    ],
+    "branchB": [
+      "replay-malformed",
+      "replay-external-claim",
+      "replay-unissued",
+      "replay-badsig",
+      "replay-absent-parent",
+      "replay-send-b"
+    ]
+  },
+  "transactions": [
+    {
+      "id": "replay-genesis",
+      "rawTransactionHex": "0200000001614300da476f8ef54b8b286fb9bed8b219cf4760b825fe9260e63ae5bd78f97200000000644123b79c502e955f8c7c494bc46ae535fd2fbdbcb2860a69aebdffac3e8a4665adb90e13d7bcb0d195de6b937c9778282008c1095856d208586dd0ab66747d56c14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff060000000000000000436a5040534c5032000747454e45534953034c41420a4c6162205265706c61790c6c61623a2f2f7265706c6179000002031027000000008813000000008813000000000110270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac88130000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac88130000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac10270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac5cc10000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "80000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-mint",
+      "rawTransactionHex": "02000000025aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd80400000064417f24a3f4b67d7183527cd0c3603e8a84b946b9bcbc76112412469b5d4c1d0744e04f5617d69ae7ae1a6f5a5dc8b8fe2102125b22fb1e73878cc6360513ce2c644121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0d593d2e001f6f09522da8392bd8acf0bf929e5d6c2e8a4f59324ebb2fa304a20000000064417728076d875d950c8f9faecad8e7ca853f526708bdc45f2351dad75a1ecfb8e718732cdb543c0f8eda736fb1fa3bd17160a2af54a59f0daeec55a3381dfd9f914121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff030000000000000000356a5032534c503200044d494e545aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd801e803000000000010270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-send-a",
+      "rawTransactionHex": "02000000025aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8010000006441fd420e8ae05294750a100c004f57ae0fd55753534450fdd4b3a95f24d4569ffac04967c1a89df9b5f5ad2e13282af42e3807530246b2d1feb95f96a28dfa03234121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff423cc7f85a90166662721cdc19a5bfd8954f8cde584d3c260249f37496107143000000006441a3e10759d2689b7fb6d649d783f9962375bf0a3f54d12acdb33a583ea95f2729fbacd2962c48aa1ce4f874a3894fa7b3536a250df4c2614d6b57ca7e8de2d7434121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff040000000000000000626a5037534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8027d000000000093260000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac10270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac9c5d0100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-hop-a",
+      "rawTransactionHex": "02000000022b3c57b961ffc320790ccb44d4dd16cc14de63e490a9df58fb9b81a486ffe8a8010000006441980f17eaff5d1f9e31dfadc0356ec77dc5f4e06e81d6fe699d5969d384ed98f7ba7b4baa06eb8ae588a8e98517d63f6b48560af8e65b81eb04c32c79f468568a4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff679711c10dedc17c12e937074b67a0dc5034b4aa1635641bbe29e8a9a3a781d7000000006441665e32e40b7be71ca5a48d3efe892c4a77a2b039ff5becbd675f96f18c1db55815b4bc7afd370bd8677e3a9cf4f84bbb06ad4a38b7606832a7972b06922938084121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000005c6a5031534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8017d000000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-malformed",
+      "rawTransactionHex": "02000000025aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8010000006441726430f500a7157da6962d91014597a05ad4d74afb353196bfb885aa1e67d863d2ba3919477a8cc6b85bd9af8f084a0b061faac368e2cb697423b9087c17cdd14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffe415f310d287451879fc2b7236025497d2b7284b5bef4930e418b395df4db416000000006441462c4d1d2d888bf8600ee75e91af65491c43d9c77974164f548ec768d56692fd50c95939844542bbd3e102fc3e022d1d976b51d18b7a993b3e84e7dae8fa65024121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c50320004d3454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd80110270000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-external-claim",
+      "rawTransactionHex": "0200000002ef1d0efd3087ffed9ba1c8d6b28e711998828bcc17e0d76c526eddbb869528e701000000644102adfc1d5c82c735af28a6798e4967f333057a869677d7712b6d1e10250f788d0e02dd88ed4ef6cf5b371202da7bc6b3de8bec6e709e77d0717e060c742316b64121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffb1632eb06bbe85bcaa3d47a946563b93e16a049e760ba881ad624b3d69ba0d51000000006441349c9b37467eabbcfd289b77325ac46c42b296d84acee495e9ea15ae61cca9cd29ead8a184cce0d639ad602702ec729de17807dc8bacb06876c75a01e2ce71374121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000005c6a5031534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8017d000000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-unissued",
+      "rawTransactionHex": "0200000002ef1d0efd3087ffed9ba1c8d6b28e711998828bcc17e0d76c526eddbb869528e70100000064412842d49b9d2b2f4eb4f87fb32826156c0ebf81660c0dde649a1769f6be4b3cdcc5ab051b08e53dc30ac7fa7158e4df5d665d091153013b630e99de61e72265f74121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff6dedc617ac77a18f97866502b52cc367e1936a409afb195fe5b10ea7b825765c00000000644116fd514989b14a34417639dce308605be261eecb6fcbebbf842e42b34d28fb316e9e80194c19502358d2d899f4957be02333cf232f0bd00719788f46576c195f4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000005c6a5031534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8017d000000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-badsig",
+      "rawTransactionHex": "02000000025aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8020000006441377b8969c853b7017cf8c01b0e0b9365d9d04e377e97215a6b6d39b82ebb90c027b88a4ac5a14bdfd4904f36cf7bdb8d9c21177efeb4b48873b62519b4fea3504121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffeabbab472ab0123c5e47122729d5e871a57df01106fcca9823839be8019e7dd6000000006441782603bcbc5950a914e4cccc0eec13073c62e532ae48adf0260d3663a70d08af581ba8ad7ce8931bc9df13e8b2056c200b1597fe054154809f890b8c1f80c3df4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff040000000000000000626a5037534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8027d00000000000b130000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac10270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac144a0100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-absent-parent",
+      "rawTransactionHex": "02000000028b53f37066dece26fb564d63c77c50b016701eda749f6eb66b3dc1bb90c65b38010000006441ded36149d0a77fcca5dfb423e445f842e6b3884af3f4cdb3cbb9f70ec7aa3380932028fa2048b808c5a8241c885db6075003ac45ad2c41b8bf00e2113b8817ae4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffffee278a03b8f21f081078a4a2780eb2d173f45a5e8c0115d7109a9d5fcce4b3ec00000000644198d9eb9d87b7bccc79b7d86dce2835fcdc248b21fc09737436d689f7e6d8d10ea38bc8149d931ac966f223e7b4813c77cd750ae4ed4817b3e0a30daf1ea611db4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000005c6a5031534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8017d000000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88acac840100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    },
+    {
+      "id": "replay-send-b",
+      "rawTransactionHex": "02000000025aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd803000000644106932b403fb7813d2a4da90f0d8ebbc14ccae59c8309a9e01f7066d0b01af771fd57f67de756d1fac0dcdcd6be233b183f0314aed5279d0cf67311e289c77bfc4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff901a186ca695cd91256311ab8b77a1129107f23645da151ebb673e250b16263b000000006441a84d0551fe739c9f28aa544ea8025e1ae5b0b9bd7871245e303c2cd16befd60a14c8347aff4c57bab51a076cb0f5a9dcbd4efa54cd91ef0004ab23203e0b64b44121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff040000000000000000626a5037534c5032000453454e445aac8ef89da948ff2bbf50b4d81f91203fcb43584d61ec4fe333c299e8c03bd8027d00000000000b130000000027544d4d00020500e8518835ff70137d88d15d4ca82c1bfaa507e8b5a73fb11ea6f2a55a5c5c43f410270000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac10270000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac144a0100000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "inputs": [
+        {
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": false
+        },
+        {
+          "prevoutSats": "100000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh",
+          "externalUncolored": true
+        }
+      ]
+    }
+  ],
+  "tips": [
+    {
+      "id": "replay-tip-a",
+      "transactionId": "replay-send-a",
+      "authorInputIndex": 0,
+      "recipient": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-a2",
+      "transactionId": "replay-hop-a",
+      "authorInputIndex": 0,
+      "recipient": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-malformed",
+      "transactionId": "replay-malformed",
+      "authorInputIndex": 0,
+      "recipient": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-external",
+      "transactionId": "replay-external-claim",
+      "authorInputIndex": 0,
+      "recipient": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-unissued",
+      "transactionId": "replay-unissued",
+      "authorInputIndex": 0,
+      "recipient": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-badsig",
+      "transactionId": "replay-badsig",
+      "authorInputIndex": 0,
+      "recipient": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-absent",
+      "transactionId": "replay-absent-parent",
+      "authorInputIndex": 0,
+      "recipient": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    },
+    {
+      "id": "replay-tip-b",
+      "transactionId": "replay-send-b",
+      "authorInputIndex": 0,
+      "recipient": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "requiredDecimals": 2,
+      "signatureAlgorithm": "schnorr"
+    }
+  ]
+}
