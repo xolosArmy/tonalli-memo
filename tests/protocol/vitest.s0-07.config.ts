@@ -32,6 +32,7 @@ export default defineConfig({
       "tests/protocol/rfc0001_alp_ancestry.test.ts",
       "tests/protocol/rfc0001_alp_replay.test.ts",
       "tests/protocol/rfc0001_reactions.test.ts",
+      "tests/protocol/rfc0001_tip_xec.test.ts",
       "tests/protocol/rfc0001_s0_evidence_matrix.test.ts"
     ],
     hookTimeout: 120000,
