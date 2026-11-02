@@ -1,0 +1,1177 @@
+{
+  "schema": "tonalli-memo.rfc0001.reactions.s0",
+  "network": "lab-reaction-net",
+  "purpose": "Laboratory REACTION and REACTION_REMOVE bytes. Synthetic signatures and a derived like count. Not a network reorg, not finality, and not a productive indexer.",
+  "status": {
+    "rfc0001": "PROPOSED — NOT RATIFIED",
+    "sec17": "DESIGN_APPROVED_VALIDATION_PENDING",
+    "s0": "OPEN",
+    "s005": "OPEN",
+    "s1": "NOT AUTHORIZED",
+    "m174": "OPEN",
+    "socialVersion": "INACTIVE",
+    "confirmation": "NOT_DEMONSTRATED",
+    "networkReorg": "NOT_DEMONSTRATED",
+    "reorgFinality": "NOT_DEMONSTRATED",
+    "indexer": "NOT_A_PRODUCTIVE_INDEXER",
+    "chronikValidated": false,
+    "productionDispatch": false
+  },
+  "generator": {
+    "library": "ecash-lib",
+    "version": "4.13.0",
+    "envelope": "tests/protocol/reaction-envelope-independent.mjs",
+    "replay": "tests/protocol/reaction-replay-independent.mjs",
+    "sighashSerializer": "tests/protocol/canonical-tm1-independent-verify.mjs"
+  },
+  "absentTargetTxid": "6d27af6714dd48106696635824465ddc278ffdb2b193825ab319a902401354d8",
+  "targets": [
+    {
+      "id": "eligible-post",
+      "group": "target",
+      "kind": "core-v1-post",
+      "action": "POST",
+      "confirmation": null,
+      "blockHeight": null,
+      "position": null,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001b249bf292667554f8fc3cf876e80d29f930ba465fbac4abbb15ced3f5b68a920000000006441dd7001a966e83f7c021f006af97d2567b7d1fcb2a81fa4a9a300c914381d1dac7d945ff4abc3225c04e0f3755d9ddbb8a7271dab0cf73ce1050cf702affc8d6a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000001e6a04544d4d00170101007265616374696f6e2074617267657420706f737428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "20a9685b3fed5cb1bb4aacfb65a40b939fd2806e87cfc38f4f55672629bf49b2",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00170101007265616374696f6e2074617267657420706f7374",
+      "scriptLength": 30,
+      "structuralOk": null,
+      "structuralError": null,
+      "framed": false,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": null,
+      "eventDataUtf8": "reaction target post",
+      "digestHex": "1b528095b53e1e221a1e75ce5e5cea87d24a8b342ac8352c8441e311d0be5d9d",
+      "preMutationDigestHex": "1b528095b53e1e221a1e75ce5e5cea87d24a8b342ac8352c8441e311d0be5d9d"
+    },
+    {
+      "id": "ineligible-payment",
+      "group": "target",
+      "kind": "payment",
+      "action": "PAYMENT",
+      "confirmation": null,
+      "blockHeight": null,
+      "position": null,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": null,
+      "rawTransactionHex": "0200000001c65d380c957a4c5ff50570fb6e03ef94983a50b0d753a64c742b4227b4ff0516000000006441564376169210fe261b2bfe7106608d2437ded7baac6d5075717411251649e9a4d5c0a7c64bd88f0631566e05403ee558b85a29f00139161e24d3e2ffab49c7764121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "5a4158582bfef9789ffa80726569d444e11851c95798a62aa076e2659b9f2af4",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1605ffb427422b744ca653d7b0503a9894ef036efb7005f55f4c7a950c385dc6",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+      "scriptLength": 25,
+      "structuralOk": null,
+      "structuralError": null,
+      "framed": false,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": null,
+      "eventDataUtf8": null,
+      "digestHex": "3785ceadc334706017154353522c6e9f604adf2416ea66ce99fba1a64e392f38",
+      "preMutationDigestHex": "3785ceadc334706017154353522c6e9f604adf2416ea66ce99fba1a64e392f38"
+    },
+    {
+      "id": "pending-post",
+      "group": "target",
+      "kind": "core-v1-post",
+      "action": "POST",
+      "confirmation": null,
+      "blockHeight": null,
+      "position": null,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001391fdab0a05748fc97c1c81dfb5e92c377d4288a121b5ef83b84e58002815d5b000000006441e6d949d2171004d623667d746b58808491ae041f2d77a635cd1da225619688bcfb4c530e30dec16cd48ed20870a9eae16bb7e639bd663ddd1bc49a3c4963d9d94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000216a04544d4d001a0101007265616374696f6e2070656e64696e672074617267657428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3c9d94bfc23ea63e1df6491dea4131811dcf754051b695b0dbeebeb5f22aec86",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5b5d810280e5843bf85e1b128a28d477c3925efb1dc8c197fc4857a0b0da1f39",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d001a0101007265616374696f6e2070656e64696e6720746172676574",
+      "scriptLength": 33,
+      "structuralOk": null,
+      "structuralError": null,
+      "framed": false,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "targetTxid": null,
+      "eventDataUtf8": "reaction pending target",
+      "digestHex": "e349458edeaa920b8f44c6d82bf2039f12773e36849ccd5d900552dc03fc429f",
+      "preMutationDigestHex": "e349458edeaa920b8f44c6d82bf2039f12773e36849ccd5d900552dc03fc429f"
+    }
+  ],
+  "reactions": [
+    {
+      "id": "seq-observer-remove-cold",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION_REMOVE",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 210,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001a1daff27518aa1a276bc14de069d53a5ff14121f82ef241bd5d0ab8c4b66f53e000000006441d1773852f78180e568df7974b76f0b3630467bf96ad7e2abd6c235ef1000bce505e6d36a530e5801ebb4d7213fe2fa8cc2cc4a5804f56a803ba2990ae9d2d0534121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0200000000000000002b6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac00000000",
+      "txid": "2c2ce5f790a9796b4024dd82ea18bc2fc614304bbfc109c81279a7e6d10aae46",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "3ef5664b8cabd0d51b24ef821f1214ffa5539d06de14bc76a2a18a5127ffdaa1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "eddbb9fb072abd539d36829cb11211a85e25479e",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "40ddb762ac7b3894a0a582432769e6b3e9597c6c6092d8b6e0d00b75e2767840",
+      "preMutationDigestHex": "40ddb762ac7b3894a0a582432769e6b3e9597c6c6092d8b6e0d00b75e2767840",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-like",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 211,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000019b99a2d1817a77eff17fc59f30984246171c80c878bf7d8940105de5e763af99000000006441f9e9333ff898c7166eaf946c0f24f83508b20d852be364f6322faf12c01cc05de9ac31f94713011436a4676d1d21d9807ef6e8b88c07cd9f3d146b3fdf191fca4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "6b6292d778c17fe1a79f2e27e9d53492e4eca9096895c921eda368f8473707e7",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "99af63e7e55d1040897dbf78c8801c17464298309fc57ff1ef777a81d1a2999b",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "63fdd9924bc438256dd6bd67aea6f6ca25ffa06cbd0181f3ab0998d2d0807746",
+      "preMutationDigestHex": "63fdd9924bc438256dd6bd67aea6f6ca25ffa06cbd0181f3ab0998d2d0807746",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-like-dup",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 211,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000014e4b22bc8f80fd41df959a84eb737958e508ee9f8763eb567d56b8a7a1edaf6f0000000064417bd3b3c03ba37b9c11acc454fbe40db36e560eee76f38f7adf5ca4f82c4614ced1c2d849980a2eb0a24374999c6bf38ea28a2ca4bf7ee14e1d76dfa2004ba4524121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "adfa90dd9ade14ffad1e625799b764268c824d0fd244e943e2dbfb6c6a5362e2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "6fafeda1a7b8567d56eb63879fee08e5587973eb849a95df41fd808fbc224b4e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "9167353a42aba3e56673ebb410e78cf756873cc2ecd95ec82290633d662be094",
+      "preMutationDigestHex": "9167353a42aba3e56673ebb410e78cf756873cc2ecd95ec82290633d662be094",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-remove",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION_REMOVE",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 212,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001a15c6f47ea095d8e331bef42aa861df39725cd105a32cac4ed98631aa436b56400000000644106d70c68b30a12fec51c4c6ba97f210b9f795c4ff797192d03ffb9ecb5feb63f79cea79cdcea055f429a2d55e22133fff4de2f9c515f714e6d00ec98b24cbba84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2586f34739cca019869fa8612a5d69f4f9a92e886238996f01db00bf3ccf5044",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "64b536a41a6398edc4ca325a10cd2597f31d86aa42ef1b338e5d09ea476f5ca1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "7672b7ab26bbf4f1ac1f737961dd51b91ae02ed5ca245e934eec5c48c3f25136",
+      "preMutationDigestHex": "7672b7ab26bbf4f1ac1f737961dd51b91ae02ed5ca245e934eec5c48c3f25136",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-remove-repeat",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION_REMOVE",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 212,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000010f94d7fb4d18d28da28c154e491246f31008eb530e5d049ab054aad96a7d5d68000000006441a120cf1d499b2d4886b91e90f98b74f99a67f6861f88073eb1bb39cc204290b372b782436d8043e848f2708148ce9a991ed0ea053397175afd834a843275d4094121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "aa1107371694205a0a614c0b5ea056e78bc23994c76fb23c5a7e6a21077504d2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "685d7d6ad9aa54b09a045d0e53eb0810f34612494e158ca28dd2184dfbd7940f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "4c731737a3d102ad6359461cf1364681d347042308f71e479dfcd34e9056ccd2",
+      "preMutationDigestHex": "4c731737a3d102ad6359461cf1364681d347042308f71e479dfcd34e9056ccd2",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-like-again",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 213,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000011a5c3d75de146b35547ff192bdab0a991230053c1ddb08e8e14494a4e82ef1c8000000006441533ec8ea357e839c96d65e76702bedf7a2bb90004209dc28601fb4c19a8e5ad55a400ecb3a1824698d1a646ec5be5d32c5b7bc17847d1b007b0fa5db336848204121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9bc4ca03dc48f44e9df7c5d6aa5fdcab540b0a7265faa51ed07f4cbf9afae992",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "c8f12ee8a49444e1e808db1d3c053012990aabbd92f17f54356b14de753d5c1a",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "b5e7a9441f2a6ac4adfe03714571a4f68414995526369b231cc1b7680ca87da6",
+      "preMutationDigestHex": "b5e7a9441f2a6ac4adfe03714571a4f68414995526369b231cc1b7680ca87da6",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-b-like",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 214,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000015fe27f4cbabdb29eb4278fedc723c768b2ac74f719b94bacec7c997d29f034310000000064418940a4e379445b3f911a2b2bdd475c2ed2d652978b115b5ec315b911a5b4be67e9f7e1b50a12bd07e4cb01245884a526b90798b02af925ac7fa76340922775ee4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "80145bd3bcfff2d1d3dbbed39e7b1b7d8a5ae92765892ce5eba5b24d7cc31fcd",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "3134f0297d997cecac4bb919f774acb268c723c7ed8f27b49eb2bdba4c7fe25f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "8affead5fc082775499057204c9cabe0e2895b91e9ed0d921ada7c07a5868807",
+      "preMutationDigestHex": "8affead5fc082775499057204c9cabe0e2895b91e9ed0d921ada7c07a5868807",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-b-remove",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION_REMOVE",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 214,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001752d77b8b420945e83f7002109cd0f2cc805e528ca977d3f021e30faf2fcb12a000000006441791f1f6777dd10ce0a970b3faee66e572c639704759d7ad30011b48edb4abcddf277b017df1d27be0d9a898148170d64abae58cb04060f9201b70063b0c8c0874121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000002b6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "6f898e0ae795ddd56d0164213cfbf63e19d790be945993261ec26491e02cf786",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2ab1fcf2fa301e023f7d97ca28e505c82c0fcd092100f7835e9420b4b8772d75",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "6deecb3832aef0d632a982f210bdd5f13a1ab86c484110512ec465c839a25d74",
+      "preMutationDigestHex": "6deecb3832aef0d632a982f210bdd5f13a1ab86c484110512ec465c839a25d74",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "seq-a-like-pending",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 215,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000013c96d31c44a3470ebe3e4d9157db2694dfe7318b88f827ffb9d2042a7bc51b8a00000000644176d6912820484615e09131539ec9d5714cb11ec7b470e6e49dc9d77c8b1dd3d4a453f6722ddff2015a2804dddc7c9d0992044670b9be98658c893cb239d51f9d4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d00240203003c9d94bfc23ea63e1df6491dea4131811dcf754051b695b0dbeebeb5f22aec860128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "bf132e9424c44408e387c9cfc390bf7936153487940b5b80eb6df6d7ccf9f12c",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8a1bc57b2a04d2b9ff27f8888b31e7df9426db57914d3ebe0e47a3441cd3963c",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00240203003c9d94bfc23ea63e1df6491dea4131811dcf754051b695b0dbeebeb5f22aec8601",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "3c9d94bfc23ea63e1df6491dea4131811dcf754051b695b0dbeebeb5f22aec86",
+      "digestHex": "3ddb49fab2c696600f90f39560502cc0758515465c022a0e25911869dba95fc2",
+      "preMutationDigestHex": "3ddb49fab2c696600f90f39560502cc0758515465c022a0e25911869dba95fc2",
+      "targetLink": "PENDING_TARGET"
+    },
+    {
+      "id": "seq-a-like-ineligible",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 215,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001d1ce49822d016f4fb3943b9ad60ba10d41ef1c4b4cb2f3475fbee93a79991f2c000000006441df53060b80f906280ab7f611f27dd28c2c2d56da8927fb70a280aa3230917c6a885e8bcaf3529e5561f27e7a009fda5a01bf73a15d2746d16a786b9d93f5a75d4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d00240203005a4158582bfef9789ffa80726569d444e11851c95798a62aa076e2659b9f2af40128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "dc7ccb185a9088ededd5af82738af68700c067541bd96b8b17bad1b16c51ad7e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2c1f99793ae9be5f47f3b24c4b1cef410da10bd69a3b94b34f6f012d8249ced1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00240203005a4158582bfef9789ffa80726569d444e11851c95798a62aa076e2659b9f2af401",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "5a4158582bfef9789ffa80726569d444e11851c95798a62aa076e2659b9f2af4",
+      "digestHex": "83f2dff3cb693887dcdb7320417fef98f5d86325c75dd40bfbe840d8b00fd1c2",
+      "preMutationDigestHex": "83f2dff3cb693887dcdb7320417fef98f5d86325c75dd40bfbe840d8b00fd1c2",
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "seq-a-like-absent",
+      "group": "sequence",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 215,
+      "position": 2,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001bab6ec95078bdd7d91d9db6c2ee3f4188a9eb732e2fc948ed409a16753f94ca50000000064413ee133d508e50185ea87d8541c4a9ba89c8b5fbea4d1fc2e9adc91ffc7602022e020412271c74c747c30b7c81db3f97d2edbef9a65a3b69c3883a8b45bea9d364121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d00240203006d27af6714dd48106696635824465ddc278ffdb2b193825ab319a902401354d80128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "5ee90f9f86a4b4b4318e637e346c4b26433e87afbed9fba98ef332471bf63b06",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a54cf95367a109d48e94fce232b79e8a18f4e32e6cdbd9917ddd8b0795ecb6ba",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00240203006d27af6714dd48106696635824465ddc278ffdb2b193825ab319a902401354d801",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "6d27af6714dd48106696635824465ddc278ffdb2b193825ab319a902401354d8",
+      "digestHex": "f1b9dbcdb09a05987fea0995425a6541cc9c918b87f609f3487b424cfe0a39c6",
+      "preMutationDigestHex": "f1b9dbcdb09a05987fea0995425a6541cc9c918b87f609f3487b424cfe0a39c6",
+      "targetLink": "ABSENT"
+    },
+    {
+      "id": "auth-schnorr-index1-41",
+      "group": "authorship",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 216,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "020000000226d325726bf9cd331317883d4defcce72db6ab665714f5150f44ab009220d522000000006441039b13fad3187b1130ebeeea010d5695ec592de4cc1edf9366922b64d078b9fbadfa9c7a4cde672e1ebc923efd62951230956d0f4c2bcf99fbd5e1321cf7a4ce4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffac30c126be9154e1bc41a0a3cbdbf33bf507c9f170559ddf298b9e3883763141000000006441583e50d66de06da9a0e1c7bb19fe839ca651bc7f375246f8dc6b757e18e662309c0feabec7f4ca51678fc8e1b9dc194e8b7fc6a142115818da5145706d6ceda44121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020301681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0168420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "34f756499f0a96313c22b9d3300b5f7b2f8b3ccaa7e981696d3ef91817140bd5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "22d5209200ab440f15f5145766abb62de7ccef4d3d88171333cdf96b7225d326",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "41317683389e8b29df9d5570f1c907f53bf3dbcba3a041bce15491be26c130ac",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020301681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "f37a614087c3af42d4023b0042ec4d4227f41a4fb38a3f8cd1ee7606114edcda",
+      "preMutationDigestHex": "f37a614087c3af42d4023b0042ec4d4227f41a4fb38a3f8cd1ee7606114edcda",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "auth-schnorr-index0-c1",
+      "group": "authorship",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 216,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000028f07896fb7f82bde720bf068d2e91d8be20a346a65e7b567403e728e4af4606d000000006441c6bbdad5bc35efc2ab425a6eb9e476cd8a93c2d3aee9774d2449cff741d1dcdd7028419aaf5e991f76dd63dde5272fbcd2f169235fa4cad8e504f609584b5fb8c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffb15243a1cb99c87f6618cec3fd3599ba6b6441d452843c8961c254cc1fac305b0000000064417b90d59fce1abb093a32f963c074b09dd04aab8b9deb7bde2adc30db0750de9f965580c83278d5b68d4a27dabd2e6dfff4752fb87f6e3e52558fe8ac04a2de714121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0122020000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac5e3c0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fc260e12857355e09677066cc74214449ee7b58b0ac1888095ae7eff6857cedf",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "6d60f44a8e723e4067b5e7656a340ae28b1de9d268f00b72de2bf8b76f89078f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "5b30ac1fcc54c261893c8452d441646bba9935fdc3ce18667fc899cba14352b1",
+            "outIdx": 0
+          },
+          "prevoutSats": "7000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "8ed755bde67a5ed93cf872ac4f33efc82e4aa588dc1b279c206d8568dae21417",
+      "preMutationDigestHex": "8ed755bde67a5ed93cf872ac4f33efc82e4aa588dc1b279c206d8568dae21417",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "auth-schnorr-index2-c1",
+      "group": "authorship",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 216,
+      "position": 2,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 2,
+      "envelopeAuthorIndex": 2,
+      "rawTransactionHex": "0200000003616b1a0271a4ca511c6fcd666150ce5f6de7c26d4beabc6ba75da0035a8f42b500000000644159ef7f2a719c39246c10e1d262a401330839adba855dd27a80a305c7caae61b94b21194f428a1f8de1b68cf63f0a923fc89ae84e12c0922d8984949cdbef4f404121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff260734f0cd3bba22c5ee11153846750711334b64e7c7bbf82f1bff04b3f0ccc2000000006441d2f0343aaed0cb03ecd6a4b43127208288f155b6e85bcddc022b93cf951e0f516fe6d1adf5639d42c307c69a0ea2c27d296b94ce39d899faf9bd8fc822ce723b4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff9a22e985dfaf5d4c4fdbfc5e002f74a0f7ea190e6bbbbd8700e814c624fcd4560000000064412da66c9126707118b70f1a7bdf2348526750283c8496760e8abc68ab839af9d92932e24cbcb39c4f7f2fbeb427c9ec772fdfaacfe93b250b847aa6653ea7e5a3c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020302681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01384a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "8b719a936e7603eba29f9a108aa6d0d654c4f739efe4bad505affc443b58696d",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b5428f5a03a05da76bbcea4b6dc2e76d5fce506166cd6f1c51caa471021a6b61",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "c2ccf0b304ff1b2ff8bbc7e7644b3311077546381511eec522ba3bcdf0340726",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "56d4fc24c614e80087bdbb6b0e19eaf7a0742f005efcdb4f4c5dafdf85e9229a",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0024020302681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "8f89e526192eb7b1a5806fd051e664500789852af5da1a56fb9441c738273485",
+      "preMutationDigestHex": "8f89e526192eb7b1a5806fd051e664500789852af5da1a56fb9441c738273485",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "auth-ecdsa-index0-41",
+      "group": "authorship",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 216,
+      "position": 3,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "ecdsa",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000013a26c1701a21714a9181c3cbf4121226c3c5970e91844cb9988fda16a4b61b79000000006a47304402206954e15184e28feb8d83b9dda6fb4c361ccf187dd05f3a2f565315cd8104d11902207be1689100b5c4dd1e2c92186c953034f45bab439a7211b713ff70e1a7cff4bd4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c2402afd94a731a56c9f303dcff7198ae16d5da5c3d04633f75788a885db5290",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "791bb6a416da8f98b94c84910e97c5c3261212f4cbc381914a71211a70c1263a",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "136ddbf34243d88bc09dea980e2e6c4dfa5005d43357821c0672397b48d61479",
+      "preMutationDigestHex": "136ddbf34243d88bc09dea980e2e6c4dfa5005d43357821c0672397b48d61479",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "mempool-b-like",
+      "group": "mempool",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "MEMPOOL",
+      "blockHeight": null,
+      "position": null,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001e70523f63307d789956a935ddb98ed2357c95071d3a2b8b87b68d89cc873804e0000000064419d52d5428f6899c071b975ae877a11ae91cb6acb169562ed10c7075db93bfa8955550005c9992cfd490c5200b3736eecf1e5ce0d850378bd2b189fd3893979b44121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "57eb6c9d992b1f504e497216ce2d738c2e6a1e68c983b745b0a17fbfa772c3a0",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "4e8073c89cd8687bb8b8a2d37150c95723ed98db5d936a9589d70733f62305e7",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "e757c494e179ab5460eef66aada237697daaf0895566401352af766e1e12c350",
+      "preMutationDigestHex": "e757c494e179ab5460eef66aada237697daaf0895566401352af766e1e12c350",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "mempool-a-remove",
+      "group": "mempool",
+      "kind": "reaction",
+      "action": "REACTION_REMOVE",
+      "confirmation": "MEMPOOL",
+      "blockHeight": null,
+      "position": null,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000017d89159b51ee33db6ead55ce9a9865db8e06ac73da45a6922a4575898381adaf00000000644199d3f8822ee6c09aa690b67b4cb382d645bdf5011ef1ff4a093ffdad0af126c382416f5cd353a0e15836ecd726149ef40927995a0fd96c6c5ff220f9e8ea71284121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3d01efa108c436433529ebed67ad600a6ceef0f484f11f7db0f3f4716725c3fb",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "afad81838975452a92a645da73ac068edb65989ace55ad6edb33ee519b15897d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020400681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "0197587c179a82d49b519d875c4904f4377754d0aec83f1eae28d9458a768204",
+      "preMutationDigestHex": "0197587c179a82d49b519d875c4904f4377754d0aec83f1eae28d9458a768204",
+      "targetLink": "ELIGIBLE"
+    }
+  ],
+  "negatives": [
+    {
+      "id": "neg-signature-flipped",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 0,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001b6172552a8c6f5b67802ea1cff52d5d501ab5248c5e345b808e007de7a4b0528000000006441dd233bf0c55193277afd57bb5879ae13bc394f72a5292b8766314fc294e277fafc52c1ee676f7c6900dd0d3d6159551e0c2c7b71d162ca366e166a8210f7ec6b4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "bf5418937d65a9a9f8be4aba957091744f35e7d6942057fa6ff91f6c4607a98d",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "28054b7ade07e008b845e3c54852ab01d5d552ff1cea0278b6f5c6a8522517b6",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "1f4e4d11cf54f591c713a0fbfb6e304d563c1c93438a3dc4987fc58ea76ba8e7",
+      "preMutationDigestHex": "1f4e4d11cf54f591c713a0fbfb6e304d563c1c93438a3dc4987fc58ea76ba8e7",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-envelope-mutated",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 1,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001e0bc39df413f253a51e4be22170a6f7b44b106ef1fd9c30d2635f32c34e831bc000000006441f50bf320dc9aa287b43796f08244863db6db25452c60d62978402089dc48094bc6af69525d96cccefa19ece7a192d9d6c31bc584732c9e8f294ee01f616552e24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644e0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "dd3e966c6a29d5921860b78760213b4e99a2fa1755ce9f577a999ef4d311398a",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bc31e8342cf335260dc3d91fef06b1447b6f0a1722bee4513a253f41df39bce0",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644e01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644e",
+      "digestHex": "c9f1fd838f8ad765c5b9c5f0b0e3e9c89a8630f70109cd54d099618fec370cf0",
+      "preMutationDigestHex": "70508d6ebd5ef1d2b11893e468443f163c0053aeac8c050964defe84db31a25a",
+      "targetLink": "ABSENT"
+    },
+    {
+      "id": "neg-author-index-5",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 2,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 5,
+      "rawTransactionHex": "0200000001f8c763cdaa980fa3fadcd9555406b1db5ee07bfc87f107d5279f8ad5e3258d2600000000644164523fead08218c0396afd9d83eec25b8b8b111c45ca9c283b109fc79db20f74c53a5bad78de792bc36f7088533248f294dba04b1a5fe79804487814fbb500b24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020305681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9c0ad905db0dfc92aee174fb8d969588b7d4261e8a272efb6e8c020402c2d8be",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "268d25e3d58a9f27d507f187fc7be05edbb1065455d9dcfaa30f98aacd63c7f8",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": null,
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020305681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": true,
+      "structuralError": null,
+      "framed": true,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "ce5e62fe522c13d8754eb377f1fc2ce81eacab7ae07e9c37e235eee0a4797e4e",
+      "preMutationDigestHex": "ce5e62fe522c13d8754eb377f1fc2ce81eacab7ae07e9c37e235eee0a4797e4e",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-version-09",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 3,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000171b8e2ef564975192ffc72167acd08ca6f6f392908084ee822a92b965063bd09000000006441d7c5025a42849f80901afc349648d3d8adb5186dd38ec83c8815e860aadd9c791e11025df7469d41a1c0f2cd5614c00f65bf04a17350a84b91354794804661a44121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024090300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9290e208e9cf5eeee5adc12009d69c7e18c9da0565081a03287a66e905aec145",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "09bd6350962ba922e84e080829396f6fca08cd7a1672fc2f19754956efe2b871",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024090300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_VERSION",
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "f15f0bb911e818900e3696b944a232a0b71fb3b9b7d83ca0b0d808d4e3b789ac",
+      "preMutationDigestHex": "f15f0bb911e818900e3696b944a232a0b71fb3b9b7d83ca0b0d808d4e3b789ac",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-kind-7f",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 4,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000101b7b61f552c9637b62cf952e57aa0502ff8a3cde8993f4696e94133c600a6610000000064418b518a76c7fc8ee847b37074dd52a015f0a10b83ad95d4984e3a38ae593b923bb508d28dd58049e9ab6e65cbe87e34c6b160258fec6571466e0376e55a44630a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f7f28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "769671f9f59e0c0a1bb16722fd26428c39d62a72d7ecb7c03cfbb0b6c9b63531",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "61a600c63341e996463f99e8cda3f82f50a07ae552f92cb637962c551fb6b701",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f7f",
+      "scriptLength": 43,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_REACTION_KIND",
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "a4cdf91846c5304bf9df4e9a8be9044d4db27ddd9c49e1705e05374fe4a75e21",
+      "preMutationDigestHex": "a4cdf91846c5304bf9df4e9a8be9044d4db27ddd9c49e1705e05374fe4a75e21",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-event-7e",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "NONE",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 5,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000013b298ff124ba698e83065db2b014e61b692fb083c37d4c5df2ff5b5d765bd85200000000644161c45e7faf24530716d51e0d62d632113dc6abfce0b5d57b14dd78247150bc8bc7aa85d5d111dd7696fe958e0281a00872147a4cb21aa68aa813d54679d760a94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d0024027e00681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "da9a24d59498f027f31b09e13b89bd74a387a25b5c4caa27bd1f83c15fb9adee",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "52d85b765d5bfff25d4c7dc383b02f691be614b0b25d06838e69ba24f18f293b",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0024027e00681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 43,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_EVENT",
+      "framed": true,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": "681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "digestHex": "39b4212ba3cc6f1b3db565f3c85f5c91cea2caad3f6fab62dee9f12fc1a6d1dc",
+      "preMutationDigestHex": "39b4212ba3cc6f1b3db565f3c85f5c91cea2caad3f6fab62dee9f12fc1a6d1dc",
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-nonminimal",
+      "group": "negative",
+      "kind": "reaction",
+      "action": "REACTION",
+      "confirmation": "CONFIRMED",
+      "blockHeight": 300,
+      "position": 6,
+      "network": "lab-reaction-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001789ddd58fb26ded80457556b469e7968620f784ace0eed38fcbc17d47f4a3ea60000000064416b1659f27d02e35f38dcfed80bb4bbcbad4c68195250fdac1fff132a9ba91978f3eb9768bc52a270c7d120b1df847e2f53aa10a1b93eda3d0e134a06c6cb58774121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002c6a04544d4d004c24020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f0128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "7ca1b2f059d2d0d22097c7f0d185437687ed2beafeee25b60e76e65e1bce41cf",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a63e4a7fd417bcfc38ed0ece4a780f6268799e466b555704d8de26fb58dd9d78",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004c24020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f01",
+      "scriptLength": 44,
+      "structuralOk": false,
+      "structuralError": "INVALID_FORMAT",
+      "framed": false,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "targetTxid": null,
+      "digestHex": "2b87295282b0b4ef37c853f057ccba006ecc38d244ec0b3dd4677fac9058e567",
+      "preMutationDigestHex": "2b87295282b0b4ef37c853f057ccba006ecc38d244ec0b3dd4677fac9058e567",
+      "targetLink": "NOT_FRAMED"
+    }
+  ],
+  "structures": [
+    {
+      "id": "structure-truncated-envelope",
+      "scriptHex": "6a04544d4d0024020300681d0409afce63771dc0caec02e98d7cc83d4dd0d8c05c7a9c0286607f9a644f",
+      "errorCode": "INVALID_FORMAT",
+      "scriptLength": 42
+    },
+    {
+      "id": "structure-lokad-only",
+      "scriptHex": "6a04544d4d00",
+      "errorCode": "INVALID_FORMAT",
+      "scriptLength": 6
+    }
+  ],
+  "replay": {
+    "sequence": [
+      "seq-observer-remove-cold",
+      "seq-a-like",
+      "seq-a-like-dup",
+      "seq-a-remove",
+      "seq-a-remove-repeat",
+      "seq-a-like-again",
+      "seq-b-like",
+      "seq-b-remove",
+      "seq-a-like-pending",
+      "seq-a-like-ineligible",
+      "seq-a-like-absent"
+    ],
+    "ancestor": [
+      "seq-observer-remove-cold",
+      "seq-a-like"
+    ],
+    "branchA": [
+      "seq-a-like-dup",
+      "seq-b-like"
+    ],
+    "branchB": [
+      "seq-a-remove",
+      "seq-a-remove-repeat",
+      "seq-a-like-again",
+      "seq-b-like",
+      "seq-b-remove"
+    ],
+    "authorship": [
+      "auth-schnorr-index1-41",
+      "auth-schnorr-index0-c1",
+      "auth-schnorr-index2-c1",
+      "auth-ecdsa-index0-41"
+    ],
+    "mempool": [
+      "mempool-b-like",
+      "mempool-a-remove"
+    ]
+  }
+}
