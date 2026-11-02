@@ -3,9 +3,12 @@
  * (network, author_hash160, target_txid, reaction_kind).
  *
  * Confirmed order is synthetic block height, position in that block, then
- * TXID. Mempool events stay on a separate list. Counts are a derived view:
- * at most one active LIKE per key, and a removal cannot drive the count
- * below zero. This is not a chain reorg, not finality, and not an indexer.
+ * TXID, including events that arrive in a later call. A mempool TXID stays
+ * off the confirmed count until that same TXID is delivered as confirmed.
+ * Repeating a TXID that is already confirmed does not append another row.
+ * Counts are a derived view: at most one active LIKE per key, and a removal
+ * cannot drive the count below zero. This is not a chain reorg, not
+ * finality, and not an indexer.
  */
 
 import { hash160, parseTx, toHex } from "./canonical-tm1-independent-verify.mjs";
@@ -87,7 +90,7 @@ export function classifyReactionTarget(record) {
 
 export function emptyReactionState() {
   return {
-    appliedTxids: [],
+    confirmedEvents: [],
     history: [],
     withheld: [],
     provisional: [],
@@ -120,22 +123,24 @@ function assertEvent(event) {
   }
 }
 
+function compareConfirmed(left, right) {
+  if (left.blockHeight !== right.blockHeight) {
+    return left.blockHeight - right.blockHeight;
+  }
+  if (left.position !== right.position) {
+    return left.position - right.position;
+  }
+  if (left.txid < right.txid) {
+    return -1;
+  }
+  if (left.txid > right.txid) {
+    return 1;
+  }
+  return 0;
+}
+
 function sortConfirmed(events) {
-  return [...events].sort((left, right) => {
-    if (left.blockHeight !== right.blockHeight) {
-      return left.blockHeight - right.blockHeight;
-    }
-    if (left.position !== right.position) {
-      return left.position - right.position;
-    }
-    if (left.txid < right.txid) {
-      return -1;
-    }
-    if (left.txid > right.txid) {
-      return 1;
-    }
-    return 0;
-  });
+  return [...events].sort(compareConfirmed);
 }
 
 function withholdReason(event) {
@@ -169,19 +174,7 @@ function canAffectActiveState(event) {
   );
 }
 
-function applyOne(state, event, lane) {
-  if (state.appliedTxids.includes(event.txid)) {
-    return;
-  }
-  state.appliedTxids.push(event.txid);
-  if (lane === "mempool") {
-    state.provisional.push({
-      txid: event.txid,
-      countedInConfirmed: false,
-      reason: "MEMPOOL"
-    });
-    return;
-  }
+function applyOne(state, event) {
   if (!canAffectActiveState(event)) {
     state.withheld.push({ txid: event.txid, reason: withholdReason(event) });
     return;
@@ -214,10 +207,25 @@ function recomputeCount(state) {
   state.confirmedLikeCount = count;
 }
 
+function rebuildConfirmed(state) {
+  state.confirmedEvents.sort(compareConfirmed);
+  const folded = { history: [], withheld: [], active: {}, confirmedLikeCount: 0 };
+  for (const event of state.confirmedEvents) {
+    applyOne(folded, event);
+  }
+  recomputeCount(folded);
+  state.history = folded.history;
+  state.withheld = folded.withheld;
+  state.active = folded.active;
+  state.confirmedLikeCount = folded.confirmedLikeCount;
+}
+
 /**
  * Returns a new state. The input state is not mutated.
- * Confirmed events are ordered before they are applied. Mempool events
- * are applied afterwards and never change confirmedLikeCount.
+ * Confirmed events already stored are ordered again with the new batch,
+ * so an older block delivered later does not overwrite a newer one.
+ * A TXID already confirmed is ignored. A mempool TXID stays provisional
+ * until the same TXID arrives as confirmed, and then it leaves that list.
  */
 export function applyReactionEvents(state, events) {
   const next = globalThis.structuredClone(state);
@@ -231,13 +239,26 @@ export function applyReactionEvents(state, events) {
       confirmed.push(event);
     }
   }
+  const known = new Set(next.confirmedEvents.map((event) => event.txid));
   for (const event of sortConfirmed(confirmed)) {
-    applyOne(next, event, "confirmed");
+    if (known.has(event.txid)) {
+      continue;
+    }
+    known.add(event.txid);
+    next.confirmedEvents.push(event);
+    next.provisional = next.provisional.filter((item) => item.txid !== event.txid);
   }
+  rebuildConfirmed(next);
   for (const event of mempool) {
-    applyOne(next, event, "mempool");
+    if (known.has(event.txid) || next.provisional.some((item) => item.txid === event.txid)) {
+      continue;
+    }
+    next.provisional.push({
+      txid: event.txid,
+      countedInConfirmed: false,
+      reason: "MEMPOOL"
+    });
   }
-  recomputeCount(next);
   return next;
 }
 

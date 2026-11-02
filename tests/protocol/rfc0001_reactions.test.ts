@@ -602,6 +602,51 @@ describe("synthetic REACTION and REACTION_REMOVE laboratory", () => {
     expect(applyReactionEvents(stateA, [...ancestor, ...branchA])).toEqual(stateA);
   });
 
+  it("promotes a mempool reaction when the same txid is confirmed", () => {
+    const mempoolLike = events.get("mempool-b-like");
+    const mempoolRemove = events.get("mempool-a-remove");
+    const like = events.get("seq-a-like");
+    if (mempoolLike === undefined || mempoolRemove === undefined || like === undefined) {
+      throw new Error("Missing mempool promotion rows.");
+    }
+    const confirmedLike = { ...mempoolLike, confirmation: "CONFIRMED" as const, blockHeight: 217, position: 0 };
+    const staged = replayReactions([mempoolLike]);
+    expect(staged.confirmedLikeCount).toBe(0);
+    expect(staged.provisional).toHaveLength(1);
+    const promoted = applyReactionEvents(staged, [confirmedLike]);
+    expect(promoted.confirmedLikeCount).toBe(1);
+    expect(promoted.provisional).toHaveLength(0);
+    expect(promoted).toEqual(replayReactions([confirmedLike]));
+    expect(applyReactionEvents(promoted, [confirmedLike])).toEqual(promoted);
+    expect(applyReactionEvents(promoted, [mempoolLike]).provisional).toHaveLength(0);
+    const confirmedRemove = {
+      ...mempoolRemove,
+      confirmation: "CONFIRMED" as const,
+      blockHeight: 217,
+      position: 1
+    };
+    const held = applyReactionEvents(replayReactions([like]), [mempoolRemove]);
+    expect(held.confirmedLikeCount).toBe(1);
+    expect(held.provisional).toHaveLength(1);
+    const removed = applyReactionEvents(held, [confirmedRemove]);
+    expect(removed.confirmedLikeCount).toBe(0);
+    expect(removed.provisional).toHaveLength(0);
+    expect(removed).toEqual(replayReactions([like, confirmedRemove]));
+  });
+
+  it("reorders an older confirmed event that arrives in a later batch", () => {
+    const like = events.get("seq-a-like");
+    const removal = events.get("seq-a-remove");
+    if (like === undefined || removal === undefined) {
+      throw new Error("Missing split-delivery rows.");
+    }
+    const incremental = applyReactionEvents(replayReactions([removal]), [like]);
+    const together = replayReactions([like, removal]);
+    expect(incremental.confirmedLikeCount).toBe(0);
+    expect(together.confirmedLikeCount).toBe(0);
+    expect(incremental).toEqual(together);
+  });
+
   it("restores a checkpoint and keeps mempool events out of the confirmed count", () => {
     const confirmed = replayReactions(pick(fixture.replay.sequence));
     const checkpoint = cloneReactionState(confirmed);

@@ -84,11 +84,19 @@ that the selected branch has removed, and events that exist only on the
 other branch, do not contribute to that count. Restoring the ancestor
 checkpoint and applying branch B matches a from-scratch replay of
 branch B. Applying branch B on top of branch A without that restore
-does not. Reapplying the same TXIDs does not append a second history
-row and does not change the count.
+does not. Reapplying a TXID that is already confirmed does not append
+a second history row and does not change the count.
+
+Confirmed order is recomputed across calls. An older event delivered
+in a later batch is sorted with the events already stored, by block,
+position, and TXID. It does not overwrite a newer event merely because
+it arrived later.
 
 Mempool rows are listed apart from confirmed rows. A mempool LIKE and a
-mempool REMOVE do not change the confirmed count.
+mempool REMOVE do not change the confirmed count. When that same TXID
+is later delivered as confirmed, it leaves the provisional list and
+joins the confirmed order. A confirmed TXID sent again as mempool stays
+out of the provisional list.
 
 This selection is an in-memory laboratory. It is not a network
 reorganization, not chain finality, and not a productive indexer.
