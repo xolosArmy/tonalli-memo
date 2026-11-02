@@ -123,7 +123,6 @@ const LAB_VALIDATED = new Set([
   "S007-BYTE-IDENTITY",
   "S007-RECORD-STAYS-UNSATISFIED",
   "S007-FALSE-TM0-OBSERVATION",
-  "M183-TRUST-DISCLOSED",
   "M183-SYNTHETIC-IS-VERIFIER-TEST",
   "M192-POLICY-1",
   "M192-POLICY-2",
@@ -189,6 +188,39 @@ function hasCommit(sha: string): boolean {
   } catch {
     return false;
   }
+}
+
+function commitHasPath(sha: string, path: string): boolean {
+  try {
+    execFileSync("git", ["cat-file", "-e", `${sha}:${path}`], {
+      cwd: REPO_ROOT,
+      stdio: "ignore"
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function evidencePaths(body: string): string[] {
+  const evidence = /\*\*Evidence:\*\*([\s\S]*?)\n- \*\*Commit:\*\*/u.exec(body);
+  const section = evidence?.[1] ?? "";
+  const paths = new Set<string>();
+  for (const match of section.matchAll(/`([^`\n]+)`/gu)) {
+    const token = match[1];
+    if (token.startsWith("tests/") || token.startsWith("packages/")) {
+      paths.add(token);
+      continue;
+    }
+    if (
+      /^(?:rfc0001_[A-Za-z0-9_.-]+\.(?:test\.ts|test\.mjs|mjs)|RFC0001-[A-Za-z0-9_.-]+\.md)$/u.test(
+        token
+      )
+    ) {
+      paths.add(`tests/protocol/${token}`);
+    }
+  }
+  return [...paths];
 }
 
 function parseRows(text: string): MatrixRow[] {
@@ -317,11 +349,27 @@ describe("S0 evidence matrix", () => {
     ]);
     const byKey = new Map(receipts.map((receipt) => [receipt.key, receipt.sha]));
     for (const row of rows) {
-      const key = /\*\*CI \/ Codex:\*\* `(R-[A-Z0-9-]+)`/u.exec(row.body);
-      expect(key).not.toBeNull();
-      const sha = byKey.get(key?.[1] ?? "");
-      expect(sha).toBeDefined();
-      expect(row.body).toContain(`**Commit:** \`${sha}\``);
+      const ciLine = /\*\*CI \/ Codex:\*\* ([^\n]+)/u.exec(row.body);
+      const commitLine = /\*\*Commit:\*\* ([^\n]+)/u.exec(row.body);
+      expect(ciLine).not.toBeNull();
+      expect(commitLine).not.toBeNull();
+      const keys = [...(ciLine?.[1] ?? "").matchAll(/`(R-[A-Z0-9-]+)`/gu)].map(
+        (match) => match[1]
+      );
+      expect(keys.length).toBeGreaterThan(0);
+      const shas: string[] = [];
+      for (const key of keys) {
+        const sha = byKey.get(key);
+        expect(sha).toBeDefined();
+        expect(commitLine?.[1]).toContain(sha);
+        shas.push(sha ?? "");
+      }
+      for (const path of evidencePaths(row.body)) {
+        expect(
+          shas.some((sha) => commitHasPath(sha, path)),
+          `${row.id} cites ${path} outside ${keys.join(", ")}`
+        ).toBe(true);
+      }
     }
     if (!hasCommit("efe60360b4a276465975b603b833a8eb15f8e080")) {
       execFileSync("git", ["fetch", "--deepen=80", "origin"], {

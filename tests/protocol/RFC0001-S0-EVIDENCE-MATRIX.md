@@ -35,8 +35,11 @@ Every commit below is an ancestor of PR #41 HEAD
 `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`, except `R-RFC` and `R-PR42`,
 which are the heads of the other two draft PRs. A Codex receipt contains
 `codex-review-receipt:v1` and a Reviewed commit line. The receipt names
-that commit. It is not a review of a later SHA. M1.10.1: a summary of no
-major issues is short of protocol proof. CI job name is `test`.
+that commit. It is not a review of a later SHA. A row may cite more
+than one receipt. Every file named in that row's evidence exists in at
+least one cited tree. An earlier receipt does not cover a file added
+later. M1.10.1: a summary of no major issues is short of protocol proof.
+CI job name is `test`.
 
 | Key | Commit | CI run | Job | Codex comment | Reviewed | Result |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -115,8 +118,8 @@ unless the row names PR #42.
 - **Normative text:** Before acceptance, the repository MUST contain machine-readable positive and negative fixtures with fixed raw bytes, deterministic verdicts, and an independent encoder and decoder for every supported event and container combination, including ALP/eMPP (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` exercised by `rfc0001_s0_07_historical.test.ts` `it("checks serialization, envelope, structure, trusted-chronik, and the independent signature")`. `tests/fixtures/rfc0001-empp-tmm.json` exercised by `rfc0001_empp_tmm.test.ts` `it("keeps the required cases and separates structural axes from production acceptance")`. `tests/fixtures/rfc0001-alp-ancestry.json` exercised by `rfc0001_alp_ancestry.test.ts` `it("proves a synthetic GENESIS, MINT and SEND chain that is not RMZ")`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`
-- **CI / Codex:** `R-CANONICAL`
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`
+- **CI / Codex:** `R-BURN`
 - **Trust model:** Independent laboratory checker for canonical TM1. Structural eMPP corpus is unsigned. Synthetic ALP chain uses laboratory token `79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`.
 - **Still required:** REPLY, REACTION, REACTION_REMOVE, and TIP_XEC still lack a fixed signed corpus with independent encode and decode on PR #41. The ALP corpus is one synthetic token. A complete combination matrix remains required before M1.7.4 can be accepted.
 
@@ -224,9 +227,9 @@ unless the row names PR #42.
 
 - **Normative text:** Any incomplete token-encoding or signature test MUST remain listed as a blocking gate rather than passed by inspection (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `tests/fixtures/rfc0001_regtest_reference.json` still lists its M1.7.4 pending ids. `rfc0001_regtest_reference.test.mjs` `test("M1.7.4 items that this pair does not prove stay listed as S0 pending")`. This matrix lists the incomplete clauses with an unmet status. `tests/protocol/RFC0001-S0-07-HISTORICAL.md` is unchanged and still records M1.7.4 as open.
-- **Commit:** `efe60360b4a276465975b603b833a8eb15f8e080`
-- **CI / Codex:** `R-REGTEST`
+- **Evidence:** `tests/fixtures/rfc0001_regtest_reference.json` still lists its M1.7.4 pending ids. `rfc0001_regtest_reference.test.mjs` `test("M1.7.4 items that this pair does not prove stay listed as S0 pending")`. This matrix lists the incomplete clauses with an unmet status. This audit does not edit `tests/protocol/RFC0001-S0-07-HISTORICAL.md`. That note, at the cited snapshot, still records M1.7.4 as open.
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`
+- **CI / Codex:** `R-REPLAY`
 - **Trust model:** Repository record. The regtest reference file was left byte-for-byte unchanged. Its reason strings describe that pair and are an incomplete inventory of later laboratory fixtures.
 - **Still required:** The blocking list has to stay visible until a later acceptance record withdraws each item. This audit does not withdraw any item.
 
@@ -254,9 +257,9 @@ unless the row names PR #42.
 
 - **Normative text:** TIP signatures and authorship remain an explicit S0 blocker (M1.7.4). The RFC text at `45ad15aa` still calls cryptographic authorship of a genuine POST beside TMM pending; later PR #41 commits add laboratory evidence.
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_sec17_coexistence.test.ts` `it("accepts laboratory authorship only for an independently verified signature")`, including `coex-schnorr-author1-sighash-41`. `rfc0001_alp_ancestry.test.ts` records `authorship: LAB_VALID` only together with a laboratory chain result. `it("keeps MULTIPLE_MEMOS when a real second memo remains, even if one signature verifies")`.
-- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`
-- **CI / Codex:** `R-COEX`
+- **Evidence:** `rfc0001_sec17_coexistence.test.ts` `it("accepts laboratory authorship only for an independently verified signature")`, including `coex-schnorr-author1-sighash-41`, and `it("keeps MULTIPLE_MEMOS when a real second memo remains, even if one signature verifies")`. `rfc0001_alp_ancestry.test.ts` records `authorship: LAB_VALID` only together with a laboratory chain result.
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`
+- **CI / Codex:** `R-BURN`
 - **Trust model:** Independent laboratory BIP143/ForkID beside a frozen eMPP container. Four coexistence matrix rows are `LAB_CRYPTOGRAPHIC`. Ten stay `NOT_DEMONSTRATED`. Production packages are unchanged. Experimental verdicts on empty-input fixtures stay `INVALID_TM1`.
 - **Still required:** Production authorship for a POST that coexists with TMM, and a signed productive tip profile, remain required.
 
@@ -285,8 +288,8 @@ unless the row names PR #42.
 - **Normative text:** Any change that would make the production parser accept version `0x02` remains an explicit S0 blocker. The current ratified bytes MUST keep rejecting that version (M1.7.4, M1.2).
 - **Status:** `LAB_VALIDATED`
 - **Evidence:** `rfc0001_s0_07_historical.test.ts` `it("rejects version 0x02 before an unknown event type")` and `it("parses the lab POST and rejects the lab version 0x02 REPLY")`. `rfc0001_empp_tmm.test.ts` `it("keeps social version 0x02 inactive and does not read an eMPP script as a POST")`.
-- **Commit:** `907ba8a2b5f68d346e863187508f7ea5fa3ec070`
-- **CI / Codex:** `R-BASELINE`
+- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`
+- **CI / Codex:** `R-EMPP`
 - **Trust model:** Ratified parser bytes at `228d1f036643ca9be8ba85e91f8200536f3242da`, executed on fixtures. Result `UNSUPPORTED_VERSION`. No chain event.
 - **Still required:** A future edit under `packages/` reopens this row. The row covers the current bytes. LAB_VALIDATED does not close the parent gate and does not activate version `0x02`.
 
@@ -294,9 +297,9 @@ unless the row names PR #42.
 
 - **Normative text:** An unsigned TMM author byte 255 does not close the author-index requirement (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_empp_tmm.test.ts` records `tmm-author-index-255` as a structural negative. `rfc0001_s0_07_historical.test.ts` `it("rejects author byte 255 at the input-range stage after structural acceptance")`. Signed nonzero indexes exist as `canonical-schnorr-author1-sighash-41`, `canonical-schnorr-author2-sighash-c1`, `lab-tip-author1`, and `coex-schnorr-author1-sighash-41`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`
-- **CI / Codex:** `R-CANONICAL`
+- **Evidence:** `rfc0001_empp_tmm.test.ts` records `tmm-author-index-255` as a structural negative. `rfc0001_s0_07_historical.test.ts` `it("rejects author byte 255 at the input-range stage after structural acceptance")`. Signed nonzero indexes are `canonical-schnorr-author1-sighash-41` and `canonical-schnorr-author2-sighash-c1` in `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json`, `lab-tip-author1` in `tests/fixtures/rfc0001-alp-ancestry.json`, and `coex-schnorr-author1-sighash-41` in `tests/fixtures/rfc0001-sec17-coexistence.json`.
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`
+- **CI / Codex:** `R-BURN`
 - **Trust model:** Laboratory signatures for canonical TM1 and for the synthetic ALP tip. The unsigned TMM byte 255 is a structural witness in the eMPP corpus.
 - **Still required:** A productive TMM author index, checked in production code, remains required. The regtest POST/REPLY pair uses index 0 only.
 
@@ -384,9 +387,9 @@ unless the row names PR #42.
 
 - **Normative text:** SEC-02: verify the selected in-range index, prevout P2PKH HASH160, unlocking script, signature, and supported sighash. An independent verifier MUST still check the signature under Core v1.0 section 8.6. The production helper stops before the digest.
 - **Status:** `PARTIAL`
-- **Evidence:** `canonical-schnorr-author1-sighash-41` and `canonical-schnorr-author2-sighash-c1` are nonzero indexes with an independent check. `negative-author-index-out-of-range` uses index 5. `rfc0001_sec17_coexistence.test.ts` alters the author index. The regtest pair remains index 0, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`
-- **CI / Codex:** `R-CANONICAL`
+- **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` holds `canonical-schnorr-author1-sighash-41`, `canonical-schnorr-author2-sighash-c1`, and `negative-author-index-out-of-range` at index 5. `rfc0001_sec17_coexistence.test.ts` `it("does not grant authorship when the signature, prevout, author index, or committed output is altered")`. The regtest pair remains index 0, sighash `0x41`, HASH160 `b4aca63fbf60884195ee538475b6840650273d3f`.
+- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`
+- **CI / Codex:** `R-COEX`
 - **Trust model:** Independent laboratory digest on the canonical and coexistence fixtures. Production `trusted-chronik` on D-07 and on synthetic normalized transactions does not replace that digest check.
 - **Still required:** The production helper's digest check remains required. The regtest pair does not add an index-1 observation.
 
@@ -404,9 +407,9 @@ unless the row names PR #42.
 
 - **Normative text:** SEC-04: immutable history plus an idempotent key `(network, author, target, kind)` and a deterministic last event for likes.
 - **Status:** `NOT_DEMONSTRATED`
-- **Evidence:** No REACTION fixture on PR #41. ALP txid idempotence in `rfc0001_alp_replay.test.ts` is a different key.
-- **Commit:** `081d75a762889207283ab7d4434030db30c79b41`
-- **CI / Codex:** `R-PR42`
+- **Evidence:** No REACTION fixture on PR #41. ALP txid idempotence in `rfc0001_alp_replay.test.ts` is a different key. PR #42 remains an offline signature preparation and is not a reaction ledger.
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `081d75a762889207283ab7d4434030db30c79b41`
+- **CI / Codex:** `R-REPLAY`, `R-PR42`
 - **Trust model:** Offline PR #42 signatures are not a reaction ledger.
 - **Still required:** The reaction key and the deterministic last-event rule remain required.
 
@@ -454,9 +457,9 @@ unless the row names PR #42.
 
 - **Normative text:** SEC-09: verify parent event, network, and chain status; bound retries; do not credit a pending or invalid target.
 - **Status:** `PARTIAL`
-- **Evidence:** The regtest REPLY parent is the observed POST. `rfc0001_alp_ancestry.test.ts` rejects invalid targets with attributable atoms `0`. `targetMessage` on laboratory tips stays `NOT_DEMONSTRATED`. No missing, non-TM1, or reorged social parent suite was executed.
-- **Commit:** `efe60360b4a276465975b603b833a8eb15f8e080`
-- **CI / Codex:** `R-REGTEST`
+- **Evidence:** The regtest REPLY parent is the observed POST in `tests/fixtures/rfc0001_regtest_reference.json`. `rfc0001_alp_ancestry.test.ts` rejects invalid targets with attributable atoms `0`. `targetMessage` on laboratory tips stays `NOT_DEMONSTRATED`. No missing, non-TM1, or reorged social parent suite was executed.
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`
+- **CI / Codex:** `R-BURN`
 - **Trust model:** One regtest parent observation plus synthetic tip-target rejection. No indexer retry loop.
 - **Still required:** A parent suite for a missing parent, a non-TM1 parent, and a reorged parent, with bounded retries, remains required.
 
@@ -554,9 +557,9 @@ unless the row names PR #42.
 
 - **Normative text:** The `alp-send-plus-one-tmm` script MUST remain outside `isTm1CandidateScript`, and `parseTm1Output` MUST still throw `INVALID_MARKER`, while social version `0x02` has no independent approval (M1.6.8 criterion 2).
 - **Status:** `LAB_VALIDATED`
-- **Evidence:** `rfc0001_empp_tmm.test.ts` `it("keeps social version 0x02 inactive and does not read an eMPP script as a POST")`. `rfc0001_sec17_dispatch.test.ts` expects `coreParseCodes` `INVALID_MARKER` for that case.
-- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`
-- **CI / Codex:** `R-EMPP`
+- **Evidence:** `rfc0001_empp_tmm.test.ts` `it("keeps social version 0x02 inactive and does not read an eMPP script as a POST")`. `rfc0001_sec17_dispatch.test.ts` expects `coreParseCodes` `INVALID_MARKER` for `alp-send-plus-one-tmm`.
+- **Commit:** `a8130df67b46af2b0a589352d81c132ead3cb551`
+- **CI / Codex:** `R-DISPATCH`
 - **Trust model:** Ratified parser bytes on the frozen script. The prototype does not change this Core result.
 - **Still required:** The criterion is the current rejection. LAB_VALIDATED does not close SEC-17 and does not approve version `0x02`.
 
@@ -765,8 +768,8 @@ unless the row names PR #42.
 - **Normative text:** S0-07 requires a v1.0 backward-compatibility regression corpus and the TM0/TM1 application-profile decision. The decision is approved. The gate remains unsatisfied (S0 acceptance table).
 - **Status:** `PARTIAL`
 - **Evidence:** `rfc0001_s0_07_historical.test.ts` `it("leaves S0-07 unsatisfied in the evidence record")`. Comment `6529195032` approves `S0-07-PROFILE-DECISION` as application policy and does not satisfy the gate.
-- **Commit:** `45ad15aa157a25f7f8e616682ccbfffad974e15c`
-- **CI / Codex:** `R-RFC`
+- **Commit:** `907ba8a2b5f68d346e863187508f7ea5fa3ec070`
+- **CI / Codex:** `R-BASELINE`
 - **Trust model:** The corpus rows below are finite. Byte identity is not every historic transaction.
 - **Still required:** S0-07 remains unsatisfied. This matrix does not change that disposition.
 
@@ -873,12 +876,12 @@ unless the row names PR #42.
 ### `M183-TRUST-DISCLOSED`
 
 - **Normative text:** If trust is delegated to Chronik, clients MUST disclose that trust model and MUST NOT claim offline independent cryptographic verification (M1.8.3).
-- **Status:** `LAB_VALIDATED`
-- **Evidence:** D-07 and canonical tests record `trustModel: trusted-chronik` separately from `INDEPENDENT_SIGNATURE_VERIFIED`. `rfc0001_s0_07_historical.test.ts` requires the evidence record to contain `trusted-chronik-gap`.
+- **Status:** `PARTIAL`
+- **Evidence:** D-07 and canonical tests record `trustModel: trusted-chronik` separately from `INDEPENDENT_SIGNATURE_VERIFIED`. `rfc0001_s0_07_historical.test.ts` requires the evidence record to contain `trusted-chronik-gap`. No client surface is executed.
 - **Commit:** `7796b3364a762013baa313b15e94ce48bfeacd88`
 - **CI / Codex:** `R-D07`
-- **Trust model:** Disclosure inside fixtures and the evidence record. The production helper's gap is part of the disclosure.
-- **Still required:** LAB_VALIDATED covers the disclosure on these fixtures. It does not add the missing digest check to production code.
+- **Trust model:** Fixture labels and wording in the evidence record. Those records are not a client disclosure.
+- **Still required:** A client that discloses delegated Chronik trust, and that does not claim offline independent verification, remains required. The fixture labels do not meet that clause. The missing production digest check stays on `M183-INDEPENDENT-86`.
 
 ### `M183-SYNTHETIC-IS-VERIFIER-TEST`
 
@@ -1124,9 +1127,9 @@ unless the row names PR #42.
 
 - **Normative text:** A finite corpus does not prove compatibility with every historic transaction. Coverage limitations MUST be disclosed (M1.9.2).
 - **Status:** `PARTIAL`
-- **Evidence:** The RFC, `RFC0001-S0-07-HISTORICAL.md`, and this matrix disclose the three-transaction bound and the byte-identity bound.
-- **Commit:** `45ad15aa157a25f7f8e616682ccbfffad974e15c`
-- **CI / Codex:** `R-RFC`
+- **Evidence:** `tests/protocol/RFC0001-S0-07-HISTORICAL.md` discloses that the three recovered transactions are not the chain. The PR #40 RFC, reviewed as `R-RFC`, discloses that a finite corpus is not every historic transaction and that byte-identity is not exhaustive proof. This matrix repeats both bounds. It is not an earlier receipt for them.
+- **Commit:** `7796b3364a762013baa313b15e94ce48bfeacd88`; `45ad15aa157a25f7f8e616682ccbfffad974e15c`
+- **CI / Codex:** `R-D07`, `R-RFC`
 - **Trust model:** Disclosure text. The S0-09 receipt reviews the RFC head and is not an acceptance of full-chain coverage.
 - **Still required:** The disclosure has to travel with any later activation record. `HISTORICAL-MAINNET` stays open.
 
@@ -1677,8 +1680,8 @@ PR #40 and PR #42 are not edited. The regtest reference was left unchanged.
 
 | Status | Count |
 | --- | --- |
-| `LAB_VALIDATED` | 27 |
-| `PARTIAL` | 72 |
+| `LAB_VALIDATED` | 26 |
+| `PARTIAL` | 73 |
 | `NOT_DEMONSTRATED` | 20 |
 | `BLOCKED` | 21 |
 | `TOTAL` | 140 |
