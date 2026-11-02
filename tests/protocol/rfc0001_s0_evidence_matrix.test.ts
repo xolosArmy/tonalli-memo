@@ -384,6 +384,7 @@ describe("S0 evidence matrix", () => {
       "R-BIND",
       "R-PREVOUT",
       "R-REPLAY",
+      "R-REACTION",
       "R-RFC",
       "R-PR42"
     ]);
