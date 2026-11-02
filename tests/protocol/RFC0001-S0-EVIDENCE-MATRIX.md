@@ -34,7 +34,8 @@ clause has been met.
 Every commit below is an ancestor of the commit that publishes this
 matrix, except `R-RFC` and `R-PR42`, which are the heads of the other
 two draft PRs. `R-REACTION` is the laboratory snapshot for the reaction fixtures,
-including the later-batch order repair. Its CI run, job, and Codex
+including the later-batch order repair. `R-TIPXEC` is the laboratory
+snapshot for the native TIP_XEC fixtures. Their CI run, job, and Codex
 columns are `unreviewed`.
 Those cells are not a Codex receipt and they are not a CI result.
 A Codex receipt contains `codex-review-receipt:v1` and a Reviewed
@@ -58,6 +59,7 @@ major issues is short of protocol proof. CI job name is `test`.
 | `R-PREVOUT` | `27a22416059cc5f6aa5cc4b11723186f23fe6b91` | 41369658945 | 125037186957 | 6566525944 | `27a2241605` | no major issues; 2026-11-02T00:57:16Z |
 | `R-REPLAY` | `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e` | 41388880882 | 125095690970 | 6569120767 | `c9ec63fbea` | no major issues; 2026-11-02T04:32:38Z |
 | `R-REACTION` | `069ab86428dc17a76ce79e6669f27a2f5121cfb1` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
+| `R-TIPXEC` | `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
 | `R-RFC` | `45ad15aa157a25f7f8e616682ccbfffad974e15c` | 41321121026 | 124891368477 | 6559961738 | `45ad15aa15` | no major issues on PR #40; 2026-11-01T15:26:35Z |
 | `R-PR42` | `081d75a762889207283ab7d4434030db30c79b41` | 40917165744 | 123600365247 | 6503170078 | `081d75a762` | no major issues on PR #42; 2026-10-29T17:02:43Z |
 
@@ -121,11 +123,11 @@ unless the row names PR #42.
 
 - **Normative text:** Before acceptance, the repository MUST contain machine-readable positive and negative fixtures with fixed raw bytes, deterministic verdicts, and an independent encoder and decoder for every supported event and container combination, including ALP/eMPP (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` exercised by `rfc0001_s0_07_historical.test.ts` `it("checks serialization, envelope, structure, trusted-chronik, and the independent signature")`. `tests/fixtures/rfc0001-empp-tmm.json` exercised by `rfc0001_empp_tmm.test.ts` `it("keeps the required cases and separates structural axes from production acceptance")`. `tests/fixtures/rfc0001-alp-ancestry.json` exercised by `rfc0001_alp_ancestry.test.ts` `it("proves a synthetic GENESIS, MINT and SEND chain that is not RMZ")`. `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")`.
-- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
-- **CI / Codex:** `R-BURN`, `R-REACTION`
-- **Trust model:** Independent laboratory checker for canonical TM1. Structural eMPP corpus is unsigned. Synthetic ALP chain uses laboratory token `79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`. The reaction corpus is a separate laboratory. `R-REACTION` is not a Codex receipt.
-- **Still required:** REPLY and TIP_XEC still lack a fixed signed corpus with independent encode and decode on PR #41. The reaction laboratory covers REACTION and REACTION_REMOVE only. The ALP corpus is one synthetic token. A complete combination matrix remains required before M1.7.4 can be accepted.
+- **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` exercised by `rfc0001_s0_07_historical.test.ts` `it("checks serialization, envelope, structure, trusted-chronik, and the independent signature")`. `tests/fixtures/rfc0001-empp-tmm.json` exercised by `rfc0001_empp_tmm.test.ts` `it("keeps the required cases and separates structural axes from production acceptance")`. `tests/fixtures/rfc0001-alp-ancestry.json` exercised by `rfc0001_alp_ancestry.test.ts` `it("proves a synthetic GENESIS, MINT and SEND chain that is not RMZ")`. `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")`. `tests/fixtures/rfc0001-tip-xec.json` exercised by `rfc0001_tip_xec.test.ts` `it("accepts a 42-byte tip script and Core still rejects version 0x02")`.
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-BURN`, `R-REACTION`, `R-TIPXEC`
+- **Trust model:** Independent laboratory checker for canonical TM1. Structural eMPP corpus is unsigned. Synthetic ALP chain uses laboratory token `79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`. The reaction corpus and the native TIP_XEC corpus are separate laboratories. `R-REACTION` and `R-TIPXEC` are not Codex receipts.
+- **Still required:** REPLY still lacks a fixed signed corpus with independent encode and decode on PR #41. The TIP_XEC laboratory covers the native two-push script only. The reaction laboratory covers REACTION and REACTION_REMOVE only. The ALP corpus is one synthetic token. A complete combination matrix remains required before M1.7.4 can be accepted.
 
 ### `M174-PARSER-NOT-SETTLEMENT`
 
@@ -141,11 +143,11 @@ unless the row names PR #42.
 
 - **Normative text:** Acceptance MUST separately prove deterministic script lengths (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_empp_tmm.test.ts` `it("shows the byte-budget disappearance separately from the independent section parse")`. `rfc0001_s0_07_historical.test.ts` `it("keeps the generated 80-byte and 81-byte boundaries owned by the existing suite")`. Canonical fixture lengths are rechecked by `it("rechecks the committed JSON against the isolated generator")`. `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")` measures the 43-byte REACTION and REACTION_REMOVE scripts in `tests/fixtures/rfc0001-reactions.json`.
-- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
-- **CI / Codex:** `R-EMPP`, `R-REACTION`
-- **Trust model:** Ratified parser bytes on stored scripts, plus the independent eMPP reader. The 223-byte TM0 text stays a candidate. Scripts past that budget take the public `NO_MEMO` path. The 43-byte reaction measurement is laboratory evidence. `R-REACTION` is not a Codex receipt.
-- **Still required:** Deterministic lengths for REPLY and a productive ALP/eMPP tip profile remain required. The reaction script length does not close this row.
+- **Evidence:** `rfc0001_empp_tmm.test.ts` `it("shows the byte-budget disappearance separately from the independent section parse")`. `rfc0001_s0_07_historical.test.ts` `it("keeps the generated 80-byte and 81-byte boundaries owned by the existing suite")`. Canonical fixture lengths are rechecked by `it("rechecks the committed JSON against the isolated generator")`. `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")` measures the 43-byte REACTION and REACTION_REMOVE scripts in `tests/fixtures/rfc0001-reactions.json`. `rfc0001_tip_xec.test.ts` `it("accepts a 42-byte tip script and Core still rejects version 0x02")` measures the 42-byte TIP_XEC scripts in `tests/fixtures/rfc0001-tip-xec.json`.
+- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-EMPP`, `R-REACTION`, `R-TIPXEC`
+- **Trust model:** Ratified parser bytes on stored scripts, plus the independent eMPP reader. The 223-byte TM0 text stays a candidate. Scripts past that budget take the public `NO_MEMO` path. The 43-byte reaction measurement and the 42-byte tip measurement are laboratory evidence. `R-REACTION` and `R-TIPXEC` are not Codex receipts.
+- **Still required:** Deterministic lengths for REPLY and a productive ALP/eMPP tip profile remain required. The reaction script length and the tip script length do not close this row.
 
 ### `M174-SIG-PREVOUT`
 
@@ -181,11 +183,11 @@ unless the row names PR #42.
 
 - **Normative text:** Acceptance MUST separately prove recipient output attribution (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_alp_ancestry.test.ts` `it("separates container, chain, authorship, amount and settlement")` attributes `125` laboratory atoms on `lab-tip-author0`, `lab-tip-author1`, and `lab-author-owns-tokens-foreign-xec`. `lab-wrong-recipient` is `INVALID_RECIPIENT`. `lab-zero-atoms` is `NO_VALUE_TRANSFER`.
-- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`
-- **CI / Codex:** `R-BIND`
-- **Trust model:** Synthetic laboratory atoms of the LAB token. Receipts that pass the laboratory checks stay `PENDING`. `realRmzTip` stays false.
-- **Still required:** Attribution of a real RMZ output and of an XEC tip amount to the target author's P2PKH remains required.
+- **Evidence:** `rfc0001_alp_ancestry.test.ts` `it("separates container, chain, authorship, amount and settlement")` attributes `125` laboratory atoms on `lab-tip-author0`, `lab-tip-author1`, and `lab-author-owns-tokens-foreign-xec`. `lab-wrong-recipient` is `INVALID_RECIPIENT`. `lab-zero-atoms` is `NO_VALUE_TRANSFER`. `tests/fixtures/rfc0001-tip-xec.json` exercised by `rfc0001_tip_xec.test.ts` `it("attributes only the recipient outputs")` sums native satoshis to the designated POST author.
+- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-BIND`, `R-TIPXEC`
+- **Trust model:** Synthetic laboratory atoms of the LAB token, plus a separate native XEC laboratory. Receipts that pass the laboratory checks stay `PENDING` or `NOT_DEMONSTRATED`. `realRmzTip` stays false. `R-TIPXEC` is not a Codex receipt.
+- **Still required:** Attribution of a real RMZ output remains required. The laboratory XEC sum is not an active-chain settlement.
 
 ### `M174-REORG`
 
@@ -215,7 +217,7 @@ unless the row names PR #42.
 - **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`
 - **CI / Codex:** `R-BIND`
 - **Trust model:** Synthetic laboratory rule: the designated author HASH160 must equal the sole owner of every fungible funding input of the section token. The section token is the laboratory token, not public RMZ.
-- **Still required:** The same rule for an XEC tip, and for public RMZ, remains a separate requirement. This row covers the synthetic multi-owner handling named in M1.7.4. LAB_VALIDATED does not close the parent gate.
+- **Still required:** The XEC funding rule is recorded as PARTIAL under SEC-05 and does not extend this row. Public RMZ remains a separate requirement. This row covers the synthetic multi-owner handling named in M1.7.4. LAB_VALIDATED does not close the parent gate.
 
 ### `M174-REVIEW-TRIPLE`
 
@@ -251,21 +253,21 @@ unless the row names PR #42.
 
 - **Normative text:** XEC and RMZ tip settlement, including the ambiguous-funding counterexample, remain an explicit S0 blocker (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** The ambiguous-funding counterexample is `lab-ambiguous-funding` and `lab-multi-owner` in `rfc0001_alp_ancestry.test.ts`, receipt `AMBIGUOUS_TIP_FUNDING`. No fixture settles an XEC amount or a public RMZ amount.
-- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`
-- **CI / Codex:** `R-BIND`
-- **Trust model:** Synthetic laboratory atoms. Settlement of those rows stays `NOT_DEMONSTRATED`.
-- **Still required:** Settlement of an XEC tip and of a public RMZ tip on an active chain remains required. The laboratory counterexample covers only the synthetic ambiguous-funding clause.
+- **Evidence:** The ambiguous-funding counterexample is `lab-ambiguous-funding` and `lab-multi-owner` in `rfc0001_alp_ancestry.test.ts`, receipt `AMBIGUOUS_TIP_FUNDING`. `tests/fixtures/rfc0001-tip-xec.json` exercised by `rfc0001_tip_xec.test.ts` `it("rejects recipient funding, third-party inputs, and self tips")` credits zero for the native recipient-funded counterexample. Positive native rows keep `settlement` at `NOT_DEMONSTRATED`.
+- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-BIND`, `R-TIPXEC`
+- **Trust model:** Synthetic laboratory atoms, plus a separate native XEC laboratory. Settlement of those rows stays `NOT_DEMONSTRATED`. `R-TIPXEC` is not a Codex receipt.
+- **Still required:** Settlement of an XEC tip and of a public RMZ tip on an active chain remains required. The laboratory counterexamples are not that settlement.
 
 ### `M174-TIP-AUTHORSHIP`
 
 - **Normative text:** TIP signatures and authorship remain an explicit S0 blocker (M1.7.4). The RFC text at `45ad15aa` still calls cryptographic authorship of a genuine POST beside TMM pending; later PR #41 commits add laboratory evidence.
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_sec17_coexistence.test.ts` `it("accepts laboratory authorship only for an independently verified signature")`, including `coex-schnorr-author1-sighash-41`, and `it("keeps MULTIPLE_MEMOS when a real second memo remains, even if one signature verifies")`. `rfc0001_alp_ancestry.test.ts` records `authorship: LAB_VALID` only together with a laboratory chain result.
-- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`
-- **CI / Codex:** `R-BURN`
-- **Trust model:** Independent laboratory BIP143/ForkID beside a frozen eMPP container. Four coexistence matrix rows are `LAB_CRYPTOGRAPHIC`. Ten stay `NOT_DEMONSTRATED`. Production packages are unchanged. Experimental verdicts on empty-input fixtures stay `INVALID_TM1`.
-- **Still required:** Production authorship for a POST that coexists with TMM, and a signed productive tip profile, remain required.
+- **Evidence:** `rfc0001_sec17_coexistence.test.ts` `it("accepts laboratory authorship only for an independently verified signature")`, including `coex-schnorr-author1-sighash-41`, and `it("keeps MULTIPLE_MEMOS when a real second memo remains, even if one signature verifies")`. `rfc0001_alp_ancestry.test.ts` records `authorship: LAB_VALID` only together with a laboratory chain result. `rfc0001_tip_xec.test.ts` `it("checks Schnorr, ECDSA, sighash, and a nonzero tipper index")` checks signed native TIP_XEC rows in `tests/fixtures/rfc0001-tip-xec.json`.
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-BURN`, `R-TIPXEC`
+- **Trust model:** Independent laboratory BIP143/ForkID beside a frozen eMPP container, and again on the native TIP_XEC corpus. Four coexistence matrix rows are `LAB_CRYPTOGRAPHIC`. Ten stay `NOT_DEMONSTRATED`. Production packages are unchanged. Experimental verdicts on empty-input fixtures stay `INVALID_TM1`. `R-TIPXEC` is not a Codex receipt.
+- **Still required:** Production authorship for a POST that coexists with TMM, and a signed productive tip profile, remain required. Laboratory TIP_XEC signatures do not close this row.
 
 ### `M174-REACTIONS`
 
@@ -321,9 +323,9 @@ unless the row names PR #42.
 
 - **Normative text:** S0-05 requires M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 (S0 acceptance table).
 - **Status:** `PARTIAL`
-- **Evidence:** The M1.7.4 rows in this matrix are the inventory. The regtest reference at `efe60360b4a276465975b603b833a8eb15f8e080` is one display-order pair. The RFC cell at `45ad15aa` still says reorg, reaction, and signed tip fixtures remain pending. Later laboratory commits add signed TM1, signed ALP tips, a synthetic reorg, and the reaction corpus in `tests/fixtures/rfc0001-reactions.json`. Those commits do not complete the gate.
-- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
-- **CI / Codex:** `R-REPLAY`, `R-REACTION`
+- **Evidence:** The M1.7.4 rows in this matrix are the inventory. The regtest reference at `efe60360b4a276465975b603b833a8eb15f8e080` is one display-order pair. The RFC cell at `45ad15aa` still says reorg, reaction, and signed tip fixtures remain pending. Later laboratory commits add signed TM1, signed ALP tips, a synthetic reorg, the reaction corpus in `tests/fixtures/rfc0001-reactions.json`, and the native tip corpus in `tests/fixtures/rfc0001-tip-xec.json`. Those commits do not complete the gate.
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-REPLAY`, `R-REACTION`, `R-TIPXEC`
 - **Trust model:** Mixed. Each underlying row names its own trust model. The gate is the conjunction. `R-REACTION` is not a Codex receipt.
 - **Still required:** S0-05 stays open while any M1.7.4 blocker in this matrix stays unmet. The reaction laboratory does not complete the conjunction.
 
@@ -341,21 +343,21 @@ unless the row names PR #42.
 
 - **Normative text:** S0-05 requires independently reproducible signed fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
-- **Evidence:** Canonical TM1 positives in `rfc0001-canonical-tm1-p2pkh.json`. Coexistence fixture `rfc0001-sec17-coexistence.json`. ALP tips in `rfc0001-alp-ancestry.json`. Signed REACTION and REACTION_REMOVE rows in `tests/fixtures/rfc0001-reactions.json`, checked by `rfc0001_reactions.test.ts` `it("checks Schnorr, ECDSA, sighash, and nonzero author indexes")`. Generators recheck bytes and refuse a private-key payload.
-- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
-- **CI / Codex:** `R-COEX`, `R-REACTION`
-- **Trust model:** Independent laboratory signatures over insecure published keys. The keys must stay unfunded. `R-REACTION` is not a Codex receipt.
-- **Still required:** Signed TIP_XEC and a productive tip profile remain required. Laboratory REACTION and REACTION_REMOVE signatures do not close this row.
+- **Evidence:** Canonical TM1 positives in `rfc0001-canonical-tm1-p2pkh.json`. Coexistence fixture `rfc0001-sec17-coexistence.json`. ALP tips in `rfc0001-alp-ancestry.json`. Signed REACTION and REACTION_REMOVE rows in `tests/fixtures/rfc0001-reactions.json`, checked by `rfc0001_reactions.test.ts` `it("checks Schnorr, ECDSA, sighash, and nonzero author indexes")`. Signed TIP_XEC rows in `tests/fixtures/rfc0001-tip-xec.json`, checked by `rfc0001_tip_xec.test.ts` `it("checks Schnorr, ECDSA, sighash, and a nonzero tipper index")`. Generators recheck bytes and refuse a private-key payload.
+- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-COEX`, `R-REACTION`, `R-TIPXEC`
+- **Trust model:** Independent laboratory signatures over insecure published keys. The keys must stay unfunded. `R-REACTION` and `R-TIPXEC` are not Codex receipts.
+- **Still required:** A productive tip profile remains required. Laboratory TIP_XEC, REACTION, and REACTION_REMOVE signatures do not close this row.
 
 ### `S005-NEGATIVE`
 
 - **Normative text:** S0-05 requires independently reproducible negative fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
-- **Evidence:** Canonical negatives include altered signature, mutated output, P2SH designated input, missing prevout, and sighash `NONE|FORKID`. ALP negatives include the ids listed in `it("rejects the mandatory negative transfers even when the TMM entry is intact")`. eMPP negatives include malformed containers and author byte 255. Reaction negatives are `rfc0001_reactions.test.ts` `it("withholds altered signatures, bad scripts, and ineligible targets")` on `tests/fixtures/rfc0001-reactions.json`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
-- **CI / Codex:** `R-CANONICAL`, `R-REACTION`
-- **Trust model:** Independent laboratory checker for canonical TM1 negatives. Synthetic ALP negatives. Structural eMPP negatives. Reaction negatives are an in-memory laboratory. `R-REACTION` is not a Codex receipt.
-- **Still required:** Negative XEC-tip funding and a network reorg that must drop credit remain required. Laboratory reaction negatives do not close this row.
+- **Evidence:** Canonical negatives include altered signature, mutated output, P2SH designated input, missing prevout, and sighash `NONE|FORKID`. ALP negatives include the ids listed in `it("rejects the mandatory negative transfers even when the TMM entry is intact")`. eMPP negatives include malformed containers and author byte 255. Reaction negatives are `rfc0001_reactions.test.ts` `it("withholds altered signatures, bad scripts, and ineligible targets")` on `tests/fixtures/rfc0001-reactions.json`. TIP_XEC negatives are `rfc0001_tip_xec.test.ts` `it("withholds bad signatures, bad prevouts, and ineligible targets")` and `it("rejects recipient funding, third-party inputs, and self tips")` on `tests/fixtures/rfc0001-tip-xec.json`.
+- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-CANONICAL`, `R-REACTION`, `R-TIPXEC`
+- **Trust model:** Independent laboratory checker for canonical TM1 negatives. Synthetic ALP negatives. Structural eMPP negatives. Reaction negatives and native tip negatives are in-memory laboratories. `R-REACTION` and `R-TIPXEC` are not Codex receipts.
+- **Still required:** A network reorg that must drop credit remains required. Laboratory reaction negatives and laboratory tip negatives do not close this row.
 
 ### `S006-GATE`
 
@@ -420,12 +422,12 @@ unless the row names PR #42.
 ### `SEC-05`
 
 - **Normative text:** SEC-05: for TIP_XEC, every funding prevout belongs to the designated tipper, with no recipient input and no third-party input.
-- **Status:** `NOT_DEMONSTRATED`
-- **Evidence:** No TIP_XEC corpus on PR #41. `lab-ambiguous-funding` is a synthetic ALP token case and is cited under `M174-MULTI-OWNER`. The regtest `spentBy` edge funds a laboratory REPLY.
-- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`
-- **CI / Codex:** `R-BIND`
-- **Trust model:** The ALP rule is a different asset. PR #42's offline TIP_XEC example uses fabricated prevouts.
-- **Still required:** A TIP_XEC corpus with recipient-funded and third-party inputs remains required.
+- **Status:** `PARTIAL`
+- **Evidence:** `tests/fixtures/rfc0001-tip-xec.json` exercised by `rfc0001_tip_xec.test.ts` `it("rejects recipient funding, third-party inputs, and self tips")` and `it("checks Schnorr, ECDSA, sighash, and a nonzero tipper index")`. The note is `RFC0001-TIP-XEC.md`. The ALP ambiguous-funding rows remain a different asset under `M174-MULTI-OWNER`.
+- **Commit:** `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-TIPXEC`
+- **Trust model:** Synthetic in-memory native XEC rule. Declared prevouts are laboratory metadata, not mainnet history. No node, no broadcast, and no productive indexer. `R-TIPXEC` is a snapshot. It is not a Codex receipt. PR #42 was not modified.
+- **Still required:** A persisted indexer, an active-chain settlement, and activation of social version `0x02` remain required. This row does not close SEC-05.
 
 ### `SEC-06`
 
@@ -491,11 +493,11 @@ unless the row names PR #42.
 
 - **Normative text:** SEC-12: zero credit for self-tips. Transfer totals stay on-chain value. Anti-abuse policy for human reputation sits outside consensus.
 - **Status:** `PARTIAL`
-- **Evidence:** `rfc0001_alp_ancestry.test.ts` expects `lab-self-tip` to be `SELF_TIP_UNCREDITED`.
-- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`
-- **CI / Codex:** `R-BIND`
-- **Trust model:** Synthetic laboratory self-tip of the LAB token. Receipt attributable atoms are `0`.
-- **Still required:** The reputation policy outside consensus, and a self-tip rule for XEC and public RMZ, remain required. The laboratory receipt is the synthetic clause only.
+- **Evidence:** `rfc0001_alp_ancestry.test.ts` expects `lab-self-tip` to be `SELF_TIP_UNCREDITED`. `rfc0001_tip_xec.test.ts` `it("rejects recipient funding, third-party inputs, and self tips")` expects `neg-self-tip` in `tests/fixtures/rfc0001-tip-xec.json` to be `SELF_TIP_UNCREDITED` with credited satoshis `0`.
+- **Commit:** `7308a3d51b5e607825ec05720611db0c79e5c19e`; `853ea0b2bb5d9d1f61a3d1232d4c21f5cedabf60`
+- **CI / Codex:** `R-BIND`, `R-TIPXEC`
+- **Trust model:** Synthetic laboratory self-tip of the LAB token, and a separate native XEC self-tip. Receipt amounts stay `0`. `R-TIPXEC` is not a Codex receipt.
+- **Still required:** The reputation policy outside consensus, and a self-tip rule for public RMZ, remain required. The laboratory receipts are the synthetic clauses only.
 
 ### `SEC-13`
 
@@ -1652,10 +1654,12 @@ edit.
    M1.7.4, S0-05, or SEC-04. Activation, a persisted indexer, and a
    network reorg remain outside this laboratory. PR #42's offline
    signatures stay a shape example with fabricated prevouts.
-2. Attributable XEC tips: designated-tipper funding, a recipient-funded
-   input, and a third-party input, with settlement left
-   `NOT_DEMONSTRATED`. The synthetic ALP ambiguous-funding rows do not
-   cover XEC.
+2. Attributable XEC tips now have a laboratory under `tests/`.
+   Designated-tipper funding, a recipient-funded input, and a
+   third-party input credit either a laboratory amount or zero.
+   Settlement stays `NOT_DEMONSTRATED`. The laboratory does not close
+   M1.7.4, S0-05, or SEC-05. The synthetic ALP ambiguous-funding rows
+   remain a different asset.
 3. Further synthetic indexer-shaped cases: persistence is still
    unexecuted. More in-memory checkpoints may be added only with
    laboratory labels. A durable indexer is in the governance list above.
@@ -1687,7 +1691,7 @@ PR #40 and PR #42 are not edited. The regtest reference was left unchanged.
 | Status | Count |
 | --- | --- |
 | `LAB_VALIDATED` | 26 |
-| `PARTIAL` | 75 |
-| `NOT_DEMONSTRATED` | 18 |
+| `PARTIAL` | 76 |
+| `NOT_DEMONSTRATED` | 17 |
 | `BLOCKED` | 21 |
 | `TOTAL` | 140 |
