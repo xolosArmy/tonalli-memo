@@ -190,6 +190,43 @@ function hasCommit(sha: string): boolean {
   }
 }
 
+function fetchReceipt(sha: string, key: string): void {
+  try {
+    execFileSync("git", ["fetch", "--depth=1", "origin", sha], {
+      cwd: REPO_ROOT,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  } catch {
+    const ref = key === "R-RFC" ? "pull/40/head" : key === "R-PR42" ? "pull/42/head" : "";
+    if (ref === "") {
+      throw new Error(`Cannot fetch receipt ${key} ${sha}.`);
+    }
+    execFileSync("git", ["fetch", "--depth=1", "origin", ref], {
+      cwd: REPO_ROOT,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  }
+}
+
+function ensureReceipts(receipts: readonly Receipt[]): void {
+  if (receipts.every((receipt) => hasCommit(receipt.sha))) {
+    return;
+  }
+  try {
+    execFileSync("git", ["fetch", "--deepen=80", "origin"], {
+      cwd: REPO_ROOT,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  } catch {
+    // A full clone has no shallow boundary. The per-SHA fetch below still runs.
+  }
+  for (const receipt of receipts) {
+    if (!hasCommit(receipt.sha)) {
+      fetchReceipt(receipt.sha, receipt.key);
+    }
+  }
+}
+
 function commitHasPath(sha: string, path: string): boolean {
   try {
     execFileSync("git", ["cat-file", "-e", `${sha}:${path}`], {
@@ -208,7 +245,10 @@ function evidencePaths(body: string): string[] {
   const paths = new Set<string>();
   for (const match of section.matchAll(/`([^`\n]+)`/gu)) {
     const token = match[1];
-    if (token.startsWith("tests/") || token.startsWith("packages/")) {
+    if (
+      (token.startsWith("tests/") || token.startsWith("packages/") || token.startsWith("docs/")) &&
+      /\.[A-Za-z0-9]+$/u.test(token)
+    ) {
       paths.add(token);
       continue;
     }
@@ -348,6 +388,10 @@ describe("S0 evidence matrix", () => {
       "R-PR42"
     ]);
     const byKey = new Map(receipts.map((receipt) => [receipt.key, receipt.sha]));
+    ensureReceipts(receipts);
+    for (const receipt of receipts) {
+      expect(hasCommit(receipt.sha), receipt.key).toBe(true);
+    }
     for (const row of rows) {
       const ciLine = /\*\*CI \/ Codex:\*\* ([^\n]+)/u.exec(row.body);
       const commitLine = /\*\*Commit:\*\* ([^\n]+)/u.exec(row.body);
@@ -370,12 +414,6 @@ describe("S0 evidence matrix", () => {
           `${row.id} cites ${path} outside ${keys.join(", ")}`
         ).toBe(true);
       }
-    }
-    if (!hasCommit("efe60360b4a276465975b603b833a8eb15f8e080")) {
-      execFileSync("git", ["fetch", "--deepen=80", "origin"], {
-        cwd: REPO_ROOT,
-        stdio: ["ignore", "pipe", "pipe"]
-      });
     }
     for (const receipt of receipts) {
       if (OTHER_PR_RECEIPTS.has(receipt.key)) {
