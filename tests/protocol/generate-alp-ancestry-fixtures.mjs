@@ -111,6 +111,44 @@ function spendSignedBy(snapshot, outIdx, signer) {
   };
 }
 
+function liedSpend(snapshot, outIdx, signer, scriptName, sats) {
+  return {
+    external: false,
+    spec: {
+      keyName: signer,
+      sats,
+      prevOut: { txid: snapshot.txid, outIdx },
+      outputScript: testOutputScript(scriptName),
+      scriptType: "p2pkh"
+    }
+  };
+}
+
+function claimedExternal(snapshot, outIdx, owner) {
+  return { ...spend(snapshot, outIdx, owner), external: true };
+}
+
+function chainParentView(childRaw, declaredInputs, parentRaw) {
+  const parentId = txidOf(parentRaw);
+  const child = parseTx(childRaw);
+  const parent = parseTx(parentRaw);
+  return declaredInputs.map((declared, index) => {
+    const input = child.inputs[index];
+    if (input.prevTxid !== parentId) {
+      return declared;
+    }
+    const output = parent.outputs[input.outIdx];
+    if (output === undefined) {
+      return { outputScriptHex: null, prevoutSats: null, scriptType: "p2pkh" };
+    }
+    return {
+      outputScriptHex: toHex(output.script),
+      prevoutSats: output.sats.toString(),
+      scriptType: "p2pkh"
+    };
+  });
+}
+
 function tmmEntry(author) {
   const body = Buffer.concat([
     Buffer.from("544d4d00", "hex"),
@@ -217,6 +255,11 @@ const labAtoms = [
   ["authorA", 5000n],
   ["authorA", 5000n],
   ["authorA", 5000n],
+  ["authorA", 5000n],
+  ["authorA", 5000n],
+  ["authorA", 5000n],
+  ["authorB", 5000n],
+  ["authorA", 5000n],
   ["authorA", 5000n]
 ];
 
@@ -243,10 +286,15 @@ const layout = {
   wrongKey: 20,
   collateral: 21,
   collateralMalformed: 22,
-  baton: 23
+  scriptMismatch: 23,
+  amountMismatch: 24,
+  wrongIndex: 25,
+  freshBeside: 26,
+  falseExternal: 27,
+  baton: 28
 };
 
-assert(labAtoms.length === 22, "Genesis atom outputs drifted.");
+assert(labAtoms.length === 27, "Genesis atom outputs drifted.");
 assert(layout.baton === labAtoms.length + 1, "Mint baton index drifted.");
 
 function buildFixtures() {
@@ -752,6 +800,148 @@ function buildFixtures() {
     ])
   ));
 
+  const genesisRaw = records.find((item) => item.id === "lab-genesis").rawTransactionHex;
+  const scriptMismatch = tipShape(
+    "lab-prevout-script-mismatch",
+    [liedSpend(genesis, layout.scriptMismatch, "authorB", "authorB", CARRIER), fee("authorA")],
+    0,
+    [125n, 4875n],
+    ["observer", "authorA"]
+  );
+  tip("lab-prevout-script-mismatch", "lab-prevout-script-mismatch", 0, "observer");
+  const scriptHistory = chainParentView(
+    scriptMismatch.record.rawTransactionHex,
+    scriptMismatch.record.inputs,
+    genesisRaw
+  );
+  assert(
+    signatureMatches(scriptMismatch.record.rawTransactionHex, scriptMismatch.record.inputs, 0, "schnorr"),
+    "Script mismatch did not verify against the declared prevout."
+  );
+  assert(
+    signatureMatches(scriptMismatch.record.rawTransactionHex, scriptHistory, 0, "schnorr") === false,
+    "Script mismatch was valid for the historical prevout."
+  );
+  assert(scriptHistory[0].outputScriptHex !== scriptMismatch.record.inputs[0].outputScriptHex, "Script lie matched history.");
+  assert(scriptHistory[0].prevoutSats === scriptMismatch.record.inputs[0].prevoutSats, "Script case also changed the amount.");
+
+  const amountMismatch = tipShape(
+    "lab-prevout-amount-mismatch",
+    [liedSpend(genesis, layout.amountMismatch, "authorA", "authorA", CARRIER + 1n), fee("authorA")],
+    0,
+    [125n, 4875n],
+    ["observer", "authorA"]
+  );
+  tip("lab-prevout-amount-mismatch", "lab-prevout-amount-mismatch", 0, "observer");
+  const amountHistory = chainParentView(
+    amountMismatch.record.rawTransactionHex,
+    amountMismatch.record.inputs,
+    genesisRaw
+  );
+  assert(amountMismatch.record.inputs[0].prevoutSats === "10001", "Amount lie drifted.");
+  assert(amountHistory[0].prevoutSats === "10000", "Historical amount drifted.");
+  assert(amountHistory[0].outputScriptHex === amountMismatch.record.inputs[0].outputScriptHex, "Amount case also changed the script.");
+  assert(
+    signatureMatches(amountMismatch.record.rawTransactionHex, amountMismatch.record.inputs, 0, "schnorr"),
+    "Amount mismatch did not verify against the declared sats."
+  );
+  assert(
+    signatureMatches(amountMismatch.record.rawTransactionHex, amountHistory, 0, "schnorr") === false,
+    "Amount mismatch was valid for the historical sats."
+  );
+
+  const wrongIndex = tipShape(
+    "lab-prevout-wrong-index",
+    [liedSpend(genesis, layout.wrongIndex, "authorA", "authorA", CARRIER + 1n), fee("authorA")],
+    0,
+    [125n, 4875n],
+    ["observer", "authorB"]
+  );
+  tip("lab-prevout-wrong-index", "lab-prevout-wrong-index", 0, "observer");
+  const wrongHistory = chainParentView(wrongIndex.record.rawTransactionHex, wrongIndex.record.inputs, genesisRaw);
+  assert(parseTx(wrongIndex.record.rawTransactionHex).inputs[0].outIdx === layout.wrongIndex, "Wrong index did not select the historical output.");
+  assert(wrongHistory[0].outputScriptHex !== wrongIndex.record.inputs[0].outputScriptHex, "Wrong index used the historical script.");
+  assert(wrongHistory[0].prevoutSats !== wrongIndex.record.inputs[0].prevoutSats, "Wrong index used the historical amount.");
+  assert(
+    signatureMatches(wrongIndex.record.rawTransactionHex, wrongIndex.record.inputs, 0, "schnorr"),
+    "Wrong index did not verify against the declared metadata."
+  );
+  assert(
+    inputUnlockMatchesPrevout(wrongIndex.record.rawTransactionHex, wrongHistory, 0, "schnorr") === false,
+    "Wrong index unlocked the historical prevout."
+  );
+
+  const missingIndex = tipShape(
+    "lab-prevout-index-missing",
+    [liedSpend(genesis, 99, "authorA", "authorA", CARRIER), fee("authorA")],
+    0,
+    [125n],
+    ["authorB"]
+  );
+  tip("lab-prevout-index-missing", "lab-prevout-index-missing", 0, "authorB");
+  assert(parseTx(missingIndex.record.rawTransactionHex).inputs[0].outIdx === 99, "Missing index drifted.");
+  assert(parseTx(genesisRaw).outputs[99] === undefined, "Genesis unexpectedly has output 99.");
+  assert(
+    signatureMatches(missingIndex.record.rawTransactionHex, missingIndex.record.inputs, 0, "schnorr"),
+    "Missing index did not verify against its fabricated prevout."
+  );
+
+  const indexAndFresh = tipShape(
+    "lab-prevout-index-and-fresh",
+    [
+      liedSpend(genesis, 99, "authorA", "authorA", CARRIER),
+      spend(genesis, layout.freshBeside, "authorA"),
+      fee("authorA")
+    ],
+    1,
+    [5000n],
+    ["authorB"]
+  );
+  tip("lab-prevout-index-and-fresh", "lab-prevout-index-and-fresh", 1, "authorB");
+  assert(parseTx(indexAndFresh.record.rawTransactionHex).inputs[1].outIdx === layout.freshBeside, "Fresh sibling outpoint drifted.");
+  assert(
+    inputUnlockMatchesPrevout(indexAndFresh.record.rawTransactionHex, indexAndFresh.record.inputs, 1, "schnorr"),
+    "Fresh sibling did not unlock its own prevout."
+  );
+
+  const falseExternal = tipShape(
+    "lab-prevout-false-external",
+    [claimedExternal(genesis, layout.falseExternal, "authorA"), fee("authorB")],
+    0,
+    [125n, 4875n],
+    ["observer", "authorA"]
+  );
+  tip("lab-prevout-false-external", "lab-prevout-false-external", 0, "observer");
+  const falseHistory = chainParentView(
+    falseExternal.record.rawTransactionHex,
+    falseExternal.record.inputs,
+    genesisRaw
+  );
+  assert(falseExternal.record.inputs[0].externalUncolored === true, "False external flag was not recorded.");
+  assert(
+    signatureMatches(falseExternal.record.rawTransactionHex, falseHistory, 0, "schnorr"),
+    "False external claim did not unlock the historical prevout."
+  );
+  assert(falseHistory[0].outputScriptHex === falseExternal.record.inputs[0].outputScriptHex, "False external case changed the script.");
+  assert(falseHistory[0].prevoutSats === falseExternal.record.inputs[0].prevoutSats, "False external case changed the amount.");
+
+  const preservedPush = alpSend(labId, ALP_STANDARD, [5000n]);
+  expectSection(preservedPush, "SEND");
+  const preserved = (id, parts) => remember(publish(
+    id,
+    0,
+    parts,
+    finalize(parts.map((part) => part.spec), [
+      { sats: 0n, script: emppScript([preservedPush]) },
+      carrier(parts[0].spec.keyName === "authorB" ? "authorA" : "authorB")
+    ])
+  ));
+  preserved("lab-after-script-mismatch", [spend(genesis, layout.scriptMismatch, "authorA"), fee("authorA")]);
+  preserved("lab-after-amount-mismatch", [spend(genesis, layout.amountMismatch, "authorA"), fee("authorA")]);
+  preserved("lab-after-wrong-index", [spend(genesis, layout.wrongIndex, "authorB"), fee("authorB")]);
+  preserved("lab-after-index-and-fresh", [spend(genesis, layout.freshBeside, "authorA"), fee("authorA")]);
+  preserved("lab-after-false-external", [spend(genesis, layout.falseExternal, "authorA"), fee("authorA")]);
+
   const document = {
     schema: "tonalli-memo.rfc0001.alp-ancestry.s0",
     status: {
@@ -762,7 +952,8 @@ function buildFixtures() {
       m174: "OPEN",
       realRmzGenealogy: "NOT_DEMONSTRATED",
       settlement: "NOT_DEMONSTRATED",
-      productiveTips: false
+      productiveTips: false,
+      externalPrevoutEvidence: "NOT_DEMONSTRATED"
     },
     publicRmzTokenId: RMZ_TOKEN_ID,
     laboratoryTokenId: labId,
@@ -804,6 +995,59 @@ function assertTranscript(transcript, document) {
     assert(entry.realRmzGenealogy === "NOT_DEMONSTRATED", `${entry.id} claims RMZ genealogy.`);
   }
   assert(document.laboratoryTokenId !== document.publicRmzTokenId, "Laboratory token id matches public RMZ.");
+  assert(document.status.externalPrevoutEvidence === "NOT_DEMONSTRATED", "External prevouts were marked as demonstrated.");
+  const allowedSources = new Set(["LOCAL_CHAIN", "EXTERNAL_NOT_DEMONSTRATED", "UNAVAILABLE"]);
+  for (const entry of Object.values(transcript.chain.byId)) {
+    assert(Array.isArray(entry.prevoutSources) && entry.prevoutSources.length > 0, `${entry.id} has no prevout source.`);
+    for (const source of entry.prevoutSources) {
+      assert(allowedSources.has(source), `${entry.id} prevout source ${source} is not a laboratory label.`);
+    }
+  }
+  assert(
+    transcript.chain.byId["lab-genesis"].prevoutSources.join() === "EXTERNAL_NOT_DEMONSTRATED",
+    "Genesis funding was treated as a local or mainnet prevout."
+  );
+  const rejected = (id, reasons) => {
+    const entry = transcript.chain.byId[id];
+    assert(entry.consensus === "INVALID" && entry.applied === false, `${id} was applied.`);
+    assert(entry.coloredOutputs.length === 0, `${id} created colored outputs.`);
+    assert(reasons.every((reason) => entry.reasons.includes(reason)), `${id} reasons were ${entry.reasons.join()}.`);
+    const attributed = transcript.tips.find((item) => item.id === id);
+    assert(attributed.laboratoryTransfer === "REJECTED" && attributed.layers.attributableAtoms === "0", `${id} was attributed.`);
+    return { entry, attributed };
+  };
+  const script = rejected("lab-prevout-script-mismatch", ["PREVOUT_SCRIPT_MISMATCH"]);
+  assert(!script.entry.reasons.includes("PREVOUT_AMOUNT_MISMATCH"), "Script mismatch also reported an amount mismatch.");
+  assert(script.attributed.receiptState === "INVALID_AUTHOR", "Script mismatch was not an author failure.");
+  const amount = rejected("lab-prevout-amount-mismatch", ["PREVOUT_AMOUNT_MISMATCH"]);
+  assert(!amount.entry.reasons.includes("PREVOUT_SCRIPT_MISMATCH"), "Amount mismatch also reported a script mismatch.");
+  assert(amount.attributed.receiptState === "INVALID_AUTHOR", "Amount mismatch was attributed or mislabeled.");
+  const wrong = rejected("lab-prevout-wrong-index", ["PREVOUT_SCRIPT_MISMATCH", "PREVOUT_AMOUNT_MISMATCH"]);
+  assert(wrong.attributed.receiptState === "INVALID_AUTHOR", "Wrong index was not an author failure.");
+  const missing = rejected("lab-prevout-index-missing", ["PREVOUT_INDEX_MISMATCH"]);
+  assert(missing.attributed.layers.authorshipError === "PREVOUT_UNAVAILABLE", "Missing index accepted fabricated authorship.");
+  const sibling = rejected("lab-prevout-index-and-fresh", ["PREVOUT_INDEX_MISMATCH"]);
+  assert(sibling.entry.consumed.map((input) => input.outIdx).includes(document.layout.freshBeside), "Fresh sibling was not recorded as referenced.");
+  assert(sibling.attributed.receiptState === "INVALID_ASSET", "A valid sibling signature changed the receipt code.");
+  assert(sibling.attributed.layers.authorship === "LAB_VALID", "The historical sibling signature was not recognized.");
+  const external = rejected("lab-prevout-false-external", ["EXTERNAL_CLAIM_CONTRADICTS_CHAIN"]);
+  assert(external.attributed.receiptState === "INVALID_ASSET", "False external claim changed the receipt code.");
+  assert(external.attributed.layers.authorship === "LAB_VALID", "Historical signature of the false external claim was rejected as authorship.");
+  for (const id of [
+    "lab-after-script-mismatch",
+    "lab-after-amount-mismatch",
+    "lab-after-wrong-index",
+    "lab-after-index-and-fresh",
+    "lab-after-false-external"
+  ]) {
+    const entry = transcript.chain.byId[id];
+    assert(entry.ancestry === "LABORATORY_VALID" && entry.applied === true, `${id} could not spend the preserved output.`);
+  }
+  const absent = transcript.chain.byId["lab-missing-prevout"];
+  assert(absent.consensus === "INVALID" && absent.applied === false, "An unknown prevout stayed consensus-valid.");
+  assert(absent.reasons.includes("PREVOUT_NOT_IN_CHAIN"), "Unknown prevout reason drifted.");
+  const absentTip = transcript.tips.find((item) => item.id === "lab-missing-prevout");
+  assert(absentTip.receiptState === "INVALID_ASSET" && absentTip.layers.authorship === "LAB_VALID", "Unknown prevout authorship drifted.");
 }
 
 function invokedDirectly() {

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { evaluateLaboratory } from "./alp-ancestry-independent.mjs";
-import { inputUnlockMatchesPrevout, signatureMatches } from "./canonical-tm1-independent-verify.mjs";
+import { inputUnlockMatchesPrevout, parseTx, signatureMatches, toHex, txidOf } from "./canonical-tm1-independent-verify.mjs";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_PATH = join(REPO_ROOT, "tests/fixtures/rfc0001-alp-ancestry.json");
@@ -35,6 +35,25 @@ function tipById(transcript, id) {
     throw new Error(`Missing tip ${id}.`);
   }
   return tip;
+}
+
+function historicalView(raw, declared, parentRaw) {
+  const parentId = txidOf(parentRaw);
+  const parent = parseTx(parentRaw);
+  return parseTx(raw).inputs.map((input, index) => {
+    if (input.prevTxid !== parentId) {
+      return declared[index];
+    }
+    const output = parent.outputs[input.outIdx];
+    if (output === undefined) {
+      return { outputScriptHex: null, prevoutSats: null, scriptType: "p2pkh" };
+    }
+    return {
+      outputScriptHex: toHex(output.script),
+      prevoutSats: output.sats.toString(),
+      scriptType: "p2pkh"
+    };
+  });
 }
 
 describe("ALP laboratory ancestry and RMZ attribution", () => {
@@ -179,7 +198,13 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
       "lab-sponsor-signs-foreign-tokens",
       "lab-wrong-key-token",
       "lab-conflict-fresh",
-      "lab-conflict-malformed"
+      "lab-conflict-malformed",
+      "lab-prevout-script-mismatch",
+      "lab-prevout-amount-mismatch",
+      "lab-prevout-wrong-index",
+      "lab-prevout-index-missing",
+      "lab-prevout-index-and-fresh",
+      "lab-prevout-false-external"
     ];
     for (const id of repaired) {
       const tip = tipById(transcript, id);
@@ -190,6 +215,16 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
     }
     expect(tipById(transcript, "lab-fake-token-id").layers.alpChainReasons).toContain("GENESIS_NOT_IN_CHAIN");
     expect(tipById(transcript, "lab-missing-prevout").layers.alpChainReasons).toContain("PREVOUT_NOT_IN_CHAIN");
+    expect(transcript.chain.byId["lab-missing-prevout"]).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["PREVOUT_NOT_IN_CHAIN"],
+      prevoutSources: ["UNAVAILABLE"]
+    });
+    expect(tipById(transcript, "lab-missing-prevout")).toMatchObject({
+      receiptState: "INVALID_ASSET",
+      layers: { authorship: "LAB_VALID", attributableAtoms: "0" }
+    });
     expect(tipById(transcript, "lab-altered-amount")).toMatchObject({
       layers: { container: "VALID", authorship: "LAB_VALID", naiveRecipientAtoms: "5001" },
       receiptState: "INVALID_ASSET"
@@ -402,6 +437,139 @@ describe("ALP laboratory ancestry and RMZ attribution", () => {
         settlesRealRmzTip: false
       })
     ]);
+  });
+
+  it("binds historical prevouts instead of fixture metadata", () => {
+    const genesisRaw = fixture.transactions.find((item) => item.id === "lab-genesis").rawTransactionHex;
+    const record = (id) => fixture.transactions.find((item) => item.id === id);
+    const chain = (id) => transcript.chain.byId[id];
+    const script = record("lab-prevout-script-mismatch");
+    const scriptHistory = historicalView(script.rawTransactionHex, script.inputs, genesisRaw);
+    expect(scriptHistory[0].outputScriptHex).not.toBe(script.inputs[0].outputScriptHex);
+    expect(scriptHistory[0].prevoutSats).toBe(script.inputs[0].prevoutSats);
+    expect(signatureMatches(script.rawTransactionHex, script.inputs, 0, "schnorr")).toBe(true);
+    expect(signatureMatches(script.rawTransactionHex, scriptHistory, 0, "schnorr")).toBe(false);
+    expect(inputUnlockMatchesPrevout(script.rawTransactionHex, scriptHistory, 0, "schnorr")).toBe(false);
+    expect(chain("lab-prevout-script-mismatch")).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["PREVOUT_SCRIPT_MISMATCH"],
+      coloredOutputs: [],
+      prevoutSources: ["LOCAL_CHAIN", "EXTERNAL_NOT_DEMONSTRATED"]
+    });
+    expect(tipById(transcript, "lab-prevout-script-mismatch")).toMatchObject({
+      receiptState: "INVALID_AUTHOR",
+      laboratoryTransfer: "REJECTED",
+      layers: { authorship: "INVALID", authorshipError: "INVALID_AUTHOR_SIGNATURE", attributableAtoms: "0" }
+    });
+
+    const amount = record("lab-prevout-amount-mismatch");
+    const amountHistory = historicalView(amount.rawTransactionHex, amount.inputs, genesisRaw);
+    expect(amount.inputs[0].prevoutSats).toBe("10001");
+    expect(amountHistory[0].prevoutSats).toBe("10000");
+    expect(amountHistory[0].outputScriptHex).toBe(amount.inputs[0].outputScriptHex);
+    expect(signatureMatches(amount.rawTransactionHex, amount.inputs, 0, "schnorr")).toBe(true);
+    expect(signatureMatches(amount.rawTransactionHex, amountHistory, 0, "schnorr")).toBe(false);
+    expect(chain("lab-prevout-amount-mismatch")).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["PREVOUT_AMOUNT_MISMATCH"],
+      coloredOutputs: []
+    });
+    expect(tipById(transcript, "lab-prevout-amount-mismatch").receiptState).toBe("INVALID_AUTHOR");
+
+    const wrong = record("lab-prevout-wrong-index");
+    const wrongHistory = historicalView(wrong.rawTransactionHex, wrong.inputs, genesisRaw);
+    expect(parseTx(wrong.rawTransactionHex).inputs[0].outIdx).toBe(fixture.layout.wrongIndex);
+    expect(wrongHistory[0].outputScriptHex).not.toBe(wrong.inputs[0].outputScriptHex);
+    expect(wrongHistory[0].prevoutSats).not.toBe(wrong.inputs[0].prevoutSats);
+    expect(signatureMatches(wrong.rawTransactionHex, wrong.inputs, 0, "schnorr")).toBe(true);
+    expect(inputUnlockMatchesPrevout(wrong.rawTransactionHex, wrongHistory, 0, "schnorr")).toBe(false);
+    expect(chain("lab-prevout-wrong-index").reasons).toEqual([
+      "PREVOUT_SCRIPT_MISMATCH",
+      "PREVOUT_AMOUNT_MISMATCH"
+    ]);
+
+    const missing = record("lab-prevout-index-missing");
+    expect(parseTx(missing.rawTransactionHex).inputs[0].prevTxid).toBe(txidOf(genesisRaw));
+    expect(parseTx(missing.rawTransactionHex).inputs[0].outIdx).toBe(99);
+    expect(parseTx(genesisRaw).outputs[99]).toBeUndefined();
+    expect(signatureMatches(missing.rawTransactionHex, missing.inputs, 0, "schnorr")).toBe(true);
+    expect(chain("lab-prevout-index-missing")).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["PREVOUT_INDEX_MISMATCH"],
+      consumed: []
+    });
+    expect(tipById(transcript, "lab-prevout-index-missing").layers.authorshipError).toBe("PREVOUT_UNAVAILABLE");
+
+    const sibling = record("lab-prevout-index-and-fresh");
+    expect(inputUnlockMatchesPrevout(sibling.rawTransactionHex, sibling.inputs, 1, "schnorr")).toBe(true);
+    expect(chain("lab-prevout-index-and-fresh")).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["PREVOUT_INDEX_MISMATCH"],
+      coloredOutputs: []
+    });
+    expect(tipById(transcript, "lab-prevout-index-and-fresh")).toMatchObject({
+      receiptState: "INVALID_ASSET",
+      layers: { authorship: "LAB_VALID", attributableAtoms: "0" }
+    });
+    expect(chain("lab-after-index-and-fresh")).toMatchObject({
+      ancestry: "LABORATORY_VALID",
+      consensus: "VALID",
+      applied: true
+    });
+    expect(chain("lab-after-index-and-fresh").consumed.map((input) => input.outIdx)).toEqual([
+      fixture.layout.freshBeside
+    ]);
+
+    const external = record("lab-prevout-false-external");
+    const externalHistory = historicalView(external.rawTransactionHex, external.inputs, genesisRaw);
+    expect(external.inputs[0].externalUncolored).toBe(true);
+    expect(signatureMatches(external.rawTransactionHex, externalHistory, 0, "schnorr")).toBe(true);
+    expect(chain("lab-prevout-false-external")).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["EXTERNAL_CLAIM_CONTRADICTS_CHAIN"],
+      coloredOutputs: [],
+      prevoutSources: ["LOCAL_CHAIN", "EXTERNAL_NOT_DEMONSTRATED"]
+    });
+    expect(tipById(transcript, "lab-prevout-false-external")).toMatchObject({
+      receiptState: "INVALID_ASSET",
+      laboratoryTransfer: "REJECTED",
+      layers: { authorship: "LAB_VALID", attributableAtoms: "0" }
+    });
+
+    for (const [id, outIdx] of [
+      ["lab-after-script-mismatch", fixture.layout.scriptMismatch],
+      ["lab-after-amount-mismatch", fixture.layout.amountMismatch],
+      ["lab-after-wrong-index", fixture.layout.wrongIndex],
+      ["lab-after-false-external", fixture.layout.falseExternal]
+    ]) {
+      expect(chain(id)).toMatchObject({ ancestry: "LABORATORY_VALID", consensus: "VALID", applied: true });
+      expect(chain(id).consumed.map((input) => input.outIdx)).toEqual([outIdx]);
+    }
+    expect(chain("lab-genesis").prevoutSources).toEqual(["EXTERNAL_NOT_DEMONSTRATED"]);
+    expect(chain("lab-tip-author0").prevoutSources).toEqual(["LOCAL_CHAIN", "EXTERNAL_NOT_DEMONSTRATED"]);
+    expect(chain("lab-tip-author1").prevoutSources).toEqual(["EXTERNAL_NOT_DEMONSTRATED", "LOCAL_CHAIN"]);
+    expect(chain("lab-malformed-action").consensus).toBe("VALID");
+    expect(chain("lab-duplicate-section").consensus).toBe("VALID");
+    expect(fixture.status.externalPrevoutEvidence).toBe("NOT_DEMONSTRATED");
+    const serialized = JSON.stringify(fixture.transcript);
+    expect(serialized).not.toContain("MAINNET");
+    expect(serialized).not.toContain("\"VERIFIED\"");
+    const evidence = readFileSync(EVIDENCE_PATH, "utf8");
+    for (const phrase of [
+      "PREVOUT_SCRIPT_MISMATCH",
+      "PREVOUT_AMOUNT_MISMATCH",
+      "PREVOUT_INDEX_MISMATCH",
+      "EXTERNAL_CLAIM_CONTRADICTS_CHAIN",
+      "EXTERNAL_NOT_DEMONSTRATED",
+      "7308a3d51b5e607825ec05720611db0c79e5c19e"
+    ]) {
+      expect(evidence).toContain(phrase);
+    }
   });
 
   it("preserves the SEC-17 matrix, the frozen corpora and the D-07 samples", () => {

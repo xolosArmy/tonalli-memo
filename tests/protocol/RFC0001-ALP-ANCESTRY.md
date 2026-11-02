@@ -19,7 +19,7 @@ broadcast.
 The synthetic token ticker is `LAB`. Its token id is the TXID of
 `lab-genesis`:
 
-`0c057793012276e1385a60fb06a8b7eae603a55ad9403c7d0a961e48495e1d5d`
+`79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`
 
 That id is not the public RMZ id. Genesis metadata records decimals `2` and
 creates one mint baton. Mint authority in this laboratory is the live baton
@@ -61,7 +61,7 @@ SEND. These rows keep `tmmStructurallyValid: true` and
 | Case | Chain result | Receipt |
 | --- | --- | --- |
 | Fake token id | `GENESIS_NOT_IN_CHAIN` | `INVALID_ASSET` |
-| Missing prevout | `PREVOUT_NOT_IN_CHAIN` | `INVALID_ASSET` |
+| Missing prevout | `PREVOUT_NOT_IN_CHAIN`, consensus invalid | `INVALID_ASSET` |
 | Amount raised from 5000 to 5001 | `INFLATED` | `INVALID_ASSET` |
 | Second spend of the same colored output | `ALREADY_SPENT` | `INVALID_ASSET` |
 | Two inputs in one transaction spend the same prevout | `DUPLICATE_PREVOUT`, consensus invalid, UTXO not consumed | `INVALID_ASSET` |
@@ -108,6 +108,91 @@ A detached claim that the laboratory token has 8 decimals is
 `DECIMAL_MISMATCH`. A claim that the public RMZ id has 2 decimals finds no
 genesis in this chain.
 
+## Historical prevout binding
+
+The previous laboratory oracle, at
+`7308a3d51b5e607825ec05720611db0c79e5c19e`, rebuilt each BIP143/ForkID
+preimage from `record.inputs`. Those fields are copied from the signing
+spec. The UTXO map stored the token id, atoms, baton and owner, but not the
+satoshis or the locking script. Parent bytes were already present as
+`rawTransactionHex` and were not consulted. The following rows were measured
+on an isolated document of `lab-genesis` plus one attack, before any oracle
+change. A digest match against declared metadata is not, by itself, the
+chain result.
+
+| Isolated attack | Against the declared prevout | Against the historical output | Oracle before the correction |
+| --- | --- | --- | --- |
+| Output 1, declared script is author B, signer B, 10000 sats | digest and unlock true | both false | consensus valid, applied, consumed output 1. Receipt `AMBIGUOUS_TIP_FUNDING`, attributable `0`, authorship `LAB_VALID` |
+| Output 1, same script, declared sats `10001` | digest and unlock true | both false | consensus valid, applied, consumed output 1. Receipt `PENDING` / `LABORATORY_ATTRIBUTED`, attributable `125` |
+| Output 13, the author B output, declared author A script and 10000 sats, signer A | digest and unlock true | both false | consensus valid, applied, consumed output 13. Receipt `AMBIGUOUS_TIP_FUNDING` |
+| Genesis outIdx 99, which does not exist, beside an honest spend of output 2 | the fresh input unlocks | output 99 has no historical prevout | `PREVOUT_NOT_IN_CHAIN`, consensus valid, applied false, consumed output 2. Authorship of the fresh input stayed `LAB_VALID` |
+| Genesis outIdx 99 alone | digest true against the fabricated prevout | no output 99 | `PREVOUT_NOT_IN_CHAIN`, consensus valid, applied false, consumed nothing. Authorship `LAB_VALID` |
+| Output 1 spent honestly, with `externalUncolored: true` | digest and unlock true | both true | the flag was ignored. Receipt `PENDING` / `LABORATORY_ATTRIBUTED`, attributable `125` |
+
+The amount row is the false attribution. The script and wrong-index rows
+were applied even though the signing key did not control the historical
+P2PKH. The sibling row burned a fresh output that the missing index never
+unlocked. Those six results are the counterexamples. They were recorded
+before the oracle was changed.
+
+The correction is only in `evaluateChain` and `attributeTip`. For an
+outpoint whose parent TXID is an applied transaction, the oracle parses that
+parent's stored bytes, checks the TXID, requires the output index, and reads
+the satoshis and locking script from that output. The preimage, the sighash
+and the HASH160 are checked against those bytes. `record.inputs` can show a
+disagreement. It is not the source of a historical output. A script
+disagreement is `PREVOUT_SCRIPT_MISMATCH`. An amount disagreement is
+`PREVOUT_AMOUNT_MISMATCH`. Both are reported together when both differ. An
+index past the parent is `PREVOUT_INDEX_MISMATCH`. An `externalUncolored`
+flag on a chain outpoint is `EXTERNAL_CLAIM_CONTRADICTS_CHAIN`. Each of
+these is consensus-invalid. The transaction is not applied, creates no
+colored outputs, and cannot be `LABORATORY_ATTRIBUTED`.
+
+`classifyAuthor` and `inputUnlockMatchesPrevout` are unchanged. The ancestry
+oracle passes the historical prevout into them. A chain input therefore
+cannot make the author HASH160 follow a lied script. An explicit external
+fee, whose parent is not in this chain, still uses its fixture prevout and
+is labeled `EXTERNAL_NOT_DEMONSTRATED`. That label is not a mainnet check
+and not a trusted-chronik check. An unmarked prevout whose parent is absent
+stays `PREVOUT_NOT_IN_CHAIN`, now consensus-invalid, and does not burn a
+sibling. A consensus-valid transaction with an invalid ALP section still
+burns known inputs. `lab-malformed-action` and `lab-duplicate-section` keep
+consensus `VALID`.
+
+The same isolated attacks, evaluated again after the correction, are
+consensus-invalid and not applied. The amount attack is `INVALID_AUTHOR`
+with attributable `0`, not `LABORATORY_ATTRIBUTED`. The isolated wrong-index
+attack declared 10000 sats, so its only chain reason is
+`PREVOUT_SCRIPT_MISMATCH`. The false external claim is
+`EXTERNAL_CLAIM_CONTRADICTS_CHAIN` and `INVALID_ASSET`. The missing index is
+`PREVOUT_INDEX_MISMATCH`. The sibling's fresh output is only referenced. It
+is not marked spent.
+
+Five new genesis outputs, indexes 23 through 27, keep those classes in the
+permanent chain without moving indexes 1 through 22. The baton index is now
+28. That is why the laboratory token id changed. The permanent rows and the
+later spends are:
+
+| Fixture | Chain reason | Receipt | Later spend |
+| --- | --- | --- | --- |
+| `lab-prevout-script-mismatch` | `PREVOUT_SCRIPT_MISMATCH` | `INVALID_AUTHOR` | `lab-after-script-mismatch` is `LABORATORY_VALID` |
+| `lab-prevout-amount-mismatch` | `PREVOUT_AMOUNT_MISMATCH` | `INVALID_AUTHOR` | `lab-after-amount-mismatch` is `LABORATORY_VALID` |
+| `lab-prevout-wrong-index` | script and amount mismatch | `INVALID_AUTHOR` | `lab-after-wrong-index` is `LABORATORY_VALID` |
+| `lab-prevout-index-missing` | `PREVOUT_INDEX_MISMATCH` | `INVALID_AUTHOR`, `PREVOUT_UNAVAILABLE` | no output existed to preserve |
+| `lab-prevout-index-and-fresh` | `PREVOUT_INDEX_MISMATCH` | `INVALID_ASSET`, authorship of the historical input stays `LAB_VALID` | `lab-after-index-and-fresh` spends the fresh output |
+| `lab-prevout-false-external` | `EXTERNAL_CLAIM_CONTRADICTS_CHAIN` | `INVALID_ASSET` | `lab-after-false-external` is `LABORATORY_VALID` |
+
+Author 0, author 1, the foreign-XEC sponsor, multiple owners, the duplicate
+prevout, the wrong-key signature and the fresh-output conflict keep their
+previous results. The frozen TMM corpus and the frozen SEC-17 corpus were
+not regenerated.
+
+External fee prevouts in this chain remain synthetic. Genesis funding is
+`EXTERNAL_NOT_DEMONSTRATED`. A signature that matches fixture metadata does
+not show that the input was seen on mainnet. trusted-chronik and the Core
+v1.0 contract were not changed. No node was contacted. Confirmation and
+settlement stay `NOT_DEMONSTRATED`. M1.7.4 remains open.
+
 ## Real historical evidence
 
 The three archived D-07 transactions remain historical TM1 observations.
@@ -145,7 +230,8 @@ M1.7.4 remains open. This run does not demonstrate:
 - reorg handling, replay, or indexer finality;
 - reactions or reaction removal;
 - productive wallet signing, broadcast, or use of funds;
-- a production mitigation of SEC-17.
+- a production mitigation of SEC-17;
+- a mainnet or trusted-chronik proof of an external fee prevout.
 
 No row in this fixture is a settled RMZ tip. S0-07, `EMPP-ALP`, and S0 stay
 open.

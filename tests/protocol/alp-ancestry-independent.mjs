@@ -314,6 +314,126 @@ function emptyNumbers() {
   };
 }
 
+function rememberReason(reasons, seen, reason) {
+  if (seen.has(reason)) {
+    return;
+  }
+  seen.add(reason);
+  reasons.push(reason);
+}
+
+function satsOf(value) {
+  if (value == null) {
+    return null;
+  }
+  try {
+    return BigInt(value);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A prevout whose parent transaction was applied in this chain is read from
+ * that parent's immutable bytes. Fixture metadata can contradict that output,
+ * but it cannot replace it. An explicit external fee prevout is not a local
+ * chain output and is not a mainnet observation.
+ * @param {{ rawTransactionHex: string, inputs: Array<{ outputScriptHex?: string, prevoutSats?: string, scriptType?: string, externalUncolored?: boolean }> }} record
+ * @param {ReturnType<typeof parseTx>} tx
+ * @param {Map<string, string>} parents
+ */
+function resolvePrevouts(record, tx, parents) {
+  const reasons = [];
+  const seen = new Set();
+  const sources = [];
+  const authorInputs = [];
+  let consensusFail = false;
+  const fail = (reason) => {
+    consensusFail = true;
+    rememberReason(reasons, seen, reason);
+  };
+  const unavailable = () => ({ outputScriptHex: null, prevoutSats: null, scriptType: "p2pkh" });
+  if (!Array.isArray(record.inputs) || record.inputs.length !== tx.inputs.length) {
+    fail("CONSENSUS_INVALID");
+    return { consensusFail, reasons, sources, authorInputs };
+  }
+  for (let index = 0; index < tx.inputs.length; index += 1) {
+    const input = tx.inputs[index];
+    const declared = record.inputs[index] ?? {};
+    const parentRaw = parents.get(input.prevTxid);
+    if (parentRaw === undefined) {
+      if (declared.externalUncolored === true) {
+        sources.push("EXTERNAL_NOT_DEMONSTRATED");
+        authorInputs.push(declared);
+        let unlocked = false;
+        try {
+          unlocked = inputUnlockMatchesPrevout(record.rawTransactionHex, record.inputs, index, "schnorr");
+        } catch {
+          unlocked = false;
+        }
+        if (!unlocked) {
+          fail("CONSENSUS_INVALID");
+        }
+        continue;
+      }
+      sources.push("UNAVAILABLE");
+      authorInputs.push(declared);
+      fail("PREVOUT_NOT_IN_CHAIN");
+      continue;
+    }
+    if (txidOf(parentRaw) !== input.prevTxid) {
+      sources.push("UNAVAILABLE");
+      authorInputs.push(unavailable());
+      fail("PARENT_TXID_MISMATCH");
+      continue;
+    }
+    const output = parseTx(parentRaw).outputs[input.outIdx];
+    if (output === undefined) {
+      sources.push("UNAVAILABLE");
+      authorInputs.push(unavailable());
+      fail("PREVOUT_INDEX_MISMATCH");
+      continue;
+    }
+    const historical = {
+      outputScriptHex: toHex(output.script),
+      prevoutSats: output.sats.toString(),
+      scriptType: "p2pkh"
+    };
+    sources.push("LOCAL_CHAIN");
+    authorInputs.push(historical);
+    const scriptAgrees = typeof declared.outputScriptHex === "string"
+      && declared.outputScriptHex.toLowerCase() === historical.outputScriptHex.toLowerCase();
+    const declaredSats = satsOf(declared.prevoutSats);
+    const amountAgrees = declaredSats !== null && declaredSats === output.sats;
+    let explained = false;
+    if (!scriptAgrees) {
+      fail("PREVOUT_SCRIPT_MISMATCH");
+      explained = true;
+    }
+    if (!amountAgrees) {
+      fail("PREVOUT_AMOUNT_MISMATCH");
+      explained = true;
+    }
+    if (declared.externalUncolored === true) {
+      fail("EXTERNAL_CLAIM_CONTRADICTS_CHAIN");
+      explained = true;
+    }
+    let unlocked = false;
+    try {
+      const view = record.inputs.map((item, slot) => (slot === index ? historical : item));
+      unlocked = inputUnlockMatchesPrevout(record.rawTransactionHex, view, index, "schnorr");
+    } catch {
+      unlocked = false;
+    }
+    if (!unlocked && !explained) {
+      fail("CONSENSUS_INVALID");
+    } else if (!unlocked) {
+      consensusFail = true;
+    }
+  }
+  return { consensusFail, reasons, sources, authorInputs };
+}
+
 /**
  * @param {{ transactions: Array<{ id: string, rawTransactionHex: string, inputs: Array<{ externalUncolored?: boolean }> }> }} document
  */
@@ -366,44 +486,30 @@ export function evaluateChain(document) {
     return consumed;
   };
 
-  const signaturesHold = (record) => {
-    let tx;
-    try {
-      tx = parseTx(record.rawTransactionHex);
-    } catch {
-      return false;
-    }
-    if (!Array.isArray(record.inputs) || record.inputs.length !== tx.inputs.length) {
-      return false;
-    }
-    for (let index = 0; index < tx.inputs.length; index += 1) {
-      const prevout = record.inputs[index];
-      if (prevout?.outputScriptHex == null || prevout.prevoutSats == null) {
-        return false;
-      }
-      try {
-        if (!inputUnlockMatchesPrevout(record.rawTransactionHex, record.inputs, index, "schnorr")) {
-          return false;
-        }
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  };
+  const parents = new Map();
+  const authorInputs = {};
 
   for (const record of document.transactions) {
     const tx = parseTx(record.rawTransactionHex);
     const txid = txidOf(record.rawTransactionHex);
+    const resolution = resolvePrevouts(record, tx, parents);
+    authorInputs[record.id] = resolution.authorInputs;
+    const rejectHere = (reasons, extra = {}) => {
+      reject(record, txid, reasons, { prevoutSources: resolution.sources, ...extra });
+    };
     const outpointKeys = tx.inputs.map((input) => `${input.prevTxid}:${input.outIdx}`);
     const duplicatePrevout = outpointKeys.some((key, index) => outpointKeys.indexOf(key) !== index);
     const spentConflict = tx.inputs.some((input) => {
       const utxo = utxos.get(`${input.prevTxid}:${input.outIdx}`);
       return utxo !== undefined && utxo.spent === true;
     });
-    if (duplicatePrevout || !signaturesHold(record) || spentConflict) {
-      const reason = duplicatePrevout ? "DUPLICATE_PREVOUT" : spentConflict ? "ALREADY_SPENT" : "CONSENSUS_INVALID";
-      reject(record, txid, [reason], {
+    if (duplicatePrevout || spentConflict || resolution.consensusFail) {
+      const reasons = duplicatePrevout
+        ? ["DUPLICATE_PREVOUT"]
+        : spentConflict
+          ? ["ALREADY_SPENT"]
+          : resolution.reasons;
+      rejectHere(reasons, {
         consensus: "INVALID",
         applied: false,
         consumed: referenced(tx)
@@ -413,28 +519,28 @@ export function evaluateChain(document) {
     const script = tx.outputs[0]?.script;
     const parsedPushes = script === undefined ? { error: "NOT_EMPP", pushes: [] } : readPushes(script);
     if (parsedPushes.error !== null) {
-      reject(record, txid, [parsedPushes.error], { consumed: consumeKnown(tx) });
+      rejectHere([parsedPushes.error], { consumed: consumeKnown(tx) });
       continue;
     }
     const alpPushes = parsedPushes.pushes.filter((push) => hex(push.subarray(0, 4)) === ALP_LOKAD);
     if (alpPushes.length !== 1) {
-      reject(record, txid, [alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"], {
+      rejectHere([alpPushes.length === 0 ? "ALP_ABSENT" : "MULTIPLE_ALP_SECTIONS"], {
         consumed: consumeKnown(tx)
       });
       continue;
     }
     const section = parseAlpSection(alpPushes[0]);
     if (!section.ok) {
-      reject(record, txid, [section.reason], { consumed: consumeKnown(tx) });
+      rejectHere([section.reason], { consumed: consumeKnown(tx) });
       continue;
     }
     if (section.kind === "GENESIS" && parsedPushes.pushes[0] !== alpPushes[0]) {
-      reject(record, txid, ["GENESIS_NOT_FIRST"], { consumed: consumeKnown(tx) });
+      rejectHere(["GENESIS_NOT_FIRST"], { consumed: consumeKnown(tx) });
       continue;
     }
     const plan = colorPlan(section, tx.outputs.length);
     if (!plan.ok) {
-      reject(record, txid, [plan.reason], { consumed: consumeKnown(tx) });
+      rejectHere([plan.reason], { consumed: consumeKnown(tx) });
       continue;
     }
 
@@ -472,20 +578,13 @@ export function evaluateChain(document) {
       resolved.push({ key, external: false, ...utxo });
     }
     if (repeatedPrevout || unresolved || alreadySpent) {
-      if (!repeatedPrevout && !alreadySpent) {
-        for (const input of resolved) {
-          if (input.key !== null) {
-            utxos.get(input.key).spent = true;
-          }
-        }
-      }
       const reason = repeatedPrevout
         ? "DUPLICATE_PREVOUT"
         : unresolved
           ? "PREVOUT_NOT_IN_CHAIN"
           : "ALREADY_SPENT";
-      reject(record, txid, [reason], {
-        consensus: repeatedPrevout || alreadySpent ? "INVALID" : "VALID",
+      rejectHere([reason], {
+        consensus: "INVALID",
         applied: false,
         consumed: resolved.filter((input) => !input.external).map(consumedView)
       });
@@ -499,7 +598,7 @@ export function evaluateChain(document) {
           utxos.get(input.key).spent = true;
         }
       }
-      reject(record, txid, ["PUBLIC_RMZ_GENESIS_ABSENT"], {
+      rejectHere(["PUBLIC_RMZ_GENESIS_ABSENT"], {
         ancestry: "NOT_DEMONSTRATED",
         tokenId,
         consumed: resolved.filter((input) => !input.external).map(consumedView)
@@ -514,7 +613,7 @@ export function evaluateChain(document) {
           utxos.get(input.key).spent = true;
         }
       }
-      reject(record, txid, ["GENESIS_NOT_IN_CHAIN"], {
+      rejectHere(["GENESIS_NOT_IN_CHAIN"], {
         tokenId,
         consumed: resolved.filter((input) => !input.external).map(consumedView)
       });
@@ -566,7 +665,7 @@ export function evaluateChain(document) {
       }
     }
     if (reasons.length > 0) {
-      reject(record, txid, reasons, {
+      rejectHere(reasons, {
         tokenId,
         genesisReference: section.kind === "GENESIS" ? txid : parent.txid,
         decimals: section.kind === "GENESIS" ? section.decimals : parent.decimals,
@@ -627,8 +726,10 @@ export function evaluateChain(document) {
       conservation: section.kind === "SEND" ? "EXACT" : "ISSUANCE",
       coloredOutputs,
       consumed: resolved.filter((input) => !input.external).map(consumedView),
-      declaredAtomMap: plan.declared
+      declaredAtomMap: plan.declared,
+      prevoutSources: resolution.sources
     });
+    parents.set(txid, record.rawTransactionHex);
   }
 
   const supply = {};
@@ -643,7 +744,7 @@ export function evaluateChain(document) {
       supply[entry.tokenId] = "0";
     }
   }
-  return { byId, supply, genesis: Object.fromEntries(genesis) };
+  return { byId, supply, genesis: Object.fromEntries(genesis), authorInputs };
 }
 
 function consumedView(input) {
@@ -775,11 +876,12 @@ export function attributeTip(document, chain, tip) {
   const record = document.transactions.find((item) => item.id === tip.transactionId);
   const chainEntry = chain.byId[tip.transactionId];
   const container = inspectContainer(record.rawTransactionHex, tip.authorInputIndex, document.targetTxid);
+  const authorInputs = chain.authorInputs[tip.transactionId] ?? record.inputs;
   const author = classifyAuthor({
     rawTransactionHex: record.rawTransactionHex,
     authorInputIndex: tip.authorInputIndex,
     signatureAlgorithm: tip.signatureAlgorithm,
-    inputs: record.inputs
+    inputs: authorInputs
   });
   const profile = chain.genesis[chainEntry.tokenId] ?? null;
   const decimalMismatch = profile !== null && profile.decimals !== tip.requiredDecimals;
@@ -789,10 +891,11 @@ export function attributeTip(document, chain, tip) {
     alpChain = "INVALID";
     alpChainReasons.push("DECIMAL_MISMATCH");
   }
-  const designated = record.inputs[tip.authorInputIndex];
-  const authorOwner = designated?.outputScriptHex === undefined
+  const designated = authorInputs[tip.authorInputIndex];
+  const designatedScript = designated?.outputScriptHex;
+  const authorOwner = designatedScript === undefined || designatedScript === null
     ? null
-    : ownerOf(Buffer.from(designated.outputScriptHex, "hex"));
+    : ownerOf(Buffer.from(designatedScript, "hex"));
   const amount = attributeAmount(
     chainEntry,
     record.rawTransactionHex,
