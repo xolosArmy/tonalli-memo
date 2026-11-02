@@ -253,11 +253,22 @@ on the malformed carrier is `EXTERNAL_CLAIM_CONTRADICTS_CHAIN` and leaves
 the carrier unspent. The following honest SEND is `INFLATED`, source
 `LOCAL_CHAIN`, receipt `INVALID_ASSET`, authorship `LAB_VALID`, attributable
 `0`. A flipped signature spends output 2 and does not consume it. A child
-of that rejected transaction is `PREVOUT_NOT_IN_CHAIN` with source
+of that rejected transaction is `CONSENSUS_INVALID_PARENT` with source
 `UNAVAILABLE`. Its authorship against the declared prevout stays `LAB_VALID`.
-That child is the negative case: a consensus-invalid parent is still
-indistinguishable from an absent prevout, and the oracle does not invent a
-chain output for it. Output 3 is a different conserving SEND. Its tip,
+The oracle records the rejected TXID and does not invent a chain output.
+
+The first form of that rule still had a hatch. The rejected parent is absent
+from the retained-parent map, so an `externalUncolored` flag was accepted
+before the rejection was consulted. Flipping only that flag on the same raw
+child, measured before the additional correction, changed it from consensus
+`INVALID` to consensus `VALID`, reason `INFLATED`, with both inputs labeled
+`EXTERNAL_NOT_DEMONSTRATED`. The child then retained three uncolored outputs.
+Those outputs could be spent later even though the parent signature had
+failed. The same probe after the correction, `replay-absent-parent-external`,
+stays consensus `INVALID`, reason `CONSENSUS_INVALID_PARENT`, source
+`UNAVAILABLE` on the rejected input. It retains no output and attributes `0`.
+It is not an external fee. A parent that was never in this chain can still
+be an explicit external fee, labeled `EXTERNAL_NOT_DEMONSTRATED`. Output 3 is a different conserving SEND. Its tip,
 `replay-tip-b`, is the only `LABORATORY_ATTRIBUTED` receipt on branch B, for
 `125` atoms. Unspent colored atoms on B are `11000`. The `10000` atoms burned
 by the malformed section are not credited to a tip and are not added to

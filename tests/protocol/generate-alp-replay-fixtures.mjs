@@ -315,8 +315,17 @@ function buildFixtures() {
   tip("replay-tip-badsig", "replay-badsig", 0, "authorB");
 
   const absentParts = [spend(bad.snapshot, 1, "authorB"), fee("authorB", "replay-absent-fee")];
-  sendOf("replay-absent-parent", absentParts, 0, [125n], ["observer"], labId);
+  const absent = sendOf("replay-absent-parent", absentParts, 0, [125n], ["observer"], labId);
   tip("replay-tip-absent", "replay-absent-parent", 0, "observer");
+  records.push({
+    id: "replay-absent-parent-external",
+    rawTransactionHex: absent.record.rawTransactionHex,
+    inputs: absent.record.inputs.map((input, index) => ({
+      ...input,
+      externalUncolored: index === 0 ? true : input.externalUncolored
+    }))
+  });
+  tip("replay-tip-absent-external", "replay-absent-parent-external", 0, "observer");
 
   const sendBParts = [spend(genesis, 3, "authorA"), fee("authorA", "replay-send-b-fee")];
   sendOf("replay-send-b", sendBParts, 0, [125n, 4875n], ["authorB", "authorA"], labId);
@@ -360,6 +369,29 @@ function buildFixtures() {
   assert(JSON.stringify(doubledView) === JSON.stringify(scratchA), "Replaying a branch credited it twice.");
   assert(doubled.idempotentSkips.length === ancestor.length + branchA.length, "Duplicate records were not skipped.");
   assert(hop.snapshot.outputs[1].scriptHex.length > 0, "Hop output was not created.");
+  const absentEntry = scratchB.entries.find((item) => item.id === "replay-absent-parent");
+  assert(
+    absentEntry.reasons.includes("CONSENSUS_INVALID_PARENT") && absentEntry.consensus === "INVALID",
+    "A child of a consensus-invalid parent was admitted."
+  );
+  const probeRecords = recordsById(records, [
+    "replay-genesis",
+    "replay-mint",
+    "replay-badsig",
+    "replay-absent-parent-external"
+  ]);
+  const probeView = logicalView(
+    replayFromScratch(probeRecords),
+    laboratoryDocument(fixtureShell, probeRecords)
+  );
+  const probeEntry = probeView.entries.find((item) => item.id === "replay-absent-parent-external");
+  assert(probeEntry.consensus === "INVALID" && probeEntry.applied === false, "External claim on a rejected parent was applied.");
+  assert(probeEntry.reasons.includes("CONSENSUS_INVALID_PARENT"), `Rejected-parent reason was ${probeEntry.reasons.join()}.`);
+  assert(!probeEntry.reasons.includes("INFLATED"), "Rejected parent was treated as an external fee.");
+  assert(probeEntry.prevoutSources[0] === "UNAVAILABLE", "Rejected parent was labeled as an external prevout.");
+  assert(!probeView.utxos.some((item) => item.txid === probeEntry.txid), "Rejected-parent child retained outputs.");
+  const probeReceipt = probeView.receipts.find((item) => item.id === "replay-tip-absent-external");
+  assert(probeReceipt.receiptState === "INVALID_ASSET" && probeReceipt.attributableAtoms === "0", "Rejected-parent child was credited.");
 
   return {
     schema: "tonalli-memo.rfc0001.alp-replay.s0",

@@ -341,8 +341,9 @@ function satsOf(value) {
  * @param {{ rawTransactionHex: string, inputs: Array<{ outputScriptHex?: string, prevoutSats?: string, scriptType?: string, externalUncolored?: boolean }> }} record
  * @param {ReturnType<typeof parseTx>} tx
  * @param {Map<string, string>} parents
+ * @param {Set<string>} rejectedTxids
  */
-function resolvePrevouts(record, tx, parents) {
+function resolvePrevouts(record, tx, parents, rejectedTxids) {
   const reasons = [];
   const seen = new Set();
   const sources = [];
@@ -362,6 +363,12 @@ function resolvePrevouts(record, tx, parents) {
     const declared = record.inputs[index] ?? {};
     const parentRaw = parents.get(input.prevTxid);
     if (parentRaw === undefined) {
+      if (rejectedTxids.has(input.prevTxid)) {
+        sources.push("UNAVAILABLE");
+        authorInputs.push(declared);
+        fail("CONSENSUS_INVALID_PARENT");
+        continue;
+      }
       if (declared.externalUncolored === true) {
         sources.push("EXTERNAL_NOT_DEMONSTRATED");
         authorInputs.push(declared);
@@ -442,6 +449,7 @@ function resolvePrevouts(record, tx, parents) {
  *   parents: Map<string, string>,
  *   authorInputs: Record<string, Array<{ outputScriptHex?: string | null, prevoutSats?: string | null, scriptType?: string }>>,
  *   seenTxids: Set<string>,
+ *   rejectedTxids: Set<string>,
  *   idempotentSkips: Array<{ id: string, txid: string }>
  * }}
  */
@@ -453,6 +461,7 @@ export function openChain() {
     parents: new Map(),
     authorInputs: {},
     seenTxids: new Set(),
+    rejectedTxids: new Set(),
     idempotentSkips: []
   };
 }
@@ -515,9 +524,11 @@ export function applyRecord(state, record) {
       outputAtoms: extra.outputAtoms ?? 0n
     });
     byId[record.id] = entry;
-    if (entry.consensus !== "INVALID") {
-      retainUncolored(state, record, txid);
+    if (entry.consensus === "INVALID") {
+      state.rejectedTxids.add(txid);
+      return;
     }
+    retainUncolored(state, record, txid);
   };
 
   const referenced = () => {
@@ -550,7 +561,7 @@ export function applyRecord(state, record) {
     return consumed;
   };
 
-  const resolution = resolvePrevouts(record, tx, parents);
+  const resolution = resolvePrevouts(record, tx, parents, state.rejectedTxids);
   authorInputs[record.id] = resolution.authorInputs;
   const rejectHere = (reasons, extra = {}) => {
     reject(reasons, { prevoutSources: resolution.sources, ...extra });

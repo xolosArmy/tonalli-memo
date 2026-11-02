@@ -253,12 +253,35 @@ describe("synthetic ALP replay, rollback and reorg", () => {
     expect(entry(scratchB, "replay-absent-parent")).toMatchObject({
       consensus: "INVALID",
       applied: false,
-      reasons: ["PREVOUT_NOT_IN_CHAIN"],
+      reasons: ["CONSENSUS_INVALID_PARENT"],
       prevoutSources: ["UNAVAILABLE", "EXTERNAL_NOT_DEMONSTRATED"]
     });
     expect(receipt(scratchB, "replay-tip-badsig").receiptState).toBe("INVALID_AUTHOR");
     expect(receipt(scratchB, "replay-tip-absent")).toMatchObject({
       receiptState: "INVALID_ASSET",
+      attributableAtoms: "0"
+    });
+    const probeRecords = recordsById(fixture.transactions, [
+      "replay-genesis",
+      "replay-mint",
+      "replay-badsig",
+      "replay-absent-parent-external"
+    ]);
+    const probe = logicalView(replayFromScratch(probeRecords), laboratoryDocument(fixture, probeRecords));
+    const probeEntry = entry(probe, "replay-absent-parent-external");
+    expect(probeEntry).toMatchObject({
+      consensus: "INVALID",
+      applied: false,
+      reasons: ["CONSENSUS_INVALID_PARENT"],
+      prevoutSources: ["UNAVAILABLE", "EXTERNAL_NOT_DEMONSTRATED"]
+    });
+    expect(probeEntry.reasons).not.toContain("INFLATED");
+    expect(probe.utxos.some((item) => item.txid === probeEntry.txid)).toBe(false);
+    expect(receipt(probe, "replay-tip-absent-external")).toMatchObject({
+      status: "ACTIVE",
+      receiptState: "INVALID_ASSET",
+      laboratoryTransfer: "REJECTED",
+      authorship: "LAB_VALID",
       attributableAtoms: "0"
     });
     const prefix = logicalView(
