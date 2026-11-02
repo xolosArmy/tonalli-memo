@@ -33,8 +33,9 @@ clause has been met.
 
 Every commit below is an ancestor of the commit that publishes this
 matrix, except `R-RFC` and `R-PR42`, which are the heads of the other
-two draft PRs. `R-REACTION` is the laboratory snapshot that added the
-reaction fixtures. Its CI run, job, and Codex columns are `unreviewed`.
+two draft PRs. `R-REACTION` is the laboratory snapshot for the reaction fixtures,
+including the later-batch order repair. Its CI run, job, and Codex
+columns are `unreviewed`.
 Those cells are not a Codex receipt and they are not a CI result.
 A Codex receipt contains `codex-review-receipt:v1` and a Reviewed
 commit line. The receipt names that commit. It is not a review of a
@@ -56,7 +57,7 @@ major issues is short of protocol proof. CI job name is `test`.
 | `R-BIND` | `7308a3d51b5e607825ec05720611db0c79e5c19e` | 41332881781 | 124926491561 | 6561578581 | `7308a3d51b` | no major issues; 2026-11-01T17:45:59Z |
 | `R-PREVOUT` | `27a22416059cc5f6aa5cc4b11723186f23fe6b91` | 41369658945 | 125037186957 | 6566525944 | `27a2241605` | no major issues; 2026-11-02T00:57:16Z |
 | `R-REPLAY` | `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e` | 41388880882 | 125095690970 | 6569120767 | `c9ec63fbea` | no major issues; 2026-11-02T04:32:38Z |
-| `R-REACTION` | `af5854528441abd35f62c474fe108ee00f35a2e1` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
+| `R-REACTION` | `069ab86428dc17a76ce79e6669f27a2f5121cfb1` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
 | `R-RFC` | `45ad15aa157a25f7f8e616682ccbfffad974e15c` | 41321121026 | 124891368477 | 6559961738 | `45ad15aa15` | no major issues on PR #40; 2026-11-01T15:26:35Z |
 | `R-PR42` | `081d75a762889207283ab7d4434030db30c79b41` | 40917165744 | 123600365247 | 6503170078 | `081d75a762` | no major issues on PR #42; 2026-10-29T17:02:43Z |
 
@@ -121,7 +122,7 @@ unless the row names PR #42.
 - **Normative text:** Before acceptance, the repository MUST contain machine-readable positive and negative fixtures with fixed raw bytes, deterministic verdicts, and an independent encoder and decoder for every supported event and container combination, including ALP/eMPP (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` exercised by `rfc0001_s0_07_historical.test.ts` `it("checks serialization, envelope, structure, trusted-chronik, and the independent signature")`. `tests/fixtures/rfc0001-empp-tmm.json` exercised by `rfc0001_empp_tmm.test.ts` `it("keeps the required cases and separates structural axes from production acceptance")`. `tests/fixtures/rfc0001-alp-ancestry.json` exercised by `rfc0001_alp_ancestry.test.ts` `it("proves a synthetic GENESIS, MINT and SEND chain that is not RMZ")`. `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")`.
-- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-BURN`, `R-REACTION`
 - **Trust model:** Independent laboratory checker for canonical TM1. Structural eMPP corpus is unsigned. Synthetic ALP chain uses laboratory token `79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`. The reaction corpus is a separate laboratory. `R-REACTION` is not a Codex receipt.
 - **Still required:** REPLY and TIP_XEC still lack a fixed signed corpus with independent encode and decode on PR #41. The reaction laboratory covers REACTION and REACTION_REMOVE only. The ALP corpus is one synthetic token. A complete combination matrix remains required before M1.7.4 can be accepted.
@@ -141,7 +142,7 @@ unless the row names PR #42.
 - **Normative text:** Acceptance MUST separately prove deterministic script lengths (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `rfc0001_empp_tmm.test.ts` `it("shows the byte-budget disappearance separately from the independent section parse")`. `rfc0001_s0_07_historical.test.ts` `it("keeps the generated 80-byte and 81-byte boundaries owned by the existing suite")`. Canonical fixture lengths are rechecked by `it("rechecks the committed JSON against the isolated generator")`. `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")` measures the 43-byte REACTION and REACTION_REMOVE scripts in `tests/fixtures/rfc0001-reactions.json`.
-- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-EMPP`, `R-REACTION`
 - **Trust model:** Ratified parser bytes on stored scripts, plus the independent eMPP reader. The 223-byte TM0 text stays a candidate. Scripts past that budget take the public `NO_MEMO` path. The 43-byte reaction measurement is laboratory evidence. `R-REACTION` is not a Codex receipt.
 - **Still required:** Deterministic lengths for REPLY and a productive ALP/eMPP tip profile remain required. The reaction script length does not close this row.
@@ -270,8 +271,8 @@ unless the row names PR #42.
 
 - **Normative text:** Reaction and unlike replay remain an explicit S0 blocker (M1.7.4).
 - **Status:** `PARTIAL`
-- **Evidence:** `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("replays likes without duplicating the active counter")` and `it("selects like state from the chosen synthetic branch")`. The laboratory note is `RFC0001-REACTIONS.md`.
-- **Commit:** `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Evidence:** `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("replays likes without duplicating the active counter")`, `it("selects like state from the chosen synthetic branch")`, `it("reorders an older confirmed event that arrives in a later batch")`, and `it("promotes a mempool reaction when the same txid is confirmed")`. The laboratory note is `RFC0001-REACTIONS.md`.
+- **Commit:** `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-REACTION`
 - **Trust model:** Synthetic in-memory state. Declared prevouts are laboratory metadata, not mainnet history. No node, no broadcast, and no productive indexer. `R-REACTION` is a snapshot. It is not a Codex receipt. PR #42 was not modified.
 - **Still required:** A persisted indexer, a network reorg, and activation of social version `0x02` remain required. This row does not close M1.7.4.
@@ -321,7 +322,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 (S0 acceptance table).
 - **Status:** `PARTIAL`
 - **Evidence:** The M1.7.4 rows in this matrix are the inventory. The regtest reference at `efe60360b4a276465975b603b833a8eb15f8e080` is one display-order pair. The RFC cell at `45ad15aa` still says reorg, reaction, and signed tip fixtures remain pending. Later laboratory commits add signed TM1, signed ALP tips, a synthetic reorg, and the reaction corpus in `tests/fixtures/rfc0001-reactions.json`. Those commits do not complete the gate.
-- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-REPLAY`, `R-REACTION`
 - **Trust model:** Mixed. Each underlying row names its own trust model. The gate is the conjunction. `R-REACTION` is not a Codex receipt.
 - **Still required:** S0-05 stays open while any M1.7.4 blocker in this matrix stays unmet. The reaction laboratory does not complete the conjunction.
@@ -341,7 +342,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires independently reproducible signed fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
 - **Evidence:** Canonical TM1 positives in `rfc0001-canonical-tm1-p2pkh.json`. Coexistence fixture `rfc0001-sec17-coexistence.json`. ALP tips in `rfc0001-alp-ancestry.json`. Signed REACTION and REACTION_REMOVE rows in `tests/fixtures/rfc0001-reactions.json`, checked by `rfc0001_reactions.test.ts` `it("checks Schnorr, ECDSA, sighash, and nonzero author indexes")`. Generators recheck bytes and refuse a private-key payload.
-- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-COEX`, `R-REACTION`
 - **Trust model:** Independent laboratory signatures over insecure published keys. The keys must stay unfunded. `R-REACTION` is not a Codex receipt.
 - **Still required:** Signed TIP_XEC and a productive tip profile remain required. Laboratory REACTION and REACTION_REMOVE signatures do not close this row.
@@ -351,7 +352,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires independently reproducible negative fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
 - **Evidence:** Canonical negatives include altered signature, mutated output, P2SH designated input, missing prevout, and sighash `NONE|FORKID`. ALP negatives include the ids listed in `it("rejects the mandatory negative transfers even when the TMM entry is intact")`. eMPP negatives include malformed containers and author byte 255. Reaction negatives are `rfc0001_reactions.test.ts` `it("withholds altered signatures, bad scripts, and ineligible targets")` on `tests/fixtures/rfc0001-reactions.json`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `af5854528441abd35f62c474fe108ee00f35a2e1`
+- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `069ab86428dc17a76ce79e6669f27a2f5121cfb1`
 - **CI / Codex:** `R-CANONICAL`, `R-REACTION`
 - **Trust model:** Independent laboratory checker for canonical TM1 negatives. Synthetic ALP negatives. Structural eMPP negatives. Reaction negatives are an in-memory laboratory. `R-REACTION` is not a Codex receipt.
 - **Still required:** Negative XEC-tip funding and a network reorg that must drop credit remain required. Laboratory reaction negatives do not close this row.
@@ -410,8 +411,8 @@ unless the row names PR #42.
 
 - **Normative text:** SEC-04: immutable history plus an idempotent key `(network, author, target, kind)` and a deterministic last event for likes.
 - **Status:** `PARTIAL`
-- **Evidence:** `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("replays likes without duplicating the active counter")` and `it("does not let the second author clear the first")`. The note is `RFC0001-REACTIONS.md`. ALP txid idempotence in `rfc0001_alp_replay.test.ts` is a different key.
-- **Commit:** `af5854528441abd35f62c474fe108ee00f35a2e1`; `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`
+- **Evidence:** `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("replays likes without duplicating the active counter")`, `it("does not let the second author clear the first")`, and `it("reorders an older confirmed event that arrives in a later batch")`. The note is `RFC0001-REACTIONS.md`. ALP txid idempotence in `rfc0001_alp_replay.test.ts` is a different key.
+- **Commit:** `069ab86428dc17a76ce79e6669f27a2f5121cfb1`; `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`
 - **CI / Codex:** `R-REACTION`, `R-REPLAY`
 - **Trust model:** Synthetic in-memory reaction state. The ALP replay key is a different asset. `R-REACTION` is not a Codex receipt. PR #42 was not modified and is not a reaction ledger.
 - **Still required:** A persisted indexer and a network reorg remain required. The laboratory key does not close SEC-04.
