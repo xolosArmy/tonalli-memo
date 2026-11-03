@@ -12,6 +12,8 @@
  * NOT_DEMONSTRATED. This module is not a network settlement and not an indexer.
  */
 
+import { TextDecoder } from "node:util";
+
 import {
   classifyAuthor,
   hash160,
