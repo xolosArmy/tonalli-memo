@@ -15,9 +15,11 @@
 import {
   classifyAuthor,
   hash160,
+  inputUnlockMatchesPrevout,
   p2pkhHash,
   parseTx,
-  toHex
+  toHex,
+  txidOf
 } from "./canonical-tm1-independent-verify.mjs";
 import { decodeTipScript } from "./tip-xec-envelope-independent.mjs";
 
@@ -103,6 +105,14 @@ export function coreV1PostAuthorIndex(rawTransactionHex) {
 }
 
 function authorOf(rawTransactionHex, index, inputs, algorithm) {
+  if (
+    !Array.isArray(inputs) ||
+    (inputs[index] !== undefined &&
+      inputs[index]?.outputScriptHex != null &&
+      (typeof inputs[index].prevoutSats !== "string" || !/^(?:0|[1-9][0-9]*)$/u.test(inputs[index].prevoutSats)))
+  ) {
+    return { valid: false, stage: "prevout-availability", errorCode: "PREVOUT_UNAVAILABLE" };
+  }
   return classifyAuthor({
     rawTransactionHex,
     authorInputIndex: index,
@@ -116,8 +126,15 @@ function authorOf(rawTransactionHex, index, inputs, algorithm) {
  * Core v1.0 POST, and that POST's designated input verifies in this laboratory.
  * A profile, an alias, or input zero of the POST is not consulted.
  */
-export function classifyTipTarget(tipNetwork, target) {
+export function classifyTipTarget(tipNetwork, target, signedTargetTxid) {
   if (target === undefined) {
+    return { link: "ABSENT", recipientHash160: null, authorInputIndex: null };
+  }
+  if (
+    typeof signedTargetTxid !== "string" ||
+    typeof target.rawTransactionHex !== "string" ||
+    txidOf(target.rawTransactionHex) !== signedTargetTxid
+  ) {
     return { link: "ABSENT", recipientHash160: null, authorInputIndex: null };
   }
   if (target.network !== tipNetwork) {
@@ -160,9 +177,28 @@ function prevoutHash(input) {
   return { ok: true, hash: toHex(hash) };
 }
 
-function fundingFailure(inputs, tipperHash, recipientHash) {
-  for (const input of inputs) {
-    const prevout = prevoutHash(input);
+function inputAlgorithm(script) {
+  const pushes = pushesOf(script);
+  if (pushes === null || pushes.length !== 2 || pushes[0].length < 2) {
+    return null;
+  }
+  const signatureLength = pushes[0].length - 1;
+  if (signatureLength === 64) {
+    return "schnorr";
+  }
+  if (signatureLength >= 8 && signatureLength <= 72) {
+    return "ecdsa";
+  }
+  return null;
+}
+
+function fundingFailure(rawTransactionHex, inputs, tipperHash, recipientHash) {
+  const serialized = parseTx(rawTransactionHex).inputs;
+  if (!Array.isArray(inputs) || inputs.length !== serialized.length) {
+    return "PREVOUT_UNAVAILABLE";
+  }
+  for (let index = 0; index < serialized.length; index += 1) {
+    const prevout = prevoutHash(inputs[index]);
     if (!prevout.ok) {
       return prevout.reason === "PREVOUT_UNAVAILABLE" ? "PREVOUT_UNAVAILABLE" : "UNSUPPORTED_INPUT_SCRIPT";
     }
@@ -174,6 +210,20 @@ function fundingFailure(inputs, tipperHash, recipientHash) {
     }
   }
   return null;
+}
+
+function fundingSignatureValid(rawTransactionHex, inputs) {
+  const serialized = parseTx(rawTransactionHex).inputs;
+  for (let index = 0; index < serialized.length; index += 1) {
+    const algorithm = inputAlgorithm(serialized[index].script);
+    if (
+      algorithm === null ||
+      !inputUnlockMatchesPrevout(rawTransactionHex, inputs, index, algorithm)
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function recipientOutputSum(rawTransactionHex, recipientHash) {
@@ -217,29 +267,31 @@ export function attributeNativeTip({ rawTransactionHex, inputs, network, signatu
   if (typeof network !== "string" || network.length === 0) {
     fail("TIP network is required.");
   }
-  const output = parseTx(rawTransactionHex).outputs[0];
+  const tx = parseTx(rawTransactionHex);
+  const output = tx.outputs[0];
   if (output === undefined) {
     fail("TIP transaction has no output.");
   }
   const decoded = decodeTipScript(output.script);
-  if (!decoded.ok) {
+  if (!decoded.ok || output.sats !== 0n || tx.outputs.slice(1).some((entry) => entry.script[0] === 0x6a)) {
+    const errorCode = decoded.ok ? "INVALID_FORMAT" : decoded.errorCode;
     return result({
       creditedSatoshis: "0",
-      verdict: decoded.errorCode,
+      verdict: errorCode,
       detail: null,
       authorHash160: null,
       recipientHash160: null,
       authorship: "LAB_INVALID",
       authorErrorCode: null,
       structuralOk: false,
-      structuralError: decoded.errorCode,
+      structuralError: errorCode,
       targetLink: "NOT_FRAMED"
     });
   }
   const authorship = authorOf(rawTransactionHex, decoded.authorInputIndex, inputs, signatureAlgorithm);
   const authorHash160 = designatedAuthorHash160(rawTransactionHex, decoded.authorInputIndex);
   const authorshipLabel = authorship.valid ? "LAB_VALID" : "LAB_INVALID";
-  const targetClass = classifyTipTarget(network, target);
+  const targetClass = classifyTipTarget(network, target, decoded.targetTxid);
   if (!authorship.valid) {
     return result({
       creditedSatoshis: "0",
@@ -280,7 +332,7 @@ export function attributeNativeTip({ rawTransactionHex, inputs, network, signatu
       targetLink: targetClass.link
     });
   }
-  const funding = fundingFailure(inputs, authorHash160, targetClass.recipientHash160);
+  const funding = fundingFailure(rawTransactionHex, inputs, authorHash160, targetClass.recipientHash160);
   if (funding !== null) {
     return result({
       creditedSatoshis: "0",
@@ -300,6 +352,20 @@ export function attributeNativeTip({ rawTransactionHex, inputs, network, signatu
       creditedSatoshis: "0",
       verdict: "SELF_TIP_UNCREDITED",
       detail: null,
+      authorHash160,
+      recipientHash160: targetClass.recipientHash160,
+      authorship: authorshipLabel,
+      authorErrorCode: null,
+      structuralOk: true,
+      structuralError: null,
+      targetLink: "ELIGIBLE"
+    });
+  }
+  if (!fundingSignatureValid(rawTransactionHex, inputs)) {
+    return result({
+      creditedSatoshis: "0",
+      verdict: "INVALID_FUNDING_SIGNATURE",
+      detail: "FUNDING_INPUT_INVALID",
       authorHash160,
       recipientHash160: targetClass.recipientHash160,
       authorship: authorshipLabel,

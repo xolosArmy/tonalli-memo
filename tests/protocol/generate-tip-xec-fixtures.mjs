@@ -152,6 +152,9 @@ function authorOf(rawTransactionHex, index, inputs, algorithm) {
 }
 
 function applyPrevoutPatch(inputs, patch) {
+  if (patch.kind === "truncate") {
+    return inputs.slice(0, patch.count);
+  }
   return inputs.map((input, index) => {
     if (index !== patch.index) {
       return input;
@@ -234,6 +237,8 @@ function signTip(spec, catalog) {
   let rawTransactionHex = signed.rawTransactionHex;
   if (spec.mutate === "flip-signature") {
     rawTransactionHex = flipSignature(rawTransactionHex, spec.signatureInputIndex);
+  } else if (spec.mutate === "flip-funding-signature") {
+    rawTransactionHex = flipSignature(rawTransactionHex, spec.mutateInputIndex ?? 0);
   } else if (spec.mutate === "envelope-byte") {
     rawTransactionHex = mutateEnvelopeByte(rawTransactionHex);
   } else if (spec.mutate === "output-script") {
@@ -254,8 +259,20 @@ function signTip(spec, catalog) {
   if (spec.mutate === "envelope-byte" || spec.mutate === "output-script") {
     assert(finalDigest !== preMutationDigestHex, `${spec.id} committed-output change kept the old digest.`);
   }
-  if (spec.prevoutPatch?.kind === "amount" || spec.prevoutPatch?.kind === "script") {
+  if (
+    (spec.prevoutPatch?.kind === "amount" || spec.prevoutPatch?.kind === "script") &&
+    spec.prevoutPatch.index === spec.signatureInputIndex
+  ) {
     assert(finalDigest !== preMutationDigestHex, `${spec.id} prevout change kept the old digest.`);
+  }
+  if (
+    spec.prevoutPatch?.kind === "amount" &&
+    spec.prevoutPatch.index !== undefined &&
+    spec.prevoutPatch.index !== spec.signatureInputIndex
+  ) {
+    const patchedDigest = digestHex(rawTransactionHex, inputs, spec.prevoutPatch.index, 0x41);
+    const originalDigest = digestHex(rawTransactionHex, signed.inputs, spec.prevoutPatch.index, 0x41);
+    assert(patchedDigest !== originalDigest, `${spec.id} funding prevout change kept the old digest.`);
   }
   const outputScript = firstOutputScript(rawTransactionHex);
   const decoded = decodeTipScript(outputScript);
@@ -535,6 +552,48 @@ function buildFixtures() {
       inputs: [
         inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-c1-a", outIdx: 0 }),
         inputSpec({ keyName: "observer", sats: 7000n, label: "tip-c1-c", outIdx: 1 })
+      ]
+    }, catalog),
+    signTip({
+      ...base,
+      id: "neg-funding-signature",
+      group: "negative",
+      signatureInputIndex: 1,
+      envelopeAuthorIndex: 1,
+      mutate: "flip-funding-signature",
+      mutateInputIndex: 0,
+      verdict: "INVALID_FUNDING_SIGNATURE",
+      detail: "FUNDING_INPUT_INVALID",
+      creditedSatoshis: "0",
+      inputs: [
+        inputSpec({ keyName: "authorA", sats: 8000n, label: "tip-bad-funding-0", outIdx: 0 }),
+        inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-bad-funding-1", outIdx: 1 })
+      ]
+    }, catalog),
+    signTip({
+      ...base,
+      id: "neg-funding-amount",
+      group: "negative",
+      signatureInputIndex: 1,
+      envelopeAuthorIndex: 1,
+      prevoutPatch: { index: 0, kind: "amount" },
+      verdict: "INVALID_FUNDING_SIGNATURE",
+      detail: "FUNDING_INPUT_INVALID",
+      creditedSatoshis: "0",
+      inputs: [
+        inputSpec({ keyName: "authorA", sats: 8000n, label: "tip-bad-funding-amt-0", outIdx: 0 }),
+        inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-bad-funding-amt-1", outIdx: 1 })
+      ]
+    }, catalog),
+    signTip({
+      ...negativeBase,
+      id: "neg-metadata-truncated",
+      detail: "PREVOUT_UNAVAILABLE",
+      sighashType: ALL_ANYONECANPAY_BIP143,
+      prevoutPatch: { kind: "truncate", count: 1 },
+      inputs: [
+        inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-trunc-a", outIdx: 0 }),
+        inputSpec({ keyName: "observer", sats: 7000n, label: "tip-trunc-c", outIdx: 1 })
       ]
     }, catalog),
     signTip({

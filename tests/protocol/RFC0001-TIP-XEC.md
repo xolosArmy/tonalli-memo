@@ -86,8 +86,13 @@ output is relay-valid.
 
 A third-party input credits 0 even when the designated tipper's
 signature checks, including sighash `0xc1` and a tipper who is not
-input zero. A tipper whose hash equals the recipient is
-`SELF_TIP_UNCREDITED` even though the transaction pays that hash.
+input zero. Truncating the declared prevout metadata array so it covers
+fewer entries than the serialized transaction inputs credits 0 as
+`AMBIGUOUS_TIP_FUNDING` with detail `PREVOUT_UNAVAILABLE`. Flipping a
+non-designated funding input signature or falsifying a non-designated
+funding input amount credits 0 as `INVALID_FUNDING_SIGNATURE`. A tipper
+whose hash equals the recipient is `SELF_TIP_UNCREDITED` even though
+the transaction pays that hash.
 A missing prevout, a prevout whose script or amount was replaced after
 signing, an unsupported prevout script, a flipped signature, a mutated
 recipient output, and a tip script mutated after signing credit 0.
@@ -95,8 +100,10 @@ An author index of 5 with one input credits 0. A zero-satoshi output
 to the recipient is `NO_VALUE_TRANSFER`. A payment to the POST's input
 zero, instead of the POST's designated author, is `INVALID_RECIPIENT`.
 
-A missing target, a payment, a reply-shaped version `0x02` script, and
-a POST whose own signature was altered do not yield a credited tip.
+A missing target, a supplied target whose transaction ID does not match
+the signed `target_txid` in the tip envelope, a payment, a reply-shaped
+version `0x02` script, and a POST whose own signature was altered do
+not yield a credited tip.
 The same target recorded on `lab-tip-net` does not satisfy a tip
 labeled `lab-other-net`. That label is a key probe inside the
 laboratory. It is not a second network confirmation.

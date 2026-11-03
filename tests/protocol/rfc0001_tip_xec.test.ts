@@ -218,7 +218,12 @@ describe("synthetic native TIP_XEC laboratory", () => {
   const catalog = new Map(fixture.targets.map((target) => [target.txid, target]));
 
   function recompute(row: TipRow) {
-    const target = row.targetTxid === null ? undefined : catalog.get(row.targetTxid);
+    const decoded = decodeTipScript(Buffer.from(row.outputScriptHex, "hex")) as {
+      framed: boolean;
+      targetTxid?: string;
+    };
+    const signedTargetTxid = decoded.framed && typeof decoded.targetTxid === "string" ? decoded.targetTxid : null;
+    const target = signedTargetTxid === null ? undefined : catalog.get(signedTargetTxid);
     return attributeNativeTip({
       rawTransactionHex: row.rawTransactionHex,
       inputs: row.inputs,
@@ -445,8 +450,20 @@ describe("synthetic native TIP_XEC laboratory", () => {
     const third = requireRow(tips, "neg-third-party");
     const thirdIndex = requireRow(tips, "neg-third-party-index1");
     const thirdAnyone = requireRow(tips, "neg-third-party-c1");
+    const badFundingSig = requireRow(tips, "neg-funding-signature");
+    const badFundingAmt = requireRow(tips, "neg-funding-amount");
+    const truncatedMeta = requireRow(tips, "neg-metadata-truncated");
     const selfTip = requireRow(tips, "neg-self-tip");
-    for (const row of [funded, third, thirdIndex, thirdAnyone, selfTip]) {
+    for (const row of [
+      funded,
+      third,
+      thirdIndex,
+      thirdAnyone,
+      badFundingSig,
+      badFundingAmt,
+      truncatedMeta,
+      selfTip
+    ]) {
       const again = recompute(row);
       expect(again.creditedSatoshis).toBe("0");
       expect(again.verdict).toBe(row.verdict);
@@ -460,6 +477,26 @@ describe("synthetic native TIP_XEC laboratory", () => {
     expect(third.detail).toBe("THIRD_PARTY_INPUT");
     expect(thirdIndex.envelopeAuthorIndex).toBe(1);
     expect(thirdAnyone.sighashByte).toBe(0xc1);
+    expect(badFundingSig.verdict).toBe("INVALID_FUNDING_SIGNATURE");
+    expect(badFundingSig.detail).toBe("FUNDING_INPUT_INVALID");
+    expect(badFundingAmt.verdict).toBe("INVALID_FUNDING_SIGNATURE");
+    expect(badFundingAmt.detail).toBe("FUNDING_INPUT_INVALID");
+    expect(truncatedMeta.verdict).toBe("AMBIGUOUS_TIP_FUNDING");
+    expect(truncatedMeta.detail).toBe("PREVOUT_UNAVAILABLE");
+    expect(truncatedMeta.inputs).toHaveLength(1);
+    const eligible = requireTarget(fixture.targets, "eligible-post-index1");
+    const manualTruncated = attributeNativeTip({
+      rawTransactionHex: thirdAnyone.rawTransactionHex,
+      inputs: thirdAnyone.inputs.slice(0, 1),
+      network: thirdAnyone.network,
+      signatureAlgorithm: thirdAnyone.signatureAlgorithm,
+      target: eligible
+    }) as { creditedSatoshis: string; verdict: string; detail: string | null };
+    expect(manualTruncated).toMatchObject({
+      creditedSatoshis: "0",
+      verdict: "AMBIGUOUS_TIP_FUNDING",
+      detail: "PREVOUT_UNAVAILABLE"
+    });
     expect(selfTip.verdict).toBe("SELF_TIP_UNCREDITED");
     expect(positiveRecipientSum(selfTip.rawTransactionHex, selfTip.authorHash160 ?? "")).toBeGreaterThan(0n);
     expect(requireRow(tips, "neg-zero-recipient").verdict).toBe("NO_VALUE_TRANSFER");
@@ -474,6 +511,9 @@ describe("synthetic native TIP_XEC laboratory", () => {
   it("withholds bad signatures, bad prevouts, and ineligible targets", () => {
     const expected = [
       ["neg-signature-flipped", "INVALID_AUTHOR_SIGNATURE"],
+      ["neg-funding-signature", "INVALID_FUNDING_SIGNATURE"],
+      ["neg-funding-amount", "INVALID_FUNDING_SIGNATURE"],
+      ["neg-metadata-truncated", "AMBIGUOUS_TIP_FUNDING"],
       ["neg-output-mutated", "INVALID_AUTHOR_SIGNATURE"],
       ["neg-envelope-mutated", "INVALID_AUTHOR_SIGNATURE"],
       ["neg-author-index-5", "AUTHOR_INPUT_OUT_OF_RANGE"],
@@ -499,6 +539,33 @@ describe("synthetic native TIP_XEC laboratory", () => {
       expect(again.targetLink).toBe(row.targetLink);
       expect(again.authorErrorCode).toBe(row.authorErrorCode);
     }
+    const eligible = requireTarget(fixture.targets, "eligible-post-index1");
+    const absentRow = requireRow(tips, "neg-target-absent");
+    const mismatchedTarget = attributeNativeTip({
+      rawTransactionHex: absentRow.rawTransactionHex,
+      inputs: absentRow.inputs,
+      network: absentRow.network,
+      signatureAlgorithm: absentRow.signatureAlgorithm,
+      target: eligible
+    }) as { creditedSatoshis: string; verdict: string; targetLink: string };
+    expect(mismatchedTarget).toMatchObject({
+      creditedSatoshis: "0",
+      verdict: "TARGET_ABSENT",
+      targetLink: "ABSENT"
+    });
+    const mutatedEnvelopeRow = requireRow(tips, "neg-envelope-mutated");
+    const mismatchedMutated = attributeNativeTip({
+      rawTransactionHex: mutatedEnvelopeRow.rawTransactionHex,
+      inputs: mutatedEnvelopeRow.inputs,
+      network: mutatedEnvelopeRow.network,
+      signatureAlgorithm: mutatedEnvelopeRow.signatureAlgorithm,
+      target: eligible
+    }) as { creditedSatoshis: string; verdict: string; targetLink: string };
+    expect(mismatchedMutated).toMatchObject({
+      creditedSatoshis: "0",
+      verdict: "INVALID_AUTHOR_SIGNATURE",
+      targetLink: "ABSENT"
+    });
     expect(requireRow(tips, "neg-target-pending").targetLink).toBe("PENDING_TARGET");
     expect(requireRow(tips, "neg-other-network").network).toBe("lab-other-net");
     expect(requireRow(tips, "neg-envelope-mutated").targetLink).toBe("ABSENT");
