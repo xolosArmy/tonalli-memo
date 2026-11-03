@@ -29,17 +29,19 @@ function fail(message) {
   throw new Error(message);
 }
 
+const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
+
 function pushesOf(script) {
   const pushes = [];
   for (let cursor = 0; cursor < script.length; ) {
     const opcode = script[cursor];
     cursor += 1;
     let length;
-    if (opcode <= 0x4b) {
+    if (opcode >= 0x01 && opcode <= 0x4b) {
       length = opcode;
     } else if (opcode === 0x4c) {
       const next = script[cursor];
-      if (next === undefined) {
+      if (next === undefined || next < 0x4c) {
         return null;
       }
       length = next;
@@ -88,20 +90,29 @@ export function coreV1PostAuthorIndex(rawTransactionHex) {
     return null;
   }
   const script = output.script;
-  if (script.length < 10 || script[0] !== 0x6a || script[1] !== 0x04) {
+  if (script.length < 10 || script.length > 223 || script[0] !== 0x6a) {
     return null;
   }
-  if (toHex(script.slice(2, 6)) !== "544d4d00") {
+  const pushes = pushesOf(script.slice(1));
+  if (pushes === null || pushes.length !== 2) {
     return null;
   }
-  const push = script[6];
-  if (push < 3 || push > 0x4b || script.length !== 7 + push) {
+  if (toHex(pushes[0]) !== "544d4d00") {
     return null;
   }
-  if (script[7] !== 0x01 || script[8] !== 0x01) {
+  const envelope = pushes[1];
+  if (envelope.length < 4 || envelope.length > 215) {
     return null;
   }
-  return script[9];
+  if (envelope[0] !== 0x01 || envelope[1] !== 0x01) {
+    return null;
+  }
+  try {
+    UTF8_DECODER.decode(envelope.slice(3));
+  } catch {
+    return null;
+  }
+  return envelope[2];
 }
 
 function authorOf(rawTransactionHex, index, inputs, algorithm) {

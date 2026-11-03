@@ -322,14 +322,21 @@ describe("synthetic native TIP_XEC laboratory", () => {
     }));
     expect(tm1Code(s08Script)).toBe("UNSUPPORTED_VERSION");
     const eligible = requireTarget(fixture.targets, "eligible-post-index1");
+    const eligiblePushdata1 = requireTarget(fixture.targets, "eligible-post-pushdata1");
     const pending = requireTarget(fixture.targets, "pending-post");
     const payment = requireTarget(fixture.targets, "ineligible-payment");
     const reply = requireTarget(fixture.targets, "ineligible-reply-shaped");
     expect(tm1Code(outputScript(eligible.rawTransactionHex))).toBe("ACCEPTED:POST:tip target post");
+    expect(tm1Code(outputScript(eligiblePushdata1.rawTransactionHex))).toBe(
+      "ACCEPTED:POST:tip target post crossing the seventy-two byte pushdata1 envelope boundary"
+    );
+    expect(Buffer.byteLength(eligiblePushdata1.eventDataUtf8 ?? "", "utf8")).toBe(73);
+    expect(toHex(outputScript(eligiblePushdata1.rawTransactionHex)).startsWith("6a04544d4d004c4c010101")).toBe(true);
     expect(tm1Code(outputScript(pending.rawTransactionHex))).toBe("ACCEPTED:POST:tip pending target");
     expect(tm1Code(outputScript(payment.rawTransactionHex))).toBe("INVALID_MARKER");
     expect(tm1Code(outputScript(reply.rawTransactionHex))).toBe("UNSUPPORTED_VERSION");
     expect(coreV1PostAuthorIndex(eligible.rawTransactionHex)).toBe(1);
+    expect(coreV1PostAuthorIndex(eligiblePushdata1.rawTransactionHex)).toBe(1);
     expect(coreV1PostAuthorIndex(reply.rawTransactionHex)).toBe(null);
     expect(designatedAuthorHash160(eligible.rawTransactionHex, 0)).not.toBe(eligible.authorHash160);
     expect(designatedAuthorHash160(eligible.rawTransactionHex, 1)).toBe(eligible.authorHash160);
@@ -421,7 +428,7 @@ describe("synthetic native TIP_XEC laboratory", () => {
   });
 
   it("attributes only the recipient outputs", () => {
-    expect(positives).toHaveLength(7);
+    expect(positives).toHaveLength(8);
     for (const row of positives) {
       const again = recompute(row);
       expect(again.verdict).toBe("LAB_ATTRIBUTABLE");
@@ -435,6 +442,7 @@ describe("synthetic native TIP_XEC laboratory", () => {
       );
     }
     expect(requireRow(tips, "tip-schnorr-index0-41").creditedSatoshis).toBe("1000");
+    expect(requireRow(tips, "tip-pushdata1-target").creditedSatoshis).toBe("1000");
     expect(requireRow(tips, "tip-multi-output").creditedSatoshis).toBe("3000");
     const mixed = requireRow(tips, "tip-mixed-output");
     expect(mixed.creditedSatoshis).toBe("1000");

@@ -383,6 +383,28 @@ function buildFixtures() {
   );
   assert(designatedAuthorHash160(eligible.rawTransactionHex, 0) !== eligible.authorHash160, "POST input zero matches the author.");
 
+  const pushdata1Text = "tip target post crossing the seventy-two byte pushdata1 envelope boundary";
+  assert(Buffer.byteLength(pushdata1Text, "utf8") === 73, "PUSHDATA1 POST text is not 73 bytes.");
+  const eligiblePushdata1 = signTarget({
+    id: "eligible-post-pushdata1",
+    kind: "core-v1-post",
+    authorship: "LAB_VALID",
+    authorInputIndex: 1,
+    eventDataUtf8: pushdata1Text,
+    inputs: [
+      inputSpec({ keyName: "observer", sats: 8000n, label: "tip-post-pd1-fee", outIdx: 0 }),
+      inputSpec({ keyName: "authorB", sats: 10000n, label: "tip-post-pd1-author", outIdx: 1 })
+    ],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(1, pushdata1Text) },
+      { sats: 17000n, script: testOutputScript("authorB") }
+    ]
+  });
+  assert(
+    eligiblePushdata1.outputScriptHex.startsWith("6a04544d4d004c4c010101"),
+    "PUSHDATA1 POST did not encode a 76-byte minimal PUSHDATA1 envelope."
+  );
+
   const pending = signTarget({
     id: "pending-post",
     kind: "core-v1-post",
@@ -416,7 +438,9 @@ function buildFixtures() {
     ]
   });
   const absentTargetTxid = createHash("sha256").update("rfc0001-tip-xec-absent-target-v1").digest("hex");
-  const catalog = new Map([eligible, pending, payment, replyShaped].map((target) => [target.txid, target]));
+  const catalog = new Map(
+    [eligible, eligiblePushdata1, pending, payment, replyShaped].map((target) => [target.txid, target])
+  );
   assert(!catalog.has(absentTargetTxid), "Absent target collided with a synthetic transaction.");
 
   const base = {
@@ -502,6 +526,12 @@ function buildFixtures() {
         { key: "observer", sats: 546n }
       ],
       inputs: [inputSpec({ keyName: "authorA", sats: 12000n, label: "tip-mixed" })]
+    }, catalog),
+    signTip({
+      ...base,
+      id: "tip-pushdata1-target",
+      targetTxidHex: eligiblePushdata1.txid,
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-a-pd1" })]
     }, catalog)
   ];
 
@@ -836,7 +866,7 @@ function buildFixtures() {
 
   const rows = [...positives, ...negatives];
   const txids = new Set();
-  for (const row of [...[eligible, pending, payment, replyShaped], ...rows]) {
+  for (const row of [...[eligible, eligiblePushdata1, pending, payment, replyShaped], ...rows]) {
     assert(!txids.has(row.txid), `${row.id} reused a txid.`);
     txids.add(row.txid);
   }
@@ -851,6 +881,7 @@ function buildFixtures() {
   }
   assert(rows.find((row) => row.id === "neg-recipient-funded").creditedSatoshis === "0", "Recipient-funded tip was credited.");
   assert(rows.find((row) => row.id === "tip-multi-output").creditedSatoshis === "3000", "Multiple recipient outputs were not summed.");
+  assert(rows.find((row) => row.id === "tip-pushdata1-target").creditedSatoshis === "1000", "PUSHDATA1 target tip was not credited.");
 
   const sample = encodeTipScript({
     version: SOCIAL_VERSION,
@@ -887,7 +918,7 @@ function buildFixtures() {
       sighashSerializer: "tests/protocol/canonical-tm1-independent-verify.mjs"
     },
     absentTargetTxid,
-    targets: [eligible, pending, payment, replyShaped],
+    targets: [eligible, eligiblePushdata1, pending, payment, replyShaped],
     tips: rows,
     structures: [
       { id: "truncated-envelope", scriptHex: sampleHex.slice(0, 40), errorCode: "INVALID_FORMAT" },

@@ -58,8 +58,10 @@ results.
 
 The recipient HASH160 is the designated author of an eligible Core v1.0
 POST. The eligible POST in this corpus uses author index 1. Its input
-zero is a different hash and is not the recipient. An alias, a profile
-address, and input zero of the POST are not substitutes.
+zero is a different hash and is not the recipient. A second eligible
+POST carries 73 bytes of UTF-8 text (a 76-byte minimal `PUSHDATA1`
+envelope) at author index 1 and is also accepted as a tip target. An
+alias, a profile address, and input zero of the POST are not substitutes.
 
 The laboratory amount is the positive integer sum of P2PKH outputs to
 that recipient hash. OP_RETURN, the fee, change back to the tipper, and
