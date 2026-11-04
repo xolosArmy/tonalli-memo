@@ -62,21 +62,41 @@ export function designatedAuthorHash160(rawTransactionHex, authorInputIndex) {
   return toHex(hash160(pushes[1]));
 }
 
+export function tm1CandidateOutputs(rawTransactionHex) {
+  const outputs = parseTx(rawTransactionHex).outputs;
+  const candidates = [];
+  for (let i = 0; i < outputs.length; i++) {
+    const output = outputs[i];
+    if (output.script.length > 0 && output.script[0] === 0x6a) {
+      const pushes = pushesOf(output.script.slice(1));
+      if (pushes !== null && pushes.length >= 1 && toHex(pushes[0]) === "544d4d00") {
+        candidates.push({ index: i, output, pushes });
+      }
+    }
+  }
+  return candidates;
+}
+
 /**
  * Author index from a Core v1.0 POST script. Input zero is not a fallback.
- * Returns null when output 0 is not a minimal v1 POST.
+ * Enforces candidate cardinality across all outputs: returns null when the
+ * transaction does not contain exactly one TM1 candidate, or when that
+ * single candidate output is not a minimal v1 POST.
  */
 export function coreV1PostAuthorIndex(rawTransactionHex) {
-  const output = parseTx(rawTransactionHex).outputs[0];
-  if (output === undefined || output.sats !== 0n) {
+  const candidates = tm1CandidateOutputs(rawTransactionHex);
+  if (candidates.length !== 1) {
+    return null;
+  }
+  const { output, pushes } = candidates[0];
+  if (output.sats !== 0n) {
     return null;
   }
   const script = output.script;
   if (script.length < 10 || script.length > 223 || script[0] !== 0x6a) {
     return null;
   }
-  const pushes = pushesOf(script.slice(1));
-  if (pushes === null || pushes.length !== 2) {
+  if (pushes.length !== 2) {
     return null;
   }
   if (toHex(pushes[0]) !== "544d4d00") {
@@ -157,6 +177,10 @@ export function classifyReplyParent(replyNetwork, parentRecord, signedParentTxid
   }
 
   if (parentRecord.kind === "core-v1-post") {
+    const candidates = tm1CandidateOutputs(parentRecord.rawTransactionHex);
+    if (candidates.length > 1) {
+      return { link: "INVALID_PARENT", reason: "MULTIPLE_MEMOS", parentKind: "core-v1-post", rootPostTxid: null, depth: null };
+    }
     const authorIndex = coreV1PostAuthorIndex(parentRecord.rawTransactionHex);
     if (authorIndex === null) {
       return { link: "INVALID_PARENT", reason: "NOT_CORE_V1_POST", parentKind: null, rootPostTxid: null, depth: null };

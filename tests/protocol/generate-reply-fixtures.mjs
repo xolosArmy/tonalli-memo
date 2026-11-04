@@ -180,7 +180,9 @@ function signTarget(spec) {
   const authorshipLabel = authorship.valid ? "LAB_VALID" : "LAB_INVALID";
   assert(authorshipLabel === spec.authorship, `${spec.id} target authorship ${authorship.errorCode}.`);
   const parsedIndex = coreV1PostAuthorIndex(rawTransactionHex);
-  if (spec.kind === "core-v1-post") {
+  if (spec.expectPostAuthorIndex !== undefined) {
+    assert(parsedIndex === spec.expectPostAuthorIndex, `${spec.id} POST index ${parsedIndex}, expected ${spec.expectPostAuthorIndex}.`);
+  } else if (spec.kind === "core-v1-post") {
     assert(parsedIndex === spec.authorInputIndex, `${spec.id} POST index ${parsedIndex}.`);
   } else {
     assert(parsedIndex === null, `${spec.id} was classified as a Core v1 POST.`);
@@ -387,6 +389,21 @@ function buildFixtures() {
     ]
   });
 
+  const duplicateCandidatePost = signTarget({
+    id: "duplicate-candidate-post-target",
+    kind: "core-v1-post",
+    expectPostAuthorIndex: null,
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    eventDataUtf8: "post with multiple tm1 candidates",
+    inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-dup-candidates" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate post") },
+      { sats: 0n, script: canonicalTm1Script(0, "second candidate post") },
+      { sats: 9000n, script: testOutputScript("authorA") }
+    ]
+  });
+
   const absentParentTxid = createHash("sha256").update("rfc0001-reply-absent-parent-v1").digest("hex");
 
   const initialCatalog = new Map([
@@ -394,7 +411,8 @@ function buildFixtures() {
     [rootPost1.txid, rootPost1],
     [pendingPost.txid, pendingPost],
     [ineligiblePayment.txid, ineligiblePayment],
-    [otherNetPost.txid, otherNetPost]
+    [otherNetPost.txid, otherNetPost],
+    [duplicateCandidatePost.txid, duplicateCandidatePost]
   ]);
 
   // Intermediate: valid reply to rootPost0 to act as eligible parent for nested reply
@@ -654,6 +672,14 @@ function buildFixtures() {
     }, catalog),
     signReply({
       ...negativeBase,
+      id: "neg-parent-duplicate-candidates",
+      parentTxidHex: duplicateCandidatePost.txid,
+      parentLink: "INVALID_PARENT",
+      parentLinkDetail: "MULTIPLE_MEMOS",
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-dup-parent" })]
+    }, catalog),
+    signReply({
+      ...negativeBase,
       id: "neg-reply-other-network",
       network: "lab-other-net",
       parentLink: "INVALID_PARENT",
@@ -748,6 +774,7 @@ function buildFixtures() {
     pendingPost,
     ineligiblePayment,
     otherNetPost,
+    duplicateCandidatePost,
     eligibleReplyParent,
     ...rows
   ]) {
@@ -796,7 +823,15 @@ function buildFixtures() {
       sighashSerializer: "tests/protocol/canonical-tm1-independent-verify.mjs"
     },
     absentParentTxid,
-    targets: [rootPost0, rootPost1, pendingPost, ineligiblePayment, otherNetPost, eligibleReplyParent],
+    targets: [
+      rootPost0,
+      rootPost1,
+      pendingPost,
+      ineligiblePayment,
+      otherNetPost,
+      duplicateCandidatePost,
+      eligibleReplyParent
+    ],
     replies: rows,
     structures: [
       { id: "truncated-envelope", scriptHex: sampleHex.slice(0, 40), errorCode: "INVALID_FORMAT" },

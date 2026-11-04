@@ -166,6 +166,32 @@
       "eventDataUtf8": "post on different network"
     },
     {
+      "id": "duplicate-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001941dbc1c8bf31997e59fc76ac051e6f5ee0007c2347a496fd2c0d7b8c56899f30000000064413ad9b75f6464cc7fe3b37d30bb0419f1487294e46ebb641c80970fe2ed7888d4e040e5612ad923176a0b35059c5a18ae1ca0ca665f404511675ba627140be4354121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f737400000000000000001f6a04544d4d00180101007365636f6e642063616e64696461746520706f737428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f39968c5b8d7c0d26f497a34c20700eef5e651c06ac79fe59719f38b1cbc1d94",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with multiple tm1 candidates"
+    },
+    {
       "id": "eligible-reply-parent",
       "group": "target",
       "kind": "reply",
@@ -1143,6 +1169,49 @@
       "parentLink": "INVALID_PARENT",
       "parentLinkDetail": "OTHER_NETWORK",
       "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-duplicate-candidates",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000018669ca111bb6224dad3d4a8b46a0274dc45abaf4ff82422a5822c0f4528a3b530000000064410b178d11c04ebcb0d2ee6250075ea4fe91701df6f4e24d5498ceced097b5a58c7a9597a6dc41cfc604d1572cd6f7b2a067bfc41101631f2457713ff144b69dd64121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e76616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "29a702a11f9296cccab84a0596ce67af6216299fcefa964991e2fba93760db50",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "533b8a52f4c022582a4282fff4ba5ac44d27a0468b4a3dad4d22b61b11ca6986",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e76616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "11e055d6f009d99eb471fcd5bc9b69720028ea6fdf47c45dd46d321d0177f284",
+      "preMutationDigestHex": "11e055d6f009d99eb471fcd5bc9b69720028ea6fdf47c45dd46d321d0177f284",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
       "rootPostTxid": null,
       "depth": null,
       "replyTextUtf8": "valid reply text",
