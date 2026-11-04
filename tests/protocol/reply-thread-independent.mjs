@@ -402,12 +402,28 @@ export function applyReplyEvents(state, events) {
     }
   }
 
-  const existingConfirmedTxids = new Set(next.confirmedEvents.map((item) => item.txid));
+  const existingConfirmedIndex = new Map(
+    next.confirmedEvents.map((item, index) => [item.txid, index])
+  );
   for (const event of confirmed.sort(compareReplyEvents)) {
-    if (existingConfirmedTxids.has(event.txid)) {
+    const existingIndex = existingConfirmedIndex.get(event.txid);
+    if (existingIndex !== undefined) {
+      const existing = next.confirmedEvents[existingIndex];
+      if (
+        existing.eligibleForThread !== event.eligibleForThread ||
+        existing.parentLink !== event.parentLink ||
+        existing.authorship !== event.authorship ||
+        existing.rootPostTxid !== event.rootPostTxid ||
+        existing.depth !== event.depth ||
+        existing.blockHeight !== event.blockHeight ||
+        existing.position !== event.position ||
+        existing.structuralOk !== event.structuralOk
+      ) {
+        next.confirmedEvents[existingIndex] = event;
+      }
       continue;
     }
-    existingConfirmedTxids.add(event.txid);
+    existingConfirmedIndex.set(event.txid, next.confirmedEvents.length);
     next.confirmedEvents.push(event);
     next.provisional = next.provisional.filter((item) => item.txid !== event.txid);
   }
@@ -416,7 +432,7 @@ export function applyReplyEvents(state, events) {
 
   for (const event of mempool) {
     if (
-      existingConfirmedTxids.has(event.txid) ||
+      existingConfirmedIndex.has(event.txid) ||
       next.provisional.some((item) => item.txid === event.txid)
     ) {
       continue;

@@ -26,6 +26,7 @@ import {
   coreV1PostAuthorIndex,
   designatedAuthorHash160,
   applyReplyEvents,
+  emptyReplyThreadState,
   replayReplies
 } from "./reply-thread-independent.mjs";
 import { isTm1ProtocolError, parseTm1Output } from "../../packages/protocol/src/index.ts";
@@ -568,6 +569,47 @@ describe("synthetic social v2 REPLY laboratory", () => {
     const duplicateState = applyReplyEvents(state, events);
     expect(duplicateState.totalConfirmedCount).toBe(3);
     expect(duplicateState.threads[rootTxid]).toHaveLength(3);
+
+    // Resolution: replaying a withheld pending reply with its verified resolution updates the thread
+    const resolvedRPending = {
+      confirmation: "CONFIRMED" as const,
+      blockHeight: 800003,
+      position: 1,
+      txid: rPending.txid,
+      parentTxid: rootTxid,
+      rootPostTxid: rootTxid,
+      authorHash160: rPending.authorHash160!,
+      replyTextUtf8: rPending.replyTextUtf8,
+      depth: 1,
+      structuralOk: true,
+      authorship: "LAB_VALID",
+      parentLink: "PARENT_VERIFIED",
+      eligibleForThread: true
+    };
+    const resolvedState = applyReplyEvents(state, [resolvedRPending]);
+    expect(resolvedState.totalConfirmedCount).toBe(4);
+    expect(resolvedState.threads[rootTxid]).toHaveLength(4);
+    expect(resolvedState.withheld).toHaveLength(0);
+
+    // Idempotence after resolution: delivering verified event again changes nothing
+    const resolvedDuplicateState = applyReplyEvents(resolvedState, [resolvedRPending]);
+    expect(resolvedDuplicateState.totalConfirmedCount).toBe(4);
+    expect(resolvedDuplicateState.threads[rootTxid]).toHaveLength(4);
+    expect(resolvedDuplicateState.withheld).toHaveLength(0);
+
+    // Sequential replay: pending classification followed by verified classification updates cleanly
+    const r1Pending = {
+      ...events[0],
+      parentLink: "PARENT_PENDING",
+      eligibleForThread: false
+    };
+    const statePendingFirst = applyReplyEvents(
+      applyReplyEvents(emptyReplyThreadState(), [r1Pending]),
+      [events[0]]
+    );
+    expect(statePendingFirst.totalConfirmedCount).toBe(1);
+    expect(statePendingFirst.threads[rootTxid]).toHaveLength(1);
+    expect(statePendingFirst.withheld).toHaveLength(0);
 
     // Mempool handling: unconfirmed events are provisional and not in confirmed count
     const mempoolEvent = {
