@@ -63,7 +63,7 @@ major issues is short of protocol proof. CI job name is `test`.
 | `R-REPLAY` | `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e` | 41388880882 | 125095690970 | 6569120767 | `c9ec63fbea` | no major issues; 2026-11-02T04:32:38Z |
 | `R-REACTION` | `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
 | `R-TIPXEC` | `9dda16706c6f3f506af2db15eae627832412cf1f` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
-| `R-REPLY` | `0f0d16efc5875044cd5de08284616c1e7aa8f3d0` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
+| `R-REPLY` | `1a29040d2e10ffb3978218522099316bda7c16c2` | unreviewed | unreviewed | unreviewed | unreviewed | snapshot only; this cell is not a Codex receipt |
 | `R-RFC` | `45ad15aa157a25f7f8e616682ccbfffad974e15c` | 41321121026 | 124891368477 | 6559961738 | `45ad15aa15` | no major issues on PR #40; 2026-11-01T15:26:35Z |
 | `R-PR42` | `081d75a762889207283ab7d4434030db30c79b41` | 40917165744 | 123600365247 | 6503170078 | `081d75a762` | no major issues on PR #42; 2026-10-29T17:02:43Z |
 
@@ -128,7 +128,7 @@ unless the row names PR #42.
 - **Normative text:** Before acceptance, the repository MUST contain machine-readable positive and negative fixtures with fixed raw bytes, deterministic verdicts, and an independent encoder and decoder for every supported event and container combination, including ALP/eMPP (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `tests/fixtures/rfc0001-canonical-tm1-p2pkh.json` exercised by `rfc0001_s0_07_historical.test.ts` `it("checks serialization, envelope, structure, trusted-chronik, and the independent signature")`. `tests/fixtures/rfc0001-empp-tmm.json` exercised by `rfc0001_empp_tmm.test.ts` `it("keeps the required cases and separates structural axes from production acceptance")`. `tests/fixtures/rfc0001-alp-ancestry.json` exercised by `rfc0001_alp_ancestry.test.ts` `it("proves a synthetic GENESIS, MINT and SEND chain that is not RMZ")`. `tests/fixtures/rfc0001-reactions.json` exercised by `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")`. `tests/fixtures/rfc0001-tip-xec.json` exercised by `rfc0001_tip_xec.test.ts` `it("accepts a 42-byte tip script and Core still rejects version 0x02")`. `tests/fixtures/rfc0001-reply.json` exercised by `rfc0001_reply.test.ts` `it("accepts 43..223 byte reply scripts and Core still rejects version 0x02")`.
-- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-BURN`, `R-REACTION`, `R-TIPXEC`, `R-REPLY`
 - **Trust model:** Independent laboratory checker for canonical TM1. Structural eMPP corpus is unsigned. Synthetic ALP chain uses laboratory token `79dee0245d45dc842e82aa37f639c325b8c62cc5d151fc7778a33f5e1c20e251`. The reaction, tip, and reply corpora are separate laboratories. `R-REACTION`, `R-TIPXEC`, and `R-REPLY` are not Codex receipts.
 - **Still required:** The TIP_XEC laboratory covers the native two-push script only. The reaction laboratory covers REACTION and REACTION_REMOVE only. The reply laboratory is an in-memory synthetic suite. The ALP corpus is one synthetic token. A complete combination matrix remains required before M1.7.4 can be accepted.
@@ -148,7 +148,7 @@ unless the row names PR #42.
 - **Normative text:** Acceptance MUST separately prove deterministic script lengths (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `rfc0001_empp_tmm.test.ts` `it("shows the byte-budget disappearance separately from the independent section parse")`. `rfc0001_s0_07_historical.test.ts` `it("keeps the generated 80-byte and 81-byte boundaries owned by the existing suite")`. Canonical fixture lengths are rechecked by `it("rechecks the committed JSON against the isolated generator")`. `rfc0001_reactions.test.ts` `it("accepts a 43-byte reaction script and Core still rejects version 0x02")` measures the 43-byte REACTION and REACTION_REMOVE scripts in `tests/fixtures/rfc0001-reactions.json`. `rfc0001_tip_xec.test.ts` `it("accepts a 42-byte tip script and Core still rejects version 0x02")` measures the 42-byte TIP_XEC scripts in `tests/fixtures/rfc0001-tip-xec.json`. `rfc0001_reply.test.ts` `it("accepts 43..223 byte reply scripts and Core still rejects version 0x02")` measures the 43 to 223 byte REPLY scripts in `tests/fixtures/rfc0001-reply.json`.
-- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `72bd470df8e24eacdaaca59e83d9bea98badf272`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-EMPP`, `R-REACTION`, `R-TIPXEC`, `R-REPLY`
 - **Trust model:** Ratified parser bytes on stored scripts, plus the independent eMPP reader. The 223-byte TM0 text stays a candidate. Scripts past that budget take the public `NO_MEMO` path. The 43-byte reaction measurement, 42-byte tip measurement, and 43..223-byte reply measurement are laboratory evidence. `R-REACTION`, `R-TIPXEC`, and `R-REPLY` are not Codex receipts.
 - **Still required:** A productive ALP/eMPP tip profile remains required. The reaction, tip, and reply script lengths do not close this row.
@@ -168,7 +168,7 @@ unless the row names PR #42.
 - **Normative text:** Acceptance MUST separately prove active-chain target resolution (M1.7.4).
 - **Status:** `PARTIAL`
 - **Evidence:** `rfc0001_regtest_reference.test.mjs` `test("display-order parent bytes, authorship and spent output match the raw transactions")` records one regtest parent link. `rfc0001_alp_replay.test.ts` `it("rolls a branch back to the ancestor and applies the other branch once")` moves laboratory receipts to `NOT_ON_ACTIVE_CHAIN`. `tests/fixtures/rfc0001-reply.json` exercised by `rfc0001_reply.test.ts` `it("separates valid authorship from a verified parent link")` classifies parent links against active targets.
-- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-REPLAY`, `R-REPLY`
 - **Trust model:** The regtest pair is an isolated Bitcoin ABC 0.34.2 observation. The branch switch is a synthetic checkpoint in process memory. The reply laboratory verifies parent links in memory. `R-REPLY` is not a Codex receipt.
 - **Still required:** Resolution of a target against a selected network active chain, including a parent that leaves that chain, remains required.
@@ -328,7 +328,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires M1.7 deterministic vectors AND independently reproducible signed and negative fixtures required by M1.7.4 (S0 acceptance table).
 - **Status:** `PARTIAL`
 - **Evidence:** The M1.7.4 rows in this matrix are the inventory. The regtest reference at `efe60360b4a276465975b603b833a8eb15f8e080` is one display-order pair. The RFC cell at `45ad15aa` still says reorg, reaction, and signed tip fixtures remain pending. Later laboratory commits add signed TM1, signed ALP tips, a synthetic reorg, the reaction corpus in `tests/fixtures/rfc0001-reactions.json`, the native tip corpus in `tests/fixtures/rfc0001-tip-xec.json`, and the reply corpus in `tests/fixtures/rfc0001-reply.json`. Those commits do not complete the gate.
-- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `c9ec63fbeac6f5980100a2ca2379e62de4b52d1e`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-REPLAY`, `R-REACTION`, `R-TIPXEC`, `R-REPLY`
 - **Trust model:** Mixed. Each underlying row names its own trust model. The gate is the conjunction. `R-REACTION`, `R-TIPXEC`, and `R-REPLY` are not Codex receipts.
 - **Still required:** S0-05 stays open while any M1.7.4 blocker in this matrix stays unmet. The reaction, tip, and reply laboratories do not complete the conjunction.
@@ -338,7 +338,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires the M1.7 deterministic vectors (S0 acceptance table).
 - **Status:** `PARTIAL`
 - **Evidence:** `tests/fixtures/rfc0001_vectors.json` and the protocol suites cited by `M174-ALL-COMBINATIONS` and `M174-SCRIPT-LENGTHS`, including `tests/fixtures/rfc0001-reply.json`. Local historical command recorded by the RFC: `node --test tests/protocol/rfc0001_validation.test.mjs tests/protocol/rfc0001_regtest_reference.test.mjs`, 43 tests, at the regtest-reference commit.
-- **Commit:** `efe60360b4a276465975b603b833a8eb15f8e080`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `efe60360b4a276465975b603b833a8eb15f8e080`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-REGTEST`, `R-REPLY`
 - **Trust model:** Synthetic vectors plus one regtest reference. The production parser is not modified by that reference. `R-REPLY` is not a Codex receipt.
 - **Still required:** Vectors for every supported social combination remain required.
@@ -348,7 +348,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires independently reproducible signed fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
 - **Evidence:** Canonical TM1 positives in `rfc0001-canonical-tm1-p2pkh.json`. Coexistence fixture `rfc0001-sec17-coexistence.json`. ALP tips in `rfc0001-alp-ancestry.json`. Signed REACTION and REACTION_REMOVE rows in `tests/fixtures/rfc0001-reactions.json`, checked by `rfc0001_reactions.test.ts` `it("checks Schnorr, ECDSA, sighash, and nonzero author indexes")`. Signed TIP_XEC rows in `tests/fixtures/rfc0001-tip-xec.json`, checked by `rfc0001_tip_xec.test.ts` `it("checks Schnorr, ECDSA, sighash, and a nonzero tipper index")`. Signed REPLY rows in `tests/fixtures/rfc0001-reply.json`, checked by `rfc0001_reply.test.ts` `it("checks Schnorr, ECDSA, sighashes, and author indexes")`. Generators recheck bytes and refuse a private-key payload.
-- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `6fbcbaa7996be8b001f4fd71257ad84f1b82ad63`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-COEX`, `R-REACTION`, `R-TIPXEC`, `R-REPLY`
 - **Trust model:** Independent laboratory signatures over insecure published keys. The keys must stay unfunded. `R-REACTION`, `R-TIPXEC`, and `R-REPLY` are not Codex receipts.
 - **Still required:** A productive tip profile remains required. Laboratory TIP_XEC, REACTION, REACTION_REMOVE, and REPLY signatures do not close this row.
@@ -358,7 +358,7 @@ unless the row names PR #42.
 - **Normative text:** S0-05 requires independently reproducible negative fixtures required by M1.7.4.
 - **Status:** `PARTIAL`
 - **Evidence:** Canonical negatives include altered signature, mutated output, P2SH designated input, missing prevout, and sighash `NONE|FORKID`. ALP negatives include the ids listed in `it("rejects the mandatory negative transfers even when the TMM entry is intact")`. eMPP negatives include malformed containers and author byte 255. Reaction negatives are `rfc0001_reactions.test.ts` `it("withholds altered signatures, bad scripts, and ineligible targets")` on `tests/fixtures/rfc0001-reactions.json`. TIP_XEC negatives are `rfc0001_tip_xec.test.ts` `it("withholds bad signatures, bad prevouts, and ineligible targets")` and `it("rejects recipient funding, third-party inputs, and self tips")` on `tests/fixtures/rfc0001-tip-xec.json`. REPLY negatives are `rfc0001_reply.test.ts` `it("withholds altered signatures, invalid scripts, and ineligible parent targets")` on `tests/fixtures/rfc0001-reply.json`.
-- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `af445925031630918cfdff3399be629a3b95793e`; `aaaec9b8e06d175cb6c67e563bc2c353f37eeb53`; `9dda16706c6f3f506af2db15eae627832412cf1f`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-CANONICAL`, `R-REACTION`, `R-TIPXEC`, `R-REPLY`
 - **Trust model:** Independent laboratory checker for canonical TM1 negatives. Synthetic ALP negatives. Structural eMPP negatives. Reaction negatives, native tip negatives, and reply negatives are in-memory laboratories. `R-REACTION`, `R-TIPXEC`, and `R-REPLY` are not Codex receipts.
 - **Still required:** A network reorg that must drop credit remains required. Laboratory reaction negatives, laboratory tip negatives, and laboratory reply negatives do not close this row.
@@ -468,7 +468,7 @@ unless the row names PR #42.
 - **Normative text:** SEC-09: verify parent event, network, and chain status; bound retries; do not credit a pending or invalid target.
 - **Status:** `PARTIAL`
 - **Evidence:** The regtest REPLY parent is the observed POST in `tests/fixtures/rfc0001_regtest_reference.json`. `rfc0001_alp_ancestry.test.ts` rejects invalid targets with attributable atoms `0`. `tests/fixtures/rfc0001-reply.json` exercised by `rfc0001_reply.test.ts` `it("separates valid authorship from a verified parent link")` rejects missing, wrong network, wrong event, payment, and invalid parents without crediting the parent link.
-- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `0f0d16efc5875044cd5de08284616c1e7aa8f3d0`
+- **Commit:** `028d5c986f0d9ebdb9cfad092c813325d2274f88`; `1a29040d2e10ffb3978218522099316bda7c16c2`
 - **CI / Codex:** `R-BURN`, `R-REPLY`
 - **Trust model:** One regtest parent observation, synthetic tip-target rejection, and in-memory laboratory reply parent resolution. `R-REPLY` is not a Codex receipt.
 - **Still required:** Network retry bounds and an indexer traversal queue remain required.
