@@ -99,7 +99,10 @@ Mempool rows are listed apart from confirmed rows. A mempool LIKE and a
 mempool REMOVE do not change the confirmed count. When that same TXID
 is later delivered as confirmed, it leaves the provisional list and
 joins the confirmed order. A confirmed TXID sent again as mempool stays
-out of the provisional list.
+out of the provisional list. Confirmed deduplication and provisional
+tracking are scoped to the event's network, so an identical TXID delivered
+across distinct networks does not conflate classifications or silently
+discard events.
 
 This selection is an in-memory laboratory. It is not a network
 reorganization, not chain finality, and not a productive indexer.

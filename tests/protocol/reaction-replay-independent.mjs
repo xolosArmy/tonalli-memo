@@ -130,6 +130,9 @@ function compareConfirmed(left, right) {
   if (left.position !== right.position) {
     return left.position - right.position;
   }
+  if (left.network !== right.network) {
+    return left.network < right.network ? -1 : 1;
+  }
   if (left.txid < right.txid) {
     return -1;
   }
@@ -224,9 +227,10 @@ function rebuildConfirmed(state) {
  * Returns a new state. The input state is not mutated.
  * Confirmed events already stored are ordered again with the new batch,
  * so an older block delivered later does not overwrite a newer one.
- * A TXID already confirmed is not duplicated, and its stored classification
+ * A TXID already confirmed on that network is not duplicated, and its stored classification
  * updates when target or authorship verification resolves. A mempool TXID stays
- * provisional until the same TXID arrives as confirmed, and then it leaves that list.
+ * provisional on its network until the same TXID arrives as confirmed on that network,
+ * and then it leaves that list.
  */
 export function applyReactionEvents(state, events) {
   const next = globalThis.structuredClone(state);
@@ -241,7 +245,9 @@ export function applyReactionEvents(state, events) {
     }
   }
   for (const event of sortConfirmed(confirmed)) {
-    const existingIndex = next.confirmedEvents.findIndex((item) => item.txid === event.txid);
+    const existingIndex = next.confirmedEvents.findIndex(
+      (item) => item.network === event.network && item.txid === event.txid
+    );
     if (existingIndex !== -1) {
       const existing = next.confirmedEvents[existingIndex];
       if (
@@ -256,15 +262,24 @@ export function applyReactionEvents(state, events) {
       continue;
     }
     next.confirmedEvents.push(event);
-    next.provisional = next.provisional.filter((item) => item.txid !== event.txid);
+    next.provisional = next.provisional.filter(
+      (item) => !(item.network === event.network && item.txid === event.txid)
+    );
   }
   rebuildConfirmed(next);
-  const confirmedTxids = new Set(next.confirmedEvents.map((item) => item.txid));
+  const confirmedKeys = new Set(
+    next.confirmedEvents.map((item) => `${item.network}|${item.txid}`)
+  );
   for (const event of mempool) {
-    if (confirmedTxids.has(event.txid) || next.provisional.some((item) => item.txid === event.txid)) {
+    const eventKey = `${event.network}|${event.txid}`;
+    if (
+      confirmedKeys.has(eventKey) ||
+      next.provisional.some((item) => item.network === event.network && item.txid === event.txid)
+    ) {
       continue;
     }
     next.provisional.push({
+      network: event.network,
       txid: event.txid,
       countedInConfirmed: false,
       reason: "MEMPOOL"

@@ -576,6 +576,93 @@ describe("synthetic REACTION and REACTION_REMOVE laboratory", () => {
     expect(extended.active[reactionStateKey(fixture.network, authorA, eligible, 0x01)]?.transitions).toBe(9);
   });
 
+  it("scopes deduplication and provisional promotion to the event network for identical TXIDs", () => {
+    const like = events.get("seq-a-like");
+    if (like === undefined || like.authorHash160 === null) {
+      throw new Error("Missing author A like.");
+    }
+    const initial = replayReactions([like]);
+    expect(initial.confirmedLikeCount).toBe(1);
+
+    // Delivering the identical TXID on a different network with PENDING_TARGET
+    // does not overwrite the primary network's confirmed event or change its like count.
+    const foreignPending = {
+      ...like,
+      network: "lab-other-net",
+      targetLink: "PENDING_TARGET" as const
+    };
+    const stagedPending = applyReactionEvents(initial, [foreignPending]);
+    expect(stagedPending.confirmedLikeCount).toBe(1);
+    expect(
+      stagedPending.active[
+        reactionStateKey(like.network, like.authorHash160, like.targetTxid, like.reactionKind)
+      ]?.active
+    ).toBe(true);
+    expect(stagedPending.withheld).toEqual([{ txid: like.txid, reason: "TARGET_PENDING" }]);
+
+    // Delivering the identical TXID on the foreign network as ELIGIBLE credits both networks independently.
+    const foreignEligible = {
+      ...like,
+      network: "lab-other-net",
+      targetLink: "ELIGIBLE" as const
+    };
+    const dualConfirmed = applyReactionEvents(stagedPending, [foreignEligible]);
+    expect(dualConfirmed.confirmedLikeCount).toBe(2);
+    expect(dualConfirmed.withheld).toHaveLength(0);
+    expect(
+      dualConfirmed.active[
+        reactionStateKey(like.network, like.authorHash160, like.targetTxid, like.reactionKind)
+      ]?.active
+    ).toBe(true);
+    expect(
+      dualConfirmed.active[
+        reactionStateKey("lab-other-net", like.authorHash160, like.targetTxid, like.reactionKind)
+      ]?.active
+    ).toBe(true);
+
+    // An identical TXID delivered as mempool on an already-confirmed network stays out of provisional.
+    const mempoolOther = {
+      ...like,
+      network: "lab-other-net",
+      confirmation: "MEMPOOL" as const
+    };
+    expect(applyReactionEvents(dualConfirmed, [mempoolOther]).provisional).toHaveLength(0);
+
+    // An identical TXID delivered as mempool on an unconfirmed network enters provisional.
+    const mempoolThird = {
+      ...like,
+      network: "lab-third-net",
+      confirmation: "MEMPOOL" as const
+    };
+    const stagedThird = applyReactionEvents(dualConfirmed, [mempoolThird]);
+    expect(stagedThird.confirmedLikeCount).toBe(2);
+    expect(stagedThird.provisional).toEqual([
+      {
+        network: "lab-third-net",
+        txid: like.txid,
+        countedInConfirmed: false,
+        reason: "MEMPOOL"
+      }
+    ]);
+
+    // When confirmed on the third network, it leaves provisional and increments the confirmed count.
+    const confirmedThird = {
+      ...like,
+      network: "lab-third-net",
+      confirmation: "CONFIRMED" as const,
+      blockHeight: 300,
+      position: 0
+    };
+    const tripleConfirmed = applyReactionEvents(stagedThird, [confirmedThird]);
+    expect(tripleConfirmed.provisional).toHaveLength(0);
+    expect(tripleConfirmed.confirmedLikeCount).toBe(3);
+    expect(
+      tripleConfirmed.active[
+        reactionStateKey("lab-third-net", like.authorHash160, like.targetTxid, like.reactionKind)
+      ]?.active
+    ).toBe(true);
+  });
+
   it("selects like state from the chosen synthetic branch", () => {
     const ancestor = pick(fixture.replay.ancestor);
     const branchA = pick(fixture.replay.branchA);
