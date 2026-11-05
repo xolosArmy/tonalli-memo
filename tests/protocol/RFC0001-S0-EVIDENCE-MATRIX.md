@@ -31,7 +31,7 @@ clause has been met.
 
 ## Receipt index
 
-Every commit below is an ancestor of the commit that publishes this
+Every commit below is a retained commit object available for this
 matrix, except `R-RFC` and `R-PR42`, which are the heads of the other
 two draft PRs. `R-REACTION` is the laboratory snapshot for the reaction fixtures,
 including the later-batch order repair. `R-TIPXEC` is the laboratory

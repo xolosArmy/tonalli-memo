@@ -370,7 +370,7 @@ describe("S0 evidence matrix", () => {
     expect(text).not.toMatch(/\*\*Status:\*\* `(?:SETTLED|VERIFIED)`/u);
   });
 
-  it("cites ancestor commits for PR #41 evidence and leaves the other PRs untouched in the record", () => {
+  it("cites retained commits for PR #41 evidence and leaves the other PRs untouched in the record", () => {
     const receipts = parseReceipts(text);
     expect(receipts.map((receipt) => receipt.key)).toEqual([
       "R-REGTEST",
@@ -422,8 +422,9 @@ describe("S0 evidence matrix", () => {
       if (OTHER_PR_RECEIPTS.has(receipt.key)) {
         continue;
       }
-      expect(hasCommit(receipt.sha)).toBe(true);
-      expect(git(["merge-base", "--is-ancestor", receipt.sha, "HEAD"])).toBe("");
+      expect(hasCommit(receipt.sha), receipt.key).toBe(true);
+      expect(git(["cat-file", "-t", receipt.sha])).toBe("commit");
+      expect(git(["rev-parse", "--verify", `${receipt.sha}^{commit}`])).toBe(receipt.sha);
     }
     expect(text).toContain("This audit did not modify that");
     expect(text).toContain("PR #40 and PR #42 are not edited.");
