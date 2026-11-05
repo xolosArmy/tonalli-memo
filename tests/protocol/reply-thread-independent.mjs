@@ -62,14 +62,58 @@ export function designatedAuthorHash160(rawTransactionHex, authorInputIndex) {
   return toHex(hash160(pushes[1]));
 }
 
+function firstPushData(scriptBody) {
+  if (scriptBody.length === 0) {
+    return null;
+  }
+  const opcode = scriptBody[0];
+  let headerLength;
+  let dataLength;
+  if (opcode >= 0x01 && opcode <= 0x4b) {
+    headerLength = 1;
+    dataLength = opcode;
+  } else if (opcode === 0x4c) {
+    if (scriptBody.length < 2) {
+      return null;
+    }
+    headerLength = 2;
+    dataLength = scriptBody[1];
+  } else if (opcode === 0x4d) {
+    if (scriptBody.length < 3) {
+      return null;
+    }
+    headerLength = 3;
+    dataLength = scriptBody[1] + scriptBody[2] * 0x100;
+  } else if (opcode === 0x4e) {
+    if (scriptBody.length < 5) {
+      return null;
+    }
+    headerLength = 5;
+    dataLength =
+      scriptBody[1] +
+      scriptBody[2] * 0x100 +
+      scriptBody[3] * 0x10000 +
+      scriptBody[4] * 0x1000000;
+  } else {
+    return null;
+  }
+  const end = headerLength + dataLength;
+  if (!Number.isSafeInteger(end) || end > scriptBody.length) {
+    return null;
+  }
+  return scriptBody.subarray(headerLength, end);
+}
+
 export function tm1CandidateOutputs(rawTransactionHex) {
   const outputs = parseTx(rawTransactionHex).outputs;
   const candidates = [];
   for (let i = 0; i < outputs.length; i++) {
     const output = outputs[i];
     if (output.script.length > 0 && output.script[0] === 0x6a) {
-      const pushes = pushesOf(output.script.slice(1));
-      if (pushes !== null && pushes.length >= 1 && toHex(pushes[0]) === "544d4d00") {
+      const body = output.script.slice(1);
+      const firstPush = firstPushData(body);
+      if (firstPush !== null && toHex(firstPush) === "544d4d00") {
+        const pushes = pushesOf(body);
         candidates.push({ index: i, output, pushes });
       }
     }
@@ -89,7 +133,7 @@ export function coreV1PostAuthorIndex(rawTransactionHex) {
     return null;
   }
   const { output, pushes } = candidates[0];
-  if (output.sats !== 0n) {
+  if (output.sats !== 0n || pushes === null) {
     return null;
   }
   const script = output.script;

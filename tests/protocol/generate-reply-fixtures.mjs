@@ -404,6 +404,21 @@ function buildFixtures() {
     ]
   });
 
+  const malformedSiblingCandidatePost = signTarget({
+    id: "malformed-sibling-candidate-post-target",
+    kind: "core-v1-post",
+    expectPostAuthorIndex: null,
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    eventDataUtf8: "post with malformed sibling tm1 candidate",
+    inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-malformed-sibling-candidates" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate post") },
+      { sats: 0n, script: new Script(bytesFromHex("6a04544d4d0076")) },
+      { sats: 9000n, script: testOutputScript("authorA") }
+    ]
+  });
+
   const absentParentTxid = createHash("sha256").update("rfc0001-reply-absent-parent-v1").digest("hex");
 
   const initialCatalog = new Map([
@@ -412,7 +427,8 @@ function buildFixtures() {
     [pendingPost.txid, pendingPost],
     [ineligiblePayment.txid, ineligiblePayment],
     [otherNetPost.txid, otherNetPost],
-    [duplicateCandidatePost.txid, duplicateCandidatePost]
+    [duplicateCandidatePost.txid, duplicateCandidatePost],
+    [malformedSiblingCandidatePost.txid, malformedSiblingCandidatePost]
   ]);
 
   // Intermediate: valid reply to rootPost0 to act as eligible parent for nested reply
@@ -680,6 +696,14 @@ function buildFixtures() {
     }, catalog),
     signReply({
       ...negativeBase,
+      id: "neg-parent-malformed-sibling-candidate",
+      parentTxidHex: malformedSiblingCandidatePost.txid,
+      parentLink: "INVALID_PARENT",
+      parentLinkDetail: "MULTIPLE_MEMOS",
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-malformed-sibling-parent" })]
+    }, catalog),
+    signReply({
+      ...negativeBase,
       id: "neg-reply-other-network",
       network: "lab-other-net",
       parentLink: "INVALID_PARENT",
@@ -775,6 +799,7 @@ function buildFixtures() {
     ineligiblePayment,
     otherNetPost,
     duplicateCandidatePost,
+    malformedSiblingCandidatePost,
     eligibleReplyParent,
     ...rows
   ]) {
@@ -830,6 +855,7 @@ function buildFixtures() {
       ineligiblePayment,
       otherNetPost,
       duplicateCandidatePost,
+      malformedSiblingCandidatePost,
       eligibleReplyParent
     ],
     replies: rows,

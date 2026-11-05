@@ -289,7 +289,7 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
   it("accepts 43..223 byte reply scripts and Core still rejects version 0x02", () => {
     expect(positives).toHaveLength(9);
-    expect(negatives).toHaveLength(20);
+    expect(negatives).toHaveLength(21);
 
     expect(
       encodeReplyScript({
@@ -475,6 +475,15 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
     const dupTarget = requireTarget(fixture.targets, "duplicate-candidate-post-target");
     expect(coreV1PostAuthorIndex(dupTarget.rawTransactionHex)).toBe(null);
+
+    const malformedSiblingParent = requireRow(replies, "neg-parent-malformed-sibling-candidate");
+    expect(malformedSiblingParent.authorship).toBe("LAB_VALID");
+    expect(malformedSiblingParent.parentLink).toBe("INVALID_PARENT");
+    expect(malformedSiblingParent.parentLinkDetail).toBe("MULTIPLE_MEMOS");
+    expect(malformedSiblingParent.eligibleForThread).toBe(false);
+
+    const malformedSiblingTarget = requireTarget(fixture.targets, "malformed-sibling-candidate-post-target");
+    expect(coreV1PostAuthorIndex(malformedSiblingTarget.rawTransactionHex)).toBe(null);
   });
 
   it("withholds altered signatures, mutated envelopes, out of range index, and invalid prevouts", () => {

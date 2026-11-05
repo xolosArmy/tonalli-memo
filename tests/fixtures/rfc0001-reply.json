@@ -192,6 +192,32 @@
       "eventDataUtf8": "post with multiple tm1 candidates"
     },
     {
+      "id": "malformed-sibling-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001b4c36f9601676475207acaea9d1500a16f41b575d20d879755855fbeebc5b3f5000000006441795d936b6e01d8faf430630e22bbe0d77abcd155971779c118fca10a09ee3a40974dd6c100f275139e891637459cf99e2686ed1864f671b6918f9d5fc24b1e9a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f73740000000000000000076a04544d4d007628230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b3",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f5b3c5ebbe5f855597870dd275b5416fa100159deaca7a2075646701966fc3b4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with malformed sibling tm1 candidate"
+    },
+    {
       "id": "eligible-reply-parent",
       "group": "target",
       "kind": "reply",
@@ -1209,6 +1235,49 @@
       "authorship": "LAB_VALID",
       "authorErrorCode": null,
       "parentTxid": "490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-malformed-sibling-candidate",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001cb526bb239ed960ad7a219430b92524dfa838761aff015146609f7585c2e7abf0000000064419394a36959b067363e6a6372910f23c61b093e2bc78a9b0b4b019f32d638cae2a60e1258168cb7000caf7e91825bf0dc338639ca43e73f914e359b7e82fc23b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b376616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9c725765c211e8cfd125f9773c56d69f0f5f5723d31dac0a662a7034dcbb9537",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bf7a2e5c58f709661415f0af618783fa4d52920b4319a2d70a96ed39b26b52cb",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b376616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "a11236daba9f37693eaab9240e23de82310a0e8d21602f085918de49ba750847",
+      "preMutationDigestHex": "a11236daba9f37693eaab9240e23de82310a0e8d21602f085918de49ba750847",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b3",
       "parentLink": "INVALID_PARENT",
       "parentLinkDetail": "MULTIPLE_MEMOS",
       "parentKind": "core-v1-post",
