@@ -90,7 +90,10 @@ a second history row and does not change the count.
 Confirmed order is recomputed across calls. An older event delivered
 in a later batch is sorted with the events already stored, by block,
 position, and TXID. It does not overwrite a newer event merely because
-it arrived later.
+it arrived later. When a confirmed reaction was initially withheld as
+`PENDING_TARGET` or `ABSENT` and is replayed after its target resolves
+to `ELIGIBLE`, its stored classification updates without duplicating the
+TXID and the derived state is rebuilt in deterministic block order.
 
 Mempool rows are listed apart from confirmed rows. A mempool LIKE and a
 mempool REMOVE do not change the confirmed count. When that same TXID

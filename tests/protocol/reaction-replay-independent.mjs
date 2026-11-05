@@ -224,8 +224,9 @@ function rebuildConfirmed(state) {
  * Returns a new state. The input state is not mutated.
  * Confirmed events already stored are ordered again with the new batch,
  * so an older block delivered later does not overwrite a newer one.
- * A TXID already confirmed is ignored. A mempool TXID stays provisional
- * until the same TXID arrives as confirmed, and then it leaves that list.
+ * A TXID already confirmed is not duplicated, and its stored classification
+ * updates when target or authorship verification resolves. A mempool TXID stays
+ * provisional until the same TXID arrives as confirmed, and then it leaves that list.
  */
 export function applyReactionEvents(state, events) {
   const next = globalThis.structuredClone(state);
@@ -239,18 +240,28 @@ export function applyReactionEvents(state, events) {
       confirmed.push(event);
     }
   }
-  const known = new Set(next.confirmedEvents.map((event) => event.txid));
   for (const event of sortConfirmed(confirmed)) {
-    if (known.has(event.txid)) {
+    const existingIndex = next.confirmedEvents.findIndex((item) => item.txid === event.txid);
+    if (existingIndex !== -1) {
+      const existing = next.confirmedEvents[existingIndex];
+      if (
+        existing.targetLink !== event.targetLink ||
+        existing.authorship !== event.authorship ||
+        existing.structuralOk !== event.structuralOk ||
+        existing.blockHeight !== event.blockHeight ||
+        existing.position !== event.position
+      ) {
+        next.confirmedEvents[existingIndex] = event;
+      }
       continue;
     }
-    known.add(event.txid);
     next.confirmedEvents.push(event);
     next.provisional = next.provisional.filter((item) => item.txid !== event.txid);
   }
   rebuildConfirmed(next);
+  const confirmedTxids = new Set(next.confirmedEvents.map((item) => item.txid));
   for (const event of mempool) {
-    if (known.has(event.txid) || next.provisional.some((item) => item.txid === event.txid)) {
+    if (confirmedTxids.has(event.txid) || next.provisional.some((item) => item.txid === event.txid)) {
       continue;
     }
     next.provisional.push({

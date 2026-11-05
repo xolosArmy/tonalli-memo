@@ -647,6 +647,66 @@ describe("synthetic REACTION and REACTION_REMOVE laboratory", () => {
     expect(incremental).toEqual(together);
   });
 
+  it("updates a withheld reaction when replayed after target resolution while staying idempotent", () => {
+    const like = events.get("seq-a-like");
+    const removal = events.get("seq-a-remove");
+    const likeAgain = events.get("seq-a-like-again");
+    if (like === undefined || removal === undefined || likeAgain === undefined) {
+      throw new Error("Missing target-resolution replay rows.");
+    }
+
+    // 1. Transition from PENDING_TARGET to ELIGIBLE
+    const pendingLike = { ...like, targetLink: "PENDING_TARGET" };
+    const stagedPending = replayReactions([pendingLike]);
+    expect(stagedPending.confirmedLikeCount).toBe(0);
+    expect(stagedPending.confirmedEvents).toHaveLength(1);
+    expect(stagedPending.withheld).toEqual([{ txid: like.txid, reason: "TARGET_PENDING" }]);
+    expect(applyReactionEvents(stagedPending, [pendingLike])).toEqual(stagedPending);
+
+    const resolvedFromPending = applyReactionEvents(stagedPending, [like]);
+    expect(resolvedFromPending.confirmedLikeCount).toBe(1);
+    expect(resolvedFromPending.confirmedEvents).toHaveLength(1);
+    expect(resolvedFromPending.history).toHaveLength(1);
+    expect(resolvedFromPending.withheld).toHaveLength(0);
+    expect(resolvedFromPending).toEqual(replayReactions([like]));
+    expect(applyReactionEvents(resolvedFromPending, [like])).toEqual(resolvedFromPending);
+
+    // 2. Transition from ABSENT to ELIGIBLE without duplicate TXIDs
+    const absentLike = { ...like, targetLink: "ABSENT" };
+    const stagedAbsent = replayReactions([absentLike]);
+    expect(stagedAbsent.confirmedLikeCount).toBe(0);
+    expect(stagedAbsent.withheld).toEqual([{ txid: like.txid, reason: "TARGET_ABSENT" }]);
+
+    const resolvedFromAbsent = applyReactionEvents(stagedAbsent, [like]);
+    expect(resolvedFromAbsent.confirmedLikeCount).toBe(1);
+    expect(resolvedFromAbsent.confirmedEvents).toHaveLength(1);
+    expect(new Set(resolvedFromAbsent.confirmedEvents.map((item) => item.txid)).size).toBe(1);
+    expect(resolvedFromAbsent.withheld).toHaveLength(0);
+    expect(resolvedFromAbsent).toEqual(replayReactions([like]));
+
+    // 3. Deterministic block and position order preserved across batches when an earlier reaction resolves later
+    const outOfOrderStaged = replayReactions([pendingLike, removal]);
+    expect(outOfOrderStaged.confirmedLikeCount).toBe(0);
+    expect(outOfOrderStaged.withheld).toEqual([{ txid: like.txid, reason: "TARGET_PENDING" }]);
+
+    const outOfOrderResolved = applyReactionEvents(outOfOrderStaged, [like, likeAgain]);
+    const canonical = replayReactions([like, removal, likeAgain]);
+    expect(outOfOrderResolved.confirmedLikeCount).toBe(1);
+    expect(outOfOrderResolved.confirmedEvents.map((item) => item.txid)).toEqual([
+      like.txid,
+      removal.txid,
+      likeAgain.txid
+    ]);
+    expect(outOfOrderResolved.history.map((item) => item.txid)).toEqual([
+      like.txid,
+      removal.txid,
+      likeAgain.txid
+    ]);
+    expect(outOfOrderResolved.withheld).toHaveLength(0);
+    expect(outOfOrderResolved).toEqual(canonical);
+    expect(applyReactionEvents(outOfOrderResolved, [like, removal, likeAgain])).toEqual(canonical);
+  });
+
   it("restores a checkpoint and keeps mempool events out of the confirmed count", () => {
     const confirmed = replayReactions(pick(fixture.replay.sequence));
     const checkpoint = cloneReactionState(confirmed);
