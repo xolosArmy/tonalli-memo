@@ -18,8 +18,10 @@ import {
 import { agree } from "./generate-canonical-tm1-fixtures.mjs";
 import {
   attributeNativeTip,
+  classifyTipTarget,
   coreV1PostAuthorIndex,
-  designatedAuthorHash160
+  designatedAuthorHash160,
+  tm1CandidateOutputs
 } from "./tip-xec-attribution-independent.mjs";
 import {
   decodeTipScript,
@@ -74,6 +76,7 @@ const REACTION_TESTS = [
   "selects like state from the chosen synthetic branch",
   "promotes a mempool reaction when the same txid is confirmed",
   "reorders an older confirmed event that arrives in a later batch",
+  "updates a withheld reaction when replayed after target resolution while staying idempotent",
   "restores a checkpoint and keeps mempool events out of the confirmed count",
   "records laboratory evidence without closing the gates"
 ] as const;
@@ -326,6 +329,7 @@ describe("synthetic native TIP_XEC laboratory", () => {
     const pending = requireTarget(fixture.targets, "pending-post");
     const payment = requireTarget(fixture.targets, "ineligible-payment");
     const reply = requireTarget(fixture.targets, "ineligible-reply-shaped");
+    const duplicateCandidates = requireTarget(fixture.targets, "ineligible-duplicate-candidates");
     expect(tm1Code(outputScript(eligible.rawTransactionHex))).toBe("ACCEPTED:POST:tip target post");
     expect(tm1Code(outputScript(eligiblePushdata1.rawTransactionHex))).toBe(
       "ACCEPTED:POST:tip target post crossing the seventy-two byte pushdata1 envelope boundary"
@@ -335,9 +339,21 @@ describe("synthetic native TIP_XEC laboratory", () => {
     expect(tm1Code(outputScript(pending.rawTransactionHex))).toBe("ACCEPTED:POST:tip pending target");
     expect(tm1Code(outputScript(payment.rawTransactionHex))).toBe("INVALID_MARKER");
     expect(tm1Code(outputScript(reply.rawTransactionHex))).toBe("UNSUPPORTED_VERSION");
+    expect(tm1Code(outputScript(duplicateCandidates.rawTransactionHex))).toBe("ACCEPTED:POST:first candidate");
+    expect(tm1CandidateOutputs(eligible.rawTransactionHex)).toHaveLength(1);
+    expect(tm1CandidateOutputs(eligiblePushdata1.rawTransactionHex)).toHaveLength(1);
+    expect(tm1CandidateOutputs(duplicateCandidates.rawTransactionHex)).toHaveLength(2);
     expect(coreV1PostAuthorIndex(eligible.rawTransactionHex)).toBe(1);
     expect(coreV1PostAuthorIndex(eligiblePushdata1.rawTransactionHex)).toBe(1);
     expect(coreV1PostAuthorIndex(reply.rawTransactionHex)).toBe(null);
+    expect(coreV1PostAuthorIndex(duplicateCandidates.rawTransactionHex)).toBe(null);
+    expect(
+      classifyTipTarget(duplicateCandidates.network, duplicateCandidates, duplicateCandidates.txid)
+    ).toEqual({
+      link: "INELIGIBLE",
+      recipientHash160: null,
+      authorInputIndex: null
+    });
     expect(designatedAuthorHash160(eligible.rawTransactionHex, 0)).not.toBe(eligible.authorHash160);
     expect(designatedAuthorHash160(eligible.rawTransactionHex, 1)).toBe(eligible.authorHash160);
     for (const row of tips) {
@@ -533,6 +549,7 @@ describe("synthetic native TIP_XEC laboratory", () => {
       ["neg-target-pending", "TARGET_PENDING"],
       ["neg-target-payment", "TARGET_INELIGIBLE"],
       ["neg-target-reply-shaped", "TARGET_INELIGIBLE"],
+      ["neg-target-duplicate-candidates", "TARGET_INELIGIBLE"],
       ["neg-other-network", "TARGET_OTHER_NETWORK"],
       ["neg-version-09", "UNSUPPORTED_VERSION"],
       ["neg-event-7e", "UNSUPPORTED_EVENT"],
@@ -575,6 +592,8 @@ describe("synthetic native TIP_XEC laboratory", () => {
       targetLink: "ABSENT"
     });
     expect(requireRow(tips, "neg-target-pending").targetLink).toBe("PENDING_TARGET");
+    expect(requireRow(tips, "neg-target-duplicate-candidates").targetLink).toBe("INELIGIBLE");
+    expect(requireRow(tips, "neg-target-duplicate-candidates").creditedSatoshis).toBe("0");
     expect(requireRow(tips, "neg-other-network").network).toBe("lab-other-net");
     expect(requireRow(tips, "neg-envelope-mutated").targetLink).toBe("ABSENT");
   });

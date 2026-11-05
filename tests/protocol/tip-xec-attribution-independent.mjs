@@ -82,21 +82,85 @@ function p2pkhHashHex(script) {
   return hash === null ? null : toHex(hash);
 }
 
+function firstPushData(scriptBody) {
+  if (scriptBody.length === 0) {
+    return null;
+  }
+  const opcode = scriptBody[0];
+  let headerLength;
+  let dataLength;
+  if (opcode >= 0x01 && opcode <= 0x4b) {
+    headerLength = 1;
+    dataLength = opcode;
+  } else if (opcode === 0x4c) {
+    if (scriptBody.length < 2) {
+      return null;
+    }
+    headerLength = 2;
+    dataLength = scriptBody[1];
+  } else if (opcode === 0x4d) {
+    if (scriptBody.length < 3) {
+      return null;
+    }
+    headerLength = 3;
+    dataLength = scriptBody[1] + scriptBody[2] * 0x100;
+  } else if (opcode === 0x4e) {
+    if (scriptBody.length < 5) {
+      return null;
+    }
+    headerLength = 5;
+    dataLength =
+      scriptBody[1] +
+      scriptBody[2] * 0x100 +
+      scriptBody[3] * 0x10000 +
+      scriptBody[4] * 0x1000000;
+  } else {
+    return null;
+  }
+  const end = headerLength + dataLength;
+  if (!Number.isSafeInteger(end) || end > scriptBody.length) {
+    return null;
+  }
+  return scriptBody.subarray(headerLength, end);
+}
+
+export function tm1CandidateOutputs(rawTransactionHex) {
+  const outputs = parseTx(rawTransactionHex).outputs;
+  const candidates = [];
+  for (let i = 0; i < outputs.length; i++) {
+    const output = outputs[i];
+    if (output.script.length > 0 && output.script[0] === 0x6a) {
+      const body = output.script.slice(1);
+      const firstPush = firstPushData(body);
+      if (firstPush !== null && toHex(firstPush) === "544d4d00") {
+        const pushes = pushesOf(body);
+        candidates.push({ index: i, output, pushes });
+      }
+    }
+  }
+  return candidates;
+}
+
 /**
  * Author index from a Core v1.0 POST script. Input zero is not a fallback.
- * Returns null when output 0 is not a minimal v1 POST.
+ * Enforces candidate cardinality across all outputs: returns null when the
+ * transaction does not contain exactly one TM1 candidate, or when that
+ * single candidate output is not a minimal v1 POST.
  */
 export function coreV1PostAuthorIndex(rawTransactionHex) {
-  const output = parseTx(rawTransactionHex).outputs[0];
-  if (output === undefined || output.sats !== 0n) {
+  const candidates = tm1CandidateOutputs(rawTransactionHex);
+  if (candidates.length !== 1) {
+    return null;
+  }
+  const { output, pushes } = candidates[0];
+  if (output.sats !== 0n || pushes === null) {
     return null;
   }
   const script = output.script;
   if (script.length < 10 || script.length > 223 || script[0] !== 0x6a) {
     return null;
   }
-  const pushes = pushesOf(script.slice(1));
-  if (pushes === null || pushes.length !== 2) {
+  if (pushes.length !== 2) {
     return null;
   }
   if (toHex(pushes[0]) !== "544d4d00") {
@@ -135,8 +199,9 @@ function authorOf(rawTransactionHex, index, inputs, algorithm) {
 }
 
 /**
- * Eligible only when the record is on the tip's network, output 0 is a
- * Core v1.0 POST, and that POST's designated input verifies in this laboratory.
+ * Eligible only when the record is on the tip's network, the transaction
+ * contains exactly one TM1 candidate output that is a Core v1.0 POST, and
+ * that POST's designated input verifies in this laboratory.
  * A profile, an alias, or input zero of the POST is not consulted.
  */
 export function classifyTipTarget(tipNetwork, target, signedTargetTxid) {
@@ -152,6 +217,10 @@ export function classifyTipTarget(tipNetwork, target, signedTargetTxid) {
   }
   if (target.network !== tipNetwork) {
     return { link: "OTHER_NETWORK", recipientHash160: null, authorInputIndex: null };
+  }
+  const candidates = tm1CandidateOutputs(target.rawTransactionHex);
+  if (candidates.length !== 1) {
+    return { link: "INELIGIBLE", recipientHash160: null, authorInputIndex: null };
   }
   const authorInputIndex = coreV1PostAuthorIndex(target.rawTransactionHex);
   if (authorInputIndex === null) {

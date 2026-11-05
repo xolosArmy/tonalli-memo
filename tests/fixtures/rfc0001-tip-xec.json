@@ -173,6 +173,32 @@
       "authorship": "LAB_VALID",
       "authorErrorCode": null,
       "eventDataUtf8": null
+    },
+    {
+      "id": "ineligible-duplicate-candidates",
+      "group": "target",
+      "kind": "duplicate-candidates",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000113fc168f77f95efebb982ad7b26befb92aa04befb899c2cbb6c90e22bc1d459100000000644192e3e9ff692a3a5603e29282113efc06cebe33d792f0d0e672e471e0ea9d9f4f00996c725fb821afb130247dd4018eba08318c8acee304b9b630696bb2ae4a914121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff030000000000000000196a04544d4d001201010066697273742063616e64696461746500000000000000001a6a04544d4d00130101007365636f6e642063616e64696461746528230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "7d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "91451dbc220ec9b6cbc299b8ef4ba02ab9ef6bb2d72a98bbfe5ef9778f16fc13",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d001201010066697273742063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
     }
   ],
   "tips": [
@@ -1132,6 +1158,46 @@
       "targetTxid": "51a075a770d17acff09a88251671d95dd1981b15e9b261698d7d179a1cf940f1",
       "digestHex": "606594388f596bebbec953cac5fb1ab6f3d7c728c1119e995cc44e9d0a6ea8ec",
       "preMutationDigestHex": "606594388f596bebbec953cac5fb1ab6f3d7c728c1119e995cc44e9d0a6ea8ec",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-target-duplicate-candidates",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000112ec7399294d05c2850dfc8cd40bab468ddcbf65df53a302167da0de2a9bb68a000000006441ae434b99ac85e9e2203b2ed949fa9b7686361d831d4b39231b9c70d0f1f87377451a0591893937d480bcad43be0fe5122b1f2d4f9e730620264c3e7ae8a28b394121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d00230205007d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2dae8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f8477dc2679c6e4d9b922fef8d3428a81b2bb05c34b5b003f54943fc5011b69e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8ab69b2adea07d1602a353df65bfdc8d46ab0bd48cfc0d85c2054d299973ec12",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00230205007d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "scriptLength": 42,
+      "targetTxid": "7d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "digestHex": "1e6bcc668474d646779a83940f67789a450327cd12ef4e48387548b20fd9e94f",
+      "preMutationDigestHex": "1e6bcc668474d646779a83940f67789a450327cd12ef4e48387548b20fd9e94f",
       "signatureOk": true,
       "creditedSatoshis": "0",
       "verdict": "TARGET_INELIGIBLE",

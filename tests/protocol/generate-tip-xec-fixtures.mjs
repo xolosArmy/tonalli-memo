@@ -437,9 +437,21 @@ function buildFixtures() {
       { sats: 9000n, script: testOutputScript("authorB") }
     ]
   });
+  const duplicateCandidate = signTarget({
+    id: "ineligible-duplicate-candidates",
+    kind: "duplicate-candidates",
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    inputs: [inputSpec({ keyName: "authorB", sats: 10000n, label: "tip-target-dup-candidate" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate") },
+      { sats: 0n, script: canonicalTm1Script(0, "second candidate") },
+      { sats: 9000n, script: testOutputScript("authorB") }
+    ]
+  });
   const absentTargetTxid = createHash("sha256").update("rfc0001-tip-xec-absent-target-v1").digest("hex");
   const catalog = new Map(
-    [eligible, eligiblePushdata1, pending, payment, replyShaped].map((target) => [target.txid, target])
+    [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate].map((target) => [target.txid, target])
   );
   assert(!catalog.has(absentTargetTxid), "Absent target collided with a synthetic transaction.");
 
@@ -702,6 +714,17 @@ function buildFixtures() {
     }, catalog),
     signTip({
       ...base,
+      id: "neg-target-duplicate-candidates",
+      group: "negative",
+      targetTxidHex: duplicateCandidate.txid,
+      targetLink: "INELIGIBLE",
+      verdict: "TARGET_INELIGIBLE",
+      creditedSatoshis: "0",
+      expectRecipient: null,
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-dup-candidate-target" })]
+    }, catalog),
+    signTip({
+      ...base,
       id: "neg-other-network",
       group: "negative",
       network: "lab-other-net",
@@ -866,7 +889,7 @@ function buildFixtures() {
 
   const rows = [...positives, ...negatives];
   const txids = new Set();
-  for (const row of [...[eligible, eligiblePushdata1, pending, payment, replyShaped], ...rows]) {
+  for (const row of [...[eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate], ...rows]) {
     assert(!txids.has(row.txid), `${row.id} reused a txid.`);
     txids.add(row.txid);
   }
@@ -880,6 +903,7 @@ function buildFixtures() {
     assert(row.sighashByte === 0x41 || row.sighashByte === 0xc1, `${row.id} used an unapproved sighash.`);
   }
   assert(rows.find((row) => row.id === "neg-recipient-funded").creditedSatoshis === "0", "Recipient-funded tip was credited.");
+  assert(rows.find((row) => row.id === "neg-target-duplicate-candidates").creditedSatoshis === "0", "Duplicate-candidate target tip was credited.");
   assert(rows.find((row) => row.id === "tip-multi-output").creditedSatoshis === "3000", "Multiple recipient outputs were not summed.");
   assert(rows.find((row) => row.id === "tip-pushdata1-target").creditedSatoshis === "1000", "PUSHDATA1 target tip was not credited.");
 
@@ -918,7 +942,7 @@ function buildFixtures() {
       sighashSerializer: "tests/protocol/canonical-tm1-independent-verify.mjs"
     },
     absentTargetTxid,
-    targets: [eligible, eligiblePushdata1, pending, payment, replyShaped],
+    targets: [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate],
     tips: rows,
     structures: [
       { id: "truncated-envelope", scriptHex: sampleHex.slice(0, 40), errorCode: "INVALID_FORMAT" },

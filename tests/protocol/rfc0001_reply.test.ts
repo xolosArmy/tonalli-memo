@@ -59,7 +59,7 @@ const FROZEN: Readonly<Record<string, string>> = {
   "tests/fixtures/rfc0001-reactions.json":
     "ab6fdbaf2513718473fe5c925fc9e381b3ad6dbd164fc7b9099549df654f72cc",
   "tests/fixtures/rfc0001-tip-xec.json":
-    "543207212c790343e13b56f58f2f286ab6e9ed5b98ab34551397a2e03b923ee4"
+    "a127f9f5272c44fce21b389f9c97f7331a5781f09b1a532f50aad02c3930b536"
 };
 
 const D07_TXIDS = [
@@ -78,6 +78,7 @@ const REACTION_TESTS = [
   "selects like state from the chosen synthetic branch",
   "promotes a mempool reaction when the same txid is confirmed",
   "reorders an older confirmed event that arrives in a later batch",
+  "updates a withheld reaction when replayed after target resolution while staying idempotent",
   "restores a checkpoint and keeps mempool events out of the confirmed count",
   "records laboratory evidence without closing the gates"
 ] as const;
