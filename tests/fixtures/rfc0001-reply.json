@@ -259,6 +259,35 @@
       "replyTextUtf8": "first level reply acting as parent",
       "replyTextByteLength": 34,
       "eligibleForThread": true
+    },
+    {
+      "id": "duplicate-output-reply-target",
+      "group": "target",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000185686f037c95d84ddf72a4896cc21e1a27ce684d5bb85e3a21735761c64d46de000000006441ced6ad0ae872c4e66eec028fce1d35f34095cd8cf6ade667a3c82b4fef6cca3c3b878457221fcd2be1fef79e3ddb4bd39fa7f0f12396fdc441cfd584b7c528e54121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000004f6a04544d4d004802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920706172656e742077697468206475706c69636174652063616e6469646174650000000000000000216a04544d4d001a0101007365636f6e642063616e646964617465206f757470757428230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "de464dc6615773213a5eb85b4d68ce271a1ec26c89a472df4dd8957c036f6885",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d004802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920706172656e742077697468206475706c69636174652063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "reply parent with duplicate candidate",
+      "parentLink": "PARENT_VERIFIED",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1
     }
   ],
   "replies": [
@@ -1281,6 +1310,49 @@
       "parentLink": "INVALID_PARENT",
       "parentLinkDetail": "MULTIPLE_MEMOS",
       "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-duplicate-output-reply",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000156094d5498331d6100a87d9af841853adabcd753e07785ce5b12ec7eff2fe9160000000064414a67c3c08ce9a11e04557ca8aaca5e840a942043b164407cd587a055759799fe6c5c02f4a09057e0fd01c73a293644a5ac05466c2371e33a31e8ab9cee47ed244121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e76616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f4841a8af003272db3f41853a9b2ae03b4d11016508c0cbd5b571974e2dc0e0a",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "16e92fff7eec125bce8577e053d7bcda3a8541f89a7da800611d3398544d0956",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e76616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "6eb397a5d0b2e4789b27ef117c80ab7d27cb6efd1a429cf2932df29372235dff",
+      "preMutationDigestHex": "6eb397a5d0b2e4789b27ef117c80ab7d27cb6efd1a429cf2932df29372235dff",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "reply",
       "rootPostTxid": null,
       "depth": null,
       "replyTextUtf8": "valid reply text",

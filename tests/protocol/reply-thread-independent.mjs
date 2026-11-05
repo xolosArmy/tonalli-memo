@@ -258,6 +258,10 @@ export function classifyReplyParent(replyNetwork, parentRecord, signedParentTxid
     if (!decoded.ok) {
       return { link: "INVALID_PARENT", reason: "NOT_VALID_REPLY_SCRIPT", parentKind: null, rootPostTxid: null, depth: null };
     }
+    const candidates = tm1CandidateOutputs(parentRecord.rawTransactionHex);
+    if (candidates.length > 1 || tx.outputs.slice(1).some((entry) => entry.script.length > 0 && entry.script[0] === 0x6a)) {
+      return { link: "INVALID_PARENT", reason: "MULTIPLE_MEMOS", parentKind: "reply", rootPostTxid: null, depth: null };
+    }
     const authorship = authorOf(
       parentRecord.rawTransactionHex,
       decoded.authorInputIndex,

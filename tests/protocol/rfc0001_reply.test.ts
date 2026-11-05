@@ -27,7 +27,8 @@ import {
   designatedAuthorHash160,
   applyReplyEvents,
   emptyReplyThreadState,
-  replayReplies
+  replayReplies,
+  verifyReply
 } from "./reply-thread-independent.mjs";
 import { isTm1ProtocolError, parseTm1Output } from "../../packages/protocol/src/index.ts";
 
@@ -289,7 +290,7 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
   it("accepts 43..223 byte reply scripts and Core still rejects version 0x02", () => {
     expect(positives).toHaveLength(9);
-    expect(negatives).toHaveLength(21);
+    expect(negatives).toHaveLength(22);
 
     expect(
       encodeReplyScript({
@@ -484,6 +485,23 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
     const malformedSiblingTarget = requireTarget(fixture.targets, "malformed-sibling-candidate-post-target");
     expect(coreV1PostAuthorIndex(malformedSiblingTarget.rawTransactionHex)).toBe(null);
+
+    const dupOutputReplyParent = requireRow(replies, "neg-parent-duplicate-output-reply");
+    expect(dupOutputReplyParent.authorship).toBe("LAB_VALID");
+    expect(dupOutputReplyParent.parentLink).toBe("INVALID_PARENT");
+    expect(dupOutputReplyParent.parentLinkDetail).toBe("MULTIPLE_MEMOS");
+    expect(dupOutputReplyParent.eligibleForThread).toBe(false);
+
+    const dupReplyTarget = requireTarget(fixture.targets, "duplicate-output-reply-target");
+    expect(
+      verifyReply({
+        rawTransactionHex: dupReplyTarget.rawTransactionHex,
+        inputs: dupReplyTarget.inputs,
+        network: "lab-mainnet",
+        signatureAlgorithm: "schnorr",
+        parentRecord: requireTarget(fixture.targets, "root-post-index0")
+      }).structuralError
+    ).toBe("INVALID_FORMAT");
   });
 
   it("withholds altered signatures, mutated envelopes, out of range index, and invalid prevouts", () => {

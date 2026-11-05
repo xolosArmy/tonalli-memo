@@ -201,7 +201,10 @@ function signTarget(spec) {
     outputScriptHex: bytesToHex(firstOutputScript(rawTransactionHex)),
     authorship: authorshipLabel,
     authorErrorCode: authorship.errorCode,
-    eventDataUtf8: spec.eventDataUtf8 ?? null
+    eventDataUtf8: spec.eventDataUtf8 ?? null,
+    ...(spec.parentLink !== undefined ? { parentLink: spec.parentLink } : {}),
+    ...(spec.rootPostTxid !== undefined ? { rootPostTxid: spec.rootPostTxid } : {}),
+    ...(spec.depth !== undefined ? { depth: spec.depth } : {})
   };
 }
 
@@ -453,9 +456,38 @@ function buildFixtures() {
     inputs: [inputSpec({ keyName: "authorB", sats: 10000n, label: "reply-parent-level1" })]
   }, initialCatalog);
 
+  const duplicateOutputReplyParent = signTarget({
+    id: "duplicate-output-reply-target",
+    kind: "reply",
+    parentLink: "PARENT_VERIFIED",
+    rootPostTxid: rootPost0.txid,
+    depth: 1,
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    eventDataUtf8: "reply parent with duplicate candidate",
+    inputs: [inputSpec({ keyName: "authorB", sats: 10000n, label: "reply-dup-reply-parent" })],
+    outputs: [
+      {
+        sats: 0n,
+        script: new Script(
+          encodeReplyScript({
+            version: SOCIAL_VERSION,
+            eventType: EVENT_REPLY,
+            authorInputIndex: 0,
+            parentTxidHex: rootPost0.txid,
+            replyText: "reply parent with duplicate candidate"
+          })
+        )
+      },
+      { sats: 0n, script: canonicalTm1Script(0, "second candidate output") },
+      { sats: 9000n, script: testOutputScript("authorB") }
+    ]
+  });
+
   const catalog = new Map([
     ...initialCatalog.entries(),
-    [eligibleReplyParent.txid, eligibleReplyParent]
+    [eligibleReplyParent.txid, eligibleReplyParent],
+    [duplicateOutputReplyParent.txid, duplicateOutputReplyParent]
   ]);
   assert(!catalog.has(absentParentTxid), "Absent parent collided with a synthetic transaction.");
 
@@ -704,6 +736,14 @@ function buildFixtures() {
     }, catalog),
     signReply({
       ...negativeBase,
+      id: "neg-parent-duplicate-output-reply",
+      parentTxidHex: duplicateOutputReplyParent.txid,
+      parentLink: "INVALID_PARENT",
+      parentLinkDetail: "MULTIPLE_MEMOS",
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-neg-dup-output-reply-parent" })]
+    }, catalog),
+    signReply({
+      ...negativeBase,
       id: "neg-reply-other-network",
       network: "lab-other-net",
       parentLink: "INVALID_PARENT",
@@ -801,6 +841,7 @@ function buildFixtures() {
     duplicateCandidatePost,
     malformedSiblingCandidatePost,
     eligibleReplyParent,
+    duplicateOutputReplyParent,
     ...rows
   ]) {
     assert(!txids.has(row.txid), `${row.id} reused a txid.`);
@@ -856,7 +897,8 @@ function buildFixtures() {
       otherNetPost,
       duplicateCandidatePost,
       malformedSiblingCandidatePost,
-      eligibleReplyParent
+      eligibleReplyParent,
+      duplicateOutputReplyParent
     ],
     replies: rows,
     structures: [
