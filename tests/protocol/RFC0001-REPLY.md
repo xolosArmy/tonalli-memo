@@ -79,7 +79,7 @@ and `parentLink === "PARENT_VERIFIED"`.
 
 ## Negatives
 
-The corpus includes 22 negative scenarios:
+The corpus includes 24 negative scenarios:
 1. `neg-signature-flipped`: scriptSig mutated -> `INVALID_AUTHOR_SIGNATURE`.
 2. `neg-envelope-mutated`: OP_RETURN script mutated after signing -> `INVALID_AUTHOR_SIGNATURE`.
 3. `neg-output-mutated`: change output mutated after signing -> `INVALID_AUTHOR_SIGNATURE`.
@@ -95,15 +95,17 @@ The corpus includes 22 negative scenarios:
 13. `neg-parent-duplicate-candidates`: parent contains multiple TM1 candidate outputs -> `INVALID_PARENT` (detail: `MULTIPLE_MEMOS`).
 14. `neg-parent-malformed-sibling-candidate`: parent contains a valid POST plus a malformed TM1 candidate sibling (`6a04544d4d0076`) -> `INVALID_PARENT` (detail: `MULTIPLE_MEMOS`).
 15. `neg-parent-duplicate-output-reply`: parent of kind `reply` contains a valid REPLY script at output 0 plus another TM1 candidate output -> `INVALID_PARENT` (detail: `MULTIPLE_MEMOS`).
-16. `neg-reply-other-network`: reply evaluated on different network -> `INVALID_PARENT` (detail: `OTHER_NETWORK`).
-17. `neg-nonminimal-push`: envelope <= 75 bytes uses `OP_PUSHDATA1` -> `INVALID_FORMAT`.
-18. `neg-empty-text`: 0 bytes of text (35-byte envelope) -> `INVALID_FORMAT`.
-19. `neg-text-too-long`: 181 bytes of text (216-byte envelope) -> `INVALID_FORMAT`.
-20. `neg-malformed-utf8`: invalid UTF-8 byte sequence (`0xff`) -> `MALFORMED_UTF8`.
-21. `neg-version-09`: unsupported version `0x09` -> `UNSUPPORTED_VERSION`.
-22. `neg-event-7e`: unsupported event `0x7e` -> `UNSUPPORTED_EVENT`.
+16. `neg-parent-mixed-tm0-and-tm1`: parent contains one TM1 POST and a separate historical TM0 output -> `INVALID_PARENT` (detail: `MULTIPLE_MEMOS`).
+17. `neg-parent-tm0-push-beside-tm1`: parent contains one TM1 POST and a later push `54 4d ff` in another OP_RETURN -> `INVALID_PARENT` (detail: `MULTIPLE_MEMOS`).
+18. `neg-reply-other-network`: reply evaluated on different network -> `INVALID_PARENT` (detail: `OTHER_NETWORK`).
+19. `neg-nonminimal-push`: envelope <= 75 bytes uses `OP_PUSHDATA1` -> `INVALID_FORMAT`.
+20. `neg-empty-text`: 0 bytes of text (35-byte envelope) -> `INVALID_FORMAT`.
+21. `neg-text-too-long`: 181 bytes of text (216-byte envelope) -> `INVALID_FORMAT`.
+22. `neg-malformed-utf8`: invalid UTF-8 byte sequence (`0xff`) -> `MALFORMED_UTF8`.
+23. `neg-version-09`: unsupported version `0x09` -> `UNSUPPORTED_VERSION`.
+24. `neg-event-7e`: unsupported event `0x7e` -> `UNSUPPORTED_EVENT`.
 
-TM1 candidate detection inspects the first data push of `OP_RETURN` outputs for the TM1 marker prefix (`544d4d00`) independently of remaining envelope or opcode validity, matching production `isTm1CandidateScript()`. If more than one candidate output is detected, or if a REPLY parent contains an extra `OP_RETURN` output, parent validation enforces transaction-wide framing and rejects the candidate parent as `MULTIPLE_MEMOS`.
+TM1 candidate detection inspects the first data push of `OP_RETURN` outputs for the TM1 marker prefix (`544d4d00`) independently of remaining envelope or opcode validity, matching production `isTm1CandidateScript()`. TM0 candidate detection counts every parsed OP_RETURN push that starts with `54 4d` outside those TM1 outputs, matching production `findMemoCandidates()`. A push stays in that count when its payload is not a valid envelope. A script that does not parse contributes no TM0 pushes. If the combined count is not exactly one, or if a REPLY parent contains an extra `OP_RETURN` output, parent validation rejects the candidate parent as `MULTIPLE_MEMOS`. A single valid TM1 POST remains eligible.
 
 ## Deterministic thread replay
 

@@ -38,6 +38,8 @@ import {
   LAB_REPLY_NETWORK,
   coreV1PostAuthorIndex,
   designatedAuthorHash160,
+  tm0Candidates,
+  tm1CandidateOutputs,
   verifyReply
 } from "./reply-thread-independent.mjs";
 
@@ -116,6 +118,32 @@ function mutateChangeScript(rawTransactionHex) {
   current[4] ^= 0x01;
   tx.outputs[1].script = new Script(Uint8Array.from(current));
   return tx.toHex();
+}
+
+function tm0Script(text) {
+  const payload = Buffer.from(text, "ascii");
+  return new Script(Uint8Array.from([0x6a, payload.length, ...payload]));
+}
+
+function tm0PushBesideScript() {
+  const unrelated = Buffer.from("x", "ascii");
+  const malformedCandidate = Buffer.from([0x54, 0x4d, 0xff]);
+  return new Script(Uint8Array.from([
+    0x6a,
+    unrelated.length,
+    ...unrelated,
+    malformedCandidate.length,
+    ...malformedCandidate
+  ]));
+}
+
+function assertRetainedTm0(target) {
+  const tm1 = tm1CandidateOutputs(target.rawTransactionHex);
+  assert(tm1.length === 1, `${target.id} lost the TM1 candidate.`);
+  const tm0 = tm0Candidates(target.rawTransactionHex, new Set(tm1.map((candidate) => candidate.index)));
+  assert(tm0.length >= 1, `${target.id} dropped the TM0 candidate.`);
+  assert(coreV1PostAuthorIndex(target.rawTransactionHex) === null, `${target.id} accepted multiple candidates.`);
+  return tm0;
 }
 
 function replyOutputs(spec, script) {
@@ -422,6 +450,46 @@ function buildFixtures() {
     ]
   });
 
+  const mixedTm0Tm1CandidatePost = signTarget({
+    id: "mixed-tm0-tm1-candidate-post-target",
+    kind: "core-v1-post",
+    expectPostAuthorIndex: null,
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    eventDataUtf8: "post with mixed tm0 and tm1 candidates",
+    inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-mixed-tm0-tm1-candidates" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate post") },
+      { sats: 0n, script: tm0Script("TM0|p|xa|hi") },
+      { sats: 9000n, script: testOutputScript("authorA") }
+    ]
+  });
+  const mixedOutputTm0 = assertRetainedTm0(mixedTm0Tm1CandidatePost);
+  assert(
+    mixedOutputTm0.some((candidate) => Buffer.from(candidate.bytes).toString("ascii") === "TM0|p|xa|hi"),
+    "Historical TM0 payload disappeared from the mixed-output post."
+  );
+
+  const tm0PushBesidePost = signTarget({
+    id: "tm0-push-beside-tm1-post-target",
+    kind: "core-v1-post",
+    expectPostAuthorIndex: null,
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    eventDataUtf8: "post with a tm0 push beside one tm1 candidate",
+    inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-tm0-push-beside-tm1" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate post") },
+      { sats: 0n, script: tm0PushBesideScript() },
+      { sats: 9000n, script: testOutputScript("authorA") }
+    ]
+  });
+  const besidePush = assertRetainedTm0(tm0PushBesidePost);
+  assert(
+    besidePush.some((candidate) => candidate.pushIndex === 1 && candidate.bytes.length === 3 && candidate.bytes[2] === 0xff),
+    "Malformed TM0 push disappeared from the candidate count."
+  );
+
   const absentParentTxid = createHash("sha256").update("rfc0001-reply-absent-parent-v1").digest("hex");
 
   const initialCatalog = new Map([
@@ -431,7 +499,9 @@ function buildFixtures() {
     [ineligiblePayment.txid, ineligiblePayment],
     [otherNetPost.txid, otherNetPost],
     [duplicateCandidatePost.txid, duplicateCandidatePost],
-    [malformedSiblingCandidatePost.txid, malformedSiblingCandidatePost]
+    [malformedSiblingCandidatePost.txid, malformedSiblingCandidatePost],
+    [mixedTm0Tm1CandidatePost.txid, mixedTm0Tm1CandidatePost],
+    [tm0PushBesidePost.txid, tm0PushBesidePost]
   ]);
 
   // Intermediate: valid reply to rootPost0 to act as eligible parent for nested reply
@@ -744,6 +814,22 @@ function buildFixtures() {
     }, catalog),
     signReply({
       ...negativeBase,
+      id: "neg-parent-mixed-tm0-and-tm1",
+      parentTxidHex: mixedTm0Tm1CandidatePost.txid,
+      parentLink: "INVALID_PARENT",
+      parentLinkDetail: "MULTIPLE_MEMOS",
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-mixed-tm0-tm1-parent" })]
+    }, catalog),
+    signReply({
+      ...negativeBase,
+      id: "neg-parent-tm0-push-beside-tm1",
+      parentTxidHex: tm0PushBesidePost.txid,
+      parentLink: "INVALID_PARENT",
+      parentLinkDetail: "MULTIPLE_MEMOS",
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "reply-tm0-push-parent" })]
+    }, catalog),
+    signReply({
+      ...negativeBase,
       id: "neg-reply-other-network",
       network: "lab-other-net",
       parentLink: "INVALID_PARENT",
@@ -840,6 +926,8 @@ function buildFixtures() {
     otherNetPost,
     duplicateCandidatePost,
     malformedSiblingCandidatePost,
+    mixedTm0Tm1CandidatePost,
+    tm0PushBesidePost,
     eligibleReplyParent,
     duplicateOutputReplyParent,
     ...rows
@@ -897,6 +985,8 @@ function buildFixtures() {
       otherNetPost,
       duplicateCandidatePost,
       malformedSiblingCandidatePost,
+      mixedTm0Tm1CandidatePost,
+      tm0PushBesidePost,
       eligibleReplyParent,
       duplicateOutputReplyParent
     ],

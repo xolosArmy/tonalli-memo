@@ -27,7 +27,9 @@ import {
   attributeNativeTip,
   coreV1PostAuthorIndex,
   designatedAuthorHash160,
-  LAB_TIP_NETWORK
+  LAB_TIP_NETWORK,
+  tm0Candidates,
+  tm1CandidateOutputs
 } from "./tip-xec-attribution-independent.mjs";
 import {
   EVENT_TIP,
@@ -127,6 +129,32 @@ function replyShapedScript(authorIndex, parentTxidHex) {
   return new Script(
     Uint8Array.from([0x6a, 0x04, 0x54, 0x4d, 0x4d, 0x00, envelope.length, ...envelope])
   );
+}
+
+function tm0Script(text) {
+  const payload = Buffer.from(text, "ascii");
+  return new Script(Uint8Array.from([0x6a, payload.length, ...payload]));
+}
+
+function tm0PushBesideScript() {
+  const unrelated = Buffer.from("x", "ascii");
+  const malformedCandidate = Buffer.from([0x54, 0x4d, 0xff]);
+  return new Script(Uint8Array.from([
+    0x6a,
+    unrelated.length,
+    ...unrelated,
+    malformedCandidate.length,
+    ...malformedCandidate
+  ]));
+}
+
+function assertRetainedTm0(target) {
+  const tm1 = tm1CandidateOutputs(target.rawTransactionHex);
+  assert(tm1.length === 1, `${target.id} lost the TM1 candidate.`);
+  const tm0 = tm0Candidates(target.rawTransactionHex, new Set(tm1.map((candidate) => candidate.index)));
+  assert(tm0.length >= 1, `${target.id} dropped the TM0 candidate.`);
+  assert(coreV1PostAuthorIndex(target.rawTransactionHex) === null, `${target.id} accepted multiple candidates.`);
+  return tm0;
 }
 
 function tipOutputs(spec, script) {
@@ -449,9 +477,43 @@ function buildFixtures() {
       { sats: 9000n, script: testOutputScript("authorB") }
     ]
   });
+  const mixedTm0Tm1Candidate = signTarget({
+    id: "ineligible-mixed-tm0-and-tm1",
+    kind: "mixed-tm0-tm1",
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    inputs: [inputSpec({ keyName: "authorB", sats: 10000n, label: "tip-target-mixed-candidate" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate") },
+      { sats: 0n, script: tm0Script("TM0|p|xa|hi") },
+      { sats: 9000n, script: testOutputScript("authorB") }
+    ]
+  });
+  const mixedOutputTm0 = assertRetainedTm0(mixedTm0Tm1Candidate);
+  assert(
+    mixedOutputTm0.some((candidate) => Buffer.from(candidate.bytes).toString("ascii") === "TM0|p|xa|hi"),
+    "Historical TM0 payload disappeared from the mixed-output target."
+  );
+  const tm0PushBesideCandidate = signTarget({
+    id: "ineligible-tm0-push-beside-tm1",
+    kind: "tm0-push-beside-tm1",
+    authorship: "LAB_VALID",
+    authorInputIndex: 0,
+    inputs: [inputSpec({ keyName: "authorB", sats: 10000n, label: "tip-target-tm0-push" })],
+    outputs: [
+      { sats: 0n, script: canonicalTm1Script(0, "first candidate") },
+      { sats: 0n, script: tm0PushBesideScript() },
+      { sats: 9000n, script: testOutputScript("authorB") }
+    ]
+  });
+  const besidePush = assertRetainedTm0(tm0PushBesideCandidate);
+  assert(
+    besidePush.some((candidate) => candidate.pushIndex === 1 && candidate.bytes.length === 3 && candidate.bytes[2] === 0xff),
+    "Malformed TM0 push disappeared from the candidate count."
+  );
   const absentTargetTxid = createHash("sha256").update("rfc0001-tip-xec-absent-target-v1").digest("hex");
   const catalog = new Map(
-    [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate].map((target) => [target.txid, target])
+    [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate, mixedTm0Tm1Candidate, tm0PushBesideCandidate].map((target) => [target.txid, target])
   );
   assert(!catalog.has(absentTargetTxid), "Absent target collided with a synthetic transaction.");
 
@@ -725,6 +787,28 @@ function buildFixtures() {
     }, catalog),
     signTip({
       ...base,
+      id: "neg-target-mixed-tm0-and-tm1",
+      group: "negative",
+      targetTxidHex: mixedTm0Tm1Candidate.txid,
+      targetLink: "INELIGIBLE",
+      verdict: "TARGET_INELIGIBLE",
+      creditedSatoshis: "0",
+      expectRecipient: null,
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-mixed-candidate-target" })]
+    }, catalog),
+    signTip({
+      ...base,
+      id: "neg-target-tm0-push-beside-tm1",
+      group: "negative",
+      targetTxidHex: tm0PushBesideCandidate.txid,
+      targetLink: "INELIGIBLE",
+      verdict: "TARGET_INELIGIBLE",
+      creditedSatoshis: "0",
+      expectRecipient: null,
+      inputs: [inputSpec({ keyName: "authorA", sats: 10000n, label: "tip-tm0-push-target" })]
+    }, catalog),
+    signTip({
+      ...base,
       id: "neg-other-network",
       group: "negative",
       network: "lab-other-net",
@@ -889,7 +973,7 @@ function buildFixtures() {
 
   const rows = [...positives, ...negatives];
   const txids = new Set();
-  for (const row of [...[eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate], ...rows]) {
+  for (const row of [...[eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate, mixedTm0Tm1Candidate, tm0PushBesideCandidate], ...rows]) {
     assert(!txids.has(row.txid), `${row.id} reused a txid.`);
     txids.add(row.txid);
   }
@@ -904,6 +988,8 @@ function buildFixtures() {
   }
   assert(rows.find((row) => row.id === "neg-recipient-funded").creditedSatoshis === "0", "Recipient-funded tip was credited.");
   assert(rows.find((row) => row.id === "neg-target-duplicate-candidates").creditedSatoshis === "0", "Duplicate-candidate target tip was credited.");
+  assert(rows.find((row) => row.id === "neg-target-mixed-tm0-and-tm1").creditedSatoshis === "0", "Mixed-candidate target tip was credited.");
+  assert(rows.find((row) => row.id === "neg-target-tm0-push-beside-tm1").creditedSatoshis === "0", "TM0-push target tip was credited.");
   assert(rows.find((row) => row.id === "tip-multi-output").creditedSatoshis === "3000", "Multiple recipient outputs were not summed.");
   assert(rows.find((row) => row.id === "tip-pushdata1-target").creditedSatoshis === "1000", "PUSHDATA1 target tip was not credited.");
 
@@ -942,7 +1028,7 @@ function buildFixtures() {
       sighashSerializer: "tests/protocol/canonical-tm1-independent-verify.mjs"
     },
     absentTargetTxid,
-    targets: [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate],
+    targets: [eligible, eligiblePushdata1, pending, payment, replyShaped, duplicateCandidate, mixedTm0Tm1Candidate, tm0PushBesideCandidate],
     tips: rows,
     structures: [
       { id: "truncated-envelope", scriptHex: sampleHex.slice(0, 40), errorCode: "INVALID_FORMAT" },

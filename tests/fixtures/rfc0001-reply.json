@@ -218,6 +218,58 @@
       "eventDataUtf8": "post with malformed sibling tm1 candidate"
     },
     {
+      "id": "mixed-tm0-tm1-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001283ed4760a902671461f4777cebc0c7325e5128a3c3a78c1f9247cc7d871815b000000006441e4150b162f28ee2135edc8167edd68736760810ce6d9ea95fe581465ad18443a74e3943ee1bbc7926c6266764725eac3aefb0fb775d8713ad888f570db54f8ad4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f737400000000000000000d6a0b544d307c707c78617c686928230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f86",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5b8171d8c77c24f9c1783a3c8a12e525730cbcce77471f467126900a76d43e28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with mixed tm0 and tm1 candidates"
+    },
+    {
+      "id": "tm0-push-beside-tm1-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000126bb91d142e334645d23357c9c018a7a477d435d179952ad49b899299883a8750000000064418c786d645daa81f76a31f6e6f9ea629a39c76364766173e4ffc875436381ceeae8f9ff44533f951e2199a3bf6167998e7c3b964fe089d7835a04829bc0b325f24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f73740000000000000000076a017803544dff28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "1f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a777",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "75a883982999b849ad5299175d437d477a8a019c7c35235d6434e342d191bb26",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with a tm0 push beside one tm1 candidate"
+    },
+    {
       "id": "eligible-reply-parent",
       "group": "target",
       "kind": "reply",
@@ -1353,6 +1405,92 @@
       "parentLink": "INVALID_PARENT",
       "parentLinkDetail": "MULTIPLE_MEMOS",
       "parentKind": "reply",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-mixed-tm0-and-tm1",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001f4deee9b860710ddef8e5d57145feaf094c2b85c90301074194e6547e0277c0e0000000064410c79b3d815e37648806af597c96260d31c1079a8dba698cdda01ed5f608ae0f1e22fdd444e4b4edb6428dd895dc2807bcb90297927b1e4ecf6529a60cb0f1df54121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f8676616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "501108eeca2e638bd563a881cdfa84d8d839c46dc1eddcbbb008dbb610bf9c85",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0e7c27e047654e19741030905cb8c294f0ea5f14575d8eefdd1007869beedef4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f8676616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "223967a9e71b4e6e00817fab293646ad0e3b57a1a38faa908bdc42e79c5b21a5",
+      "preMutationDigestHex": "223967a9e71b4e6e00817fab293646ad0e3b57a1a38faa908bdc42e79c5b21a5",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f86",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-tm0-push-beside-tm1",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000016e639d4b72089385322d129589be9a3fcac5e579b688f79ab78e23a1cbb163280000000064410a645092c15c6dc8cca95767553a61af031ad7bf30f0733a965be41820061e28b6fa8dc187e28b6ade9d814a0d23a7126bba67699bc2a37163bc7e85a44c02a54121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d00330202001f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a77776616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e358376eae9695227858ac11792860cc67982b357b642bf3b627a2120d52a671",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2863b1cba1238eb79af788b679e5c5ca3f9abe8995122d32859308724b9d636e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00330202001f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a77776616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "af0a2bfefd8c7f39de6863aa9154cbd5b8978decb59cb64dccc4cae8c9e4e904",
+      "preMutationDigestHex": "af0a2bfefd8c7f39de6863aa9154cbd5b8978decb59cb64dccc4cae8c9e4e904",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "1f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a777",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
       "rootPostTxid": null,
       "depth": null,
       "replyTextUtf8": "valid reply text",

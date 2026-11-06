@@ -121,15 +121,114 @@ export function tm1CandidateOutputs(rawTransactionHex) {
   return candidates;
 }
 
+const OP_RETURN_MAX_BYTES = 223;
+const ONE_BYTE_STACK_ADDS = new Set([
+  0x00, 0x4f, 0x50,
+  0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
+  0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60
+]);
+
+/**
+ * OP_RETURN stack pushes, matching ecash-lib getStackArray.
+ * Returns null when the output is not a parsed stack. A parsed push that
+ * starts with TM stays a candidate even when its payload is not a valid envelope.
+ */
+function opReturnStackPushes(script) {
+  if (script.length === 0 || script[0] !== 0x6a || script.length > OP_RETURN_MAX_BYTES) {
+    return null;
+  }
+  const pushes = [];
+  let cursor = 1;
+  while (cursor < script.length) {
+    const opcode = script[cursor];
+    cursor += 1;
+    if (ONE_BYTE_STACK_ADDS.has(opcode)) {
+      pushes.push(Uint8Array.of(opcode));
+      continue;
+    }
+    let length;
+    if (opcode >= 0x01 && opcode <= 0x4b) {
+      length = opcode;
+    } else if (opcode === 0x4c) {
+      if (cursor >= script.length) {
+        return null;
+      }
+      length = script[cursor];
+      cursor += 1;
+    } else if (opcode === 0x4d) {
+      if (cursor + 1 >= script.length) {
+        return null;
+      }
+      length = script[cursor] + script[cursor + 1] * 0x100;
+      cursor += 2;
+    } else if (opcode === 0x4e) {
+      if (cursor + 3 >= script.length) {
+        return null;
+      }
+      length =
+        script[cursor] +
+        script[cursor + 1] * 0x100 +
+        script[cursor + 2] * 0x10000 +
+        script[cursor + 3] * 0x1000000;
+      cursor += 4;
+    } else {
+      return null;
+    }
+    if (!Number.isSafeInteger(length) || cursor + length > script.length) {
+      return null;
+    }
+    pushes.push(script.slice(cursor, cursor + length));
+    cursor += length;
+  }
+  return pushes;
+}
+
+export function tm0Candidates(rawTransactionHex, excludedOutputIndexes = new Set()) {
+  const outputs = parseTx(rawTransactionHex).outputs;
+  const candidates = [];
+  for (let i = 0; i < outputs.length; i++) {
+    if (excludedOutputIndexes.has(i)) {
+      continue;
+    }
+    const pushes = opReturnStackPushes(outputs[i].script);
+    if (pushes === null) {
+      continue;
+    }
+    for (let pushIndex = 0; pushIndex < pushes.length; pushIndex++) {
+      const push = pushes[pushIndex];
+      if (push.length >= 2 && push[0] === 0x54 && push[1] === 0x4d) {
+        candidates.push({ outputIndex: i, pushIndex, bytes: push });
+      }
+    }
+  }
+  return candidates;
+}
+
+export function memoCandidates(rawTransactionHex) {
+  const tm1 = tm1CandidateOutputs(rawTransactionHex);
+  const tm1Indexes = new Set(tm1.map((c) => c.index));
+  const tm0 = tm0Candidates(rawTransactionHex, tm1Indexes);
+  return {
+    tm1,
+    tm0,
+    total: tm1.length + tm0.length
+  };
+}
+
 /**
  * Author index from a Core v1.0 POST script. Input zero is not a fallback.
  * Enforces candidate cardinality across all outputs: returns null when the
- * transaction does not contain exactly one TM1 candidate, or when that
- * single candidate output is not a minimal v1 POST.
+ * transaction does not contain exactly one candidate (considering both TM1
+ * and TM0 candidates matching findMemoCandidates), or when that single
+ * candidate output is not a minimal v1 POST.
  */
 export function coreV1PostAuthorIndex(rawTransactionHex) {
   const candidates = tm1CandidateOutputs(rawTransactionHex);
   if (candidates.length !== 1) {
+    return null;
+  }
+  const tm0 = tm0Candidates(rawTransactionHex, new Set([candidates[0].index]));
+  if (tm0.length > 0) {
     return null;
   }
   const { output, pushes } = candidates[0];
@@ -221,8 +320,10 @@ export function classifyReplyParent(replyNetwork, parentRecord, signedParentTxid
   }
 
   if (parentRecord.kind === "core-v1-post") {
-    const candidates = tm1CandidateOutputs(parentRecord.rawTransactionHex);
-    if (candidates.length > 1) {
+    const tm1 = tm1CandidateOutputs(parentRecord.rawTransactionHex);
+    const tm1Indexes = new Set(tm1.map((c) => c.index));
+    const tm0 = tm0Candidates(parentRecord.rawTransactionHex, tm1Indexes);
+    if (tm1.length + tm0.length > 1) {
       return { link: "INVALID_PARENT", reason: "MULTIPLE_MEMOS", parentKind: "core-v1-post", rootPostTxid: null, depth: null };
     }
     const authorIndex = coreV1PostAuthorIndex(parentRecord.rawTransactionHex);

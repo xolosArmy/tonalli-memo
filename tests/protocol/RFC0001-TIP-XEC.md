@@ -105,8 +105,13 @@ zero, instead of the POST's designated author, is `INVALID_RECIPIENT`.
 A missing target, a supplied target whose transaction ID does not match
 the signed `target_txid` in the tip envelope, a payment, a reply-shaped
 version `0x02` script, a POST whose own signature was altered, and a target
-transaction containing more than one TM1 candidate output (`ineligible-duplicate-candidates`)
+transaction containing more than one TM1 candidate output (`ineligible-duplicate-candidates`),
+a POST accompanied by a historical TM0 output (`ineligible-mixed-tm0-and-tm1`),
+and a POST accompanied by a malformed TM0 push in another output
+(`ineligible-tm0-push-beside-tm1`)
 do not yield a credited tip (`TARGET_INELIGIBLE`, 0 satoshis).
+The signed control `coex-control-tm0-and-tm1` is rejected the same way.
+A single TM1 POST target remains eligible.
 The same target recorded on `lab-tip-net` does not satisfy a tip
 labeled `lab-other-net`. That label is a key probe inside the
 laboratory. It is not a second network confirmation.

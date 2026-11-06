@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -12,7 +13,8 @@ import {
   inputUnlockMatchesPrevout,
   parseTx,
   sighashByteAt,
-  signatureMatches
+  signatureMatches,
+  toHex
 } from "./canonical-tm1-independent-verify.mjs";
 import { agree } from "./generate-canonical-tm1-fixtures.mjs";
 import {
@@ -27,10 +29,20 @@ import {
   designatedAuthorHash160,
   applyReplyEvents,
   emptyReplyThreadState,
+  LAB_REPLY_NETWORK,
+  memoCandidates,
   replayReplies,
+  tm1CandidateOutputs,
   verifyReply
 } from "./reply-thread-independent.mjs";
 import { isTm1ProtocolError, parseTm1Output } from "../../packages/protocol/src/index.ts";
+
+const verificationRequire = createRequire(
+  join(fileURLToPath(new URL("../..", import.meta.url)), "packages/verification/package.json")
+);
+const { getStackArray } = verificationRequire("ecash-lib") as {
+  getStackArray: (script: string) => string[];
+};
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_PATH = join(REPO_ROOT, "tests/fixtures/rfc0001-reply.json");
@@ -60,7 +72,7 @@ const FROZEN: Readonly<Record<string, string>> = {
   "tests/fixtures/rfc0001-reactions.json":
     "ab6fdbaf2513718473fe5c925fc9e381b3ad6dbd164fc7b9099549df654f72cc",
   "tests/fixtures/rfc0001-tip-xec.json":
-    "a127f9f5272c44fce21b389f9c97f7331a5781f09b1a532f50aad02c3930b536"
+    "f27e94cd3c30c7d15c348fd325aea90722f190eb9aebd96e69ec6a77cf7980a9"
 };
 
 const D07_TXIDS = [
@@ -171,6 +183,31 @@ interface ReplyFixture {
 
 function sha256(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function productionTm0Count(rawTransactionHex: string): number {
+  const tx = parseTx(rawTransactionHex) as { outputs: { script: Uint8Array }[] };
+  const tm1Indexes = new Set(
+    (tm1CandidateOutputs(rawTransactionHex) as { index: number }[]).map((candidate) => candidate.index)
+  );
+  let count = 0;
+  tx.outputs.forEach((output, index) => {
+    if (tm1Indexes.has(index) || output.script.length === 0 || output.script[0] !== 0x6a) {
+      return;
+    }
+    let pushes: string[];
+    try {
+      pushes = getStackArray(toHex(output.script));
+    } catch {
+      return;
+    }
+    for (const push of pushes) {
+      if (push.length >= 4 && push.startsWith("544d")) {
+        count += 1;
+      }
+    }
+  });
+  return count;
 }
 
 function tm1Code(script: Uint8Array): string {
@@ -290,7 +327,7 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
   it("accepts 43..223 byte reply scripts and Core still rejects version 0x02", () => {
     expect(positives).toHaveLength(9);
-    expect(negatives).toHaveLength(22);
+    expect(negatives).toHaveLength(24);
 
     expect(
       encodeReplyScript({
@@ -428,6 +465,18 @@ describe("synthetic social v2 REPLY laboratory", () => {
   });
 
   it("verifies parent eligibility, depth resolution, and separates authorship from parent linkage", () => {
+    const singleCandidatePost = requireTarget(fixture.targets, "root-post-index0");
+    const singleCandidates = memoCandidates(singleCandidatePost.rawTransactionHex) as {
+      tm1: unknown[];
+      tm0: unknown[];
+      total: number;
+    };
+    expect(singleCandidates.tm1).toHaveLength(1);
+    expect(singleCandidates.tm0).toHaveLength(0);
+    expect(singleCandidates.total).toBe(1);
+    expect(coreV1PostAuthorIndex(singleCandidatePost.rawTransactionHex)).toBe(0);
+    expect(productionTm0Count(singleCandidatePost.rawTransactionHex)).toBe(0);
+
     const directChild = requireRow(replies, "reply-schnorr-index0-41");
     expect(directChild.parentLink).toBe("PARENT_VERIFIED");
     expect(directChild.parentKind).toBe("core-v1-post");
@@ -485,6 +534,34 @@ describe("synthetic social v2 REPLY laboratory", () => {
 
     const malformedSiblingTarget = requireTarget(fixture.targets, "malformed-sibling-candidate-post-target");
     expect(coreV1PostAuthorIndex(malformedSiblingTarget.rawTransactionHex)).toBe(null);
+    expect(tm1CandidateOutputs(malformedSiblingTarget.rawTransactionHex)).toHaveLength(2);
+
+    const mixedParent = requireRow(replies, "neg-parent-mixed-tm0-and-tm1");
+    expect(mixedParent.authorship).toBe("LAB_VALID");
+    expect(mixedParent.parentLink).toBe("INVALID_PARENT");
+    expect(mixedParent.parentLinkDetail).toBe("MULTIPLE_MEMOS");
+    expect(mixedParent.eligibleForThread).toBe(false);
+    const mixedTarget = requireTarget(fixture.targets, "mixed-tm0-tm1-candidate-post-target");
+    expect(coreV1PostAuthorIndex(mixedTarget.rawTransactionHex)).toBe(null);
+    const mixedCandidates = memoCandidates(mixedTarget.rawTransactionHex) as { tm0: unknown[]; total: number };
+    expect(mixedCandidates.tm0).toHaveLength(productionTm0Count(mixedTarget.rawTransactionHex));
+    expect(mixedCandidates.total).toBeGreaterThan(1);
+    expect(
+      classifyReplyParent(mixedTarget.network, mixedTarget, mixedTarget.txid)
+    ).toMatchObject({ link: "INVALID_PARENT", reason: "MULTIPLE_MEMOS" });
+
+    const pushParent = requireRow(replies, "neg-parent-tm0-push-beside-tm1");
+    expect(pushParent.authorship).toBe("LAB_VALID");
+    expect(pushParent.parentLink).toBe("INVALID_PARENT");
+    expect(pushParent.parentLinkDetail).toBe("MULTIPLE_MEMOS");
+    expect(pushParent.eligibleForThread).toBe(false);
+    const pushTarget = requireTarget(fixture.targets, "tm0-push-beside-tm1-post-target");
+    const pushTm0 = (memoCandidates(pushTarget.rawTransactionHex) as {
+      tm0: { pushIndex: number; bytes: Uint8Array }[];
+    }).tm0;
+    expect(pushTm0).toHaveLength(productionTm0Count(pushTarget.rawTransactionHex));
+    expect(pushTm0.some((candidate) => candidate.pushIndex === 1 && candidate.bytes[2] === 0xff)).toBe(true);
+    expect(coreV1PostAuthorIndex(pushTarget.rawTransactionHex)).toBe(null);
 
     const dupOutputReplyParent = requireRow(replies, "neg-parent-duplicate-output-reply");
     expect(dupOutputReplyParent.authorship).toBe("LAB_VALID");
@@ -502,6 +579,40 @@ describe("synthetic social v2 REPLY laboratory", () => {
         parentRecord: requireTarget(fixture.targets, "root-post-index0")
       }).structuralError
     ).toBe("INVALID_FORMAT");
+  });
+
+  it("rejects coex-control-tm0-and-tm1 as a Core POST parent", () => {
+    const coexistence = JSON.parse(
+      readFileSync(join(REPO_ROOT, "tests/fixtures/rfc0001-sec17-coexistence.json"), "utf8")
+    ) as { cases: { id: string; rawTransactionHex: string; txid: string; inputs: InputSpec[]; signatureAlgorithm: string }[] };
+    const control = coexistence.cases.find((row) => row.id === "coex-control-tm0-and-tm1");
+    if (control === undefined) {
+      throw new Error("Missing coex-control-tm0-and-tm1.");
+    }
+    const counted = memoCandidates(control.rawTransactionHex) as {
+      tm1: { index: number }[];
+      tm0: { outputIndex: number; bytes: Uint8Array }[];
+    };
+    const tm1 = counted.tm1;
+    const tm0 = counted.tm0;
+    expect(tm1).toHaveLength(1);
+    expect(tm0.length).toBe(productionTm0Count(control.rawTransactionHex));
+    expect(tm0.length).toBeGreaterThan(0);
+    expect(tm0.some((candidate) => candidate.outputIndex !== tm1[0]?.index)).toBe(true);
+    expect(coreV1PostAuthorIndex(control.rawTransactionHex)).toBe(null);
+    expect(
+      classifyReplyParent(
+        LAB_REPLY_NETWORK,
+        {
+          kind: "core-v1-post",
+          network: LAB_REPLY_NETWORK,
+          rawTransactionHex: control.rawTransactionHex,
+          inputs: control.inputs,
+          signatureAlgorithm: control.signatureAlgorithm
+        },
+        control.txid
+      )
+    ).toMatchObject({ link: "INVALID_PARENT", reason: "MULTIPLE_MEMOS" });
   });
 
   it("withholds altered signatures, mutated envelopes, out of range index, and invalid prevouts", () => {

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +22,8 @@ import {
   classifyTipTarget,
   coreV1PostAuthorIndex,
   designatedAuthorHash160,
+  LAB_TIP_NETWORK,
+  memoCandidates,
   tm1CandidateOutputs
 } from "./tip-xec-attribution-independent.mjs";
 import {
@@ -30,6 +33,13 @@ import {
   s08TipScriptHex
 } from "./tip-xec-envelope-independent.mjs";
 import { isTm1ProtocolError, parseTm1Output } from "../../packages/protocol/src/index.ts";
+
+const verificationRequire = createRequire(
+  join(fileURLToPath(new URL("../..", import.meta.url)), "packages/verification/package.json")
+);
+const { getStackArray } = verificationRequire("ecash-lib") as {
+  getStackArray: (script: string) => string[];
+};
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_PATH = join(REPO_ROOT, "tests/fixtures/rfc0001-tip-xec.json");
@@ -156,6 +166,31 @@ interface TipFixture {
 
 function sha256(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function productionTm0Count(rawTransactionHex: string): number {
+  const tx = parseTx(rawTransactionHex) as { outputs: { script: Uint8Array }[] };
+  const tm1Indexes = new Set(
+    (tm1CandidateOutputs(rawTransactionHex) as { index: number }[]).map((candidate) => candidate.index)
+  );
+  let count = 0;
+  tx.outputs.forEach((output, index) => {
+    if (tm1Indexes.has(index) || output.script.length === 0 || output.script[0] !== 0x6a) {
+      return;
+    }
+    let pushes: string[];
+    try {
+      pushes = getStackArray(toHex(output.script));
+    } catch {
+      return;
+    }
+    for (const push of pushes) {
+      if (push.length >= 4 && push.startsWith("544d")) {
+        count += 1;
+      }
+    }
+  });
+  return count;
 }
 
 function tm1Code(script: Uint8Array): string {
@@ -344,9 +379,33 @@ describe("synthetic native TIP_XEC laboratory", () => {
     expect(tm1CandidateOutputs(eligiblePushdata1.rawTransactionHex)).toHaveLength(1);
     expect(tm1CandidateOutputs(duplicateCandidates.rawTransactionHex)).toHaveLength(2);
     expect(coreV1PostAuthorIndex(eligible.rawTransactionHex)).toBe(1);
+    const eligibleCandidates = memoCandidates(eligible.rawTransactionHex) as {
+      tm1: unknown[];
+      tm0: unknown[];
+      total: number;
+    };
+    expect(eligibleCandidates.tm1).toHaveLength(1);
+    expect(eligibleCandidates.tm0).toHaveLength(0);
+    expect(eligibleCandidates.total).toBe(1);
+    expect(productionTm0Count(eligible.rawTransactionHex)).toBe(0);
     expect(coreV1PostAuthorIndex(eligiblePushdata1.rawTransactionHex)).toBe(1);
     expect(coreV1PostAuthorIndex(reply.rawTransactionHex)).toBe(null);
     expect(coreV1PostAuthorIndex(duplicateCandidates.rawTransactionHex)).toBe(null);
+    const mixedTarget = requireTarget(fixture.targets, "ineligible-mixed-tm0-and-tm1");
+    expect(coreV1PostAuthorIndex(mixedTarget.rawTransactionHex)).toBe(null);
+    const mixedCandidates = memoCandidates(mixedTarget.rawTransactionHex) as { tm0: unknown[]; total: number };
+    expect(mixedCandidates.tm0).toHaveLength(productionTm0Count(mixedTarget.rawTransactionHex));
+    expect(mixedCandidates.total).toBeGreaterThan(1);
+    expect(
+      classifyTipTarget(mixedTarget.network, mixedTarget, mixedTarget.txid)
+    ).toMatchObject({ link: "INELIGIBLE", recipientHash160: null, authorInputIndex: null });
+    const pushTarget = requireTarget(fixture.targets, "ineligible-tm0-push-beside-tm1");
+    const pushTm0 = (memoCandidates(pushTarget.rawTransactionHex) as {
+      tm0: { pushIndex: number; bytes: Uint8Array }[];
+    }).tm0;
+    expect(pushTm0).toHaveLength(productionTm0Count(pushTarget.rawTransactionHex));
+    expect(pushTm0.some((candidate) => candidate.pushIndex === 1 && candidate.bytes[2] === 0xff)).toBe(true);
+    expect(coreV1PostAuthorIndex(pushTarget.rawTransactionHex)).toBe(null);
     expect(
       classifyTipTarget(duplicateCandidates.network, duplicateCandidates, duplicateCandidates.txid)
     ).toEqual({
@@ -550,6 +609,8 @@ describe("synthetic native TIP_XEC laboratory", () => {
       ["neg-target-payment", "TARGET_INELIGIBLE"],
       ["neg-target-reply-shaped", "TARGET_INELIGIBLE"],
       ["neg-target-duplicate-candidates", "TARGET_INELIGIBLE"],
+      ["neg-target-mixed-tm0-and-tm1", "TARGET_INELIGIBLE"],
+      ["neg-target-tm0-push-beside-tm1", "TARGET_INELIGIBLE"],
       ["neg-other-network", "TARGET_OTHER_NETWORK"],
       ["neg-version-09", "UNSUPPORTED_VERSION"],
       ["neg-event-7e", "UNSUPPORTED_EVENT"],
@@ -596,6 +657,41 @@ describe("synthetic native TIP_XEC laboratory", () => {
     expect(requireRow(tips, "neg-target-duplicate-candidates").creditedSatoshis).toBe("0");
     expect(requireRow(tips, "neg-other-network").network).toBe("lab-other-net");
     expect(requireRow(tips, "neg-envelope-mutated").targetLink).toBe("ABSENT");
+  });
+
+  it("rejects coex-control-tm0-and-tm1 as a Core POST target", () => {
+    const coexistence = JSON.parse(
+      readFileSync(join(REPO_ROOT, "tests/fixtures/rfc0001-sec17-coexistence.json"), "utf8")
+    ) as { cases: { id: string; rawTransactionHex: string; txid: string; inputs: Prevout[]; signatureAlgorithm: string }[] };
+    const control = coexistence.cases.find((row) => row.id === "coex-control-tm0-and-tm1");
+    if (control === undefined) {
+      throw new Error("Missing coex-control-tm0-and-tm1.");
+    }
+    const counted = memoCandidates(control.rawTransactionHex) as {
+      tm1: { index: number }[];
+      tm0: { outputIndex: number }[];
+    };
+    const tm1 = counted.tm1;
+    const tm0 = counted.tm0;
+    expect(tm1).toHaveLength(1);
+    expect(tm0.length).toBe(productionTm0Count(control.rawTransactionHex));
+    expect(tm0.length).toBeGreaterThan(0);
+    expect(tm0.some((candidate) => candidate.outputIndex !== tm1[0]?.index)).toBe(true);
+    expect(coreV1PostAuthorIndex(control.rawTransactionHex)).toBe(null);
+    const target = {
+      network: LAB_TIP_NETWORK,
+      rawTransactionHex: control.rawTransactionHex,
+      inputs: control.inputs,
+      signatureAlgorithm: control.signatureAlgorithm
+    };
+    expect(classifyTipTarget(LAB_TIP_NETWORK, target, control.txid)).toMatchObject({
+      link: "INELIGIBLE",
+      recipientHash160: null,
+      authorInputIndex: null
+    });
+    const tip = requireRow(tips, "neg-target-mixed-tm0-and-tm1");
+    expect(recompute(tip).creditedSatoshis).toBe("0");
+    expect(requireRow(tips, "neg-target-tm0-push-beside-tm1").creditedSatoshis).toBe("0");
   });
 
   it("records laboratory evidence without closing the gates", () => {
