@@ -1,6 +1,6 @@
 // Capability decisions only. This module cannot assemble, sign, broadcast, or deploy.
 
-import { reject } from "./allowlist.mjs";
+import { readOwnValue, reject } from "./allowlist.mjs";
 
 export const CAPABILITIES = Object.freeze([
   "read",
@@ -9,12 +9,6 @@ export const CAPABILITIES = Object.freeze([
   "broadcast",
   "deploy",
 ]);
-
-function copyPermissions(source) {
-  const out = {};
-  for (const capability of CAPABILITIES) out[capability] = source[capability];
-  return Object.freeze(out);
-}
 
 export function defaultPermissions() {
   const out = {};
@@ -45,25 +39,28 @@ export function parsePermissions(input) {
       };
     }
   }
+  const snapshot = {};
   for (const capability of CAPABILITIES) {
-    if (!Object.hasOwn(input, capability)) {
-      return {
-        ...reject("INCOMPLETE", `missing capability ${capability}`),
-        permissions: denied,
-      };
+    const read = readOwnValue(input, capability);
+    if (!read.ok) {
+      const reason = read.code === "INCOMPLETE"
+        ? `missing capability ${capability}`
+        : `capability ${capability} is an accessor`;
+      return { ...reject(read.code, reason), permissions: denied };
     }
-    if (typeof input[capability] !== "boolean") {
+    if (typeof read.value !== "boolean") {
       return {
         ...reject("MALFORMED", `capability ${capability} is not boolean`),
         permissions: denied,
       };
     }
+    snapshot[capability] = read.value;
   }
   return {
     ok: true,
     code: "PARSED",
     reason: "permissions parsed",
-    permissions: copyPermissions(input),
+    permissions: Object.freeze(snapshot),
   };
 }
 

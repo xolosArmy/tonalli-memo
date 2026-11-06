@@ -4,6 +4,7 @@ import {
   CONFIG_FIELDS,
   LAB_ALLOWLIST,
   PROXY_ENV_KEYS,
+  readOwnValue,
   reject,
 } from "./allowlist.mjs";
 
@@ -236,24 +237,27 @@ export function validateConfiguration(config) {
   for (const key of keys) {
     if (!CONFIG_FIELDS.includes(key)) return reject("UNKNOWN_FIELD", `field ${key} is not allowed`);
   }
+  const snap = {};
   for (const key of CONFIG_FIELDS) {
-    if (!Object.hasOwn(config, key)) return reject("INCOMPLETE", `field ${key} is missing`);
+    const read = readOwnValue(config, key);
+    if (!read.ok) return read;
+    snap[key] = read.value;
   }
-  if (config.followRedirects !== false) {
+  if (snap.followRedirects !== false) {
     return reject("REDIRECT", "followRedirects must be false");
   }
-  if (config.proxy !== null) return reject("PROXY", "proxy must be null");
-  const envDecision = classifyEnv(config.env);
+  if (snap.proxy !== null) return reject("PROXY", "proxy must be null");
+  const envDecision = classifyEnv(snap.env);
   if (!envDecision.ok) return envDecision;
-  if (config.chain !== LAB_ALLOWLIST.chain) {
-    if (typeof config.chain !== "string" || config.chain.trim() === "") {
+  if (snap.chain !== LAB_ALLOWLIST.chain) {
+    if (typeof snap.chain !== "string" || snap.chain.trim() === "") {
       return reject("CHAIN", "chain is empty or not a string");
     }
-    return reject("CHAIN", `chain ${JSON.stringify(config.chain)} is not regtest`);
+    return reject("CHAIN", `chain ${JSON.stringify(snap.chain)} is not regtest`);
   }
-  const datadirDecision = classifyDatadir(config.datadir);
+  const datadirDecision = classifyDatadir(snap.datadir);
   if (!datadirDecision.ok) return datadirDecision;
-  const binaryDecision = classifyBinary(config.binaryDir);
+  const binaryDecision = classifyBinary(snap.binaryDir);
   if (!binaryDecision.ok) return binaryDecision;
-  return classifyEndpoint(config.endpoint, config.role);
+  return classifyEndpoint(snap.endpoint, snap.role);
 }

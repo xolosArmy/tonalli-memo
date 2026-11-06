@@ -45,3 +45,12 @@ export const PROXY_ENV_KEYS = Object.freeze([
 export function reject(code, reason) {
   return { ok: false, code, reason };
 }
+
+export function readOwnValue(input, key) {
+  const description = Object.getOwnPropertyDescriptor(input, key);
+  if (!description) return reject("INCOMPLETE", `field ${key} is missing`);
+  if (typeof description.get === "function" || typeof description.set === "function") {
+    return reject("MALFORMED", `field ${key} is an accessor`);
+  }
+  return { ok: true, code: "DATA_PROPERTY", reason: "data property", value: description.value };
+}

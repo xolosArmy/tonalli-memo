@@ -1,6 +1,6 @@
 // Laboratory flags. They do not change productive feature flags.
 
-import { reject } from "./allowlist.mjs";
+import { readOwnValue, reject } from "./allowlist.mjs";
 
 export const LAB_FLAGS = Object.freeze([
   "socialV2",
@@ -12,12 +12,6 @@ export const LAB_FLAGS = Object.freeze([
   "rmzEmpp",
   "broadcast",
 ]);
-
-function copyFlags(source) {
-  const out = {};
-  for (const flag of LAB_FLAGS) out[flag] = source[flag];
-  return Object.freeze(out);
-}
 
 export function defaultLabFlags() {
   const out = {};
@@ -43,16 +37,20 @@ export function parseLabFlags(input) {
       return { ...reject("UNKNOWN_FLAG", `unknown flag ${key}`), flags: safe };
     }
   }
+  const snapshot = {};
   for (const flag of LAB_FLAGS) {
-    if (!Object.hasOwn(input, flag)) {
-      return { ...reject("INCOMPLETE", `missing flag ${flag}`), flags: safe };
+    const read = readOwnValue(input, flag);
+    if (!read.ok) {
+      const reason = read.code === "INCOMPLETE" ? `missing flag ${flag}` : `flag ${flag} is an accessor`;
+      return { ...reject(read.code, reason), flags: safe };
     }
-    if (typeof input[flag] !== "boolean") {
+    if (typeof read.value !== "boolean") {
       return { ...reject("MALFORMED", `flag ${flag} is not boolean`), flags: safe };
     }
+    snapshot[flag] = read.value;
   }
   for (const flag of LAB_FLAGS) {
-    if (input[flag] === true) {
+    if (snapshot[flag] === true) {
       return {
         ...reject("FLAG_ENABLED", `${flag} must remain false in S1-A`),
         flags: safe,
@@ -63,6 +61,6 @@ export function parseLabFlags(input) {
     ok: true,
     code: "FLAGS_OFF",
     reason: "all laboratory flags are off",
-    flags: copyFlags(input),
+    flags: Object.freeze(snapshot),
   };
 }

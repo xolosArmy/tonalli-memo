@@ -64,7 +64,7 @@ function patched(patch) {
 }
 
 function git(args) {
-  return execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+  return execFileSync("git", args, { cwd: root, encoding: "utf8" }).replace(/\s+$/, "");
 }
 
 function walk(dir) {
@@ -348,6 +348,53 @@ test("REG-11A el diff queda dentro de labs/s1-d2 y la base no se mueve", () => {
   for (const name of seen) {
     for (const prefix of forbidden) assert.equal(name.startsWith(prefix), false, name);
   }
+});
+
+test("REG-11A rechaza accessors sin invocarlos", () => {
+  let flagReads = 0;
+  const flags = { ...defaultLabFlags() };
+  Object.defineProperty(flags, "broadcast", {
+    enumerable: true,
+    get() {
+      flagReads += 1;
+      return flagReads >= 3;
+    },
+  });
+  const parsedFlags = parseLabFlags(flags);
+  assert.equal(parsedFlags.ok, false);
+  assert.equal(parsedFlags.code, "MALFORMED");
+  assert.equal(parsedFlags.flags.broadcast, false);
+  assert.equal(flagReads, 0);
+
+  let permissionReads = 0;
+  const permissions = { ...defaultPermissions() };
+  Object.defineProperty(permissions, "assemble", {
+    enumerable: true,
+    get() {
+      permissionReads += 1;
+      return permissionReads >= 2;
+    },
+  });
+  assert.equal(parsePermissions(permissions).code, "MALFORMED");
+  assert.equal(allows(permissions, "assemble"), false);
+  assert.equal(permissionReads, 0);
+
+  let endpointReads = 0;
+  const config = allowlistedConfig("rpc");
+  Object.defineProperty(config, "endpoint", {
+    enumerable: true,
+    get() {
+      endpointReads += 1;
+      return endpointReads === 1 ? LAB_ALLOWLIST.endpoints.rpc : "http://203.0.113.10:8333";
+    },
+  });
+  const adapter = safeAdapter();
+  const decision = evaluateConfiguration(config, adapter);
+  assert.equal(decision.verdict, "rejected");
+  assert.equal(decision.code, "MALFORMED");
+  assert.equal(decision.connectInvoked, false);
+  assert.equal(adapter.calls.length, 0);
+  assert.equal(endpointReads, 0);
 });
 
 test("REG-11A los módulos de decisión no importan red ni procesos", () => {
