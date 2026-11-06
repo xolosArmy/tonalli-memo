@@ -1891,26 +1891,426 @@ The proposed release sequence is:
 
 These stage names express a proposal, not existing
 infrastructure or approvals. S0 acceptance never
-implies D3 or D4 permission.
+implies D3 or D4 permission. The blockchain-first
+rules in this section MUST NOT be read as
+authorization of S1, D2, D3, D4, social version
+`0x02`, a production parser change, or a change
+to the existing Core indexer.
+
+Comment `6690028869` registers the blockchain-first
+direction stated here. That comment does not close
+S0 and does not authorize implementation. Stating
+the direction in this draft does not ratify
+RFC-0001. Comment `6689226597` remains in force,
+including its refusal of S1, D2, D3, D4, and social
+version `0x02`.
 
 A documented, rehearsed rollback MUST disable v2
 write, ingest and read **independently**, preserve
 Core v1.0 and accepted TM0 functionality, and leave
 the original immutable chain transactions untouched.
-The indexer MUST persist enough chain identity,
-block hash/height, transaction ordering, event
-version, source-trust and reconciliation checkpoints
-to rebuild derived v2 state from the active chain
-without double-crediting tips or duplicating likes.
+Derived v2 state MUST still be rebuildable from the
+active chain without double-crediting a tip or
+duplicating a like. M1.9.4.1 through M1.9.4.8 state
+where that duty is carried. They do not withdraw it,
+and they do not require a social SQL store to meet it.
 
-Recovery MUST be idempotent across restarts,
-deep reorgs, partial database migrations, shadow
-indexes and obsolete client caches. A flag-off
-state MUST NOT discard historical raw transaction
-evidence needed for auditing, but MUST cease
-publishing data outside the authorized feature
+A flag-off state MUST NOT discard historical raw
+transaction evidence needed for auditing, but MUST
+cease publishing data outside the authorized feature
 scope. Existing personal-data/secret handling
 controls MUST remain in force throughout recovery.
+Logs and derived social views MUST NOT contain seed
+phrases, private keys, or secret payment material.
+
+The isolation requirements of M1.9.3 remain in force
+in full. Nothing in this section relaxes the
+regtest allowlist, the prohibition on production
+seeds and production wallets, the separation of
+read, assembly, signing, broadcast, and deployment
+permissions, or the duty to fail closed on mainnet
+or on an unidentified chain.
+
+#### M1.9.4.1. Authoritative record
+
+The active eCash chain is the authoritative record
+of confirmed social events. A reorganization MAY
+change which transactions are confirmed. A
+transaction that is not in the active chain MUST
+NOT be presented as currently confirmed.
+
+Chronik is a service for indexing, retrieval, and
+notification. Chronik MUST NOT be treated as a
+substitute for eCash consensus rules or for
+verification of a transaction. A Chronik page, a
+transaction identifier, a block summary, or a
+WebSocket notice is not, by itself, a verified
+social event and is not settlement.
+
+Before a transaction contributes to a social view,
+the implementation MUST verify it under the rules
+that apply to its profile. A Core v1.0 POST MUST be
+verified with the TM1 Core v1.0 parser. That parser
+MUST NOT accept social version `0x02`.
+Interpretation of a social-v2 event, when a later
+authorization allows it at all, MUST follow
+M1.9.4.3 and MUST remain behind the default-off
+gates in M1.9.1. Source trust MUST remain visible
+on the derived event. Data retrieved under
+`trusted-chronik` MUST NOT be presented as
+independent signature verification. The limits in
+M1.9.2 remain in force.
+
+The social projector is a deterministic function
+from verified transactions on the active chain to
+a derived view. The view MUST be reconstructable
+from that chain. The view, and any cache of the
+view, MUST NOT be a second source of truth.
+
+#### M1.9.4.2. No social SQL store
+
+The social layer MUST NOT require a SQL database
+of its own to store posts, replies, likes, or tips.
+Those facts MUST be derived from the active chain.
+
+Derived social state MAY live only in memory or in
+a discardable cache. A cache MUST NOT outrank the
+active chain. A cache MUST NOT be required in order
+to rebuild a correct view. A cache that describes a
+chain other than the active chain MUST NOT be served
+as current confirmed state.
+
+This subsection does not delete, migrate, re-schema,
+or extend the SQLite database of the existing Core
+indexer under `apps/indexer`. That database is
+outside this amendment. This amendment does not
+authorize writing posts, replies, likes, or tips
+into it. A later migration of any store requires
+a separate authorization.
+
+Partial database migrations and shadow indexes of
+the Core indexer remain obligations of that Core
+indexer. They are not waived by the absence of a
+social SQL store, and a social projection does not
+satisfy them.
+
+#### M1.9.4.3. Complete reconstruction
+
+The projector MUST reconstruct confirmed social
+state from a declared historical block range. The
+origin height MUST be justified by evidence that
+the range covers every confirmed social event the
+view claims to include. Coverage of the range MUST
+be checkable against the blocks and transactions
+that were actually read.
+
+An arbitrary origin MUST NOT be reported as
+complete. A partial sample of blocks MUST NOT be
+reported as coverage of the rest of the range. If
+no sufficient proof of a historical boundary is
+recorded, the range MUST begin at the relevant
+chain origin.
+
+Full enumeration of every block in the declared
+range, and of every transaction in those blocks,
+is the integrity reference for discovery. The
+implementation MUST apply the current verifier to
+every output that verifier already inspects. This
+amendment does not change the verifier, does not
+change TM1 Core v1.0, and does not adopt a rule
+that new social profiles must occupy a particular
+output index. Such a location rule would require
+a separate normative decision and MUST NOT reject
+a historical Core v1.0 POST that the current
+verifier accepts at another index.
+
+That application discovers candidates and applies
+the current cardinality policy. Discovery and
+cardinality MUST NOT be read as acceptance of
+social version `0x02` by the TM1 Core v1.0 parser.
+M1.9.2 item 6 records the current result for
+ordinary two-push framing: `isTm1CandidateScript`
+is true, `parseTm1Output` throws
+`UNSUPPORTED_VERSION`, the application status is
+`INVALID_TM1`, and `findMemoCandidates` keeps that
+TM1 candidate without also keeping its LOKAD push
+as TM0. The production parser MUST continue to
+reject version `0x02`.
+
+A future social-v2 verifier MUST interpret REPLY,
+REACTION, REACTION_REMOVE, and TIP combinations
+only inside an environment that a later
+authorization explicitly allows, and only behind
+the default-off gates of M1.9.1 and the isolation
+rules of M1.9.3. That verifier MUST NOT replace
+the Core v1.0 parser, MUST NOT change `packages/`
+by virtue of this section, and MUST NOT treat
+candidate discovery as authorization to accept
+version `0x02`.
+
+A LOKAD query MAY be used to reduce work. A LOKAD
+result MUST NOT be treated as exhaustive unless
+the implementation demonstrates equivalent coverage
+of the entire declared range, including every
+candidate the current verifier accepts outside the
+first output. Documented LOKAD subscription
+matchers are not that demonstration. Until
+equivalent coverage is shown, a view built only
+from LOKAD results MUST NOT be marked
+`COMPLETE_CONFIRMED`.
+
+Completeness of a declared range requires
+verifiable evidence of all of the following:
+
+1. block identity: the hash and height of each
+   relied-on block, and agreement of that pair
+   across the reads the pass uses;
+2. continuity: no unexplained gap in the heights
+   the range claims to cover;
+3. transaction count: the transactions read for
+   each block account for the count that block
+   announces, with no missing page;
+4. intra-block order under M1.9.4.4;
+5. the Chronik trust model: a Chronik response is
+   `trusted-chronik` evidence of what that service
+   returned. It is not independent signature
+   verification and it is not a substitute for
+   eCash consensus rules.
+
+A complete HTTP pagination of the pages Chronik
+returned MUST NOT by itself be treated as an
+independent cryptographic proof of the whole
+chain. Pagination shows that the reported pages
+were read. It does not, by itself, prove that
+those pages are the chain a full node would
+accept. Where any item in the list above cannot
+be shown, the view MUST remain incomplete and
+M1.9.4.8 requires a fail-closed result.
+
+The implementation MUST NOT claim that Chronik, a
+LOKAD index, or a finite scan is absolutely
+exhaustive except to the extent the evidence in
+this subsection covers. A missing page, an
+unverified gap, a block whose identity or
+transaction count does not check, or a
+verifier-accepted candidate that was not
+incorporated MUST leave the view incomplete for
+the range that depends on it.
+
+#### M1.9.4.4. Deterministic order
+
+Confirmed events that the view orders MUST be
+ordered by block height, the transaction's real
+position in that block, and TXID. This is the
+confirmed replay order M1.5.3 already requires.
+This subsection states what MUST NOT be
+substituted for the position M1.5.3 names.
+
+The real position is the transaction's position
+under eCash consensus rules for that block. A
+Chronik page index, WebSocket arrival order,
+`timeFirstSeen`, or a sort by TXID alone MUST NOT
+be used as that position. The pair `(height, txid)`
+MUST NOT be used to publish a definitive LIKE or
+REACTION_REMOVE result.
+
+An order that has not been verified MUST NOT be
+used to present LIKE or REACTION_REMOVE state as
+definitive. While the required position is
+unverified, the affected key MUST be reported as
+`ORDER_UNVERIFIED`.
+
+Events on one reaction key in the same block MUST
+follow the demonstrated consensus position. A
+greater height outranks a lesser height.
+
+#### M1.9.4.5. Atomic publication
+
+Every reconstruction MUST be computed in a
+temporary view. The temporary view MUST NOT be
+served as confirmed social state.
+
+Only a temporary view that is complete and
+coherent with one identified tip MAY atomically
+replace the published view. Coherence MUST include
+all of the following:
+
+1. the same active tip block hash and height at
+   the start and at the end of the pass;
+2. gap-free coverage of the declared range under
+   M1.9.4.3, including block identity, continuity,
+   and transaction count;
+3. verified consensus order, under M1.9.4.4, for
+   every LIKE and REACTION_REMOVE that the view
+   presents as definitive;
+4. the Chronik trust model named in M1.9.4.3,
+   still visible on the published view.
+
+HTTP pagination of a Chronik response, even when
+every reported page was read, MUST NOT by itself
+satisfy this list.
+
+Replacement MUST publish the closed view in one
+step. The implementation MUST NOT copy individual
+events into the published view while the pass is
+open, and MUST NOT publish a partial counter, a
+partial thread, or a partial tip amount as if it
+were the complete confirmed state.
+
+An incomplete reconstruction MUST NOT be published
+as complete confirmed state. It MUST NOT replace
+the published view, MUST NOT erase likes, threads,
+or tip amounts already published, and MUST NOT
+present an empty set as a complete confirmed view.
+
+If no published view exists, the implementation
+MUST report that no confirmed view is available.
+It MUST NOT invent an empty confirmed feed to fill
+that gap.
+
+#### M1.9.4.6. View states and reorganizations
+
+An implementation that serves a social view MUST
+distinguish at least these states:
+
+| State | Meaning |
+| --- | --- |
+| `COMPLETE_CONFIRMED` | A published view whose declared range, block identity, continuity, transaction count, consensus order, Chronik trust model, and active tip have been checked under M1.9.4.3 through M1.9.4.5. HTTP pagination alone is not sufficient. |
+| `INCOMPLETE` | The pass lacks a page, a transaction, a block identity, continuity, a transaction count, range coverage, or a resource it needs, or Chronik failed during the pass. This is not complete confirmed state. |
+| `ORDER_UNVERIFIED` | Confirmed events are known, and the consensus position required for a definitive LIKE or REACTION_REMOVE is not. This is not a definitive reaction state. |
+| `PROVISIONAL` | Mempool only. A provisional event MUST NOT increment a confirmed like count and MUST NOT credit a tip. A WebSocket notice MUST NOT by itself leave this state. |
+| `STALE_CHAIN` | The view described a chain that is no longer the active chain, or the implementation can no longer show that the published tip is the active tip. |
+
+A `STALE_CHAIN` view MUST NOT be presented as the
+current confirmed state. If the implementation
+retains it, the implementation MUST label it as an
+obsolete historical snapshot, MUST show the block
+hash and height it described, and MUST show a
+visible staleness warning. A retained stale
+snapshot MUST NOT feed current like counts, current
+tip balances, or any other value presented as
+current confirmed social state.
+
+A view of a reorganized-away chain MUST NOT be
+presented as the current confirmed state. A
+disconnect or invalidation notice MUST NOT be
+applied as a silent in-place edit of the published
+view. Any replacement MUST be a new view that meets
+M1.9.4.5 for the active chain. Rollback MUST still
+recompute affected confirmed state from the
+selected chain, as M1.5.4 requires, without
+rewriting the underlying transactions.
+
+#### M1.9.4.7. Idempotence
+
+Reprocessing a transaction, restarting the
+projector, or recovering a connection MUST NOT
+duplicate a like and MUST NOT credit a tip twice.
+
+Likes keep the idempotent key defined in M1.5.3:
+`(network, author_hash160, target_txid, reaction_kind)`.
+That is the key SEC-04 names as
+`(network, author, target, kind)`. When order has
+been verified, the definitive event for that key
+is the last confirmed event under M1.9.4.4.
+Replaying the same transaction MUST NOT create a
+second key and MUST NOT increment the active count
+a second time.
+
+A tip MUST be credited at most once for its
+transaction in a given published view of the active
+chain. An ineligible target MUST contribute zero.
+If a transaction leaves the active chain and later
+returns, the new complete view credits it once, not
+once for each time it was observed.
+
+Mempool state and confirmed state MUST be kept
+separate. Confirmation of a txid MUST NOT add a
+second credit on top of a provisional notice for
+that same txid.
+
+#### M1.9.4.8. Recovery and availability
+
+After a disconnect, a process restart, a
+reorganization, or a Chronik failure, the
+implementation MUST show one of these outcomes,
+with the evidence that supports it:
+
+1. a new `COMPLETE_CONFIRMED` view of the active
+   tip;
+2. the previous published view, still coherent
+   with that same active tip under M1.9.4.5;
+3. an explicit `INCOMPLETE`, `ORDER_UNVERIFIED`,
+   or `STALE_CHAIN` condition.
+
+Lost notifications MUST be recovered by reading
+the chain again through Chronik. The implementation
+MUST NOT assume that a WebSocket session replays
+every message missed while the connection was down.
+
+If completeness of the claimed range cannot be
+shown, the implementation MUST fail closed. The
+same fail-closed result is required when block
+identity, continuity, transaction count,
+intra-block order, or the Chronik trust model
+cannot be shown. Complete HTTP pagination is not
+a substitute for that evidence. The implementation
+MUST report that the confirmed view is unavailable
+or stale. When the tip hash and height are known,
+it MUST report them. It MUST NOT present the
+failure as an empty confirmed history, and it MUST
+NOT present a stale view as current.
+
+This subsection does not assert that Chronik is
+always available. It does not assert that a LOKAD
+index, a paginated HTTP read, or any single scan
+is an independent cryptographic proof of the whole
+chain or is absolutely exhaustive. Those properties
+hold only for a range whose coverage evidence meets
+M1.9.4.3 and whose publication meets M1.9.4.5.
+
+Social recovery MUST remain idempotent across
+projector restarts, deep reorganizations, and
+discard of obsolete derived caches. Discarding a
+cache MUST NOT discard the underlying chain
+transactions. Core indexer migrations remain
+outside this amendment, as stated in M1.9.4.2.
+Recovery across those Core migrations, and across
+Core shadow indexes, remains a Core obligation.
+Absence of a social SQL store does not satisfy it.
+
+#### M1.9.4.9. What this section does not authorize
+
+This section states where confirmed social state
+lives and how a derived view may be published. It
+does not authorize S1, D2, D3, D4, activation of
+social v2, version `0x02`, `TIP` `0x05`, ALP/eMPP
+TMM entries, P2SH, delegation, mainnet signing,
+transfers, a production change, or a change to
+TM1 Core v1.0.
+
+The production parser MUST continue to reject
+version `0x02`, as the document header and M1.9.2
+already require. Counting a version `0x02` script
+as a TM1 candidate is not that acceptance. This
+section does not enable a social-v2 verifier in
+production and does not move any social event from
+proposed to supported.
+
+M1.9.5 remains in force. Ratification of RFC-0001
+as a document still MUST NOT enable those
+features. M1.7.4 remains an open release gate.
+Its blockers, including reorg rollback, restart
+idempotence, reaction replay, tip settlement, and
+any change that would make the production parser
+accept version `0x02`, stay unsatisfied by this
+text. Incorporating this section into the RFC
+does not by itself satisfy any open evidence row,
+including the persistence and recovery rows that
+cite M1.9.4. A row is satisfied only by the
+evidence it requires, judged after this text is
+in force and never by the text alone. S0 stays
+open. S1 stays unauthorized.
 
 ### M1.9.5. Version activation authority
 
