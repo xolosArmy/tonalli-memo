@@ -1,0 +1,4832 @@
+{
+  "schema": "tonalli-memo.rfc0001.sec17-dispatch-matrix.s0",
+  "governanceComment": "6559174591",
+  "productionDispatch": false,
+  "sec17Mitigation": "DESIGN_APPROVED_VALIDATION_PENDING",
+  "rfc0001": "PROPOSED — NOT RATIFIED",
+  "s0": "OPEN",
+  "s1": "NOT AUTHORIZED",
+  "rows": [
+    {
+      "id": "alp-send-plus-one-tmm",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-send-only",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "ABSENT_MEMO"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "duplicate-tmm",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 3
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 3,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "DUPLICATE_TMM",
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-truncated-target",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_MALFORMED",
+        "TMM_RECOGNIZED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-overlong-target",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_MALFORMED",
+        "TMM_RECOGNIZED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-wrong-version",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_MALFORMED",
+        "TMM_RECOGNIZED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-wrong-event",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_MALFORMED",
+        "TMM_RECOGNIZED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-author-index-255",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_UTF8",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-reversed-target",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tmm-non-utf8-target",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_UTF8",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "wrong-token-id",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-truncated-entry",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-burn-not-admitted",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-mint-not-admitted",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-unknown-action",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alternate-entry-order",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 1
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 1,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "non-minimal-tmm-push",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "truncated-script",
+      "corpus": "empp-29",
+      "container": "MALFORMED_EMPP",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "MALFORMED_EMPP",
+        "TRUNCATED_EMPP"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "extra-push",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "budget-natural-219",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "budget-natural-225",
+      "corpus": "empp-29",
+      "container": "BYTE_BUDGET",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "BYTE_BUDGET_EXCEEDED"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "budget-exact-223",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "budget-exact-224",
+      "corpus": "empp-29",
+      "container": "BYTE_BUDGET",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "BYTE_BUDGET_EXCEEDED"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-wrong-output-attribution",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "alp-zero-atoms",
+      "corpus": "empp-29",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "empp-beside-one-tm1",
+      "corpus": "empp-29",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "AUTHORIZED_B",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "empp-beside-unrelated-op-return",
+      "corpus": "empp-29",
+      "container": "EMPP+UNRECOGNIZED",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID",
+        "UNRECOGNIZED_CONTAINER"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "empp-beside-tm0",
+      "corpus": "empp-29",
+      "container": "EMPP+CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "two-push-social-v2-inactive",
+      "corpus": "empp-29",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "UNSUPPORTED_VERSION"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "c-empp-tm0-text",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "GENUINE_TM0_INSIDE_EMPP"
+      ],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_C",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "c-conventional-tm0",
+      "corpus": "sec17-21",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "c-empp-tmm-binary",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "c-empp-tmm-and-tm0-text",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 3
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 3
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "GENUINE_TM0_INSIDE_EMPP",
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_A_C",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "c-empp-tmm-beside-conventional-tm0",
+      "corpus": "sec17-21",
+      "container": "EMPP+CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm1-pipe",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm2-pipe",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm9-pipe",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm-no-digit",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_MARKER",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_MARKER",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-marker-not-tm",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "ABSENT_MEMO"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm2-no-pipes",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_FORMAT",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-invalid-utf8",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TEXT_MARKER_PRESERVED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_UTF8",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_UTF8",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "d-empp-tm0-bad-type",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "TM0_TEXT_REJECTED"
+      ],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_TYPE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_TYPE_FORMAT",
+      "change": "AUTHORIZED_D",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-tm0-text-budget-223",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "GENUINE_TM0_INSIDE_EMPP"
+      ],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_C",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-tm0-text-budget-224",
+      "corpus": "sec17-21",
+      "container": "BYTE_BUDGET",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "BYTE_BUDGET_EXCEEDED"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-tm0-text-budget-225",
+      "corpus": "sec17-21",
+      "container": "BYTE_BUDGET",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "BYTE_BUDGET_EXCEEDED"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-truncated-tm0-push",
+      "corpus": "sec17-21",
+      "container": "MALFORMED_EMPP",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "MALFORMED_EMPP",
+        "TRUNCATED_EMPP"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-non-minimal-tm0-push",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "GENUINE_TM0_INSIDE_EMPP"
+      ],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "AUTHORIZED_C",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-alp-only-no-tmm",
+      "corpus": "sec17-21",
+      "container": "EMPP",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "ABSENT_MEMO"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-unrecognized-two-push-v2",
+      "corpus": "sec17-21",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "UNSUPPORTED_VERSION"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "e-unrelated-no-memo",
+      "corpus": "sec17-21",
+      "container": "UNRECOGNIZED",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "UNRECOGNIZED_CONTAINER"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Genesis memo",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Status message",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Payload containing additional pipes",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:UTF-8 accented text",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:UTF-8 emoji within byte limit",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "UNAUTHORIZED",
+      "beforeCode": null,
+      "afterStatus": "UNAUTHORIZED",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Empty string",
+      "corpus": "tm0",
+      "container": "UNRECOGNIZED",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "UNRECOGNIZED_CONTAINER"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Missing fields",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Lowercase marker",
+      "corpus": "tm0",
+      "container": "UNRECOGNIZED",
+      "beforeCandidates": [],
+      "afterCandidates": [],
+      "dropped": [],
+      "internalDiagnosis": [
+        "UNRECOGNIZED_CONTAINER"
+      ],
+      "beforeStatus": "NO_MEMO",
+      "beforeCode": null,
+      "afterStatus": "NO_MEMO",
+      "afterCode": null,
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Unknown version",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Unknown type",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNKNOWN_TYPE",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNKNOWN_TYPE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Reserved type under default validation",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "RESERVED_TYPE",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "RESERVED_TYPE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Uppercase type",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_TYPE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_TYPE_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Type longer than one character",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_TYPE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_TYPE_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Unknown profile",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "UNKNOWN_PROFILE",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "UNKNOWN_PROFILE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Uppercase profile",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_PROFILE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_PROFILE_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Empty payload",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "EMPTY_PAYLOAD",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "EMPTY_PAYLOAD",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Invalid UTF-8 supplied as Uint8Array",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_UTF8",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_UTF8",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Malformed envelope without enough separators",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Leading structural space in type",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_TYPE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_TYPE_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm0:Trailing structural space in profile",
+      "corpus": "tm0",
+      "container": "CONVENTIONAL_TM0",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_MEMO",
+      "beforeCode": "INVALID_PROFILE_FORMAT",
+      "afterStatus": "INVALID_MEMO",
+      "afterCode": "INVALID_PROFILE_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:1 byte event_data",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:72 byte event_data uses direct push",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:73 byte event_data uses OP_PUSHDATA1",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:212 byte maximum event_data",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:UTF-8 multibyte text",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:UTF-8 emoji",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:NFC accented character",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:NFD accented character",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Leading and trailing spaces",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Non-zero author input index",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:213 byte event_data exceeds maximum",
+      "corpus": "tm1-output",
+      "container": "BYTE_BUDGET",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [
+        "BYTE_BUDGET_EXCEEDED"
+      ],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "PAYLOAD_TOO_LARGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "PAYLOAD_TOO_LARGE",
+      "change": "AUTHORIZED_E",
+      "coreParseCodes": [
+        "PAYLOAD_TOO_LARGE"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Unknown version",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_VERSION",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_VERSION",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "UNSUPPORTED_VERSION"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Reserved REPLY event type",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_EVENT_TYPE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_EVENT_TYPE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "UNSUPPORTED_EVENT_TYPE"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Empty event_data",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "EMPTY_EVENT_DATA",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "EMPTY_EVENT_DATA",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "EMPTY_EVENT_DATA"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Invalid UTF-8 event_data",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_UTF8",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_UTF8",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_UTF8"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Non-minimal OP_PUSHDATA1 for short envelope",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Truncated envelope",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Additional third push",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-output:Additional non-push opcode",
+      "corpus": "tm1-output",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 0
+    },
+    {
+      "id": "tm1-tx:Single valid zero-valued TM1 candidate output",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "tm1-tx:Non-zero output value on TM1 candidate output",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "tm1-tx:Duplicate TM1 candidate outputs in same transaction",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "tm1-tx:Duplicate identical TM1 candidate outputs in same transaction",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "tm1-tx:Multiple candidate outputs mixing TM0 and TM1",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM0+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "tm1-tx:Candidate output with malformed TM1 envelope alongside another candidate",
+      "corpus": "tm1-tx",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED",
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "canonical-schnorr-author0-sighash-41",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "canonical-schnorr-author1-sighash-41",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2
+    },
+    {
+      "id": "canonical-schnorr-author0-sighash-c1",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2
+    },
+    {
+      "id": "canonical-schnorr-author2-sighash-c1",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 3
+    },
+    {
+      "id": "canonical-ecdsa-author0-sighash-41",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-signature-altered",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-post-mutated",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-sighash-all-output-mutated",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-prevout-amount",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-pubkey-hash-mismatch",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_AUTHOR_SIGNATURE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_AUTHOR_SIGNATURE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-author-index-out-of-range",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-prevout-missing",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "PREVOUT_UNAVAILABLE",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "PREVOUT_UNAVAILABLE",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-designated-p2sh",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_AUTHOR_SCRIPT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_AUTHOR_SCRIPT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-sighash-none-forkid",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "UNSUPPORTED_SIGHASH",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "UNSUPPORTED_SIGHASH",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "negative-multipush-envelope",
+      "corpus": "canonical",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "INVALID_TM1",
+      "beforeCode": "INVALID_FORMAT",
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_FORMAT",
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "INVALID_FORMAT"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
+      "corpus": "d07",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
+      "corpus": "d07",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150",
+      "corpus": "d07",
+      "container": "CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 0,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [],
+      "internalDiagnosis": [],
+      "beforeStatus": "VERIFIED_TM1",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "UNCHANGED",
+      "coreParseCodes": [
+        "PARSED"
+      ],
+      "authorship": "PRODUCTION_TRUSTED_CHRONIK",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1
+    },
+    {
+      "id": "coex-schnorr-author0-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-schnorr-author1-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 1,
+        "preimageInputIndex": 1,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author0-sighash-41",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "ecdsa",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author2-sighash-c1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "AUTHORIZED_B_LAB_CRYPTO",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "LAB_CRYPTOGRAPHIC",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 3,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "ecdsa",
+        "sighashByte": 193,
+        "authorInputIndex": 2,
+        "preimageInputIndex": 2,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-negative-signature",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-outpoint",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-amount",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-script",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "INVALID_AUTHOR_SIGNATURE",
+      "change": "AUTHORIZED_B",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "pubkey-hash-match",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "INVALID_TM1",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 2,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index-out-of-range",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "INVALID_TM1",
+      "afterCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "change": "AUTHORIZED_B",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "author-index",
+        "independentErrorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 5,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "INVALID_TM1",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-output",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-empp",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "VERIFIED_TM1",
+      "afterCode": null,
+      "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_REJECTED",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": "INVALID_AUTHOR_SIGNATURE",
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "VERIFIED_TM1",
+        "productionTrustModel": "trusted-chronik",
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-tm0-and-tm1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM0+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 1,
+          "pushIndex": 0
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "INVALID_MARKER",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "MULTIPLE_MEMOS",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-two-tm1",
+      "corpus": "sec17-coexistence",
+      "container": "EMPP+CONVENTIONAL_TM1",
+      "beforeCandidates": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "afterCandidates": [
+        {
+          "protocol": "TM1",
+          "outputIndex": 1,
+          "pushIndex": null
+        },
+        {
+          "protocol": "TM1",
+          "outputIndex": 2,
+          "pushIndex": null
+        }
+      ],
+      "dropped": [
+        {
+          "protocol": "TM0",
+          "outputIndex": 0,
+          "pushIndex": 2,
+          "reason": "STRUCTURAL_TMM"
+        }
+      ],
+      "internalDiagnosis": [
+        "TMM_RECOGNIZED",
+        "TMM_STRUCTURALLY_VALID"
+      ],
+      "beforeStatus": "MULTIPLE_MEMOS",
+      "beforeCode": null,
+      "afterStatus": "MULTIPLE_MEMOS",
+      "afterCode": null,
+      "change": "AUTHORIZED_A",
+      "coreParseCodes": [
+        "INVALID_MARKER",
+        "PARSED",
+        "PARSED"
+      ],
+      "authorship": "NOT_DEMONSTRATED",
+      "settlement": "PENDING",
+      "socialEventCredited": false,
+      "inputCount": 1,
+      "lab": {
+        "source": "synthetic-fixture",
+        "chronikValidated": false,
+        "networkValidity": "NOT_DEMONSTRATED",
+        "tipSettlement": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "cryptographicAuthorship": "LAB_VALID",
+        "independentStage": "cryptographic-signature",
+        "independentErrorCode": null,
+        "signatureAlgorithm": "schnorr",
+        "sighashByte": 65,
+        "authorInputIndex": 0,
+        "preimageInputIndex": 0,
+        "preimageAgreesWithLibrary": true,
+        "productionBeforeStatus": "MULTIPLE_MEMOS",
+        "productionStatus": "MULTIPLE_MEMOS",
+        "productionTrustModel": null,
+        "appliedAsPostAuthorship": false
+      }
+    }
+  ]
+}

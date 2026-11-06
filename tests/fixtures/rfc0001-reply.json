@@ -1,0 +1,1814 @@
+{
+  "schema": "tonalli-memo.rfc0001.reply.s0",
+  "network": "lab-reply-net",
+  "purpose": "Laboratory social v2 REPLY bytes, verified authorship, parent link verification, and thread replay. Synthetic signatures. Not a network settlement, not finality, and not a productive indexer.",
+  "status": {
+    "rfc0001": "PROPOSED — NOT RATIFIED",
+    "sec17": "DESIGN_APPROVED_VALIDATION_PENDING",
+    "s0": "OPEN",
+    "s005": "OPEN",
+    "s1": "NOT AUTHORIZED",
+    "m174": "OPEN",
+    "socialVersion": "INACTIVE",
+    "confirmation": "NOT_DEMONSTRATED",
+    "settlement": "NOT_DEMONSTRATED",
+    "networkReorg": "NOT_DEMONSTRATED",
+    "indexer": "NOT_A_PRODUCTIVE_INDEXER",
+    "chronikValidated": false,
+    "productionDispatch": false
+  },
+  "generator": {
+    "library": "ecash-lib",
+    "version": "4.13.0",
+    "envelope": "tests/protocol/reply-envelope-independent.mjs",
+    "thread": "tests/protocol/reply-thread-independent.mjs",
+    "sighashSerializer": "tests/protocol/canonical-tm1-independent-verify.mjs"
+  },
+  "absentParentTxid": "d24f0dc8aecc27e94c35495d9cb0aa6160552642e78cdb27803d69c5177c70e6",
+  "targets": [
+    {
+      "id": "root-post-index0",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000014ff9a869de297875673e54f2df2fba397bece6abb6053f62d33125de2a64285f000000006441c8753469cb3dfaf9f85b91d7033633989801e13ef420c8b1c70dadd4dd4a0bbd73df27d69b3c4e9bbe61b23a8fefc58021cdbcb2f64010ddc32c989a3f6a3be14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002c6a04544d4d0025010100726f6f7420706f73742066726f6d20617574686f72204120617420696e646578203028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5f28642ade2531d3623f05b6abe6ec7b39ba2fdff2543e67757829de69a8f94f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d0025010100726f6f7420706f73742066726f6d20617574686f72204120617420696e6465782030",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "root post from author A at index 0"
+    },
+    {
+      "id": "root-post-index1",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "0200000002d60d576f0ecb6f26485e3ad7e7348bb6aca65a33f3251c0dfc6a0149760627c9000000006441c3bedb107251947f4701b15a336869aaccebe71145573f602b64d78e99ef214ee542471a37e2e8a87f7f2d63c81c0ff6f7f9c08aba59e9bcb445300f9fead9094121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffecad2aecd2bc24cad9a00771f37d65909c74772f415cc510787bdecbb01bd785010000006441d6ce33889fed45fc146238b25fbc90aa5d40d53f517c86bcde99856beae2d97fa0b70c0d8d38954dc77aba9374c3cfdfd54912bcf0290142806aaf97cca282e14121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000002c6a04544d4d0025010101726f6f7420706f73742066726f6d20617574686f72204220617420696e646578203168420000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "cc8a37a47e02dcba1e34dc5073157c82b7f3d64182c9fa68a4c609028c034feb",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "c927067649016afc0d1c25f3335aa6acb68b34e7d73a5e48266fcb0e6f570dd6",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "85d71bb0cbde7b7810c55c412f77749c90657df37107a0d9ca24bcd2ec2aadec",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d0025010101726f6f7420706f73742066726f6d20617574686f72204220617420696e6465782031",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "root post from author B at index 1"
+    },
+    {
+      "id": "pending-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001bc5a288dbe272cf49d7769b2d87496bb8ddcd4923c54ea77d2fbe64bd0f0956800000000644111e217473b17cd666bc74e703a06293775a4967d00c6d98ece6a9c8a4bfc3e47aec18d4c9e2732906f55169ec511b4124ae81194c4608f6d42df0a9b87f127d34121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002d6a04544d4d002601010070656e64696e6720706f7374207769746820666c6970706564207369676e617475726528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "ddf369a9417dfe6601c5eb4cc7d5fec7e6f76f53808c296e195390bde3272344",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "6895f0d04be6fbd277ea543c92d4dc8dbb9674d8b269779df42c27be8d285abc",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d002601010070656e64696e6720706f7374207769746820666c6970706564207369676e6174757265",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "eventDataUtf8": "pending post with flipped signature"
+    },
+    {
+      "id": "ineligible-payment-target",
+      "group": "target",
+      "kind": "payment",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000010ca0ffa08548815eac4d65484d09913b2ae16a6db1b40b0ed8dae16cd74fbf8c000000006441fb829a2866cdf3bbc8e4e00bc6bb82a39a5d72762613b20f52a6d6f028f9430238e2a24b1e4e3a16ae890c3bb89af3089a13c587f5e90073f260a307c26bfa294121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "ff6947a01e0433a345499af8bf28f47628db174cf94f865a478bffcc47e9dbd2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8cbf4fd76ce1dad80e0bb4b16d6ae12a3b91094d48654dac5e814885a0ffa00c",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    },
+    {
+      "id": "other-net-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-other-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001ce74f587ca5c42ca9603354f49e8e49c33e00444b2006bdb5ec6e5db1040aa94000000006441e96a28aa23c77786ff05c2c9eb6bb1faea2370e424f05e8b796884fc69e84472547f2404910226de712198db9ef8753bc24c94eb39dd966c66fdf41fa0e66e704121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000236a04544d4d001c010100706f7374206f6e20646966666572656e74206e6574776f726b28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b8771c6add89d1002963c4a1d7923f1bce579e57195e8b07d599073bfe25ec9c",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "94aa4010dbe5c65edb6b00b24404e0339ce4e8494f350396ca425cca87f574ce",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001c010100706f7374206f6e20646966666572656e74206e6574776f726b",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post on different network"
+    },
+    {
+      "id": "duplicate-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001941dbc1c8bf31997e59fc76ac051e6f5ee0007c2347a496fd2c0d7b8c56899f30000000064413ad9b75f6464cc7fe3b37d30bb0419f1487294e46ebb641c80970fe2ed7888d4e040e5612ad923176a0b35059c5a18ae1ca0ca665f404511675ba627140be4354121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f737400000000000000001f6a04544d4d00180101007365636f6e642063616e64696461746520706f737428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f39968c5b8d7c0d26f497a34c20700eef5e651c06ac79fe59719f38b1cbc1d94",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with multiple tm1 candidates"
+    },
+    {
+      "id": "malformed-sibling-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001b4c36f9601676475207acaea9d1500a16f41b575d20d879755855fbeebc5b3f5000000006441795d936b6e01d8faf430630e22bbe0d77abcd155971779c118fca10a09ee3a40974dd6c100f275139e891637459cf99e2686ed1864f671b6918f9d5fc24b1e9a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f73740000000000000000076a04544d4d007628230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b3",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f5b3c5ebbe5f855597870dd275b5416fa100159deaca7a2075646701966fc3b4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with malformed sibling tm1 candidate"
+    },
+    {
+      "id": "mixed-tm0-tm1-candidate-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001283ed4760a902671461f4777cebc0c7325e5128a3c3a78c1f9247cc7d871815b000000006441e4150b162f28ee2135edc8167edd68736760810ce6d9ea95fe581465ad18443a74e3943ee1bbc7926c6266764725eac3aefb0fb775d8713ad888f570db54f8ad4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f737400000000000000000d6a0b544d307c707c78617c686928230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f86",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5b8171d8c77c24f9c1783a3c8a12e525730cbcce77471f467126900a76d43e28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with mixed tm0 and tm1 candidates"
+    },
+    {
+      "id": "tm0-push-beside-tm1-post-target",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000126bb91d142e334645d23357c9c018a7a477d435d179952ad49b899299883a8750000000064418c786d645daa81f76a31f6e6f9ea629a39c76364766173e4ffc875436381ceeae8f9ff44533f951e2199a3bf6167998e7c3b964fe089d7835a04829bc0b325f24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000001e6a04544d4d001701010066697273742063616e64696461746520706f73740000000000000000076a017803544dff28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "1f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a777",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "75a883982999b849ad5299175d437d477a8a019c7c35235d6434e342d191bb26",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "6a04544d4d001701010066697273742063616e64696461746520706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "post with a tm0 push beside one tm1 candidate"
+    },
+    {
+      "id": "eligible-reply-parent",
+      "group": "target",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001cdf4953c6abc139a010b6926eef67f4c794a883ce429accb759da45d932f0855000000006441b857af0070da4fe299dbb5cf48e303c1d8667082341e4fe5f57cde9ad4db18fd5fa436a2f2f0220ac743933b30a62475b7bf46f3fc5e4bec0dd8cad2b4f4392c4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000004c6a04544d4d004502020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916256669727374206c6576656c207265706c7920616374696e6720617320706172656e7428230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "ba9e16bbb639d32d2292a6d2896353d65e0320593c4babfb1b47fbff1b48e405",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "55082f935da49d75cbac29e43c884a794c7ff6ee26690b019a13bc6a3c95f4cd",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004502020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916256669727374206c6576656c207265706c7920616374696e6720617320706172656e74",
+      "scriptLength": 76,
+      "digestHex": "029edfefb5be5f45e4928af15c8fabbbb8b296b67e93585413aecf050214b0bd",
+      "preMutationDigestHex": "029edfefb5be5f45e4928af15c8fabbbb8b296b67e93585413aecf050214b0bd",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "first level reply acting as parent",
+      "replyTextByteLength": 34,
+      "eligibleForThread": true
+    },
+    {
+      "id": "duplicate-output-reply-target",
+      "group": "target",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000185686f037c95d84ddf72a4896cc21e1a27ce684d5bb85e3a21735761c64d46de000000006441ced6ad0ae872c4e66eec028fce1d35f34095cd8cf6ade667a3c82b4fef6cca3c3b878457221fcd2be1fef79e3ddb4bd39fa7f0f12396fdc441cfd584b7c528e54121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000004f6a04544d4d004802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920706172656e742077697468206475706c69636174652063616e6469646174650000000000000000216a04544d4d001a0101007365636f6e642063616e646964617465206f757470757428230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "de464dc6615773213a5eb85b4d68ce271a1ec26c89a472df4dd8957c036f6885",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d004802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920706172656e742077697468206475706c69636174652063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "reply parent with duplicate candidate",
+      "parentLink": "PARENT_VERIFIED",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1
+    }
+  ],
+  "replies": [
+    {
+      "id": "reply-schnorr-index0-41",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001b322af9d4a3e826b86e009cd36eb751544debe89b48e05513f5ce24746606a24000000006441649396ec4825bfb63b601fb5ecac34ac03a5afbbde1a0155b7c39555b9f0c1284b95e2c487e44dcfca79af8f57d2cd8f773504db677f9f0ac491cffeac60f0884121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d002402020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916254128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "6aed1f7630d8423fa31c1a0099c96c94fd2e5cb8a5bc8c9688cb44da20812749",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "246a604647e25c3f51058eb489bede441575eb36cd09e0866b823e4a9daf22b3",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d002402020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162541",
+      "scriptLength": 43,
+      "digestHex": "236abfde3ecb1f067359c8575dcc2c49d6791a3a9b4de7190be7cd4ae7c1e550",
+      "preMutationDigestHex": "236abfde3ecb1f067359c8575dcc2c49d6791a3a9b4de7190be7cd4ae7c1e550",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "A",
+      "replyTextByteLength": 1,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-schnorr-index1-41",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "0200000002259b3cde50daabad2eb444190b33d6d092993f9d95212bcf6b5672422b601bbf0000000064419a7224ad9e1c8dbaa98ffc7cedaddb6d7b95abcf8def65b2d0c86540e9b62a66b2ee9fc6dc7bccc86b7dc7c940c524132d0a80374704bd9b3258af2251442b9d4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff82ebfa728ac1f4da089d5d91e0eb2bbe6beb0ba3e0716350a0a78f5a6900e2c6010000006441312055e2825a5d441bf376270f8635b2e3ea5324010d3dfe143fc9211f00019a27906576a98c14b74acca747429e9d7dae1d1815d6bf3e08a18c96db270eb9e14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000476a04544d4d004002020164eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920617420617574686f7220696e70757420696e646578203168420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b759ad348fb36bbc5d676c34b81b0e2995dfdbb1a2406c177b4768f7c753f922",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bf1b602b4272566bcf2b21959d3f9992d0d6330b1944b42eadabda50de3c9b25",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "c6e200695a8fa7a0506371e0a30beb6bbe2bebe0915d9d08daf4c18a72faeb82",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004002020164eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920617420617574686f7220696e70757420696e6465782031",
+      "scriptLength": 71,
+      "digestHex": "5e698b73abae93ecae31875ac47152deb6bea56a0637855eadd2f7e0bce95851",
+      "preMutationDigestHex": "5e698b73abae93ecae31875ac47152deb6bea56a0637855eadd2f7e0bce95851",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 1,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "reply at author input index 1",
+      "replyTextByteLength": 29,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-schnorr-index2-c1",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 2,
+      "envelopeAuthorIndex": 2,
+      "rawTransactionHex": "02000000031c43b5e4b9f559d7e2199e4fed3c5709d8fb205f6736feb8118086a3d4314bab0000000064418a403b4567d295ef0e5ca8ff20b910b49d8403458ee78eb2e5fe8bae2f47edf69f736ae88af1c21972bfa0474b9ac3bcb1c4786023dc2fd45f293d3f35d184ce4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff602635436c3736075ccdd611417d5d11841f263768de75eca1960b9383d8ccec01000000644149f428fd3b8d81d20830d03f02cbb6edc0fc346fe826966080c6b50abc39454fc3274218df97168264810619c7b3ac5c94b8c0f1be8281af3728d0db211aee0d4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2fffffffffe2c5ee465da342709efac4d3efa667b80bb9cfdc770f0d917858f59f7d4cffa020000006441f8622fb8be3724bf02cf02bdb141becbcdd63aad1b680516440085f0766f374579a8543c5c520100bcac21dd9e1b88f4a51b77448a060b37623c179fd12bc92ac121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000004c6a04544d4d004502020264eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920617420696e6465782032207769746820616e796f6e6563616e706179384a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3e248339971a7bc12e655811300552926404a3864426f40304e1f1c117e05445",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "ab4b31d4a3868011b8fe36675f20fbd809573ced4f9e19e2d759f5b9e4b5431c",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "ecccd883930b96a1ec75de6837261f84115d7d4111d6cd5c0736376c43352660",
+            "outIdx": 1
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "facfd4f7598f8517d9f070c7fd9cbb807b66fa3e4dacef092734da65e45e2cfe",
+            "outIdx": 2
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d004502020264eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c7920617420696e6465782032207769746820616e796f6e6563616e706179",
+      "scriptLength": 76,
+      "digestHex": "7af91d215ea2dba2ef22fd6cf36bf6e83b3be65ad293118e479ae0ad745e2fb8",
+      "preMutationDigestHex": "7af91d215ea2dba2ef22fd6cf36bf6e83b3be65ad293118e479ae0ad745e2fb8",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 2,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "reply at index 2 with anyonecanpay",
+      "replyTextByteLength": 34,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-ecdsa-index0-41",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "ecdsa",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001c71ce2b5fd02dc92d078cbaa1368a71feb1e619c6b3797e6446378a452aad3d5000000006b483045022100ddc5ff73c274d26fdc86d9220b9b9d8709787ba778d998cb5bb1b76d57a94d3a02202846eacfd6ccbbc652b6695b43d817c899ed8f5f2441c63e32d9d034609b30e24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000416a04544d4d003a02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c79207369676e6564207769746820656364736128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c53d7cd7ec07e072d37032cecf40f0fedaf5d8ecbcf280cbcc1dbcdd0822139e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "d5d3aa52a4786344e697376b9c611eeb1fa76813aacb78d092dc02fdb5e21cc7",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003a02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c79207369676e65642077697468206563647361",
+      "scriptLength": 65,
+      "digestHex": "709bdaac00271df0c6f4fa9916fd2f58773c2366e6c247a21292ffec2432f237",
+      "preMutationDigestHex": "709bdaac00271df0c6f4fa9916fd2f58773c2366e6c247a21292ffec2432f237",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "reply signed with ecdsa",
+      "replyTextByteLength": 23,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-ecdsa-index1-c1",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "ecdsa",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "020000000220dd12e7e5a192680a59eba7c764aac35804b6469ed993313fa7c02afc58fe8d000000006441c23ab964e8ea7b00ed942d3746fa6a6516a29960d82da1d4bb8088abe15a9e7528f8e27b3a5b288f15354d9b226b947b2e9f889b6af191cb531732af42a8ed504121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffbf69d6cc8daf09a4d990d35835e2bfcc628b5b0692acc4fa3142d07cc28e117e010000006b483045022100cc115af36aded9c80da48aaabdc9393286ecbe8e4049692f7b7308f99b2c02d10220267df82814f02babc3ba94b124758518a54ae0ffffe524a155b7915f3ec4becfc121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000486a04544d4d004102020164eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c79207369676e6564207769746820656364736120616e6420633168420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "54a199430e5a817f84bb168fc275a500c46f0aaacb995f02d45034c018c9b8bf",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8dfe58fc2ac0a73f3193d99e46b60458c3aa64c7a7eb590a6892a1e5e712dd20",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "7e118ec27cd04231fac4ac92065b8b62ccbfe23558d390d9a409af8dccd669bf",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d004102020164eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916257265706c79207369676e6564207769746820656364736120616e64206331",
+      "scriptLength": 72,
+      "digestHex": "79f3a2a5a2fe71e25c7f9335702eb436ce51b23c0a93d7e63314548f0ad798ec",
+      "preMutationDigestHex": "79f3a2a5a2fe71e25c7f9335702eb436ce51b23c0a93d7e63314548f0ad798ec",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 1,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "reply signed with ecdsa and c1",
+      "replyTextByteLength": 30,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-nested-child",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001797b1c45bb3d4d8503807a4bc86018ba2f6093d8d83c9f2bb83f45349950bfb900000000644189a8a3ca06af88adb11054d4bbb79fc71e31e6d3ffa5b8e3cd34948f6c3ace069af87ecff130792c8b3f39f3cbea237ca1d9eefca9f69dc5f411adacc7a85cbf4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000004b6a04544d4d0044020200ba9e16bbb639d32d2292a6d2896353d65e0320593c4babfb1b47fbff1b48e4056e6573746564207265706c7920746f206669727374206c6576656c207265706c7928230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "18920f07c4e67a79c314015f0186bccec3134adc6759160c6a90fb2572fe71a8",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b9bf509934453fb82b9f3cd8d893602fba1860c84b7a8003854d3dbb451c7b79",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0044020200ba9e16bbb639d32d2292a6d2896353d65e0320593c4babfb1b47fbff1b48e4056e6573746564207265706c7920746f206669727374206c6576656c207265706c79",
+      "scriptLength": 75,
+      "digestHex": "e0ebe21a2b6f95c9cc0dd69d97fd8f6ec10d394c8f8f4146867679e65908508b",
+      "preMutationDigestHex": "e0ebe21a2b6f95c9cc0dd69d97fd8f6ec10d394c8f8f4146867679e65908508b",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "ba9e16bbb639d32d2292a6d2896353d65e0320593c4babfb1b47fbff1b48e405",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "reply",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 2,
+      "replyTextUtf8": "nested reply to first level reply",
+      "replyTextByteLength": 33,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-push-boundary-40b",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001313925e05ed6c231894363b3d1f881ee1c47f330db0c714c2a2e65be98cacabd000000006441c48167b2ad05b69c37efc7afd6aaa1e50a2a92d4d278c345f94553d1868efa1282731458742d7ead51f6527f45e33df53f099153bb2b8bf0b975925a08571f684121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000526a04544d4d004b02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916253132333435363738393031323334353637383930313233343536373839303132333435363738393028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f73fdfb74b3096c405ca523be19de3a09ccb8fac0750a466038bce147e64fe48",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bdcaca98be652e2a4c710cdb30f3471cee81f8d1b363438931c2d65ee0253931",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004b02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162531323334353637383930313233343536373839303132333435363738393031323334353637383930",
+      "scriptLength": 82,
+      "digestHex": "a52f6a403ab30e4dd5bef95ffa10259abca365615afdc7840e4abc052314e9d7",
+      "preMutationDigestHex": "a52f6a403ab30e4dd5bef95ffa10259abca365615afdc7840e4abc052314e9d7",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "1234567890123456789012345678901234567890",
+      "replyTextByteLength": 40,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-push-boundary-41b",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001f70e1b6a3a5414edf7de33b8e7dbe0239a755eddff08fdf7468b04a12aa1062f000000006441591b36ce54771b22dc18eb85a8a8a2eb025da720bb26a49f364a9ee765b75064f7349442d308216b44b4f9521011b35ac5d07af269a6c91e78ea5ce03b3e387e4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000546a04544d4d004c4c02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625313233343536373839303132333435363738393031323334353637383930313233343536373839303128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b7cdf728f81a9b7762d5616b2ab6d3f49fbd6a058234f1d54a2dd7eb7195e6e6",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2f06a12aa1048b46f7fd08ffdd5e759a23e0dbe7b833def7ed14543a6a1b0ef7",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004c4c02020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916253132333435363738393031323334353637383930313233343536373839303132333435363738393031",
+      "scriptLength": 84,
+      "digestHex": "705eb1f3dc92b30397d1a14aa8d622b8be61e33e61769713e0a191f27dfd94e2",
+      "preMutationDigestHex": "705eb1f3dc92b30397d1a14aa8d622b8be61e33e61769713e0a191f27dfd94e2",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "12345678901234567890123456789012345678901",
+      "replyTextByteLength": 41,
+      "eligibleForThread": true
+    },
+    {
+      "id": "reply-max-text-180b",
+      "group": "positive",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001002d807d7e76c076c986efac7124f92fea8fdb3acc452ff608d642c4fc8eaaa8000000006441e6c8583c9bed6af709a0d8009d8c4d433e4120e7ad180f7ceb2e73b2db85d4213f369fe2ac53cb6065b73f5f18d4f4ab3a9981cb6a63a42de8dfc2b82e26f5c24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000df6a04544d4d004cd702020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162561616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "081b62b1de580bb7cfdd35885657e23aefc5ae0e8e75913620c4f4b645a50d66",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a8aa8efcc442d608f62f45cc3adb8fea2ff92471acef86c976c0767e7d802d00",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004cd702020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "scriptLength": 223,
+      "digestHex": "52bbd64991e08f8d109fa1a9bd0306caf0d59606455a3cf94538719e4316ce26",
+      "preMutationDigestHex": "52bbd64991e08f8d109fa1a9bd0306caf0d59606455a3cf94538719e4316ce26",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "replyTextByteLength": 180,
+      "eligibleForThread": true
+    },
+    {
+      "id": "neg-signature-flipped",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000163f829dcd713c301c4bb54a1bcb90e6b89c34976532aea8fc34c89152b778e2d000000006441eb2e112bce251cbf211344356ddbd137a1ce209f1e3a2ab5d74a3c811279d78ac1ef0ca9afc1547bcb4bc221c8c7f40c9689112ed8e67cabcc0119257c3bd2d94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "807fe29f31a5582b746e37874bb7f879f63b8278d383e8d096f9137546bee3e3",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2d8e772b15894cc38fea2a537649c3896b0eb9bca154bbc401c313d7dc29f863",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "9fcf3fa2bbad6523fec3360b4a0efc645b4084e4ca5fbf3994045ba1e2ac38f7",
+      "preMutationDigestHex": "9fcf3fa2bbad6523fec3360b4a0efc645b4084e4ca5fbf3994045ba1e2ac38f7",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-envelope-mutated",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000017884b0056d0cd4ff847740e045c22e147481a6d1c45c6f84c538c64b9c3c9612000000006441de074070f738ba1824233a2c86f39c1957e61977d302e078dcea70943388f12a83b68ad245dc67f91e8a76ad7232cac8d75d81e5b31a020adf8583d519560ff04121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "5b72cdf5284f7e4589d73246dd76f4319e2564090d8d5ac6ffc51362ccaf0a09",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "12963c9c4bc638c5846f5cc4d1a68174142ec245e0407784ffd40c6d05b08478",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657875",
+      "scriptLength": 58,
+      "digestHex": "4f6866d94e8013aac02e3db21076a5b899e116cda3710a3a9887de6d515599f5",
+      "preMutationDigestHex": "8120b866fc5266bf40a6182eff94b8f3ad228a33d478fca4bc8b61417664094c",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply texu",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-output-mutated",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000157eb8d7daa69dd6e727f51cdadbfaa50f2ab6635e2c268ecebd2ff91aa34d7c600000000644134f8a7137cca380310ce841114fbefa26df0683f0f41559b377d95a5131af9cd7a6db0c5ffff8578418173ba4ed62e206b685498591d288bb6e3a18319698c4a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d03acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "52a410964d8c303d06471333f72448e763796bcdf5162da6ab242d1ea96e8f1f",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "c6d734aa91ffd2ebec68c2e23566abf250aabfadcd517f726edd69aa7d8deb57",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "d25be4f29af4d751226cb1ed3686d9577154f3b93a190fc7ad74f115c9c70e7e",
+      "preMutationDigestHex": "cdb82db9c09a63f75e5c9c4de7977dd07e522ea1df8744021e028f70e0a6be68",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-author-index-5",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 5,
+      "rawTransactionHex": "0200000001be3114dd1bdb33814dab4e7a7bf6586e4b3815929042f6f912d35c6b8b78128d0000000064414ac811de80642c23655433930ce107aa7b7195c087a37096bd47c671dcb86b587f8356989b96148c45a78f2b2c2f8f47d50081eea2fc334cba2c1bc936ae58eb4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020564eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "220192ba9f028a89336b1102519edfb95c55eada50df08e06811b77846b0c2c9",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8d12788b6b5cd312f9f642909215384b6e58f67b7a4eab4d8133db1bdd1431be",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020564eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "05df1727206c3666737b5232395f6495825484e50cc8585da0c43ff1372a133f",
+      "preMutationDigestHex": "05df1727206c3666737b5232395f6495825484e50cc8585da0c43ff1372a133f",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 5,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-prevout-missing",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001889cb3f8782944a4e48990d30487fd590a50465f729093c63e2b9d83617f8dfc00000000644147924a52b45278f6553e008ea718bc3f54e7e3ba40c941c407311f33ac6469611214bd098282370e6adafe969fa524bd3094e81f4bcf07170d1bbeba3fa510534121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9b0d36038cfdad106ad1b73d3f9c2af66603eade01403044dd69050820b363ae",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "fc8d7f61839d2b3ec69390725f46500a59fd8704d39089e4a4442978f8b39c88",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": null,
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": null,
+      "preMutationDigestHex": "0bea6fe64a9ed7ce4fda19e98612616bb5752d2fb998c6e84da50627613f3e24",
+      "signatureOk": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "PREVOUT_UNAVAILABLE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-prevout-script",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001788adcfbe8a32d6859cf2017858c77898e34fa93b570297717056439a276bc28000000006441c4f2a351dbe3db6a03eecddc69e96b188e2cd00f91fbe6251fb5db178ef9569a7a2fbc542c8eae2d0da26effb394ab7cfdcd710f62bc8a7f760da806a2ae3d6a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "4ea484b01c3861e0da9a9821eff5de21fcd1f84f2e0e02d3631a1792f2f057b3",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "28bc76a239640517772970b593fa348e89778c851720cf59682da3e8fbdc8a78",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "d8a27e775f3d4219bffdc48fa5ef5932486db1971eab720fd048195d8a76773d",
+      "preMutationDigestHex": "01c6e286c098122168a446a1bc4b1adb53a93dfd2407797b0206feb8738a9606",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-prevout-amount",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000014593e05edb47e3d1e3853d681967655473d838b97d7fe06684e4cf9e6920137500000000644151eed47ef187c1fc2c09bf9b1c41147d85e6a6c9ad026d0fb39e46ba21e3ad09baccfd1475b3a7a8bd67b83f4a944ccda6d02f995a4f856509f399d091ad68bb4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "23ed0add2190a8bf980842c8d4427d735053c8271aa81b9f694f43f99ef739ab",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "751320699ecfe48466e07f7db938d87354656719683d85e3d1e347db5ee09345",
+            "outIdx": 0
+          },
+          "prevoutSats": "1",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "27db7e247451de2f69cce694c9fb825d6367abb6999bc81cbc652ae0fb19736c",
+      "preMutationDigestHex": "284bd1b408245a450f1016b489a5cd7055a1551a36b0498088fc150014f04951",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-unsupported-script",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001e5f4d6b70ad9cf1561e085d1805df3ae1815c1b091039c9875788651e0403dff00000000644140f7187f87616c0cb33994bd6db24878b7e67f445bafa0971fa9ffe33b0b7d47f662d28d5243a634ac00398bb83683996769a08d870cb6a014b4f165d490bf184121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9805edbf7885af24d29fcf04ac97dc4842949f18dbc0bde8e5726dc148340350",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "ff3d40e051867875989c0391b0c11518aef35d80d185e06115cfd90ab7d6f4e5",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "a914ecd2cbd8262d2c361b93bf89c4f0a78d76a16e7087",
+          "scriptType": "p2sh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "8bb502af7c6fa4ca214504ece31b9f66ab7667f47394dcded471c5b82f64037a",
+      "preMutationDigestHex": "87e60f5db06bd62c3b40d492a2a875874847ec3a413a4f21c48207d90df3ed22",
+      "signatureOk": false,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "UNSUPPORTED_AUTHOR_SCRIPT",
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "PARENT_VERIFIED",
+      "parentLinkDetail": null,
+      "parentKind": "core-v1-post",
+      "rootPostTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "depth": 1,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-absent",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001a184553df240109fbedca5f1bc300933a14a7cb11f590828e37cede967a2eb5c000000006441309fd77b336937d761c60ad8c1a9d9c6f2cfa63342ba358bf4e5bdc70c3ea7f2c1630084d66e03ef0aaa3667a36c47aeecd68864eefa664b54affcd694b8fabe4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200d24f0dc8aecc27e94c35495d9cb0aa6160552642e78cdb27803d69c5177c70e676616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c4642bac4f704ba2e4e19792305d5b8d80ac1a9a7192671af55148a1b738369f",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5ceba267e9ed7ce32808591fb17c4aa1330930bcf1a5dcbe9f1040f23d5584a1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200d24f0dc8aecc27e94c35495d9cb0aa6160552642e78cdb27803d69c5177c70e676616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "0ae9701d03bdb054ce5dd7c6bfa22fd583d04989bf78305364a415dcad643859",
+      "preMutationDigestHex": "0ae9701d03bdb054ce5dd7c6bfa22fd583d04989bf78305364a415dcad643859",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "d24f0dc8aecc27e94c35495d9cb0aa6160552642e78cdb27803d69c5177c70e6",
+      "parentLink": "PARENT_PENDING",
+      "parentLinkDetail": "ABSENT",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-pending",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000146375a9f2355dcc6c881ae050167579b38cab6f89fe586e5ffb6dc12cbdf08cb0000000064415782e4ccd19c43ae26439db8af40dd33d8cef10390cd0cc4ea1a423cfe4919292f21855130745a475d1cc08041cc1aa910454d03c2a8521892fa4b2f0c0297b94121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200ddf369a9417dfe6601c5eb4cc7d5fec7e6f76f53808c296e195390bde327234476616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "a2f19f87fb2390596294ee47eb1893df571cfce6887c0e4b6f9dca6ff96f2d4e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cb08dfcb12dcb6ffe586e59ff8b6ca389b57670105ae81c8c6dc55239f5a3746",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200ddf369a9417dfe6601c5eb4cc7d5fec7e6f76f53808c296e195390bde327234476616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "33efe078cbb5fd216ff251ef1bf0731be62a8d0c36562d6cbc7c1bb6526d9ec3",
+      "preMutationDigestHex": "33efe078cbb5fd216ff251ef1bf0731be62a8d0c36562d6cbc7c1bb6526d9ec3",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "ddf369a9417dfe6601c5eb4cc7d5fec7e6f76f53808c296e195390bde3272344",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "PARENT_AUTHOR_INVALID",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-payment",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001cea775932f9caa873b0fd4264e7769959edb021b5ac9f5d470dd6ad20def2e3e000000006441ad4eaef6690f53765d429586282718464ac4d4a1629975bbe4eac2d7b8e1a562ac1391de978fa7b8abbf425cd76b64dc96ede42101efc42bf122128aaae86de14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200ff6947a01e0433a345499af8bf28f47628db174cf94f865a478bffcc47e9dbd276616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d9094a7e887ba7d1324e069831cb422708fab1e17fa2151fc6290bddcdd3bd26",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "3e2eef0dd26add70d4f5c95a1b02db9e9569774e26d40f3b87aa9c2f9375a7ce",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200ff6947a01e0433a345499af8bf28f47628db174cf94f865a478bffcc47e9dbd276616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "142620de545833c6a89cfe325af8f268eb364981201b95ecb3f84348a7d3cafc",
+      "preMutationDigestHex": "142620de545833c6a89cfe325af8f268eb364981201b95ecb3f84348a7d3cafc",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "ff6947a01e0433a345499af8bf28f47628db174cf94f865a478bffcc47e9dbd2",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "INELIGIBLE_MESSAGE_TYPE",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-other-network",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000012d02dbea9813f86201d45d1b3913864cf142c7ed852fa8044063825474971817000000006441ad278a93ffd9e2daa340b93611d6f3c90c2b860d339d6bcb81be6ab875e97ccd474d2f6598865dadd70295a6a308e61dd01b9c202b30a862d44cb5349ee4b3a64121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200b8771c6add89d1002963c4a1d7923f1bce579e57195e8b07d599073bfe25ec9c76616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "22f5509b3dc257d54363d154ead1a103c66701ca2bdc4d8b7b7bfb9dbe2e5e81",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "171897745482634004a82f85edc742f14c8613391b5dd40162f81398eadb022d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200b8771c6add89d1002963c4a1d7923f1bce579e57195e8b07d599073bfe25ec9c76616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "9e9fbf4504844bb89026f52ded3796a9a4f1cfd2fba80548f3503f9bbf960960",
+      "preMutationDigestHex": "9e9fbf4504844bb89026f52ded3796a9a4f1cfd2fba80548f3503f9bbf960960",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "b8771c6add89d1002963c4a1d7923f1bce579e57195e8b07d599073bfe25ec9c",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "OTHER_NETWORK",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-duplicate-candidates",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000018669ca111bb6224dad3d4a8b46a0274dc45abaf4ff82422a5822c0f4528a3b530000000064410b178d11c04ebcb0d2ee6250075ea4fe91701df6f4e24d5498ceced097b5a58c7a9597a6dc41cfc604d1572cd6f7b2a067bfc41101631f2457713ff144b69dd64121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e76616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "29a702a11f9296cccab84a0596ce67af6216299fcefa964991e2fba93760db50",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "533b8a52f4c022582a4282fff4ba5ac44d27a0468b4a3dad4d22b61b11ca6986",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e76616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "11e055d6f009d99eb471fcd5bc9b69720028ea6fdf47c45dd46d321d0177f284",
+      "preMutationDigestHex": "11e055d6f009d99eb471fcd5bc9b69720028ea6fdf47c45dd46d321d0177f284",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "490a2110bc6a5d0b0d3c5eab94063cd1c4b15031d03781cccf8a31d4f45c446e",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-malformed-sibling-candidate",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001cb526bb239ed960ad7a219430b92524dfa838761aff015146609f7585c2e7abf0000000064419394a36959b067363e6a6372910f23c61b093e2bc78a9b0b4b019f32d638cae2a60e1258168cb7000caf7e91825bf0dc338639ca43e73f914e359b7e82fc23b84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b376616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9c725765c211e8cfd125f9773c56d69f0f5f5723d31dac0a662a7034dcbb9537",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bf7a2e5c58f709661415f0af618783fa4d52920b4319a2d70a96ed39b26b52cb",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b376616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "a11236daba9f37693eaab9240e23de82310a0e8d21602f085918de49ba750847",
+      "preMutationDigestHex": "a11236daba9f37693eaab9240e23de82310a0e8d21602f085918de49ba750847",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "fc690e91716a59b067483018b4eb2da7bd602e85c47cecf0dff9921a2e4865b3",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-duplicate-output-reply",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000156094d5498331d6100a87d9af841853adabcd753e07785ce5b12ec7eff2fe9160000000064414a67c3c08ce9a11e04557ca8aaca5e840a942043b164407cd587a055759799fe6c5c02f4a09057e0fd01c73a293644a5ac05466c2371e33a31e8ab9cee47ed244121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e76616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f4841a8af003272db3f41853a9b2ae03b4d11016508c0cbd5b571974e2dc0e0a",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "16e92fff7eec125bce8577e053d7bcda3a8541f89a7da800611d3398544d0956",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e76616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "6eb397a5d0b2e4789b27ef117c80ab7d27cb6efd1a429cf2932df29372235dff",
+      "preMutationDigestHex": "6eb397a5d0b2e4789b27ef117c80ab7d27cb6efd1a429cf2932df29372235dff",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "bc987ae83bdddea3fbdaa2030585f9f60e442c2819a660856dcf3552f5a5104e",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "reply",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-mixed-tm0-and-tm1",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001f4deee9b860710ddef8e5d57145feaf094c2b85c90301074194e6547e0277c0e0000000064410c79b3d815e37648806af597c96260d31c1079a8dba698cdda01ed5f608ae0f1e22fdd444e4b4edb6428dd895dc2807bcb90297927b1e4ecf6529a60cb0f1df54121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033020200582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f8676616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "501108eeca2e638bd563a881cdfa84d8d839c46dc1eddcbbb008dbb610bf9c85",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0e7c27e047654e19741030905cb8c294f0ea5f14575d8eefdd1007869beedef4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033020200582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f8676616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "223967a9e71b4e6e00817fab293646ad0e3b57a1a38faa908bdc42e79c5b21a5",
+      "preMutationDigestHex": "223967a9e71b4e6e00817fab293646ad0e3b57a1a38faa908bdc42e79c5b21a5",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "582c513ef877113704205219aa221a8a0a671d4f1f964dd60e8ee8e9d7eb3f86",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-parent-tm0-push-beside-tm1",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000016e639d4b72089385322d129589be9a3fcac5e579b688f79ab78e23a1cbb163280000000064410a645092c15c6dc8cca95767553a61af031ad7bf30f0733a965be41820061e28b6fa8dc187e28b6ade9d814a0d23a7126bba67699bc2a37163bc7e85a44c02a54121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d00330202001f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a77776616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e358376eae9695227858ac11792860cc67982b357b642bf3b627a2120d52a671",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2863b1cba1238eb79af788b679e5c5ca3f9abe8995122d32859308724b9d636e",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00330202001f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a77776616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "af0a2bfefd8c7f39de6863aa9154cbd5b8978decb59cb64dccc4cae8c9e4e904",
+      "preMutationDigestHex": "af0a2bfefd8c7f39de6863aa9154cbd5b8978decb59cb64dccc4cae8c9e4e904",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "1f7aa62a71e054deed28cfcdddf40d4680edbe968ecda6f960c9a91b4491a777",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "MULTIPLE_MEMOS",
+      "parentKind": "core-v1-post",
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-reply-other-network",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-other-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000010d085d33e62758aec87c88bfebbf8669e60c4ad13ac4c657c43a6aa741b3fc0e000000006441e91eb0e04e80403ba1e48366400797385b73549af3be017eb53e1cfe08acc29404fb7ca5e1c1243b1a8f8a83ddfc9704903abd1cfdf84979e67622fea6db67034121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2c96fd30ebd490caaeb1ea6b6f948ac7b18927941f7d300e588ab098bb58b499",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0efcb341a76a3ac457c6c43ad14a0ce66986bfebbf887cc8ae5827e6335d080d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "f294dc18c46062eb0b6dfa3495999d6836a5bd3cdfab19aed8a9886b9571f483",
+      "preMutationDigestHex": "f294dc18c46062eb0b6dfa3495999d6836a5bd3cdfab19aed8a9886b9571f483",
+      "signatureOk": true,
+      "structuralOk": true,
+      "structuralError": null,
+      "authorInputIndex": 0,
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "parentTxid": "64eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "parentLink": "INVALID_PARENT",
+      "parentLinkDetail": "OTHER_NETWORK",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": "valid reply text",
+      "replyTextByteLength": 16,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-nonminimal-push",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000123c80c1b22bd11f7097e521b3dda7efdf9cfe1ec73cf13604caecfcd505f478c000000006441006018b2865635b6ea3a52fee1942e5113a17f54523e127525fe28a12053807a312990013da99209d814f20b37d55e823ab82e770fcf9ff88b4bddd92f97b5bf4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003b6a04544d4d004c3302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "6b47a52db210086993b706192155a83dcce8e99b8176ffe62d7ea28188de869e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8c475f50cdcfae4c6013cf73ece1cff9fd7eda3d1b527e09f711bd221b0cc823",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004c3302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 59,
+      "digestHex": "6eb1cf1eb8688587fb2a3be7080ea3869cab704bb8731179a60fae21b1d565d7",
+      "preMutationDigestHex": "6eb1cf1eb8688587fb2a3be7080ea3869cab704bb8731179a60fae21b1d565d7",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "INVALID_FORMAT",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "INVALID_FORMAT",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-empty-text",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001e603941052216ff6a3968045e7e6ca9e36c401c795e341b055e29e9f32c82d28000000006441b6c8c412f192a8275f4623c28187cf4e62a90813b138f34c44e73a188c3052742fa17d5505a5cb3db3fa8068c00e0af6892e7b73f156d7997fd095b55d69e15f4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002a6a04544d4d002302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c5d6d7f7133ac866652d89d905f73d08d717c2f9bff13ebaab5cbd68faa1ce52",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "282dc8329f9ee255b041e395c701c4369ecae6e7458096a3f66f2152109403e6",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d002302020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625",
+      "scriptLength": 42,
+      "digestHex": "ae7871bdeabccc57236ec95f064ccd3ceb514fc26a2e2f471a524cda7ee7df7f",
+      "preMutationDigestHex": "ae7871bdeabccc57236ec95f064ccd3ceb514fc26a2e2f471a524cda7ee7df7f",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "INVALID_FORMAT",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "INVALID_FORMAT",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-text-too-long",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001158a4d7efac77cb57a51646eba63fea5172d88678b4c66358c5fa43cdaa9f80d00000000644127aef206f6ba2cdcef84c9ab016fbd92ab8dd71913e7db2ff7995c8c6225eb550bd505a87f44e95c4d5e8cb3a72e296d7a2e0f8ae9beafab1507fbf7f3599e694121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff020000000000000000e06a04544d4d004cd802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a916256161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616128230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "247e7325d9d9166a926f18dfad4c86f2bfd96dbc44a31d9860f8eff5a7a8d593",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0df8a9da3ca45f8c35664c8b67882d17a5fe63ba6e64517ab57cc7fa7e4d8a15",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004cd802020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162561616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "scriptLength": 224,
+      "digestHex": "120ec8c1bfdc89d1ca65eb2ef27d9f82826ddd13dfd860c560280a6af670792f",
+      "preMutationDigestHex": "120ec8c1bfdc89d1ca65eb2ef27d9f82826ddd13dfd860c560280a6af670792f",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "INVALID_FORMAT",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "INVALID_FORMAT",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-malformed-utf8",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000153568202f76acf0e5d05b4f44ee8118840488db84c983d2f4653ea0ade1b6d3a0000000064419964cd8611de7a7f32b72861dee83d244a8dde9eb8bc8e4bfd5aa32f3a2a27d7e45284bf16de0de87e2de25ed0b1552f745337866c5e196296849a287999b7094121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000002b6a04544d4d002402020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625ff28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "ef430e1a461b7fa84440defa7b79da8e8dcf4767a9049f53c4ddb32d079084f1",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "3a6d1bde0aea53462f3d984cb88d48408811e84ef4b4055d0ecf6af702825653",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d002402020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a91625ff",
+      "scriptLength": 43,
+      "digestHex": "542e5f43a6c210e5c588081bf7da1353a59647b38d3f06281af54063d67a659a",
+      "preMutationDigestHex": "542e5f43a6c210e5c588081bf7da1353a59647b38d3f06281af54063d67a659a",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "MALFORMED_UTF8",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "MALFORMED_UTF8",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-version-09",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001868095f6ede266ebab5aa8574835def0b7c43de3145391529a07d76cd8a4c0ae000000006441b156cad8fd63cc4fb3ab52d9d9e5f98249bbf7afd8dbafe6ebb36abd2e2944f3af99312c741becae1d544c6e809a56a30ceff4df802cb0110235a4246cd997fc4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d003309020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "92fdc8b99db1d0fe721d9ac047ccff9e7de52da828049eff7643a217b9b349e6",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "aec0a4d86cd7079a52915314e33dc4b7f0de354857a85aabeb66e2edf6958086",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d003309020064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "2629dbadb9821d80312ba44707578649aede5099a7fd1a6938f353254aef7ce1",
+      "preMutationDigestHex": "2629dbadb9821d80312ba44707578649aede5099a7fd1a6938f353254aef7ce1",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_VERSION",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "UNSUPPORTED_VERSION",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    },
+    {
+      "id": "neg-event-7e",
+      "group": "negative",
+      "kind": "reply",
+      "network": "lab-reply-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000013aeeae4536ad6cfc637731650d46c043a71b850eba94f4c8342e376935fc2214000000006441922c6ee998597f4aa3cb3a32490aca1c710bb40554178da023c5a83cafe0afc3af74cce4e02efd5c79f5374282264067b74de1a357cbabababace55e4ef0a84f4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0200000000000000003a6a04544d4d0033027e0064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c79207465787428230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "77ee74d775f732bf254ba517ff0a40c786099e7b5d965b26f6ff90331557b219",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1422fc3569372e34c8f494ba0e851ba743c0460d65317763fc6cad3645aeee3a",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0033027e0064eb4fc5f913f296b9c0cfffbee40c7bb2a33f2a655d1e977b8342e6d9a9162576616c6964207265706c792074657874",
+      "scriptLength": 58,
+      "digestHex": "78844890b1c8f155546ae64e9b0e73805f220fdad5d037b848ba70e612af937b",
+      "preMutationDigestHex": "78844890b1c8f155546ae64e9b0e73805f220fdad5d037b848ba70e612af937b",
+      "signatureOk": true,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_EVENT",
+      "authorInputIndex": null,
+      "authorHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "parentTxid": null,
+      "parentLink": "NOT_FRAMED",
+      "parentLinkDetail": "UNSUPPORTED_EVENT",
+      "parentKind": null,
+      "rootPostTxid": null,
+      "depth": null,
+      "replyTextUtf8": null,
+      "replyTextByteLength": 0,
+      "eligibleForThread": false
+    }
+  ],
+  "structures": [
+    {
+      "id": "truncated-envelope",
+      "scriptHex": "6a04544d4d0029020200d24f0dc8aecc27e94c35",
+      "errorCode": "INVALID_FORMAT"
+    },
+    {
+      "id": "lokad-only",
+      "scriptHex": "6a04544d4d00",
+      "errorCode": "INVALID_FORMAT"
+    }
+  ]
+}

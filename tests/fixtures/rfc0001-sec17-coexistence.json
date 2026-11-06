@@ -1,0 +1,717 @@
+{
+  "schema": "tonalli-memo.rfc0001.sec17-coexistence.s0",
+  "purpose": "Laboratory proof that a signed TM1 Core v1.0 POST keeps or loses cryptographic authorship beside an ALP/eMPP TMM container. Synthetic keys only. Not a Chronik confirmation, not a social event, and not a settled tip.",
+  "source": "synthetic-fixture",
+  "chronikValidated": false,
+  "networkValidity": "NOT_DEMONSTRATED",
+  "tipSettlement": "NOT_DEMONSTRATED",
+  "socialEventCredited": false,
+  "rfc0001": "PROPOSED — NOT RATIFIED",
+  "sec17": "design approved, production mitigation pending",
+  "s0": "OPEN",
+  "s1": "NOT AUTHORIZED",
+  "emppScriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "emppScriptSource": "tests/fixtures/rfc0001-empp-tmm.json#alp-send-plus-one-tmm",
+  "sighashSerializer": "tests/protocol/canonical-tm1-independent-verify.mjs",
+  "signer": "tests/protocol/generate-canonical-tm1-fixtures.mjs",
+  "cases": [
+    {
+      "id": "coex-schnorr-author0-sighash-41",
+      "polarity": "positive",
+      "description": "Schnorr author input 0, sighash 0x41. ALP/eMPP TMM and the two-push POST are both outputs before the digest is signed. Synthetic laboratory signature only.",
+      "mutation": "none",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d83a2bf41bd71df5735cd965a1809010d8ec69d034caa6eb54d808e5a79186c8",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff814d9703ba4e7f2ef355ef68eac262d95cba0f6c97879c97a95981d2b3f4f66f0000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_B_LAB_CRYPTO",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "LAB_CRYPTOGRAPHIC",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-schnorr-author1-sighash-41",
+      "polarity": "positive",
+      "description": "Schnorr author input 1, sighash 0x41, with a separate funding input. The POST names input 1. Outputs are fixed before signing.",
+      "mutation": "none",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 1,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000245ddc666dcb2810c82f4bd51c4f0f46521c507d0c96e6e66e6e6e033a78d5d2b000000006441a4d57e92259473fbda73f1fe5a6110fbcbcbd484117ff469f04021195616ad39620e8aa2eabc5b2efee769902ea220cd556d7ea822780472115b0aa0f20f86954121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0699181372be4cb3b8e715387bb79e6f860caf70f370b365a3895d007d23935000000000644160e86e24b0606e98e6f990da71fccb93bcb1f77ac35c75a005892c2348ef6ae6fc2809885bab92f2b07e0e274052e5a85680e74915e884390dd320401b0d74274121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010101636f657820617574686f723168420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "055143442ab10ff9d397a6e1e56d7557a99abb0a9023d6a805a5c51198d76010",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2b5d8da733e0e6e6666e6ec9d007c52165f4f0c451bdf4820c81b2dc66c6dd45",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "5093237d005d89a365b370f370af0c866f9eb77b3815e7b8b34cbe7213189906",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 1,
+      "libPreimageHex": "02000000ba96d51f500de9292cac35127d23eb842475be7b961048fe60dff5cc91d0dbea752adad0a7b9ceca853768aebb6965eca126a62965f698a0c1bc43d83db632ad0699181372be4cb3b8e715387bb79e6f860caf70f370b365a3895d007d239350000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffd1a9221618022d642ebbe1d34db01dc0927ce9d0671c2ec960bbb743b14b4eaf0000000041000000",
+      "signedDigestHex": "8544ec6e58ad9b34644a434103398abc8dbd2e8d64095aebd00c2e9807baa428",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_B_LAB_CRYPTO",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "LAB_CRYPTOGRAPHIC",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author0-sighash-41",
+      "polarity": "positive",
+      "description": "ECDSA author input 0, sighash 0x41. BIP143 digest. The eMPP container is committed with the POST.",
+      "mutation": "none",
+      "signatureAlgorithm": "ecdsa",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000159d5cd4e717e59bdc1af3b4fc6339f839f660f28c074ce0454043f68abd93068000000006a473044022040edf3ac197cda8825159d67d9d4f6c97daf21d011d90f9c250429c5d2d49687022063fdf73c91a910cac426845e45dfc8c112fc774d636ad28d8e1ec8c8649319634121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000156a04544d4d000e010100636f65782065636473613028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "78973002e2c9f3b6dfeabcbc447a5d044a2ed9b7ec93f0ae5c656df0a602ec36",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "6830d9ab683f045404ce74c0280f669f839f33c64f3bafc1bd597e714ecdd559",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "02000000a323364c54fe86a23403ff417e1792f2e1a34c16209f27eb83ef2ef3a948435a3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504459d5cd4e717e59bdc1af3b4fc6339f839f660f28c074ce0454043f68abd93068000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffce57038c3b166b3d553f7783b3161c1a7cd23b80aec6dadb5e279985f22b63850000000041000000",
+      "signedDigestHex": "8910deaa333e949b10858bcb71c318cddd0c45ee7076c022c9843315f6911527",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_B_LAB_CRYPTO",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "LAB_CRYPTOGRAPHIC",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-ecdsa-author2-sighash-c1",
+      "polarity": "positive",
+      "description": "ECDSA author input 2, sighash 0xc1. Nonzero author index and SIGHASH_ALL|ANYONECANPAY|FORKID. Every output is fixed first.",
+      "mutation": "none",
+      "signatureAlgorithm": "ecdsa",
+      "authorInputIndex": 2,
+      "sighashByte": 193,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "0200000003cfdc64653a89c1a557b1a6f3e448ea551df6ae445910ec04e5e5d6d9e19f36bb000000006441837393a184573483737a9c4441fc7da63d41d67e667a5973bfd55eb13a88a69bdc7ae08b8eb5f64022b02ead526d35051999255a8c73cdbbc96a0530737a971c4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff7aab2c3ad12350db4d038a61d8f1021dad4bff2b1397d757af93925d826aa6a5000000006441ccb8e8e720e5bf8008df664148aaa07aa29e472d0f6d62576bd2e2575e0ad20458c1baf6afc7591b9c50f79bff4e8f39d81717c601195494b9861fecb0bf34d54121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff8c1621b7414bc66b69832ad49241bd997fbd25281c450d33b53e1826d4574020000000006b483045022100bf6fc315181a2dd3f4765c856ef466d1070d06917e5b6a190c177c1eee7b6a60022076adf3a254e2d27c87cc430a2b0e37099ab9eeb9ac6c31d0f2222674115f9197c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000156a04544d4d000e010102636f657820656364736132384a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "79dc390a46091337c33e582458918fa0ef78773af0beab63e1d47f8c3ffedbfd",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bb369fe1d9d6e5e504ec105944aef61d55ea48e4f3a6b157a5c1893a6564dccf",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "a5a66a825d9293af57d797132bff4bad1d02f1d8618a034ddb5023d13a2cab7a",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "204057d426183eb5330d451c2825bd7f99bd4192d42a83696bc64b41b721168c",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 2,
+      "libPreimageHex": "02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008c1621b7414bc66b69832ad49241bd997fbd25281c450d33b53e1826d4574020000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff0399873dcb228d6be6523dac2efb0da6b7fd4965454c2e37644ed2a01bcb834700000000c1000000",
+      "signedDigestHex": "be854c2cf96b245e7a5eaf5e36c399a13084bfbd6612f1c8c25941a4e751b69a",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_B_LAB_CRYPTO",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "LAB_CRYPTOGRAPHIC",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": true
+      }
+    },
+    {
+      "id": "coex-negative-signature",
+      "polarity": "negative",
+      "description": "Signature byte flipped after signing. The POST and the eMPP output stay in place. Production trusted-chronik still reports VERIFIED_TM1. The laboratory oracle rejects the signature.",
+      "mutation": "signature",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4da0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "59b01dc8e10e8b7b87dbe38414f78989187fbd81a6f2f6783e1f74da17cbfdd7",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff814d9703ba4e7f2ef355ef68eac262d95cba0f6c97879c97a95981d2b3f4f66f0000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-outpoint",
+      "polarity": "negative",
+      "description": "The signed outpoint txid is altered after signing. ScriptSig and the POST stay structurally valid. The laboratory digest no longer matches.",
+      "mutation": "outpoint",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000129ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "30eaedd09c54d9b5ae2acdef776862854d5613f6ca94d4c147c419467a895afa",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac29",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "02000000050a8ef3730bc41508f0ce96634ff682197ee943192a6b57df14bde0cb69e44a3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504429ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff814d9703ba4e7f2ef355ef68eac262d95cba0f6c97879c97a95981d2b3f4f66f0000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-amount",
+      "polarity": "negative",
+      "description": "The raw signature is untouched. The recorded prevout amount is one satoshi above the signed amount, so the BIP143 preimage changes.",
+      "mutation": "prevout-amount",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d83a2bf41bd71df5735cd965a1809010d8ec69d034caa6eb54d808e5a79186c8",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10001",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1127000000000000ffffffff814d9703ba4e7f2ef355ef68eac262d95cba0f6c97879c97a95981d2b3f4f66f0000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-prevout-script",
+      "polarity": "negative",
+      "description": "The designated prevout script is replaced with another synthetic P2PKH. HASH160 no longer matches. Removing the false TMM candidate does not repair authorship.",
+      "mutation": "prevout-script",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d83a2bf41bd71df5735cd965a1809010d8ec69d034caa6eb54d808e5a79186c8",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac1027000000000000ffffffff814d9703ba4e7f2ef355ef68eac262d95cba0f6c97879c97a95981d2b3f4f66f0000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "pubkey-hash-match",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "AUTHORIZED_B",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "INVALID_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index",
+      "polarity": "negative",
+      "description": "After a valid author-1 signature, the POST author byte is rewritten to input 0. SIGHASH_ALL committed the original output. Production checks input 0 structurally and does not check the digest.",
+      "mutation": "author-index",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000245ddc666dcb2810c82f4bd51c4f0f46521c507d0c96e6e66e6e6e033a78d5d2b000000006441a4d57e92259473fbda73f1fe5a6110fbcbcbd484117ff469f04021195616ad39620e8aa2eabc5b2efee769902ea220cd556d7ea822780472115b0aa0f20f86954121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0699181372be4cb3b8e715387bb79e6f860caf70f370b365a3895d007d23935000000000644160e86e24b0606e98e6f990da71fccb93bcb1f77ac35c75a005892c2348ef6ae6fc2809885bab92f2b07e0e274052e5a85680e74915e884390dd320401b0d74274121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723168420000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b80388ed98ef0ac6db1320c8ce4b72e39c5fc640d6566fd4536e223b376cd5e5",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2b5d8da733e0e6e6666e6ec9d007c52165f4f0c451bdf4820c81b2dc66c6dd45",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "5093237d005d89a365b370f370af0c866f9eb77b3815e7b8b34cbe7213189906",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "02000000ba96d51f500de9292cac35127d23eb842475be7b961048fe60dff5cc91d0dbea752adad0a7b9ceca853768aebb6965eca126a62965f698a0c1bc43d83db632ad45ddc666dcb2810c82f4bd51c4f0f46521c507d0c96e6e66e6e6e033a78d5d2b000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac401f000000000000ffffffffbf25049391b49943f5913b6c871127faeb835ea053edee4739fe1a42b6a502140000000041000000",
+      "signedDigestHex": "8544ec6e58ad9b34644a434103398abc8dbd2e8d64095aebd00c2e9807baa428",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-author-index-out-of-range",
+      "polarity": "negative",
+      "description": "The POST names author input 5 and the transaction has one input. Input 0 carries a real Schnorr signature. That signature is not the TM1 author.",
+      "mutation": "author-index-out-of-range",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 5,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "0200000001af81c12f6e7c1b1e1fcca0aebea063b556020f95fe5586324de41c79cf6a0d100000000064416f7bbd841a518a783f38881d002a361e59c281d2e35d46c26b0c0dc7c9e0eadf7b70bf01a61a00515359e19f458f3b6721097eb7f7fd819ea6901eaeec41425f4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000196a04544d4d0012010105636f657820696e646578206669766528230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "42de9f048aa63b8726628a46ee2dda5f5e8d3fa753817617120b8ced019b9eaa",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "100d6acf791ce44d328655fe950f0256b563a0beaea0cc1f1e1b7c6e2fc181af",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "020000006d1c9a311fb06969e09e6dfc265220c1fe361132081dddf586749972d856f5343bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e70665044af81c12f6e7c1b1e1fcca0aebea063b556020f95fe5586324de41c79cf6a0d10000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000fffffffffdbda2cf240354f3640c010871432af772babeace4c18d12ac0449132b6cb0a60000000041000000",
+      "signedDigestHex": "19b4af75764511ffff6a6aea113eb835443e0f4804821c39782403521c02dc7f",
+      "signatureStillValidAt": {
+        "index": 0,
+        "algorithm": "schnorr"
+      },
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "author-index",
+          "errorCode": "AUTHOR_INPUT_OUT_OF_RANGE"
+        },
+        "change": "AUTHORIZED_B",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "INVALID_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-output",
+      "polarity": "negative",
+      "description": "The change output value is reduced after a 0x41 signature. SIGHASH_ALL committed every output, including that change.",
+      "mutation": "committed-output",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000166a04544d4d000f010100636f657820617574686f723027230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fc042f39d39cee842a84a0790ba4534b10d6779b6258a88a36aee4e1f480907e",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffffff564b1cffe103565ad50dbe0b06513315d990e7573744dc0d0c42a4d5e2cfe20000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-negative-committed-empp",
+      "polarity": "negative",
+      "description": "One byte inside the signed eMPP/TMM output is flipped. The container remains a structural TMM. The POST signature no longer covers the output.",
+      "mutation": "committed-empp",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1
+      ],
+      "rawTransactionHex": "020000000128ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000006441de4ca0f6fc27df995d3996e44161fa99a89369c2c9f86e3d571d94852dcdd43459cca4deb68a571d101910631d225fa974cdaf44925a571483c3b951e4908a8a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1e0000000000000000166a04544d4d000f010100636f657820617574686f723028230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c70e35b823fa5b5cb57a3294a27dfc847630d1d19ce30596f0d826e754e9a520",
+      "outputCount": 3,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "cfda1080b3efac348b8d0ae0ff7b9ad62ff5563ecc6e5db16ce9a0421952ac28",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "0200000018fa39b35fb03fb980b76850057800cf5be6fcd6d917dc61995b9078e72928523bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e7066504428ac521942a0e96cb15d6ecc3e56f52fd69a7bffe00a8d8b34acefb38010dacf000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac1027000000000000ffffffff55414b467abbac0dd2dc53d4551abdbf932467352ac340a558353b1a2d9fbc960000000041000000",
+      "signedDigestHex": "b5b11deff761744c2e7400ab8bc7e96585e79134ac00ef86c4aeba76b8288def",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": false,
+          "stage": "cryptographic-signature",
+          "errorCode": "INVALID_AUTHOR_SIGNATURE"
+        },
+        "change": "B_TRUSTED_CHRONIK_UNPROVEN",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "VERIFIED_TM1",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-tm0-and-tm1",
+      "polarity": "control",
+      "description": "A valid Schnorr POST coexists with a real TM0 and a structural TMM. Dropping the TMM leaves the real TM0 and the real TM1. The signature does not cancel MULTIPLE_MEMOS.",
+      "mutation": "none",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        2
+      ],
+      "rawTransactionHex": "02000000010c39a4f580598da80cf5618f85a8081fc1018485aea477eeed9de8f74bcd30d500000000644122220f8b74a6a0f8fb9e07c299bd129b1efaa2e1d078cb914b4b06cbba397887e0f0d7970fca9c6fb63b4e8e855771993277f6a120cb1567ec383c2891a7ad9d4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0400000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f00000000000000000d6a0b544d307c707c78617c68690000000000000000196a04544d4d0012010100636f65782062657369646520746d30f82a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "fb850c8b13e2123ce4f73283195f91762896459d0b4e2abe42f1d7996039615e",
+      "outputCount": 4,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "d530cd4bf7e89dedee77a4ae858401c11f08a8858f61f50ca88d5980f5a4390c",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "02000000b79952b9677ed34bdbd20bfcc0efdda40507ec393c046fdca379f842608ef00c3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650440c39a4f580598da80cf5618f85a8081fc1018485aea477eeed9de8f74bcd30d5000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ace02e000000000000ffffffff653c5ab43318dcd031bb8024f0428f2db7786b46a149310b02737f4e7115f8a90000000041000000",
+      "signedDigestHex": "29d47b72a8ffe58ab87509fa255d0d9c0cdd97cfcc255b7ebed96181171a30e1",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_A",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "MULTIPLE_MEMOS",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    },
+    {
+      "id": "coex-control-two-tm1",
+      "polarity": "control",
+      "description": "A valid Schnorr signature on author input 0 does not choose between two TM1 candidates. Dropping the structural TMM leaves both POSTs.",
+      "mutation": "none",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "postOutputIndexes": [
+        1,
+        2
+      ],
+      "rawTransactionHex": "02000000012d70f1e326b7a14d6fce961c9881df37249ea5000e67947d3bd48d05bd9a2038000000006441aeec1572ee15f23a9f92cafa49704619810c05e53157dc3ab7d87074a3aa37fa36bd1e811e62d4236860596b67e1c4581c7d9a099436ce9dd25773903f4910634121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0400000000000000005c6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0000000000000000146a04544d4d000d010100636f657820746d3120610000000000000000146a04544d4d000d010100636f657820746d312062f82a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "4a880d2b2056a02e34fa6b334e9244974ea2bf50c566dea1c825a34a23612802",
+      "outputCount": 4,
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "38209abd058dd43b7d94670e00a59e2437df81981c96ce6f4da1b726e3f1702d",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "preimageInputIndex": 0,
+      "libPreimageHex": "02000000775b624022b8ef421f2fe8e864d6ef82b4e96652f52a19ee003289b5503bbb8b3bb13029ce7b1f559ef5e747fcac439f1455a2ec7c5f09b72290795e706650442d70f1e326b7a14d6fce961c9881df37249ea5000e67947d3bd48d05bd9a2038000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ace02e000000000000ffffffff21546800205e66a6f65778b52c3c04b28365f45af988140abdc4b29c4f4ff2c30000000041000000",
+      "signedDigestHex": "f4a5994c66a50f19810f20b5601ef1c4e1ab0fb797afd13bb853910ae6aeca46",
+      "signatureStillValidAt": null,
+      "source": "synthetic-fixture",
+      "chronikValidated": false,
+      "networkValidity": "NOT_DEMONSTRATED",
+      "tipSettlement": "NOT_DEMONSTRATED",
+      "expected": {
+        "independent": {
+          "valid": true,
+          "stage": "cryptographic-signature",
+          "errorCode": null
+        },
+        "change": "AUTHORIZED_A",
+        "beforeStatus": "MULTIPLE_MEMOS",
+        "afterStatus": "MULTIPLE_MEMOS",
+        "authorship": "NOT_DEMONSTRATED",
+        "structuralPost": true,
+        "appliedAsPostAuthorship": false
+      }
+    }
+  ]
+}

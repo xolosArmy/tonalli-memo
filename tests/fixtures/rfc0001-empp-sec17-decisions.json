@@ -1,0 +1,1894 @@
+{
+  "schema": "tonalli-memo.rfc0001.empp-sec17-decisions.s0",
+  "rfc0001": "PROPOSED — NOT RATIFIED",
+  "s0": "OPEN",
+  "s1": "NOT AUTHORIZED",
+  "socialVersion0x02": "inactive-in-production",
+  "baseline": "228d1f036643ca9be8ba85e91f8200536f3242da",
+  "referenceRfcHead": "4d52ebf23c7fdf6cc485cf40cff2a7c414e79784",
+  "priorCorpus": {
+    "path": "tests/fixtures/rfc0001-empp-tmm.json",
+    "sha256": "3a6519697f6f88de7801520e80f8442ab63522fcf1e4b0e6dbef0b6d8ae882d8",
+    "cases": 29
+  },
+  "ecashLib": "4.13.0",
+  "rmzTokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+  "byteBudget": 223,
+  "canonicalTm0Text": "TM0|p|xa|hi",
+  "limits": [
+    "Characterization of current production behavior only.",
+    "No container dispatch is implemented.",
+    "No decision A-E option is adopted or ratified.",
+    "A recognized TM0 text layout is not an authorization.",
+    "Authorship stays NOT_DEMONSTRATED.",
+    "Settlement stays pending.",
+    "Social version 0x02 stays inactive.",
+    "SEC-17 criteria remain unsatisfied.",
+    "S0-07 remains unsatisfied. S0 stays OPEN. S1 stays NOT AUTHORIZED."
+  ],
+  "adoptedOption": null,
+  "cases": [
+    {
+      "id": "c-empp-tm0-text",
+      "decision": "C",
+      "purpose": "ALP SEND plus one structurally pipe-shaped TM0 text entry inside eMPP. Content recognition is not authorship.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 64,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "c-conventional-tm0",
+      "decision": "C",
+      "purpose": "The same TM0 text as an ordinary OP_RETURN, outside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {},
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "tm0-envelope",
+          "scriptHex": "6a0b544d307c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 13,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "NOT_EMPP",
+        "order": "ABSENT",
+        "extraPushCount": 0,
+        "flags": [
+          "NOT_EMPP"
+        ],
+        "pushes": [],
+        "alp": {
+          "present": false,
+          "action": "ABSENT",
+          "structurallyValidSend": false,
+          "tokenType": null,
+          "tokenId": null,
+          "rmzTokenId": false,
+          "atomMap": [],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": false,
+          "alpStructurallyValid": false,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "ABSENT",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "c-empp-tmm-binary",
+      "decision": "C",
+      "purpose": "The 92-byte ALP SEND plus binary TMM control from the 29-case corpus.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": null,
+      "textLayout": null,
+      "inspectOptions": {
+        "declaredTargetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 92,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "ALP_THEN_TMM",
+        "extraPushCount": 0,
+        "flags": [],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 39,
+            "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 1,
+          "structurallyValidCount": 1,
+          "exactlyOne": true,
+          "entries": [
+            {
+              "pushIndex": 1,
+              "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "byteLength": 39,
+              "structurallyValid": true,
+              "version": 2,
+              "event": 5,
+              "authorInputIndex": 1,
+              "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "targetByteOrder": "DISPLAY",
+              "flags": []
+            }
+          ]
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": true,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "c-empp-tmm-and-tm0-text",
+      "decision": "C",
+      "purpose": "Binary TMM and a pipe-shaped TM0 text entry in the same eMPP container.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredTargetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0b544d307c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 104,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "ALP_THEN_TMM",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 39,
+            "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          },
+          {
+            "index": 2,
+            "offset": 92,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 1,
+          "structurallyValidCount": 1,
+          "exactlyOne": true,
+          "entries": [
+            {
+              "pushIndex": 1,
+              "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "byteLength": 39,
+              "structurallyValid": true,
+              "version": 2,
+              "event": 5,
+              "authorInputIndex": 1,
+              "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "targetByteOrder": "DISPLAY",
+              "flags": []
+            }
+          ]
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": true,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "c-empp-tmm-beside-conventional-tm0",
+      "decision": "C",
+      "purpose": "Binary TMM eMPP beside a separate conventional TM0 output.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredTargetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000027544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        {
+          "outputIndex": 1,
+          "valueSats": "0",
+          "role": "tm0-envelope",
+          "scriptHex": "6a0b544d307c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 92,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "ALP_THEN_TMM",
+        "extraPushCount": 0,
+        "flags": [],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 39,
+            "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 1,
+          "structurallyValidCount": 1,
+          "exactlyOne": true,
+          "entries": [
+            {
+              "pushIndex": 1,
+              "hex": "544d4d00020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "byteLength": 39,
+              "structurallyValid": true,
+              "version": 2,
+              "event": 5,
+              "authorInputIndex": 1,
+              "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "targetByteOrder": "DISPLAY",
+              "flags": []
+            }
+          ]
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": true,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm1-pipe",
+      "decision": "D",
+      "purpose": "Pipe-shaped TM1 marker inside eMPP. It is not a two-push TM1 POST.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d317c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM1|p|xa|hi",
+        "marker": "TM1",
+        "layout": "TM_DIGIT_MARKER_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d317c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 64,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d317c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm2-pipe",
+      "decision": "D",
+      "purpose": "Pipe-shaped TM2 marker inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d327c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM2|p|xa|hi",
+        "marker": "TM2",
+        "layout": "TM_DIGIT_MARKER_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d327c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 64,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d327c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm9-pipe",
+      "decision": "D",
+      "purpose": "Pipe-shaped TM9 marker inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d397c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM9|p|xa|hi",
+        "marker": "TM9",
+        "layout": "TM_DIGIT_MARKER_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d397c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 64,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d397c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm-no-digit",
+      "decision": "D",
+      "purpose": "Marker TM with pipes and no digit, inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d7c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM|p|xa|hi",
+        "marker": "TM",
+        "layout": "OTHER_MARKER_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000a544d7c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 63,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 10,
+            "hex": "544d7c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-marker-not-tm",
+      "decision": "D",
+      "purpose": "Pipe-shaped marker that does not start with TM, inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "4e4f7c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "NO|p|xa|hi",
+        "marker": "NO",
+        "layout": "OTHER_MARKER_LAYOUT",
+        "startsWithTm": false
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000a4e4f7c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 63,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 10,
+            "hex": "4e4f7c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm2-no-pipes",
+      "decision": "D",
+      "purpose": "TM2 bytes with no pipe layout, inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d32",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM2",
+        "marker": null,
+        "layout": "NO_PIPE_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000003544d32"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 56,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 3,
+            "hex": "544d32"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-invalid-utf8",
+      "decision": "D",
+      "purpose": "TM prefix followed by a non-UTF-8 byte, inside eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544dff7c70",
+      "textLayout": {
+        "utf8": false,
+        "text": null,
+        "marker": null,
+        "layout": "INVALID_UTF8",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d000000000005544dff7c70"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 58,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 5,
+            "hex": "544dff7c70"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "d-empp-tm0-bad-type",
+      "decision": "D",
+      "purpose": "TM0 marker whose type field is not one lowercase letter. Decode and validate are separate.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c397c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|9|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c397c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 64,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c397c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-tm0-text-budget-223",
+      "decision": "E",
+      "purpose": "ALP SEND, TM0 text, and a filler push. The script is exactly 223 bytes.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c707c78617c68694c9d01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 223,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 2,
+        "flags": [
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          },
+          {
+            "index": 2,
+            "offset": 64,
+            "minimal": true,
+            "byteLength": 157,
+            "hex": "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-tm0-text-budget-224",
+      "decision": "E",
+      "purpose": "The same TM0 text in a 224-byte eMPP script.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c707c78617c68694c9e0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 224,
+        "byteBudget": 223,
+        "byteBudgetExceeded": true,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 2,
+        "flags": [
+          "BYTE_BUDGET_EXCEEDED",
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          },
+          {
+            "index": 2,
+            "offset": 64,
+            "minimal": true,
+            "byteLength": 158,
+            "hex": "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-tm0-text-budget-225",
+      "decision": "E",
+      "purpose": "The same TM0 text in a 225-byte eMPP script.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c707c78617c68694c9f010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 225,
+        "byteBudget": 223,
+        "byteBudgetExceeded": true,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 2,
+        "flags": [
+          "BYTE_BUDGET_EXCEEDED",
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": true,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          },
+          {
+            "index": 2,
+            "offset": 64,
+            "minimal": true,
+            "byteLength": 159,
+            "hex": "010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-truncated-tm0-push",
+      "decision": "E",
+      "purpose": "The TM0 push is cut before its declared length.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": null,
+      "textLayout": null,
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000000b544d307c707c78"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 60,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "INVALID",
+        "order": "PARTIAL",
+        "extraPushCount": 0,
+        "flags": [
+          "TRUNCATED_PUSH"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": false,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-non-minimal-tm0-push",
+      "decision": "E",
+      "purpose": "The TM0 text is carried by a non-minimal OP_PUSHDATA1.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": "544d307c707c78617c6869",
+      "textLayout": {
+        "utf8": true,
+        "text": "TM0|p|xa|hi",
+        "marker": "TM0",
+        "layout": "TM0_TEXT_LAYOUT",
+        "startsWithTm": true
+      },
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d00000000004c0b544d307c707c78617c6869"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 65,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "PARSEABLE",
+        "order": "PARTIAL",
+        "extraPushCount": 1,
+        "flags": [
+          "NON_MINIMAL_PUSH",
+          "EXTRA_PUSH",
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "minimal": false,
+            "byteLength": 11,
+            "hex": "544d307c707c78617c6869"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-alp-only-no-tmm",
+      "decision": "E",
+      "purpose": "ALP SEND with no TMM entry and no text entry.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": null,
+      "textLayout": null,
+      "inspectOptions": {
+        "declaredRecipientOutput": 1
+      },
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "empp",
+          "scriptHex": "6a5031534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 52,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "CANONICAL",
+        "order": "PARTIAL",
+        "extraPushCount": 0,
+        "flags": [
+          "TMM_ABSENT"
+        ],
+        "pushes": [
+          {
+            "index": 0,
+            "offset": 2,
+            "minimal": true,
+            "byteLength": 49,
+            "hex": "534c5032000453454e44085930c985cca74ff3c3b73c2a8053634bd3c818f50c98e9c530c6090fbd23c9017d0000000000"
+          }
+        ],
+        "alp": {
+          "present": true,
+          "action": "SEND",
+          "structurallyValidSend": true,
+          "tokenType": 0,
+          "tokenId": "c923bd0f09c630c5e9980cf518c8d34b6353802a3cb7c3f34fa7cc85c9305908",
+          "rmzTokenId": true,
+          "atomMap": [
+            {
+              "outputIndex": 1,
+              "atoms": "125"
+            }
+          ],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [
+            1
+          ],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": true,
+          "alpStructurallyValid": true,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "STRUCTURAL_OUTPUT_MAP_ONLY",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-unrecognized-two-push-v2",
+      "decision": "E",
+      "purpose": "Ordinary two-push version 0x02. It is not an eMPP container.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": null,
+      "textLayout": null,
+      "inspectOptions": {},
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "two-push-v2",
+          "scriptHex": "6a04544d4d000402050161"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 11,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "NOT_EMPP",
+        "order": "ABSENT",
+        "extraPushCount": 0,
+        "flags": [
+          "NOT_EMPP"
+        ],
+        "pushes": [],
+        "alp": {
+          "present": false,
+          "action": "ABSENT",
+          "structurallyValidSend": false,
+          "tokenType": null,
+          "tokenId": null,
+          "rmzTokenId": false,
+          "atomMap": [],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": false,
+          "alpStructurallyValid": false,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "ABSENT",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    },
+    {
+      "id": "e-unrelated-no-memo",
+      "decision": "E",
+      "purpose": "Ordinary OP_RETURN that is neither TM0 nor TM1 nor eMPP.",
+      "focusOutputIndex": 0,
+      "textPayloadHex": null,
+      "textLayout": null,
+      "inspectOptions": {},
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "valueSats": "0",
+          "role": "unrelated-op-return",
+          "scriptHex": "6a04deadbeef"
+        }
+      ],
+      "independent": {
+        "scriptByteLength": 6,
+        "byteBudget": 223,
+        "byteBudgetExceeded": false,
+        "container": "NOT_EMPP",
+        "order": "ABSENT",
+        "extraPushCount": 0,
+        "flags": [
+          "NOT_EMPP"
+        ],
+        "pushes": [],
+        "alp": {
+          "present": false,
+          "action": "ABSENT",
+          "structurallyValidSend": false,
+          "tokenType": null,
+          "tokenId": null,
+          "rmzTokenId": false,
+          "atomMap": [],
+          "burnAtoms": null,
+          "mintAtoms": [],
+          "numBatons": null,
+          "positiveOutputIndexes": [],
+          "flags": []
+        },
+        "tmm": {
+          "recognizedCount": 0,
+          "structurallyValidCount": 0,
+          "exactlyOne": false,
+          "entries": []
+        },
+        "axes": {
+          "containerValid": false,
+          "alpStructurallyValid": false,
+          "tmmStructurallyValid": false,
+          "authorship": "NOT_DEMONSTRATED",
+          "attributableTransfer": false,
+          "transfer": "ABSENT",
+          "settlement": "PENDING",
+          "tokenHistory": "NOT_CHECKED",
+          "wireShape": "NOT_PROPOSED_SHAPE"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1840 @@
+{
+  "schema": "tonalli-memo.rfc0001.tip-xec.s0",
+  "network": "lab-tip-net",
+  "purpose": "Laboratory native TIP_XEC bytes and strict funding attribution. Synthetic signatures. Not a network settlement, not finality, and not a productive indexer.",
+  "status": {
+    "rfc0001": "PROPOSED — NOT RATIFIED",
+    "sec17": "DESIGN_APPROVED_VALIDATION_PENDING",
+    "s0": "OPEN",
+    "s005": "OPEN",
+    "s1": "NOT AUTHORIZED",
+    "m174": "OPEN",
+    "socialVersion": "INACTIVE",
+    "confirmation": "NOT_DEMONSTRATED",
+    "settlement": "NOT_DEMONSTRATED",
+    "networkReorg": "NOT_DEMONSTRATED",
+    "indexer": "NOT_A_PRODUCTIVE_INDEXER",
+    "chronikValidated": false,
+    "productionDispatch": false
+  },
+  "generator": {
+    "library": "ecash-lib",
+    "version": "4.13.0",
+    "envelope": "tests/protocol/tip-xec-envelope-independent.mjs",
+    "attribution": "tests/protocol/tip-xec-attribution-independent.mjs",
+    "sighashSerializer": "tests/protocol/canonical-tm1-independent-verify.mjs"
+  },
+  "absentTargetTxid": "0e03972831ed1426c6ad78c8fec6fb7e86d2d4b7edde6892b66fe6c006b349ba",
+  "targets": [
+    {
+      "id": "eligible-post-index1",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "020000000245528e58a2346ba06af60d6aac51294f9e10947fb6bebabda2bf8ab3faf88b980000000064416180d7f52fa5a92eb0303111176fcf622a59b4201652c81e55aaafa5207db67fc001033e1c1e76007436f8e57260e4d0ecb0dd69aca732c4b0a64df92a4dfb804121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffffc28e29e0f546c263bcb6dbe8fe1430571405e0897aad9ec0e7a76a8af9abb7a9010000006441ad20c376eccb2b12c7f9125cc409de10b5e8e9d67dedd37c22501b2b292977d9b8c87d4c6d3cca8d1e6b52f240ffc25123ff4cc302849a07e6f051816c61a0574121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000196a04544d4d00120101017469702074617267657420706f737468420000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "988bf8fab38abfa2bdbabeb67f94109e4f2951ac6a0df66aa06b34a2588e5245",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "a9b7abf98a6aa7e7c09ead7a89e00514573014fee8dbb6bc63c246f5e0298ec2",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d00120101017469702074617267657420706f7374",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "tip target post"
+    },
+    {
+      "id": "eligible-post-pushdata1",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 1,
+      "rawTransactionHex": "020000000282844e575165a6468a070ffb627a8aec891ad46b2e11a8c2fa1d5ed8772f191a000000006441aca17d4bc6272b24354ab175ab989387ccaa0adc1f1f1202980848a217490a9e456aa680bb69e940ab8678e2935cac6353f4abdaa50d626c26e43f8755eb2ab04121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff8918f887c339b4dc979f306ffc0c011834d50e9940fecd93301f44caaaf81d5f010000006441a1476e0d0d9d7bd9b84aa347e5b5f8ffec5f77ea208e021957c7530fec7c9da3e0e85e0115df13a62aa203723332c8a2998a8c5247aece72fc243cf4de888c504121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff020000000000000000546a04544d4d004c4c0101017469702074617267657420706f73742063726f7373696e672074686520736576656e74792d74776f20627974652070757368646174613120656e76656c6f706520626f756e6461727968420000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "4c026808899a5cfd03c14af1c3b3d097ab1f6fa56e35049ed51ba0e9da25a3e1",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "1a192f77d85e1dfac2a8112e6bd41a89ec8a7a62fb0f078a46a66551574e8482",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "5f1df8aaca441f3093cdfe40990ed53418010cfc6f309f97dcb439c387f81889",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d004c4c0101017469702074617267657420706f73742063726f7373696e672074686520736576656e74792d74776f20627974652070757368646174613120656e76656c6f706520626f756e64617279",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": "tip target post crossing the seventy-two byte pushdata1 envelope boundary"
+    },
+    {
+      "id": "pending-post",
+      "group": "target",
+      "kind": "core-v1-post",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001e43e24206ecaeeb4b196e2249a5f9c9b1c83c61232a662e27304c899bdd24f350000000064412a236a651e23cbfaa6a72af01475aed5e40b943991e26f1b2b2a5a26fd96a64aebc6da4b07c66a942a6bdd6ebca70c945a3025d98812a1078b1fc17bd548bbd44121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000001c6a04544d4d00150101007469702070656e64696e672074617267657428230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "786eec3c4142675c20925a9692cbd8f7a210dd0438f2d0edc4c69015b11a4bf5",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "354fd2bd99c80473e262a63212c6831c9b9c5f9a24e296b1b4eeca6e20243ee4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d00150101007469702070656e64696e6720746172676574",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "eventDataUtf8": "tip pending target"
+    },
+    {
+      "id": "ineligible-payment",
+      "group": "target",
+      "kind": "payment",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "02000000015f4178344b6f45e9667220b1fe1f96bd3025b52e75e3acb70b2b8559f80148230000000064416bacca088eb3384f75c88f3577f99473225346ecc8ecaaa16d8d86e20b6f3656633bfd99939fd809f36e4120fba0bc3b062297b13ce6993f92125b81d19909a24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "d8c4d37c2a2d8c0f3f8343866b7077c12d151ad6e1be1d07bc318bebf1905d84",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "234801f859852b0bb7ace3752eb52530bd961ffeb1207266e9456f4b3478415f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    },
+    {
+      "id": "ineligible-reply-shaped",
+      "group": "target",
+      "kind": "reply-shaped",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001102161997c3dc13e77c1c00a9438f47d2bd3fa41ce27e84ee0a2785e40859959000000006441353ba69c2c8ef0f3e3965aa96f56ea4a1173398d34207abc1e1433ff0f0e24340fd185b5eb80e11bf3f311983c8b5aa3bd25bf794c3e57c3d84fdec6e7a9c23a4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0200000000000000002b6a04544d4d0024020200c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd76128230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "51a075a770d17acff09a88251671d95dd1981b15e9b261698d7d179a1cf940f1",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "599985405e78a2e04ee827ce41fad32b7df438940ac0c1773ec13d7c99612110",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d0024020200c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd761",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    },
+    {
+      "id": "ineligible-duplicate-candidates",
+      "group": "target",
+      "kind": "duplicate-candidates",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000113fc168f77f95efebb982ad7b26befb92aa04befb899c2cbb6c90e22bc1d459100000000644192e3e9ff692a3a5603e29282113efc06cebe33d792f0d0e672e471e0ea9d9f4f00996c725fb821afb130247dd4018eba08318c8acee304b9b630696bb2ae4a914121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff030000000000000000196a04544d4d001201010066697273742063616e64696461746500000000000000001a6a04544d4d00130101007365636f6e642063616e64696461746528230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "7d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "91451dbc220ec9b6cbc299b8ef4ba02ab9ef6bb2d72a98bbfe5ef9778f16fc13",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d001201010066697273742063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    },
+    {
+      "id": "ineligible-mixed-tm0-and-tm1",
+      "group": "target",
+      "kind": "mixed-tm0-tm1",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "0200000001b0697036f14bd3941396db127ebc2e15d4fefa318728df0f6edcb96e74e6b9160000000064419a2f35f15e1d7a280124a89b0acdb02963564af41a8ad08bba68d93810e06a333d99cfc078812e9ab3536a576aa2363dbe3048b90b71142587109c99b2e50db04121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff030000000000000000196a04544d4d001201010066697273742063616e64696461746500000000000000000d6a0b544d307c707c78617c686928230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "a1f155e8fe459a3d5e6fba6a84f3107fe851fc4267b6b164a5250c8acf7cc6b2",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "16b9e6746eb9dc6e0fdf288731fafed4152ebc7e12db961394d34bf1367069b0",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d001201010066697273742063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    },
+    {
+      "id": "ineligible-tm0-push-beside-tm1",
+      "group": "target",
+      "kind": "tm0-push-beside-tm1",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "rawTransactionHex": "020000000143e6af11bd23a14a9d4c43de1a30a6c39ccdb29628a48f5e74dd8de21f38015400000000644191f60ce7477a8fd59954997fbe501b73b944ea9c24bebb273802cf42fcf5e96a2dc37aead695e100912618c271d9b8743dd18bd756bd7757bb31c01b7ad8e95d4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff030000000000000000196a04544d4d001201010066697273742063616e6469646174650000000000000000076a017803544dff28230000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "2dd25cc83b6b4fb9d0247923bffcfb1dd60ddf574560e35e1e006a43aa064d4a",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5401381fe28ddd745e8fa42896b2cd9cc3a6301ade434c9d4aa123bd11afe643",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "outputScriptHex": "6a04544d4d001201010066697273742063616e646964617465",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "eventDataUtf8": null
+    }
+  ],
+  "tips": [
+    {
+      "id": "tip-schnorr-index0-41",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000013b06f4bb5d07a4dde3ae10a3a72be449227f07e9eedd4e3131aa3b010bc97b3000000000644143e89f76ee6d39b822bfb28867b20725e65096185854ded2dd9edcac940f11a379b9bcbb99c6199d48187373e31db865a2a630f3d5362db2590c2730d45bc7b44121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "0b9248574a4b7d7cb0b0a543d1e0950e83dedc780512452c020f246250f1822e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "307bc90b013baa31314eddeee9077f2249e42ba7a310aee3dda4075dbbf4063b",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "a559a0f6cde6a8c067fcf869fe8a01d1c6af54cf3dbb3a50ff0cf248e4d1580b",
+      "preMutationDigestHex": "a559a0f6cde6a8c067fcf869fe8a01d1c6af54cf3dbb3a50ff0cf248e4d1580b",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-schnorr-index1-41",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "02000000027aacb0152710909f9a2f182d6ac7ce8474082dc43917abd096e83458427f346f00000000644137d071824d01fa0a86bafef80a4a8d0a51b8e0cbb83f19906551d7112cf504ff8855fdb6903676765a4c201bcd4b6b87d27858a61cd76c58c439f7f6fc230a074121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff7a3364a663cba2d2b7377092e64d2ede9e4529eec2f9c20e5950de273c9fb24301000000644136bc087a3f56e1f03a0279b43ce188dc9abaf80b7304a565ca479e68075d89ecde737acfc8e2a8a408a82b77b6c170afc93f020e825b2a657485cff57852512a4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac803e0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "5f3ab20689ec75673571ac133631c04841c6c88c02d474bba7353c0d9aaed068",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "6f347f425834e896d0ab1739c42d087484cec76a2d182f9a9f90102715b0ac7a",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "43b29f3c27de50590ec2f9c2ee29459ede2e4de6927037b7d2a2cb63a664337a",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "d1691b2d7e569dc74e74838fd7107074e07970806580c8a917eed7de5540bf76",
+      "preMutationDigestHex": "d1691b2d7e569dc74e74838fd7107074e07970806580c8a917eed7de5540bf76",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-schnorr-index0-c1",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000299a8784ccffd064c7d7267dded8791fe8e8351d73f9b3f6de3a743c055f193f7000000006441919db92200817d95f02f3a1e6a0e580c0698fa12f98824ccee056a8cb8e21c783805872624abbfaefe74851b1ad949d6b11217c71a9e225b119c499ba5deed53c121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff70575937269a0f0402712d762fbe0a3a7b20c2b4e937bf8018e772e6517e87a1010000006441dad81b90ee4919c0a2e8e3a492d3d4c1842fcc242ed504fc4774133cefab63c7c0908e7a17e5380ce86c42983f830068fa6c3b0993a769afe84d9cc10567a7df4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac983a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "7c518653e06148b62bad783724c991315523d8d788d056ed6a09b025fc5fb216",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f793f155c043a7e36d3f9b3fd751838efe9187eddd67727d4c06fdcf4c78a899",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "a1877e51e672e71880bf37e9b4c2207b3a0abe2f762d7102040f9a2637595770",
+            "outIdx": 1
+          },
+          "prevoutSats": "7000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "79a5a96c4e187677706335f4b4369660784b96fea8fdcb27e3bec3de4b712564",
+      "preMutationDigestHex": "79a5a96c4e187677706335f4b4369660784b96fea8fdcb27e3bec3de4b712564",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-schnorr-index2-c1",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 2,
+      "envelopeAuthorIndex": 2,
+      "rawTransactionHex": "0200000003de75ffecc01ded8530f80af9c3c0c9ab9f11573685beca8f95c16b3e30676d360000000064412e7f75b891f38b511bc6ddbfa599b722dcb7132fef39204c675f665ea15d5df4b37a39941743b8da428de9f43bb85ccc27812053e790d401720559167bd318114121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff14904c7d6b47354c047e259de231197413d6a3fdbc85a1b131005e93abd7e5ff010000006441df9d56b50df5a71fd1b8385e8dc5fdfb6e7ee1e54886f943111f1edefac2765f36f3ea15a38c80bb79cbee54b30da7f30709d81c4234880d42ae1c42c5f37b4c4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff29121bea0c42cb6939944c878dce50c5b3f5215db1de659eedd9080aaf22f1f9020000006441aa1422715f7feab074d60232a8ee3b118bec827c586c21cacc8694680ae8d8fc58dcb446dfde85be23f6c53b9feb01716624c8e87e1fe8aa8ae72677bfb55c0ac121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020502c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac50460000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3a19697bd49ccda48a1c37f725eaee39766e922fa51f49f24cbdb2de599609a1",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "366d67303e6bc1958fcabe853657119fabc9c0c3f90af83085ed1dc0ecff75de",
+            "outIdx": 0
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "ffe5d7ab935e0031b1a185bcfda3d613741931e29d257e044c35476b7d4c9014",
+            "outIdx": 1
+          },
+          "prevoutSats": "5000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "f9f122af0a08d9ed9e65deb15d21f5b3c550ce8d874c943969cb420cea1b1229",
+            "outIdx": 2
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0023020502c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "f0897d32cc26690b870084d10a5810e504cf944f1ccccbb3601d5dcbb0bd3af8",
+      "preMutationDigestHex": "f0897d32cc26690b870084d10a5810e504cf944f1ccccbb3601d5dcbb0bd3af8",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-ecdsa-index0-41",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "ecdsa",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001632eea1e34a4892109d818947d4fb4bf77bfa4d1cfa1c4ff634dfffe6c655651000000006a47304402204fda35d10b908ba06fb17db83e2aa8f3c7188a91c0186f995dfbb21fdfdf15430220144da4cf5180ee1a8bda2c73ca9990a119991f02bd8b70498b83e1b6f7ce92064121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e98c4b176c7b2e7938e1ced65a33ec6927586eeb881da1a06c4210942c7131e8",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "5156656cfeff4d63ffc4a1cfd1a4bf77bfb44f7d9418d8092189a4341eea2e63",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "0b31195ce8a6c364a4d09246c4b3e7c639eb6e858a7a29eb99f0312815195b3d",
+      "preMutationDigestHex": "0b31195ce8a6c364a4d09246c4b3e7c639eb6e858a7a29eb99f0312815195b3d",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-multi-output",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000017c7ba459a473277891f9a591592ea1241932b11836315c12b2e6fcd20b899500000000006441b8e7caa0cfd8ff9bbbcd4f0c6d7b220eacc8eb06a0bb407b1addb5a51394b24a45868802ec37f487a8578547833aa3b08946d953a0051636171982eb0532df764121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0400000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088acd0070000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac803e0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "1bceef7c450e9cebb790e3a4d113400842f64a6bddce92e0b81227ea929019aa",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0095890bd2fce6b2125c313618b1321924a12e5991a5f991782773a459a47b7c",
+            "outIdx": 0
+          },
+          "prevoutSats": "20000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "8bac6591ed62d6d4d9eb06e9d8b9bd7ba6201d0adb77f154a7037c0eadba072c",
+      "preMutationDigestHex": "8bac6591ed62d6d4d9eb06e9d8b9bd7ba6201d0adb77f154a7037c0eadba072c",
+      "signatureOk": true,
+      "creditedSatoshis": "3000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-mixed-output",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000010a33248c7795d24c3b908b70c53d5bcf362c7d8a34c6a08263890595795c249e000000006441ca54950221336a2bc38a4cd15a5c607d6844353f3d1ec973608e7fbf85d7e4381f86a4a586a047da0546f37d518159870f60a5adf8dd5534f3e0096efe8b99754121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0400000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac22020000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88acee240000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "ac3e1b483afe08397820b732826c45ff2742f714357ebc9893c240cb61802ce7",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "9e245c799505896382a0c6348a7d2c36cf5b3dc5708b903b4cd295778c24330a",
+            "outIdx": 0
+          },
+          "prevoutSats": "12000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "f74694250f2383a436949f69e0132c85b1be52bf67d536b707718a35d0830ef9",
+      "preMutationDigestHex": "f74694250f2383a436949f69e0132c85b1be52bf67d536b707718a35d0830ef9",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "tip-pushdata1-target",
+      "group": "positive",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001d4457a27778df7d7928981f01a7f8a5501186a9e76ea107df8c8246dd22de8f700000000644116f6e267dfe40c8ab625a48caade9b6fe2eab06014ed25e2218d8db9935e2527d9e6e55ced365af700cdd13f27af49cfd6956d0dc252595a116c7cec2b5053314121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d00230205004c026808899a5cfd03c14af1c3b3d097ab1f6fa56e35049ed51ba0e9da25a3e1e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "725e528a480b25dbc2a12626f732da4800bf8fcdd40c6fa09fbf137d87730443",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "f7e82dd26d24c8f87d10ea769e6a1801558a7f1af0818992d7f78d77277a45d4",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00230205004c026808899a5cfd03c14af1c3b3d097ab1f6fa56e35049ed51ba0e9da25a3e1",
+      "scriptLength": 42,
+      "targetTxid": "4c026808899a5cfd03c14af1c3b3d097ab1f6fa56e35049ed51ba0e9da25a3e1",
+      "digestHex": "39e04fdf3e8b66f25cadb9348f2d06d8272d4cd50d283ec70bb12826427c26e1",
+      "preMutationDigestHex": "39e04fdf3e8b66f25cadb9348f2d06d8272d4cd50d283ec70bb12826427c26e1",
+      "signatureOk": true,
+      "creditedSatoshis": "1000",
+      "verdict": "LAB_ATTRIBUTABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-recipient-funded",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000024525fbea2219b7793c5ea8f5bbec9dd7ea02b64c7732a7fd3395052f4fda68030000000064415c64231bac22748a10ad7d46e56a6d5eb961a3d358edff2f0d62223357f3f87752be79091a2daffe2cc69e42c2b3bbdb0ebffe9ad4df7f2e8cec8ae20c5c541e4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff00f9297c56a3cdd9d37043f2dccd2afd4d2bdd8be43a0b2f5a18e3fe83266b61010000006441c2c40a5e1197ec66134d9b77b7659c41e89101f329ef040ce8355efe7d2799abd65b009f2d53ec8149eb8c4d34c4f60d6c6b32d695b7733c8822f97ad68c427c4121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd740420f00000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088acf4010000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e823f382d84aaf4173d43577f0f02bfdc8ada3a2f085b97452a09d7763ddb6ee",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0368da4f2f059533fda732774cb602ead79decbbf5a85e3c79b71922eafb2545",
+            "outIdx": 0
+          },
+          "prevoutSats": "1000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "616b2683fee3185a2f0b3ae48bdd2b4dfd2acddcf24370d3d9cda3567c29f900",
+            "outIdx": 1
+          },
+          "prevoutSats": "1000000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "df819fa9dac68f0e5cf69a09833ced10492874c653817770be3a19672912c372",
+      "preMutationDigestHex": "df819fa9dac68f0e5cf69a09833ced10492874c653817770be3a19672912c372",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AMBIGUOUS_TIP_FUNDING",
+      "detail": "RECIPIENT_INPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-third-party",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000002e6c93e60aa710661b0b5da66b3b9ff7cf6b0b853e613d53264f2c5ce4370b0c3000000006441b5ddedc178c47c4970ee7b19e766a6bf9b96ee7e5eef93842a0fd7349d4b182da5985e8fad30e6aec374850700b9c9056ae366f637dbbdb46529b6bf3a31f5dc4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff40bde6717e09dd0553464afe509a264585fc7096b1e7110817056ded632804e00100000064418d6615312022d485c1d3b80c1b5eda282631a12f9314264c310872707a114afd8196909308ad0dbfd94654f5470edb3f1cf2bf857d6d085f255754c47bf91db04121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac983a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "a4ba2b4d94426d1abce5b1997ec40a6ed09aa4621f4580f064ed72630d656a83",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "c3b07043cec5f26432d513e653b8b0f67cffb9b366dab5b0610671aa603ec9e6",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "e0042863ed6d05170811e7b19670fc8545269a50fe4a465305dd097e71e6bd40",
+            "outIdx": 1
+          },
+          "prevoutSats": "7000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "8b8210cca15728b953dc90bdc23f64967db4b669c5f8912425d50d1e58b16fb8",
+      "preMutationDigestHex": "8b8210cca15728b953dc90bdc23f64967db4b669c5f8912425d50d1e58b16fb8",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AMBIGUOUS_TIP_FUNDING",
+      "detail": "THIRD_PARTY_INPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-third-party-index1",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "0200000002e5d87b62c42bfd0beefda2665e595f8bc06c2b5123a684c1a63b4ae1726a3aeb0000000064411f317207f0ba1d8459a4d0cf7d88b73541836faa7ad0d864ad9610d09ddeee49da5e180ac7172bd6e490be50298eb9d128f4ab9d1978ac5fb7239902d65c90ab4121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff97de0408f81da6272480532054853cdd3cba89b894b212a391ad3382a74694930100000064413339948e356200d2e9131519d45d422f2c493284f494dd298fae6ba34fcb0b6649a60c7e59b407a9e33833731dda218b27c54b0a1d73a85de45f17fbc93e34f64121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac803e0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "6ee2cb672fe7f3b33ea81cf6092a39ea79c54e67b3c7676d80f385a956d1533f",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "eb3a6a72e14a3ba6c184a623512b6cc08b5f595e66a2fdee0bfd2bc4627bd8e5",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "939446a78233ad91a312b294b889ba3cdd3c85542053802427a61df80804de97",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "83d395f0838fa8a226d0d661bfe4999b168d26e2990513a4144a5b0e17392055",
+      "preMutationDigestHex": "83d395f0838fa8a226d0d661bfe4999b168d26e2990513a4144a5b0e17392055",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AMBIGUOUS_TIP_FUNDING",
+      "detail": "THIRD_PARTY_INPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-third-party-c1",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000002e1af3d2c560bb3676431f6e64db633737508a37fbda8a96cecd681e9f7f28a4e0000000064413ac917dd30cb78d68817949902db7b55aca6ce8a6237875523a2e39c1548660fa5a29f31c51b763736485a8f353541c5eefaec5d1c990b91b92be7d7cf9d34acc121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffbd44fd5c1719a5ad8cb2ef1b926f22c27e79f06154d69fd541c2d8dc2bc6039d0100000064413a51ff297c112506e5724c7decb7a0a87a1027cc1658ea1768b8c3bd909c53bd84d50af64bf38a15a3903a91278409f8c1f5a33d6950e7a8c77730a151d54c244121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac983a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "6ba575611a59b3f705bc6b2905097fa23b8793cf7d5359aa57ccdafd80f92d02",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "4e8af2f7e981d6ec6ca9a8bd7fa308757333b64de6f6316467b30b562c3dafe1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "9d03c62bdcd8c241d59fd65461f0797ec2226f921befb28cada519175cfd44bd",
+            "outIdx": 1
+          },
+          "prevoutSats": "7000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "16588bd02a6f5958a585b848395353a68dff0c2de1f9bf719faafb21b44a7784",
+      "preMutationDigestHex": "16588bd02a6f5958a585b848395353a68dff0c2de1f9bf719faafb21b44a7784",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AMBIGUOUS_TIP_FUNDING",
+      "detail": "THIRD_PARTY_INPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-funding-signature",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "0200000002a75836acc2764dd0ce4e6d186d7148ad80209f6d8011d2c268a40dd520c0628e0000000064419007a1be7e52e062c86d4a0be58b092126ff003fd64136e40fc79e942f6ebfd65245345d3599f0ce1261d1a253a94ee8c3219ab23aece0da8f8db30cce826e1e4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff56ef8e7ed9fe277fe63886e7691b9e545653b5ab73d96dccf8960b83bceab096010000006441c683a26ed1d5dc19dac1e2d1c7f0427efc0562adcbfd43e48094709bea28b66612ede799ffdfe17454741058ea60393de7b32eead162e71323ca71206d00206b4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac803e0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c18e007d0fb54b807fb363c6d35156933fd16ab3a19a036a1e4e088a2c603b23",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8e62c020d50da468c2d211806d9f2080ad48716d186d4eced04d76c2ac3658a7",
+            "outIdx": 0
+          },
+          "prevoutSats": "8000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "96b0eabc830b96f8cc6dd973abb55356549e1b69e78638e67f27fed97e8eef56",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "fa35ca378a002c2fa7b35af7ae4b1c566a86f838be9c777fe25fcacf127fe53d",
+      "preMutationDigestHex": "fa35ca378a002c2fa7b35af7ae4b1c566a86f838be9c777fe25fcacf127fe53d",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_FUNDING_SIGNATURE",
+      "detail": "FUNDING_INPUT_INVALID",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-funding-amount",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 1,
+      "envelopeAuthorIndex": 1,
+      "rawTransactionHex": "020000000222fe31832ee3c498b2e555583897a432cceea88f85e5bb0b5b9361c3fbcaf477000000006441743f2a8592315a2ccf3dfc6e6c31472686176c874332ee97e4c7334e176a17f0c2c32bb86b26e7f30208275674098558e8690676a03c790a03c0354875d414244121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffee3c2d8dfdb06e0a7fea910877d330f7d485ebfddc258d556ab0cd75acd98ef00100000064416a2dd2df21199313a4af78f6c9aa7b177fd3038c1d404bc9f40abd526e0d0ac0516f15ebe3e27cbb79fafd04c63bf6cac711aacf5573db4fe3198874d6c137304121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac803e0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "4265d2f5c4e6c67282949bfdd0d410a55dc84060532bf3532d8f1a3a4efb24be",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "77f4cafbc361935b0bbbe5858fa8eecc32a497385855e5b298c4e32e8331fe22",
+            "outIdx": 0
+          },
+          "prevoutSats": "1",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        },
+        {
+          "prevOut": {
+            "txid": "f08ed9ac75cdb06a558d25dcfdeb85d4f730d3770891ea7f0a6eb0fd8d2d3cee",
+            "outIdx": 1
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020501c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "a9f95fbdae42440e30a33887369472325625f1a37ac08bf37d5c230c364772b1",
+      "preMutationDigestHex": "a9f95fbdae42440e30a33887369472325625f1a37ac08bf37d5c230c364772b1",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_FUNDING_SIGNATURE",
+      "detail": "FUNDING_INPUT_INVALID",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-metadata-truncated",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000292e6c620c3bdb6d18203d4f74d25334a2c7036e849c4c5155043b413d8b05e250000000064410dbb25329bd17c95ce42abdaab06b71df2399d8a42b7be3351e3e0b929a4d3c31914d13d6f4a308d59376d0924dd14d9c0b0cc6a436021931dd9d4e4c3d4022bc121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffffd529751ae8984fe4d174b7ed4cc21c9f56ea1e9b5d101aac46580f38c018a0e4010000006441c0251f0a0dcc61b4b09b637963d55287dc6931e024dbaf43782cb0ed1a0e6394618c3c5b013d6efb8fc7f499fcb8b84c70a0761c84f35c4ed82c51c4c17078504121021f8a566c205633d029094747d2e18f44e05993dda7a5f88f496078205f656e59ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac983a0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "c97114c41e7943995eb42cc8594b8b2a7f7f48489dd0d0103776b11f25c05b4d",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "255eb0d813b4435015c5c449e836702c4a33254df7d40382d1b6bdc320c6e692",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 193,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "f71c410c37c977a5ee3b26d36a5c4f3b3405665e0489b998026af9ffa24c7238",
+      "preMutationDigestHex": "f71c410c37c977a5ee3b26d36a5c4f3b3405665e0489b998026af9ffa24c7238",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AMBIGUOUS_TIP_FUNDING",
+      "detail": "PREVOUT_UNAVAILABLE",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-self-tip",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000018f1e407294108597fdeef3b00a24a902cbd01b008a03069af00e6bee9c7ac616000000006441bedf79dd08ad5edbdc09769deee4b912c5a0592bfb6758bc85e679236b27c58b55c488728859408dcb874e8923161d33a07d5d2d4bfdde1cc800edd84305a3414121025f7117a78150fe2ef97db7cfc83bd57b2e2c0d0dd25eaf467a4a1c2a45ce1486ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac00000000",
+      "txid": "a36d809eb89ded69ae62d0dbd15dd04176db4b2097997fcb486a2be529dbf22e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "16c67a9cee6b0ef09a06038a001bd0cb02a9240ab0f3eefd9785109472401e8f",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "1075bf81020f5c558390f1dac2c5214112d1ac7f71dfe5ff0387a67499fe337c",
+      "preMutationDigestHex": "1075bf81020f5c558390f1dac2c5214112d1ac7f71dfe5ff0387a67499fe337c",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "SELF_TIP_UNCREDITED",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-zero-recipient",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001d155dd98dc81bd5667c0d22a16de5a6a56a86c2def60986b761af8f37c52cc88000000006441f189eff4d9b1a0d710a1535d3a3b94a9df2b51757bc62999b5549523e818c15189ec2d0caecc672c72b7db9e73fb029fc724396ebcb341265e98d3fdae62b46e4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd700000000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac28230000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b7911b242c59452e7b3837af3abc80bb85f0c0df86e4d68969ad8c18afc8ffbd",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "88cc527cf3f81a766b9860ef2d6ca8566a5ade162ad2c06756bd81dc98dd55d1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "7882334050b00e6ada410a60ad89369c059bcb84f71e3b3ac2ab0d7c077dae7b",
+      "preMutationDigestHex": "7882334050b00e6ada410a60ad89369c059bcb84f71e3b3ac2ab0d7c077dae7b",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "NO_VALUE_TRANSFER",
+      "detail": "ZERO_OUTPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-pays-post-input-zero",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001fb5c9d4a486548ca36fce5906b682689a1b44e0fef5eeefd5754d99bb37d38a400000000644101bbd1435cf544054bcbfed215ef738e5606994372a00be50165fc07be8bc5f9a90a599e64887e04176ca3478b798bb64f5f6f8ccd7537b538a314489ff5a10c4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a914eddbb9fb072abd539d36829cb11211a85e25479e88ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "dc07cca48aaea1014fd43208602ada14b1b3b8c58ccc4bc17dff32f0c16d0f14",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a4387db39bd95457fdee5eef0f4eb4a18926686b90e5fc36ca4865484a9d5cfb",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "304241dd267ee6f3479c471ab10d197e7400f1de04f7f6232950ec2f8fc4ccbf",
+      "preMutationDigestHex": "304241dd267ee6f3479c471ab10d197e7400f1de04f7f6232950ec2f8fc4ccbf",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_RECIPIENT",
+      "detail": "OTHER_OUTPUT",
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-target-absent",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000018218a16b1a1f5ba31eb519a0c75163da8afeb884b691432aa21a3366b4637e37000000006441f5cf0d3a3c964a099e5233094929de2f6eee63f1e16db876d657383638be4d59bb9b6a6c891eef7e652bbc2abdf0a8bf529c4ce96182fc3a2af91136752db2d24121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d00230205000e03972831ed1426c6ad78c8fec6fb7e86d2d4b7edde6892b66fe6c006b349bae8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "e57a57dcb58dae23befa6c98f0108ac1f2ec4b2d4d3c338f71d31a911087d902",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "377e63b466331aa22a4391b684b8fe8ada6351c7a019b51ea35b1f1a6ba11882",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00230205000e03972831ed1426c6ad78c8fec6fb7e86d2d4b7edde6892b66fe6c006b349ba",
+      "scriptLength": 42,
+      "targetTxid": "0e03972831ed1426c6ad78c8fec6fb7e86d2d4b7edde6892b66fe6c006b349ba",
+      "digestHex": "f2658cb45cf22b9524ab523d70ecf4a131571fa3c16cda70acdce1963e99e017",
+      "preMutationDigestHex": "f2658cb45cf22b9524ab523d70ecf4a131571fa3c16cda70acdce1963e99e017",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_ABSENT",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ABSENT"
+    },
+    {
+      "id": "neg-target-pending",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001212e9a046c2a06f45a67357300a6ad442dbdcb725d315a39c6346d05dfe88c980000000064419679bd857988dafa06b17950c7720947e7208d25f76fd1e9f3667f439a97285283a971c42badaa838ead7b226ce7615f82dbfa1180ec876c30a8bd439e2ba66c4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500786eec3c4142675c20925a9692cbd8f7a210dd0438f2d0edc4c69015b11a4bf5e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b6f8da745913f276c2fbeeac515f676b27cdbbabb6f5b918467fe5fd810f9cd9",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "988ce8df056d34c6395a315d72cbbd2d44ada6007335675af4062a6c049a2e21",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500786eec3c4142675c20925a9692cbd8f7a210dd0438f2d0edc4c69015b11a4bf5",
+      "scriptLength": 42,
+      "targetTxid": "786eec3c4142675c20925a9692cbd8f7a210dd0438f2d0edc4c69015b11a4bf5",
+      "digestHex": "48db1edce1960822e128b41e6dcfd30cb9d421ea698c553beaa8c6789e28e8e0",
+      "preMutationDigestHex": "48db1edce1960822e128b41e6dcfd30cb9d421ea698c553beaa8c6789e28e8e0",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_PENDING",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "PENDING_TARGET"
+    },
+    {
+      "id": "neg-target-payment",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001c28739df1cc6f59e5bed038918cd0111c70d0825fa3f8c479643efb772eafee2000000006441c2cf826232df10dde16cc5b16a17c5b157e5660c2d8f72d172df7c7e27965499c61035b20e1894660578f24b609d00ed151c34ebb01a4a1a831ee5bf255eda2e4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500d8c4d37c2a2d8c0f3f8343866b7077c12d151ad6e1be1d07bc318bebf1905d84e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3eaeda6dd0885c7ff48432814a44b93008d20ae09e645b53ab8fb311bc49d42b",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "e2feea72b7ef4396478c3ffa25080dc71101cd188903ed5b9ef5c61cdf3987c2",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500d8c4d37c2a2d8c0f3f8343866b7077c12d151ad6e1be1d07bc318bebf1905d84",
+      "scriptLength": 42,
+      "targetTxid": "d8c4d37c2a2d8c0f3f8343866b7077c12d151ad6e1be1d07bc318bebf1905d84",
+      "digestHex": "a6ff19aeccc254a0c30a19195c2181bb04c064fcb34f29fd3874076a3b9c6655",
+      "preMutationDigestHex": "a6ff19aeccc254a0c30a19195c2181bb04c064fcb34f29fd3874076a3b9c6655",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-target-reply-shaped",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000011dd966840e3ed32090a257ffab24961d65be41e6ee037e947dcc73577044660f000000006441ac7fff55c78455b052307adf6de4198151e0fd69bc23764082c715408226873829433a52ce6a0f19d46d98c96a599156f318e66c2d9ba9a2ddf1f236a1f2c30f4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d002302050051a075a770d17acff09a88251671d95dd1981b15e9b261698d7d179a1cf940f1e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "ae429d182da0142accb07c1f4e642b433cf78586fe6a6f2907904360461f22c6",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "0f6644705773cc7d947e03eee641be651d9624abff57a29020d33e0e8466d91d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d002302050051a075a770d17acff09a88251671d95dd1981b15e9b261698d7d179a1cf940f1",
+      "scriptLength": 42,
+      "targetTxid": "51a075a770d17acff09a88251671d95dd1981b15e9b261698d7d179a1cf940f1",
+      "digestHex": "606594388f596bebbec953cac5fb1ab6f3d7c728c1119e995cc44e9d0a6ea8ec",
+      "preMutationDigestHex": "606594388f596bebbec953cac5fb1ab6f3d7c728c1119e995cc44e9d0a6ea8ec",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-target-duplicate-candidates",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "020000000112ec7399294d05c2850dfc8cd40bab468ddcbf65df53a302167da0de2a9bb68a000000006441ae434b99ac85e9e2203b2ed949fa9b7686361d831d4b39231b9c70d0f1f87377451a0591893937d480bcad43be0fe5122b1f2d4f9e730620264c3e7ae8a28b394121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d00230205007d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2dae8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f8477dc2679c6e4d9b922fef8d3428a81b2bb05c34b5b003f54943fc5011b69e",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8ab69b2adea07d1602a353df65bfdc8d46ab0bd48cfc0d85c2054d299973ec12",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00230205007d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "scriptLength": 42,
+      "targetTxid": "7d27c904cc41537a97e1ddcb901e1255fe5efff3e72ad4781128333987c9f2da",
+      "digestHex": "1e6bcc668474d646779a83940f67789a450327cd12ef4e48387548b20fd9e94f",
+      "preMutationDigestHex": "1e6bcc668474d646779a83940f67789a450327cd12ef4e48387548b20fd9e94f",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-target-mixed-tm0-and-tm1",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001ac5683d850c245abb292d7aa7d67050bb2884c34ba4b3029daebb6b8527379b300000000644172c8ab7f509db20ac1a1aaf281cfb992fbe377b149b3a9587712bce4aff2298df401f2a86fe3fbd6a67810d4b08b0c57fc75c387e191bcb8396863fcc2937ac14121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500a1f155e8fe459a3d5e6fba6a84f3107fe851fc4267b6b164a5250c8acf7cc6b2e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "d8bd352ea72f96cd48ab019fa64dee66a5102516e32715d8dbdcd39f4b6db780",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b3797352b8b6ebda29304bba344c88b20b05677daad792b2ab45c250d88356ac",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500a1f155e8fe459a3d5e6fba6a84f3107fe851fc4267b6b164a5250c8acf7cc6b2",
+      "scriptLength": 42,
+      "targetTxid": "a1f155e8fe459a3d5e6fba6a84f3107fe851fc4267b6b164a5250c8acf7cc6b2",
+      "digestHex": "11f97bd5550daa479cdaa3703daf1c5d047d0027b61c7c272d5aa7eda10928d6",
+      "preMutationDigestHex": "11f97bd5550daa479cdaa3703daf1c5d047d0027b61c7c272d5aa7eda10928d6",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-target-tm0-push-beside-tm1",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000016751312f9e09619741ea94732d375039b195b34b6d54b2d16f38a5ac6254b02e000000006441958457042d150a056e142618ba20481a3753bfe8c68226e13e1d6e7c9c9a7561f512ae2992f44f0dceff0eef8c8256ebe1371db415e4b53a889c9b0100a3cc4c4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d00230205002dd25cc83b6b4fb9d0247923bffcfb1dd60ddf574560e35e1e006a43aa064d4ae8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "1c09f3767412e5ba9caf78d4fd43ebc1342314aca11e0f07694c9dc214016432",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2eb05462aca5386fd1b2546d4bb395b13950372d7394ea419761099e2f315167",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d00230205002dd25cc83b6b4fb9d0247923bffcfb1dd60ddf574560e35e1e006a43aa064d4a",
+      "scriptLength": 42,
+      "targetTxid": "2dd25cc83b6b4fb9d0247923bffcfb1dd60ddf574560e35e1e006a43aa064d4a",
+      "digestHex": "96c3dbd3f6042b1f93506921dc23e4aae5b826390ec290d0e2027d08baa26b56",
+      "preMutationDigestHex": "96c3dbd3f6042b1f93506921dc23e4aae5b826390ec290d0e2027d08baa26b56",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_INELIGIBLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "INELIGIBLE"
+    },
+    {
+      "id": "neg-other-network",
+      "group": "negative",
+      "network": "lab-other-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000019d500a45a05962599cc36deb51b9c2cb6cd49d47dab15202a237e54d18395de1000000006441d3151a95b20c0da2349f4a1d7fa450d1403040d1f8eea7ab080fa9be57c35ae3ef0dda64a36e6ce17a62ecdce4096a9d69ee016dd9f1421485a7e89094d348454121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "acedeb771c7c31a792505b1ec82b22fd48685f90e6dc532288300f64266afa0b",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "e15d39184de537a20252b1da479dd46ccbc2b951eb6dc39c596259a0450a509d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "91d0c434427528c6e13aafd586a677568fd8c8693337b1e37a9e7581c4b1c459",
+      "preMutationDigestHex": "91d0c434427528c6e13aafd586a677568fd8c8693337b1e37a9e7581c4b1c459",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "TARGET_OTHER_NETWORK",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_VALID",
+      "authorErrorCode": null,
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "OTHER_NETWORK"
+    },
+    {
+      "id": "neg-signature-flipped",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001800f171fea9378f250cbe66045b6c6fd28b90d0fa5148a77b97a62ddd5c427810000000064416755732701b2f4bf2f7facb4fb200612f8153edf4e7753fe23b12f69bbaa39376a9e5f321c2b30b6d4842e875445aec978b0123ba66728127c9c5c241cccb3114121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "a7d5905a60fa1dea3535123928005ecc0e4c0a6b37cfff893069050060556beb",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8127c4d5dd627ab9778a14a50f0db928fdc6b64560e6cb50f27893ea1f170f80",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "434afb7373d5f3fda0c3d20a7810ce34bf061c401be48ba84b8479f96f21c3bd",
+      "preMutationDigestHex": "434afb7373d5f3fda0c3d20a7810ce34bf061c401be48ba84b8479f96f21c3bd",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_AUTHOR_SIGNATURE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-output-mutated",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001495f1dd7c7003e917cde915162749681931404a20163ac74701f75974ef76be50000000064416b1757b7a866a68619cb7894b24014fcfd7b00682338e609462edbb6d78adbb02b32f322d1ac5dc88bf3a20b8fcf6b9cfdadc34c02de1ed4f121d8eda8173dcb4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148031268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b7eb6687615f295d7812b9c8e693c62dd2e3840cf3252fc448fc688d0d07b636",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "e56bf74e97751f7074ac6301a2041493819674625191de7c913e00c7d71d5f49",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "98350a63d08d833fdd165f6efe21363c3e80e2c21c71e9b1395053e79176e716",
+      "preMutationDigestHex": "996f177378588ca34f41e6e91e6247d6acf36302f7a3ed2abd1c3dc5b9284657",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_AUTHOR_SIGNATURE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-envelope-mutated",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000015d2fd12846ec455d00f939e6cafe3d37a000504a043700d3f53751aa74b00c930000000064413ea692cd8957efb37f2e54261a0df71a1c928967e5d123e5be79e2e619371343092c8f83c7322e40848458a3473b3334022aa7cc4d09f96d7dfe5151267e5aba4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd6e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b428d7bc78615fac788467ec7b88b5ccb7aa7272a5d1606b41e7f659a6f39411",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "930cb074aa5137f5d30037044a5000a0373dfecae639f9005d45ec4628d12f5d",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd6",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd6",
+      "digestHex": "89d89e4f78af77394cff32076d3420cf06ae6ce6bcd6accc62ca1d6495894cce",
+      "preMutationDigestHex": "05e1de1bf7a47f6facc62435453709298e588765ab6b754c33740731925b1a55",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_AUTHOR_SIGNATURE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ABSENT"
+    },
+    {
+      "id": "neg-author-index-5",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 5,
+      "rawTransactionHex": "0200000001872be16c6698aeaa9d88fbb2dd78f6f07d6e12c1a56c2dae8db914f1e467a72b0000000064419b982e9e1386fa958981dc926eef540d6b46e833c8c4f4042548b9c1939cc1ff038a1f879b804feff9a13da849d4bcc4c6c70852d83344b0b9aac45c3942957b4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020505c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "b794fd3384ed105dc433b8af578dc7e0a9c1594cbb47693100880623b4e6dd41",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "2ba767e4f114b98dae2d6ca5c1126e7df0f678ddb2fb889daaae98666ce12b87",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020505c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "be96ea9cb598cae437ad9b2c5e561e33b18bc43d9bcfcf43079b83b2dee4fa03",
+      "preMutationDigestHex": "be96ea9cb598cae437ad9b2c5e561e33b18bc43d9bcfcf43079b83b2dee4fa03",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": null,
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "AUTHOR_INPUT_OUT_OF_RANGE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-prevout-missing",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001051d81952f5f16ec61fee2b7654eaaa68d626fe6b7ba272c401aa85a5c2019bb00000000644195d7d26424cb23a3412920c964a15efeca8d4968b0baf5a770024bdaec3899c0b49bf82b6210780df3fe38852f0890cd62cc78db7b3d8011eb55a37f994ed5f84121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "9f8f19c34e266a5f562bcf132fd463534610ca81e15ed9167ef2ec5d15130740",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bb19205c5aa81a402c27bab7e66f628da6aa4e65b7e2fe61ec165f2f95811d05",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": null,
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": null,
+      "preMutationDigestHex": "262f16ef60e1a561de7828697e9c1fb6fbf56446682be5aa6fda6f9a4313c90c",
+      "signatureOk": null,
+      "creditedSatoshis": "0",
+      "verdict": "PREVOUT_UNAVAILABLE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "PREVOUT_UNAVAILABLE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-prevout-script",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000017414a69cb91ddbeea16710eeca580c994502648eec914e2feffbb66b0fc2b78d000000006441620beeab1f888c866ebec507cd9fe11197d289d07b197b98267e81fa7d149ecb5fa7dac7fa71ac80285abcd9b66d7c4e53110d96239ccaf4cd0532bea55e533d4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "7c760739fd63b2fb4d5b6f9413217b92d927ec58d90f961cc7ecbda5ed281742",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "8db7c20f6bb6fbef2f4e91ec8e640245990c58caee1067a1eedb1db99ca61474",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a914eddbb9fb072abd539d36829cb11211a85e25479e88ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "01830d9a13923cf5ca0dedf7241d7eaf8a550b29fe910ace362ce41c5dcf49b8",
+      "preMutationDigestHex": "6f975cae4701bf488f7e3b99d7b01a1a180e201e59abe6f087360c5d906fb53f",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_AUTHOR_SIGNATURE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-prevout-amount",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001a143d9823aff7235a02cf9d93a2d37ce79ed72a83e6a41a138435a051c576ea30000000064418785a8dd533f30f1f1af3e2ffbb2ddfbd2a00d262abbd5685f8c314299321ccb708343106822980bc759ab434d6af5d8165ab45587a1b617a27c26cf73e2efee4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2c792659eee4aad4f38b8bca8805f2349d049747b69e8eaee4462dd1400aa2b8",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "a36e571c055a4338a1416a3ea872ed79ce372d3ad9f92ca03572ff3a82d943a1",
+            "outIdx": 0
+          },
+          "prevoutSats": "1",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "41780c6fd2d9ac38f9479b2a99f9e3fc98f99f5b9ea7feadcc1a599f3c67e912",
+      "preMutationDigestHex": "1993166e3930a60945a0fb6a69441aa5c288f50b4bb03585b1222afee3bdfd67",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_AUTHOR_SIGNATURE",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "INVALID_AUTHOR_SIGNATURE",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-unsupported-script",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001b9c385b1a83c47deeaf5724d60331124818f9ae8ac1cadad4ae83d2fb96cecbd000000006441aad314239a14b6839ce1b6f0605a0de8e3e8142870dd7753bc65ac7da137b08540d03ecbc87c7b970070b83e97c72f0cccbc09e258bb9d1902e935b1e2fedb904121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "3250d771c4f73ac11c371eb4a1b955632ed16a008d137882e9b723c28adac767",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "bdec6cb92f3de84aadad1cace89a8f81241133604d72f5eade473ca8b185c3b9",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "a914ecd2cbd8262d2c361b93bf89c4f0a78d76a16e7087",
+          "scriptType": "p2sh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "10aa45ea0f293646c88cd1b5d35d53cf1244cb401afd34a905fa6377b33931c2",
+      "preMutationDigestHex": "eba275f0475de95740338c621cbb70b5ea07cf56c75d9836b4c2e672ab70ac3a",
+      "signatureOk": false,
+      "creditedSatoshis": "0",
+      "verdict": "UNSUPPORTED_AUTHOR_SCRIPT",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": "3d02acb8e612f1c277793a232f20b693e87700e3",
+      "recipientHash160": "8030268a04488647a9bc64a8f5bf1cc6db27d300",
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": "UNSUPPORTED_AUTHOR_SCRIPT",
+      "structuralOk": true,
+      "structuralError": null,
+      "targetLink": "ELIGIBLE"
+    },
+    {
+      "id": "neg-version-09",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001d1c444e833b31b724e46de36ab41582d5c170142ce0ec8fa4f2954be536b5911000000006441b3995d197e6c51da965e2a6903a7a3e223e2571f081c84c42f92872876d0be744aeefa2ff4c6add6685f1676fcf27bcb80af42df479e3d85956ca2c5b306e4734121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023090500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "2b7ee91210c6ed1b2951ab08d718879ece775ca8220bf22b2f9108c2b0e1b749",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "11596b53be54294ffac80ece4201175c2d5841ab36de464e721bb333e844c4d1",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023090500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "7698a602c5a72df3a912a36df0b6c595d172c3ee663354ed2f50afa885991952",
+      "preMutationDigestHex": "7698a602c5a72df3a912a36df0b6c595d172c3ee663354ed2f50afa885991952",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "UNSUPPORTED_VERSION",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": null,
+      "recipientHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_VERSION",
+      "targetLink": "NOT_FRAMED"
+    },
+    {
+      "id": "neg-event-7e",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "0200000001dd17c044527c7d01b9aac002453f177189197e153034d99c5c406871a0bca37d0000000064412457472fd3bb19f9270277372bf2936224fd5bac765c04aca932b5521a831ec1cae8fe8310497920d5a6478a80f5186b4dfaa12e4b6403127191b56a590ead084121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002a6a04544d4d0023027e00c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "f5c0cdbc8430b71a1acc55bb36ce2fd5041004942fa9829773d1744c2715f6d8",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "7da3bca07168405c9cd93430157e198971173f4502c0aab9017d7c5244c017dd",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d0023027e00c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 42,
+      "targetTxid": "c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "digestHex": "17f97a3d54b577b5288eb350b5061bc07a33cbce4720481fe23775796ebb7ed1",
+      "preMutationDigestHex": "17f97a3d54b577b5288eb350b5061bc07a33cbce4720481fe23775796ebb7ed1",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "UNSUPPORTED_EVENT",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": null,
+      "recipientHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "structuralOk": false,
+      "structuralError": "UNSUPPORTED_EVENT",
+      "targetLink": "NOT_FRAMED"
+    },
+    {
+      "id": "neg-nonminimal",
+      "group": "negative",
+      "network": "lab-tip-net",
+      "signatureAlgorithm": "schnorr",
+      "signatureInputIndex": 0,
+      "envelopeAuthorIndex": 0,
+      "rawTransactionHex": "02000000012945c552898da3992054be30f55fdcae2638bd1113f0c6f2d8a999db18d05eb50000000064419a3d9bc830ac71bff83ae9631c2cf4590ad6e121a7d846755716e4b8b401440083ccc22f4d6aeaf206e5d2459f26fbfdca8dd44edd3e92ac4a3077f13c7112fc4121036d6caac248af96f6afa7f904f550253a0f3ef3f5aa2fe6838a95b216691468e2ffffffff0300000000000000002b6a04544d4d004c23020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7e8030000000000001976a9148030268a04488647a9bc64a8f5bf1cc6db27d30088ac401f0000000000001976a9143d02acb8e612f1c277793a232f20b693e87700e388ac00000000",
+      "txid": "90357e45918c41bdb4238bb7d5822c83912a99b601d414d26cf455239bb19981",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b55ed018db99a9d8f2c6f01311bd3826aedc5ff530be542099a38d8952c54529",
+            "outIdx": 0
+          },
+          "prevoutSats": "10000",
+          "outputScriptHex": "76a9143d02acb8e612f1c277793a232f20b693e87700e388ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "sighashByte": 65,
+      "outputScriptHex": "6a04544d4d004c23020500c0eb405a40521236503b55e4fa7f9ddd17589b0fc6b49b0126014b59812d2cd7",
+      "scriptLength": 43,
+      "targetTxid": null,
+      "digestHex": "86a3ae9ac169f5fc776ffbf0fa429586aa102f1f7de07d77362c496212b24eac",
+      "preMutationDigestHex": "86a3ae9ac169f5fc776ffbf0fa429586aa102f1f7de07d77362c496212b24eac",
+      "signatureOk": true,
+      "creditedSatoshis": "0",
+      "verdict": "INVALID_FORMAT",
+      "detail": null,
+      "settlement": "NOT_DEMONSTRATED",
+      "confirmation": "NOT_DEMONSTRATED",
+      "authorHash160": null,
+      "recipientHash160": null,
+      "authorship": "LAB_INVALID",
+      "authorErrorCode": null,
+      "structuralOk": false,
+      "structuralError": "INVALID_FORMAT",
+      "targetLink": "NOT_FRAMED"
+    }
+  ],
+  "structures": [
+    {
+      "id": "truncated-envelope",
+      "scriptHex": "6a04544d4d00230205010e03972831ed1426c6ad",
+      "errorCode": "INVALID_FORMAT"
+    },
+    {
+      "id": "lokad-only",
+      "scriptHex": "6a04544d4d00",
+      "errorCode": "INVALID_FORMAT"
+    }
+  ]
+}

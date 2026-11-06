@@ -1,0 +1,355 @@
+{
+  "schema": "rfc0001-synthetic-vectors-v1",
+  "status": "PROPOSED_UNRATIFIED_TEST_HARNESS",
+  "sourceRfc": "https://github.com/xolosArmy/tonalli-memo/pull/40",
+  "network": "synthetic-no-broadcast",
+  "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "limitations": [
+    "No signed transaction bytes, eCash signature verification, live Chronik, regtest or ALP SEND integration.",
+    "authorMock uses declarations, NOT cryptographic verification.",
+    "tipXecMock uses labeled input/output owners, NOT script or consensus verification.",
+    "A structurally valid OP_RETURN never proves a valid author or a settled payment."
+  ],
+  "structural": [
+    {
+      "id": "reply-ascii",
+      "scriptHex": "6a04544d4d0027020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f686f6c61",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "reply-one-byte",
+      "scriptHex": "6a04544d4d0024020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "reply-180-bytes",
+      "scriptHex": "6a04544d4d004cd7020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "reply-181-bytes",
+      "scriptHex": "6a04544d4d004cd8020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "expect": "PAYLOAD_TOO_LARGE"
+    },
+    {
+      "id": "reply-invalid-utf8",
+      "scriptHex": "6a04544d4d0024020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff",
+      "expect": "INVALID_UTF8"
+    },
+    {
+      "id": "reply-empty",
+      "scriptHex": "6a04544d4d0023020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "expect": "EMPTY_REPLY"
+    },
+    {
+      "id": "reaction-like",
+      "scriptHex": "6a04544d4d0024020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f01",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "reaction-unlike",
+      "scriptHex": "6a04544d4d0024020401000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f01",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "reaction-unknown-kind",
+      "scriptHex": "6a04544d4d0024020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f02",
+      "expect": "UNSUPPORTED_REACTION_KIND"
+    },
+    {
+      "id": "reaction-short",
+      "scriptHex": "6a04544d4d0023020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "expect": "INVALID_EVENT_DATA_LENGTH"
+    },
+    {
+      "id": "reaction-long",
+      "scriptHex": "6a04544d4d0025020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0100",
+      "expect": "INVALID_EVENT_DATA_LENGTH"
+    },
+    {
+      "id": "tip-xec",
+      "scriptHex": "6a04544d4d0023020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "expect": "VALID_FORMAT"
+    },
+    {
+      "id": "tip-extra",
+      "scriptHex": "6a04544d4d0024020501000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f00",
+      "expect": "INVALID_EVENT_DATA_LENGTH"
+    },
+    {
+      "id": "unsupported-event",
+      "scriptHex": "6a04544d4d0023020601000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "expect": "UNSUPPORTED_EVENT_TYPE"
+    },
+    {
+      "id": "unsupported-version",
+      "scriptHex": "6a04544d4d0024030201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61",
+      "expect": "UNSUPPORTED_VERSION"
+    },
+    {
+      "id": "invalid-txid-31-bytes",
+      "scriptHex": "6a04544d4d0023020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e01",
+      "expect": "INVALID_EVENT_DATA_LENGTH"
+    },
+    {
+      "id": "reply-overlong-push",
+      "scriptHex": "6a04544d4d004c24020201000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f61",
+      "expect": "NONMINIMAL_PUSH"
+    },
+    {
+      "id": "extra-opcode",
+      "scriptHex": "6a04544d4d0024020301000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0151",
+      "expect": "INVALID_FORMAT"
+    },
+    {
+      "id": "v1-post-still-valid",
+      "scriptHex": "6a04544d4d00050101006f6b",
+      "expect": "CORE_V1_DELEGATED"
+    }
+  ],
+  "contextMocks": [
+    {
+      "id": "parent-valid",
+      "kind": "target",
+      "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "parents": {
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f": "POST_VERIFIED"
+      },
+      "expect": "PARENT_VERIFIED"
+    },
+    {
+      "id": "parent-missing",
+      "kind": "target",
+      "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "parents": {},
+      "expect": "PARENT_PENDING"
+    },
+    {
+      "id": "parent-non-post",
+      "kind": "target",
+      "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "parents": {
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f": "OTHER_TX"
+      },
+      "expect": "INVALID_PARENT"
+    },
+    {
+      "id": "cycle-in-index",
+      "kind": "target",
+      "targetTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "childTxid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "parents": {
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f": "REPLY_VERIFIED"
+      },
+      "expect": "REFERENCE_CYCLE"
+    },
+    {
+      "id": "like-then-unlike-then-like",
+      "kind": "reactions",
+      "events": [
+        {
+          "author": "a",
+          "action": "REACTION"
+        },
+        {
+          "author": "a",
+          "action": "REACTION"
+        },
+        {
+          "author": "a",
+          "action": "REACTION_REMOVE"
+        },
+        {
+          "author": "a",
+          "action": "REACTION"
+        }
+      ],
+      "expect": 1
+    },
+    {
+      "id": "two-authors",
+      "kind": "reactions",
+      "events": [
+        {
+          "author": "a",
+          "action": "REACTION"
+        },
+        {
+          "author": "b",
+          "action": "REACTION"
+        }
+      ],
+      "expect": 2
+    },
+    {
+      "id": "invalid-designated-index",
+      "kind": "authorMock",
+      "inputCount": 1,
+      "authorInputIndex": 1,
+      "prevoutOwner": "a",
+      "pubkeyOwner": "a",
+      "signatureOk": true,
+      "expect": "AUTHOR_INPUT_OUT_OF_RANGE"
+    },
+    {
+      "id": "wrong-key-mock",
+      "kind": "authorMock",
+      "inputCount": 2,
+      "authorInputIndex": 1,
+      "prevoutOwner": "a",
+      "pubkeyOwner": "b",
+      "signatureOk": true,
+      "expect": "INVALID_AUTHOR_SCRIPT_SIG"
+    },
+    {
+      "id": "bad-signature-mock",
+      "kind": "authorMock",
+      "inputCount": 2,
+      "authorInputIndex": 1,
+      "prevoutOwner": "a",
+      "pubkeyOwner": "a",
+      "signatureOk": false,
+      "expect": "INVALID_AUTHOR_SIGNATURE"
+    },
+    {
+      "id": "author-mock-valid",
+      "kind": "authorMock",
+      "inputCount": 2,
+      "authorInputIndex": 1,
+      "prevoutOwner": "a",
+      "pubkeyOwner": "a",
+      "signatureOk": true,
+      "expect": "MOCK_AUTHOR_MATCH_ONLY"
+    },
+    {
+      "id": "tip-recipient-wrong",
+      "kind": "tipXecMock",
+      "tipper": "a",
+      "recipient": "b",
+      "inputs": [
+        {
+          "owner": "a",
+          "sats": 2000
+        }
+      ],
+      "outputs": [
+        {
+          "owner": "c",
+          "sats": 1000
+        },
+        {
+          "owner": "a",
+          "sats": 500
+        }
+      ],
+      "expect": {
+        "status": "INVALID_RECIPIENT",
+        "creditedSats": 0
+      }
+    },
+    {
+      "id": "tip-1000-sats",
+      "kind": "tipXecMock",
+      "tipper": "a",
+      "recipient": "b",
+      "inputs": [
+        {
+          "owner": "a",
+          "sats": 2000
+        }
+      ],
+      "outputs": [
+        {
+          "owner": "b",
+          "sats": 1000
+        },
+        {
+          "owner": "a",
+          "sats": 500
+        }
+      ],
+      "expect": {
+        "status": "MOCK_TIP_ELIGIBLE",
+        "creditedSats": 1000
+      }
+    },
+    {
+      "id": "recipient-funded-tip-exploit",
+      "kind": "tipXecMock",
+      "tipper": "a",
+      "recipient": "b",
+      "inputs": [
+        {
+          "owner": "a",
+          "sats": 1000
+        },
+        {
+          "owner": "b",
+          "sats": 1000000
+        }
+      ],
+      "outputs": [
+        {
+          "owner": "b",
+          "sats": 1000000
+        },
+        {
+          "owner": "a",
+          "sats": 500
+        }
+      ],
+      "expect": {
+        "status": "AMBIGUOUS_TIP_FUNDING",
+        "creditedSats": 0
+      }
+    },
+    {
+      "id": "third-party-funded-tip",
+      "kind": "tipXecMock",
+      "tipper": "a",
+      "recipient": "b",
+      "inputs": [
+        {
+          "owner": "a",
+          "sats": 1000
+        },
+        {
+          "owner": "c",
+          "sats": 1000000
+        }
+      ],
+      "outputs": [
+        {
+          "owner": "b",
+          "sats": 500000
+        }
+      ],
+      "expect": {
+        "status": "AMBIGUOUS_TIP_FUNDING",
+        "creditedSats": 0
+      }
+    },
+    {
+      "id": "self-tip",
+      "kind": "tipXecMock",
+      "tipper": "a",
+      "recipient": "a",
+      "inputs": [
+        {
+          "owner": "a",
+          "sats": 2000
+        }
+      ],
+      "outputs": [
+        {
+          "owner": "a",
+          "sats": 1500
+        }
+      ],
+      "expect": {
+        "status": "SELF_TIP_UNCREDITED",
+        "creditedSats": 0
+      }
+    }
+  ]
+}

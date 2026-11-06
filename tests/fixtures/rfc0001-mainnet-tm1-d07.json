@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "protocol": "TM1-CORE-V1.0",
+  "network": "eCash-mainnet",
+  "purpose": "Public mainnet bytes recovered by an HTTPS read. The bytes are stored unchanged. A confirmed transaction is not, by itself, INDEPENDENT_SIGNATURE_VERIFIED.",
+  "retrieval": {
+    "method": "https-read",
+    "chronikUrl": "https://chronik.e.cash",
+    "retrievedAt": "2026-10-30T23:02:05Z",
+    "client": "chronik-client 4.3.0",
+    "serialization": "Local BIP143-free transaction serializer from Chronik version, inputs, outputs and locktime. Computed TXID and byte length matched Chronik. No mainnet byte was edited.",
+    "auditScript": "scripts/d07-conf-04-historical-audit.mjs",
+    "auditVerdict": "SAMPLE_COMPATIBLE_NOT_RATIFICATION",
+    "auditTrust": "trusted-chronik",
+    "archivedArtifact": {
+      "id": 12744812743,
+      "name": "d07-conf-04-mainnet-audit-c446d2f7cf0af44fe2b45b024b2c7ec623b0c8b5",
+      "createdAt": "2026-10-27T15:09:44Z",
+      "contents": "Block metadata and STRUCTURALLY_COMPATIBLE under trusted-chronik. No raw transaction, scriptSig or prevout amount."
+    },
+    "cohortNote": "Published as TM1 Draft 0.2 on 2026-09-10. These samples do not prove which software revision produced them."
+  },
+  "entries": [
+    {
+      "txid": "fadee1662482e302fcac768686085baa8f67ea9b67d846dfea100a0de1dcd9fd",
+      "label": "Primer canary TM1",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html",
+      "editorialNote": null,
+      "blockHeight": 965957,
+      "blockHash": "00000000000000003b25b96ec23a48cfb9adc5c32f6a17854c4a1e48635e9d49",
+      "blockTimestamp": 1788923344,
+      "timeFirstSeen": 1788923168,
+      "tokenStatus": "TOKEN_STATUS_NON_TOKEN",
+      "tokenEntryCount": 0,
+      "rawTransactionHex": "02000000012ff54e4dee933eaa33aaace96a9f5f930f60f2a06146d272763f9286bf470d47020000006441c042ba7e31c3ef92915048342f2959115cd8153fa988571e7b990d688be467e0c4440cc6429b7a60ef792c4a286515a4e09588f2b52d32db5f7eaf2866c47a46412102669b1ee6cc4596ff4b486f35518f2ec24703d17cb1799f1cc44c9408c0731710ffffffff020000000000000000496a04544d4d004201010048656c6c6f20576f726c64202120546f6e616c6c69204d656d6f206973206f6e6c696e6520696e206170702e746f6e616c6c692e636173682077616c6c6574ec6f0400000000001976a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac00000000",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "470d47bf86923f7672d24661a0f2600f935f9f6ae9acaa33aa3e93ee4d4ef52f",
+            "outIdx": 2
+          },
+          "prevoutSats": "291117",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d004201010048656c6c6f20576f726c64202120546f6e616c6c69204d656d6f206973206f6e6c696e6520696e206170702e746f6e616c6c692e636173682077616c6c6574"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "290796",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac"
+        }
+      ],
+      "eventDataUtf8": "Hello World ! Tonalli Memo is online in app.tonalli.cash wallet",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "observedDigestHex": "8327b7ef606eb15da863120183a3055764f86421dfe5b3272eee3c6705b2c8b7",
+      "expected": {
+        "structural": "STRUCTURALLY_COMPATIBLE",
+        "independent": "INDEPENDENT_SIGNATURE_VERIFIED",
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "trustModel": "trusted-chronik"
+        }
+      }
+    },
+    {
+      "txid": "8539b6f59912009f8f4fd322bf67266063233c101a4b54aa0a765ad0c9955ff8",
+      "label": "Primera auto-ingesta TM1 desde mempool",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html",
+      "editorialNote": null,
+      "blockHeight": 966182,
+      "blockHash": "000000000000000014df2a71da2969462991f7f10faf59bfd8b6ca19e54424b5",
+      "blockTimestamp": 1789059586,
+      "timeFirstSeen": 1789058894,
+      "tokenStatus": "TOKEN_STATUS_NON_TOKEN",
+      "tokenEntryCount": 0,
+      "rawTransactionHex": "020000000101e77be93a5594bd1ac6a64d943882075e7cf920c4cd6d8c85a42398d91c91d903000000644140f6602df19253ac72e8f8a68144931a5fdcdd41dcae7bf97653ca5fd0afe92ea952e93f45c3dbbbaa6cb2a76c429a83f8c772a585eea56f946d501999693391412102669b1ee6cc4596ff4b486f35518f2ec24703d17cb1799f1cc44c9408c0731710ffffffff0200000000000000005b6a04544d4d004c5301010044656e74726f20646520546f6e616c6c69204d656d6f206c6120636f6d756e6964616420706f64726120706f7374656172207920636f6d70617274697220656e20656c2066656564207075626c69636f5a6a0400000000001976a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac00000000",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "d9911cd99823a4858c6dcdc420f97c5e078238944da6c61abd94553ae97be701",
+            "outIdx": 3
+          },
+          "prevoutSats": "289712",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d004c5301010044656e74726f20646520546f6e616c6c69204d656d6f206c6120636f6d756e6964616420706f64726120706f7374656172207920636f6d70617274697220656e20656c2066656564207075626c69636f"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "289370",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac"
+        }
+      ],
+      "eventDataUtf8": "Dentro de Tonalli Memo la comunidad podra postear y compartir en el feed publico",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "observedDigestHex": "85ef67bce3b2cf2fd0edd878966e6a2d729d595847714d51c87302125a920af2",
+      "expected": {
+        "structural": "STRUCTURALLY_COMPATIBLE",
+        "independent": "INDEPENDENT_SIGNATURE_VERIFIED",
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "trustModel": "trusted-chronik"
+        }
+      }
+    },
+    {
+      "txid": "0c96216decc99af759517cf2143e2bd22ea179d48a9280635c8cd1c1eb6b0150",
+      "label": "Primer Memo + NFT",
+      "sourceUrl": "https://magazine.ecash.mx/reportajes/tonalli-memo-mainnet-capa-social-ecash.html",
+      "editorialNote": "The magazine label says Memo + NFT. Chronik reports TOKEN_STATUS_NON_TOKEN and this transaction has no token output. The nft1 reference is text inside the POST.",
+      "blockHeight": 966215,
+      "blockHash": "000000000000000057ab28172e7fe03ec76f05629b1a47d6435ded377dfe2b6c",
+      "blockTimestamp": 1789079141,
+      "timeFirstSeen": 1789079043,
+      "tokenStatus": "TOKEN_STATUS_NON_TOKEN",
+      "tokenEntryCount": 0,
+      "rawTransactionHex": "02000000017b1b3b6500cc19d058dd4de5dd4125eceef1d3b1fc55d1f11496532d54ea3fb103000000644167a0f844ab7e56b1d1eee7c3f0fa23218e74921662336f058283cca2c23a122730f777dc784eaf0627f07b4bf4b3553e584d9485d91d6994450d5f113b1e72f3412102669b1ee6cc4596ff4b486f35518f2ec24703d17cb1799f1cc44c9408c0731710ffffffff020000000000000000886a04544d4d004c80010100406e6674313a313763383037623336343531363931366566626366653634656163313562323132393335636365396539366161353835393662666261636664626130643763340a466972737420786f6c6f7341726d79204e4654207075626c697368206e6f204d656d6f20466565642e20f09f94a5f09f94a5f09f94a592640400000000001976a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac00000000",
+      "inputs": [
+        {
+          "prevOut": {
+            "txid": "b13fea542d539614f1d155fcb1d3f1eeec2541dde54ddd58d019cc00653b1b7b",
+            "outIdx": 3
+          },
+          "prevoutSats": "288286",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac",
+          "scriptType": "p2pkh"
+        }
+      ],
+      "outputs": [
+        {
+          "outputIndex": 0,
+          "sats": "0",
+          "outputScriptHex": "6a04544d4d004c80010100406e6674313a313763383037623336343531363931366566626366653634656163313562323132393335636365396539366161353835393662666261636664626130643763340a466972737420786f6c6f7341726d79204e4654207075626c697368206e6f204d656d6f20466565642e20f09f94a5f09f94a5f09f94a5"
+        },
+        {
+          "outputIndex": 1,
+          "sats": "287890",
+          "outputScriptHex": "76a9143c0995f962a39c760b06e67ec1efe1f780d5628488ac"
+        }
+      ],
+      "eventDataUtf8": "@nft1:17c807b364516916efbcfe64eac15b212935cce9e96aa58596bfbacfdba0d7c4\nFirst xolosArmy NFT publish no Memo Feed. 🔥🔥🔥",
+      "signatureAlgorithm": "schnorr",
+      "authorInputIndex": 0,
+      "sighashByte": 65,
+      "observedDigestHex": "b88e3bb43213861873be7ae674970400ece148f615c0154a14a98e10c046d015",
+      "expected": {
+        "structural": "STRUCTURALLY_COMPATIBLE",
+        "independent": "INDEPENDENT_SIGNATURE_VERIFIED",
+        "normalized": {
+          "status": "VERIFIED_TM1",
+          "trustModel": "trusted-chronik"
+        }
+      }
+    }
+  ]
+}
