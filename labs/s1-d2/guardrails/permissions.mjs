@@ -1,6 +1,6 @@
 // Capability decisions only. This module cannot assemble, sign, broadcast, or deploy.
 
-import { readOwnValue, reject } from "./allowlist.mjs";
+import { ownDataKeys, propertyLabel, readOwnValue, reject, rejectProxy } from "./allowlist.mjs";
 
 export const CAPABILITIES = Object.freeze([
   "read",
@@ -24,17 +24,20 @@ export function parsePermissions(input) {
   if (typeof input !== "object" || Array.isArray(input)) {
     return { ...reject("MALFORMED", "permissions must be a plain object"), permissions: denied };
   }
+  const opaque = rejectProxy(input, "permissions");
+  if (opaque) return { ...opaque, permissions: denied };
   if (Object.getPrototypeOf(input) !== Object.prototype) {
     return {
       ...reject("MALFORMED", "permissions prototype is not Object.prototype"),
       permissions: denied,
     };
   }
-  const keys = Object.keys(input);
-  for (const key of keys) {
-    if (!CAPABILITIES.includes(key)) {
+  const inspected = ownDataKeys(input);
+  if (!inspected.ok) return { ...inspected, permissions: denied };
+  for (const key of inspected.keys) {
+    if (typeof key !== "string" || !CAPABILITIES.includes(key)) {
       return {
-        ...reject("UNKNOWN_CAPABILITY", `unknown capability ${key}`),
+        ...reject("UNKNOWN_CAPABILITY", `unknown capability ${propertyLabel(key)}`),
         permissions: denied,
       };
     }

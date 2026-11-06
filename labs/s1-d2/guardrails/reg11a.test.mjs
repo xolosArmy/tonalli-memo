@@ -397,6 +397,183 @@ test("REG-11A rechaza accessors sin invocarlos", () => {
   assert.equal(endpointReads, 0);
 });
 
+test("REG-11A rechaza un getter de followRedirects sin invocar connect", () => {
+  const adapter = safeAdapter();
+  let getterRan = 0;
+  Object.defineProperty(adapter, "followRedirects", {
+    enumerable: true,
+    configurable: true,
+    get() {
+      getterRan += 1;
+      this.connect();
+      return false;
+    },
+  });
+  const decision = evaluateConfiguration(allowlistedConfig("rpc"), adapter);
+  assert.equal(getterRan, 0);
+  assert.equal(decision.verdict, "rejected");
+  assert.equal(decision.code, "MALFORMED");
+  assert.equal(decision.connectInvoked, false);
+  assert.equal(decision.reg11bSatisfied, false);
+  assert.equal(decision.offlineOnly, true);
+
+  let callsGetter = 0;
+  const callsAdapter = safeAdapter();
+  Object.defineProperty(callsAdapter, "calls", {
+    enumerable: true,
+    configurable: true,
+    get() {
+      callsGetter += 1;
+      this.connect();
+      return [];
+    },
+  });
+  const callsDecision = evaluateConfiguration(allowlistedConfig("chronik"), callsAdapter);
+  assert.equal(callsGetter, 0);
+  assert.equal(callsDecision.verdict, "rejected");
+  assert.equal(callsDecision.code, "MALFORMED");
+  assert.equal(callsDecision.connectInvoked, false);
+
+  const inner = safeAdapter();
+  let traps = 0;
+  const proxied = new Proxy(inner, {
+    get(target, key, receiver) {
+      traps += 1;
+      if (key === "followRedirects") target.connect();
+      return Reflect.get(target, key, receiver);
+    },
+    getOwnPropertyDescriptor(target, key) {
+      traps += 1;
+      if (key === "followRedirects") target.connect();
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    ownKeys(target) {
+      traps += 1;
+      target.connect();
+      return Reflect.ownKeys(target);
+    },
+  });
+  const proxyDecision = evaluateConfiguration(allowlistedConfig("rpc"), proxied);
+  assert.equal(traps, 0);
+  assert.equal(inner.calls.length, 0);
+  assert.equal(proxyDecision.verdict, "rejected");
+  assert.equal(proxyDecision.code, "MALFORMED");
+  assert.equal(proxyDecision.connectInvoked, false);
+});
+
+test("REG-11A rechaza propiedades ocultas, símbolos y tipos inesperados", () => {
+  function hidden(target, key, value) {
+    Object.defineProperty(target, key, {
+      value,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    });
+    return target;
+  }
+
+  const proxyEnv = hidden({}, "HTTP_PROXY", "http://127.0.0.1:8888");
+  const proxyDecision = evaluateConfiguration(patched({ env: proxyEnv }), safeAdapter());
+  assert.equal(proxyDecision.verdict, "rejected");
+  assert.equal(proxyDecision.code, "PROXY_ENV");
+  assert.equal(proxyDecision.connectInvoked, false);
+  assert.equal(proxyDecision.reg11bSatisfied, false);
+
+  const unknownEnv = hidden({}, "PATH", "/tmp");
+  assert.equal(validateConfiguration(patched({ env: unknownEnv })).code, "UNKNOWN_FIELD");
+  const symbolEnv = {};
+  Object.defineProperty(symbolEnv, Symbol("env"), { value: "hidden" });
+  assert.equal(validateConfiguration(patched({ env: symbolEnv })).code, "UNKNOWN_FIELD");
+
+  const hiddenConfig = hidden(allowlistedConfig("rpc"), "socialV2", false);
+  assert.equal(evaluateConfiguration(hiddenConfig, safeAdapter()).code, "UNKNOWN_FIELD");
+  const symbolConfig = allowlistedConfig("rpc");
+  Object.defineProperty(symbolConfig, Symbol("config"), { value: true });
+  assert.equal(evaluateConfiguration(symbolConfig, safeAdapter()).code, "UNKNOWN_FIELD");
+
+  const hiddenFlags = hidden({ ...defaultLabFlags() }, "wallet", false);
+  const flagDecision = parseLabFlags(hiddenFlags);
+  assert.equal(flagDecision.ok, false);
+  assert.equal(flagDecision.code, "UNKNOWN_FLAG");
+  for (const name of LAB_FLAGS) assert.equal(flagDecision.flags[name], false);
+  const symbolFlags = { ...defaultLabFlags() };
+  Object.defineProperty(symbolFlags, Symbol("flag"), { value: false });
+  assert.equal(parseLabFlags(symbolFlags).code, "UNKNOWN_FLAG");
+
+  const hiddenPermissions = hidden({ ...defaultPermissions() }, "admin", true);
+  const permissionDecision = parsePermissions(hiddenPermissions);
+  assert.equal(permissionDecision.code, "UNKNOWN_CAPABILITY");
+  for (const capability of CAPABILITIES) {
+    assert.equal(permissionDecision.permissions[capability], false);
+  }
+  const symbolPermissions = { ...defaultPermissions() };
+  Object.defineProperty(symbolPermissions, Symbol("capability"), { value: true });
+  assert.equal(parsePermissions(symbolPermissions).code, "UNKNOWN_CAPABILITY");
+  assert.equal(allows(symbolPermissions, "sign"), false);
+
+  let envReads = 0;
+  const env = {};
+  Object.defineProperty(env, "HTTP_PROXY", {
+    enumerable: false,
+    configurable: true,
+    get() {
+      envReads += 1;
+      return "http://127.0.0.1:8888";
+    },
+  });
+  assert.equal(validateConfiguration(patched({ env })).code, "MALFORMED");
+  assert.equal(envReads, 0);
+
+  let configReads = 0;
+  const config = allowlistedConfig("rpc");
+  Object.defineProperty(config, "proxy", {
+    enumerable: false,
+    configurable: true,
+    get() {
+      configReads += 1;
+      return "http://127.0.0.1:8888";
+    },
+  });
+  const configDecision = evaluateConfiguration(config, safeAdapter());
+  assert.equal(configDecision.code, "MALFORMED");
+  assert.equal(configDecision.connectInvoked, false);
+  assert.equal(configReads, 0);
+
+  let flagReads = 0;
+  const flags = { ...defaultLabFlags() };
+  Object.defineProperty(flags, "reply", {
+    enumerable: false,
+    configurable: true,
+    get() {
+      flagReads += 1;
+      return true;
+    },
+  });
+  const hiddenFlag = parseLabFlags(flags);
+  assert.equal(hiddenFlag.code, "MALFORMED");
+  assert.equal(hiddenFlag.flags.reply, false);
+  assert.equal(flagReads, 0);
+
+  const stringRedirect = evaluateConfiguration(patched({ followRedirects: "true" }), safeAdapter());
+  assert.equal(stringRedirect.verdict, "rejected");
+  assert.equal(stringRedirect.code, "REDIRECT");
+  assert.equal(stringRedirect.connectInvoked, false);
+
+  const stringFollow = { ...safeAdapter(), followRedirects: "true" };
+  const stringMax = { ...safeAdapter(), maxRedirects: "1" };
+  const followDecision = evaluateConfiguration(allowlistedConfig("rpc"), stringFollow);
+  const maxDecision = evaluateConfiguration(allowlistedConfig("chronik"), stringMax);
+  assert.equal(followDecision.verdict, "rejected");
+  assert.equal(followDecision.code, "MALFORMED");
+  assert.equal(followDecision.connectInvoked, false);
+  assert.equal(stringFollow.calls.length, 0);
+  assert.equal(maxDecision.verdict, "rejected");
+  assert.equal(maxDecision.code, "MALFORMED");
+  assert.equal(maxDecision.connectInvoked, false);
+  assert.equal(stringMax.calls.length, 0);
+  assert.equal(validateConfiguration(patched({ maxRedirects: "1" })).code, "UNKNOWN_FIELD");
+});
+
 test("REG-11A los módulos de decisión no importan red ni procesos", () => {
   const libraries = EXPECTED_FILES.filter((name) => name.endsWith(".mjs") && !name.endsWith(".test.mjs"));
   const banned = [

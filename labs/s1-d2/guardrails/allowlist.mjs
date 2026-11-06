@@ -1,5 +1,7 @@
 // S1-A offline allowlist. These strings are not permission to connect.
 
+import { types } from "node:util";
+
 export const AUTHORIZED_MAIN_SHA = "228d1f036643ca9be8ba85e91f8200536f3242da";
 
 export const LAB_ALLOWLIST = Object.freeze({
@@ -46,11 +48,39 @@ export function reject(code, reason) {
   return { ok: false, code, reason };
 }
 
+export function propertyLabel(key) {
+  return typeof key === "symbol" ? "symbol" : key;
+}
+
+export function rejectProxy(input, label) {
+  if (types.isProxy(input)) return reject("MALFORMED", `${label} is a proxy`);
+  return null;
+}
+
+export function isAccessorDescriptor(description) {
+  return description != null && ("get" in description || "set" in description);
+}
+
 export function readOwnValue(input, key) {
+  const opaque = rejectProxy(input, `field ${propertyLabel(key)}`);
+  if (opaque) return opaque;
   const description = Object.getOwnPropertyDescriptor(input, key);
   if (!description) return reject("INCOMPLETE", `field ${key} is missing`);
-  if (typeof description.get === "function" || typeof description.set === "function") {
-    return reject("MALFORMED", `field ${key} is an accessor`);
+  if (isAccessorDescriptor(description)) {
+    return reject("MALFORMED", `field ${propertyLabel(key)} is an accessor`);
   }
   return { ok: true, code: "DATA_PROPERTY", reason: "data property", value: description.value };
+}
+
+export function ownDataKeys(input) {
+  const opaque = rejectProxy(input, "object");
+  if (opaque) return opaque;
+  const keys = Reflect.ownKeys(input);
+  for (const key of keys) {
+    const description = Object.getOwnPropertyDescriptor(input, key);
+    if (!description || isAccessorDescriptor(description)) {
+      return reject("MALFORMED", `field ${propertyLabel(key)} is an accessor`);
+    }
+  }
+  return { ok: true, code: "OWN_KEYS", reason: "own data properties", keys };
 }

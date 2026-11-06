@@ -4,8 +4,11 @@ import {
   CONFIG_FIELDS,
   LAB_ALLOWLIST,
   PROXY_ENV_KEYS,
+  ownDataKeys,
+  propertyLabel,
   readOwnValue,
   reject,
+  rejectProxy,
 } from "./allowlist.mjs";
 
 const LOCALHOST_ALIASES = new Set([
@@ -174,20 +177,26 @@ function classifyEnv(env) {
   if (env === null || typeof env !== "object" || Array.isArray(env)) {
     return reject("MALFORMED", "env must be a plain object");
   }
+  const opaque = rejectProxy(env, "env");
+  if (opaque) return opaque;
   if (Object.getPrototypeOf(env) !== Object.prototype) {
     return reject("MALFORMED", "env prototype is not Object.prototype");
   }
-  const keys = Object.keys(env);
-  if (keys.length === 0) {
+  const inspected = ownDataKeys(env);
+  if (!inspected.ok) return inspected;
+  if (inspected.keys.length === 0) {
     return { ok: true, code: "NO_PROXY_ENV", reason: "no proxy environment entries" };
   }
   const proxyKeys = new Set(PROXY_ENV_KEYS);
-  for (const key of keys) {
-    if (proxyKeys.has(key) || /proxy/i.test(key)) {
+  for (const key of inspected.keys) {
+    if (typeof key === "string" && (proxyKeys.has(key) || /proxy/i.test(key))) {
       return reject("PROXY_ENV", `environment entry ${key} can redirect traffic`);
     }
   }
-  return reject("UNKNOWN_FIELD", `environment entry ${keys[0]} is not allowed`);
+  return reject(
+    "UNKNOWN_FIELD",
+    `environment entry ${propertyLabel(inspected.keys[0])} is not allowed`,
+  );
 }
 
 function classifyDatadir(value) {
@@ -230,12 +239,17 @@ export function validateConfiguration(config) {
   if (config === null || typeof config !== "object" || Array.isArray(config)) {
     return reject("MALFORMED", "configuration must be a plain object");
   }
+  const opaque = rejectProxy(config, "configuration");
+  if (opaque) return opaque;
   if (Object.getPrototypeOf(config) !== Object.prototype) {
     return reject("MALFORMED", "configuration prototype is not Object.prototype");
   }
-  const keys = Object.keys(config);
-  for (const key of keys) {
-    if (!CONFIG_FIELDS.includes(key)) return reject("UNKNOWN_FIELD", `field ${key} is not allowed`);
+  const inspected = ownDataKeys(config);
+  if (!inspected.ok) return inspected;
+  for (const key of inspected.keys) {
+    if (typeof key !== "string" || !CONFIG_FIELDS.includes(key)) {
+      return reject("UNKNOWN_FIELD", `field ${propertyLabel(key)} is not allowed`);
+    }
   }
   const snap = {};
   for (const key of CONFIG_FIELDS) {

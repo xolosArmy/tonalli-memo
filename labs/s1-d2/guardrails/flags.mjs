@@ -1,6 +1,6 @@
 // Laboratory flags. They do not change productive feature flags.
 
-import { readOwnValue, reject } from "./allowlist.mjs";
+import { ownDataKeys, propertyLabel, readOwnValue, reject, rejectProxy } from "./allowlist.mjs";
 
 export const LAB_FLAGS = Object.freeze([
   "socialV2",
@@ -25,16 +25,19 @@ export function parseLabFlags(input) {
   if (typeof input !== "object" || Array.isArray(input)) {
     return { ...reject("MALFORMED", "flag configuration must be a plain object"), flags: safe };
   }
+  const opaque = rejectProxy(input, "flag configuration");
+  if (opaque) return { ...opaque, flags: safe };
   if (Object.getPrototypeOf(input) !== Object.prototype) {
     return {
       ...reject("MALFORMED", "flag prototype is not Object.prototype"),
       flags: safe,
     };
   }
-  const keys = Object.keys(input);
-  for (const key of keys) {
-    if (!LAB_FLAGS.includes(key)) {
-      return { ...reject("UNKNOWN_FLAG", `unknown flag ${key}`), flags: safe };
+  const inspected = ownDataKeys(input);
+  if (!inspected.ok) return { ...inspected, flags: safe };
+  for (const key of inspected.keys) {
+    if (typeof key !== "string" || !LAB_FLAGS.includes(key)) {
+      return { ...reject("UNKNOWN_FLAG", `unknown flag ${propertyLabel(key)}`), flags: safe };
     }
   }
   const snapshot = {};
