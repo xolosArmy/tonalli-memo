@@ -58,8 +58,8 @@ La precedencia dentro de una URL no exacta es: carácter prohibido, credenciales
 
 S1-B no está autorizado. La revisión técnica de Tepoztli deja estas condiciones para un acta futura. Este directorio no las implementa.
 
-- **H-1.** El adaptador de S1-B debe exigir campos obligatorios explícitos. Un campo ausente no puede usarse como evidencia de seguridad.
-- **H-2.** S1-B no debe aceptar una capacidad `connect` invocable como si su presencia fuera una aprobación para conectar.
+- **H-1.** El adaptador contiene una capacidad `connect` invocable. `ALLOWLISTED_OFFLINE` nunca constituye autorización para utilizarla.
+- **H-2.** La ausencia de campos explícitos del adaptador no demuestra seguridad. S1-B deberá exigir los campos obligatorios y validar sus valores.
 
 ## REG-11B, no autorizado
 
