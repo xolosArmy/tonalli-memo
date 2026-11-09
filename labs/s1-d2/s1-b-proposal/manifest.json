@@ -1,0 +1,50 @@
+{
+  "schema": "tonalli-s1-b-documentary-manifest/v1",
+  "scope": "Documentation only; no runtime evidence; no implementation authorized.",
+  "base_sha": "228d1f036643ca9be8ba85e91f8200536f3242da",
+  "excludes": [
+    "manifest.json"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4387,
+      "sha256": "ddf5399dbfbfd9732313f5f7e447905082451a734e4fd48b1edc690207b4ac3c"
+    },
+    {
+      "path": "adapter-contract.md",
+      "bytes": 11407,
+      "sha256": "94c36309c7a135082fc546b492832ec5bd3b06aac247b7a9b31a4091505c33ca"
+    },
+    {
+      "path": "isolation-architecture.md",
+      "bytes": 11581,
+      "sha256": "30833083f2bb828e31a6ef2abe1fa2d761a3f9a84c919f451fba8573740c2e43"
+    },
+    {
+      "path": "references-and-decisions.md",
+      "bytes": 19918,
+      "sha256": "47634856f1b4bc03c4457c11ba58f79a5f33e4008b5bcd1c45949899ea39fce4"
+    },
+    {
+      "path": "reg11b-matrix.md",
+      "bytes": 13231,
+      "sha256": "7664767d1ec97700b3b3b51781ed49d725fe5f97ec1f5451b593ec3b939c4a69"
+    },
+    {
+      "path": "seventh-act-proposal.md",
+      "bytes": 12033,
+      "sha256": "1249e2dafa628465a056da4f90fac2bddce65bbe96925cd69c842b73587dab3e"
+    },
+    {
+      "path": "sources.json",
+      "bytes": 37959,
+      "sha256": "f3e205006082b49642a3848d3129bf262a8f63d979f15f906a2f3ef87616693b"
+    },
+    {
+      "path": "suspension-rollback-evidence.md",
+      "bytes": 7847,
+      "sha256": "a32a2a3d800b755a6b9f6ccdd5bfed0911e3ce0540d248719a7fe4718e17978f"
+    }
+  ]
+}

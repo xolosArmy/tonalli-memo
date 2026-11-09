@@ -1,0 +1,95 @@
+{
+  "schema": "tonalli-s1-b-stage1-infrastructure-manifest/v1",
+  "scope": "Offline stage-1 artifacts only. No runtime evidence. REG-11B was not run.",
+  "acta": "6744011208",
+  "s1a_head": "7d5b91283085871565e784c717ddc14b6736af46",
+  "design_head": "a0257480cf9c12f8ee8df71408f276f42b8ee463",
+  "historical_main": "228d1f036643ca9be8ba85e91f8200536f3242da",
+  "import_commit": "287ebd51c4446cb6be9f2d5b051b86da5577a818",
+  "implementation_commit": "6ba8cd9da7358d8315580c62ad6ec411dff19e2b",
+  "excludes": [
+    "manifest.json"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1820,
+      "sha256": "583c0d80d732668dd6f3870fb4898bbf8b7b8e6729710ffc54aa9c97633767a9"
+    },
+    {
+      "path": "decisions.mjs",
+      "bytes": 350,
+      "sha256": "a2754a0880e490832c5e707d5273c8f52937a202d47f34bcb43fbd3a15064ee4"
+    },
+    {
+      "path": "fixtures.mjs",
+      "bytes": 2140,
+      "sha256": "9fb12c78adf38c68f24a769fcf99adedb4be7a51bb9aa0c681a4788a379f03a3"
+    },
+    {
+      "path": "h1-separation.mjs",
+      "bytes": 1189,
+      "sha256": "dddfed349c77139dfacff844ddd6e7d5450c094514cc2184eacda6b54f37bba2"
+    },
+    {
+      "path": "h2-schema.mjs",
+      "bytes": 8246,
+      "sha256": "c684be006a221a06c5c2fac2b76feb4dc3db1523614fec464c09942ad899757a"
+    },
+    {
+      "path": "inert-script.mjs",
+      "bytes": 456,
+      "sha256": "99b2bd7cc7f68e49c72266f62b9221da2de26b7c19e23fbbccd5485af4a0e0be"
+    },
+    {
+      "path": "inventory.mjs",
+      "bytes": 3847,
+      "sha256": "f22a3c3fb947b259413f4b5084834e7610984bf9b89cdca193dfe436c5aa7a58"
+    },
+    {
+      "path": "offline.test.mjs",
+      "bytes": 9253,
+      "sha256": "6081ef10f623a25d2a72e8dde87a655ee7a7beabfd6c09e6d136d6b63adcedfb"
+    },
+    {
+      "path": "preflight-plan.mjs",
+      "bytes": 3448,
+      "sha256": "e0481c24042cafed4f6947b0a6c2ad809daf0d21bb9fa526d0b92252a1c8211c"
+    },
+    {
+      "path": "procedures/suspension-rollback-custody.md",
+      "bytes": 2201,
+      "sha256": "5153f3f34388f90810cdd9477b9bc8442642e9c1da0a227dd11be7ddd6618bb5"
+    },
+    {
+      "path": "provenance.md",
+      "bytes": 3063,
+      "sha256": "2773f827066004dad2c9a4be0b2b5a4fed36094da0dcb8076fa8aad1c920abda"
+    },
+    {
+      "path": "scripts/prepare-confinement.mjs",
+      "bytes": 100,
+      "sha256": "7d73449133df64cef00ba82a5813dbf58b1939212c3b633d9e86de946a53bce8"
+    },
+    {
+      "path": "scripts/prepare-namespace.mjs",
+      "bytes": 98,
+      "sha256": "ea3cde31cad8f40d79173ac45869ed6a881299d6931ba4cdaf71a6c886545522"
+    },
+    {
+      "path": "scripts/prepare-network-policy.mjs",
+      "bytes": 103,
+      "sha256": "60af871794c7d531c61162a42aa5c53fad556f0f61069bdb7c182a289d103b8e"
+    },
+    {
+      "path": "templates/README.md",
+      "bytes": 523,
+      "sha256": "e07b08fac0954aa67dec7d9a20de422e4da078fcaa8cefc4b29d83263a3703c2"
+    },
+    {
+      "path": "templates/bitcoin-abc-0.34.2-chronik.regtest.conf.template",
+      "bytes": 1697,
+      "sha256": "5567e290ba7fd49e00c60decad0dfd9a5d16e29de4e82c6208dea3f4e602bfd2"
+    }
+  ]
+}
