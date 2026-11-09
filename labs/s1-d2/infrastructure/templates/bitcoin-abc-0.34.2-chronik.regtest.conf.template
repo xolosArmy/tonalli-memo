@@ -1,0 +1,56 @@
+# INERT_TEMPLATE=true
+# APPLIED=false
+# DO_NOT_INSTALL=true
+# Octava Acta 6744011208. This file is not bitcoin.conf and authorizes no process start.
+# Bitcoin ABC 0.34.2 with integrated Chronik. One process, one unapplied template.
+# rpcbind/rpcport/rpcallowip are RPC settings. They are not a P2P bind= line.
+# No P2P bind is present. No rpcuser, rpcpassword, rpcauth, or cookie is present.
+# Backend, executable hash, datadir measurement, genesis approval, and broker stay pending.
+
+# [regtest] placement is reserved for a future generator. It is not installed here.
+
+chain=regtest
+server=1
+daemon=0
+
+# RPC candidate. Not permission to connect. D-05 has not authorized live use.
+rpcbind=127.0.0.1:19443
+rpcport=19443
+rpcallowip=127.0.0.1/32
+
+# Chronik candidate, same process. Not a separate service and not permission to connect.
+chronik=1
+chronikbind=127.0.0.1:19442
+chronikelectrumpeersvalidationinterval=0
+
+# P2P stays off in the template. connect=0 is the negative form, not a peer address.
+networkactive=0
+listen=0
+connect=0
+maxconnections=0
+dns=0
+dnsseed=0
+fixedseeds=0
+forcednsseed=0
+discover=0
+listenonion=0
+onion=0
+proxy=0
+natpmp=0
+i2pacceptincoming=0
+rest=0
+avalanche=0
+
+disablewallet=1
+walletbroadcast=0
+persistmempool=0
+
+# Candidate paths from the offline allowlist. Identity of the files is not measured here.
+# datadir=/home/xolosarmy/xolosarmy-regtest/data
+# executable=/home/xolosarmy/bitcoin-abc-0.34.2/bin/bitcoind
+
+# PENDING_D-02 namespace and network-policy backend
+# PENDING_D-03 executable SHA-256
+# PENDING_D-04 datadir owner, mode, and mount measurement
+# PENDING_D-05 live use of the candidate endpoints and genesis
+# PENDING_D-06 broker API and RPC authentication ACL
