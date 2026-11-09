@@ -12,7 +12,11 @@ El siguiente texto se propone para revisión de Fernando y revisión técnica in
 
 ### 1. Autoridad, referencias y límites
 
-Repositorio: `xolosArmy/tonalli-memo`. Autoridad de decisión: **Fernando**, responsable del proyecto. Fecha/hora efectiva de adopción, enlace del registro, PR documental y SHA exacto evaluado: **PENDIENTES DE DECISIÓN EXPRESA Y REGISTRO**. No asumir fecha retroactiva.
+Repositorio: `xolosArmy/tonalli-memo`. Autoridad exclusiva para aprobar avances: **Fernando**, responsable del proyecto. Fecha/hora efectiva de adopción, enlace del registro, PR documental y SHA exacto evaluado: **PENDIENTES DE DECISIÓN EXPRESA Y REGISTRO**. No asumir fecha retroactiva.
+
+**Distribución de funciones:** Antigravity es el autor técnico del expediente S1-B según la atribución del encargo; Codex es revisor independiente automatizado siempre que la ejecución revisora no haya participado en la elaboración del contenido revisado; Tepoztli puede aportar revisión documental independiente complementaria cuando corresponda, con informe y alcance identificados. Ninguno de estos roles técnicos tiene autoridad para aprobar avances: esa decisión corresponde exclusivamente a Fernando.
+
+La atribución del encargo no borra la procedencia material: el HEAD documental de referencia `b0dd61769a822926871aa14623ef4fd31318f5e2` y estas correcciones fueron elaborados/materializados por la sesión redactora de Codex registrada en el historial de trabajo. Esa sesión no se computa como revisor independiente. La revisión automatizada solicitada a una ejecución distinta en GitHub debe acreditar ausencia de participación en la elaboración; el nombre de producto o la cuenta publicadora no bastan para demostrar independencia. No se atribuye a Tepoztli una revisión S1-B aún no documentada.
 
 Se reconoce la [Sexta Acta 6709563778](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6709563778), que aceptó la salida técnica **offline** de S1-A en PR #43, SHA `7d5b91283085871565e784c717ddc14b6736af46`, con base `228d1f036643ca9be8ba85e91f8200536f3242da`. El código auditado por Tepoztli fue `38f16abe99f7fb229fa4eb23b1c73b239b4ab22b`; los cambios posteriores hasta el HEAD aceptado fueron documentales. El cierre no autorizó merge, S1-B ni REG-11B.
 
@@ -21,6 +25,12 @@ Se conservan como referencias sin incorporarlas: RFC-0001 PR #40 `762582248fb183
 ### 2. Objeto documental propuesto
 
 Evaluar arquitectura de aislamiento, contrato de adaptadores, matriz negativa REG-11B, límites operativos y procedimiento de suspensión/rollback/custodia bajo `labs/s1-d2/s1-b-proposal/`. La preparación no modifica código productivo, workflows, RFC ni matriz, y no incorpora implementaciones de PR Draft anteriores. La aprobación eventual de este expediente tendrá efecto documental únicamente.
+
+**Integración futura propuesta, no ejecutada:** tras otra orden expresa, derivar una rama de implementación nueva del HEAD inmutable S1-A `7d5b91283085871565e784c717ddc14b6736af46`, preservándolo como ancestro y conservando los nueve archivos originales con sus blobs exactos. Incorporar después, en un commit documental separado, únicamente el subárbol de este expediente desde el HEAD completo revisado del PR #44. No hacer merge de #43 o #44 a `main` para ello ni aplicar solo el delta correctivo de #44 sin sus documentos preexistentes. Una alternativa de importación sobre otra base aprobada exige igualdad exacta de los blobs/delta S1-A, mapa de procedencia y revisión de cualquier conflicto antes de aceptarse como equivalente.
+
+La secuencia reproducible I-01–I-05 de [referencias y decisiones](references-and-decisions.md) fija A/D/M, objetos y comparaciones de cada paso. REG-11A histórico se conserva intacto en un checkout de reproducción de A con inventario y refs históricos explícitos. La rama ampliada requiere una suite/inventario cerrados separados, trazados a las aserciones originales y revisados sin borrar o debilitar controles. No se atribuye a la suite original una corrida verde sobre un árbol con nuevos documentos. Toda nueva evidencia identifica su SHA y alcance; no reescribe la evidencia aceptada de S1-A.
+
+Reutilizar guardrails offline preserva continuidad y trazabilidad, pero no implementa aislamiento efectivo de red/SO o adaptadores ni satisface H-1/H-2 runtime. El SHA combinado resultante debe recibir nueva revisión independiente y decisión expresa de Fernando antes del avance correspondiente. Ninguna operación de integración, modificación de suites o ejecución de pruebas se realiza por esta propuesta documental.
 
 Se proponen los siguientes requisitos para una futura orden operativa:
 
@@ -44,7 +54,7 @@ REG-11B se mantiene **NO AUTORIZADA / NO EJECUTADA**. La matriz propuesta contie
 
 La futura aceptación exige dos repeticiones limpias autorizadas, evidencia íntegra, cero conexiones no autorizadas, exactamente los dos listeners, cero peers y comprobaciones efectivas de H-1/H-2, suspensión y cierre. Un caso omitido, observación perdida, fallo o evidencia inconclusa impide aceptación. REG-11A y CI verde no sustituyen estos resultados.
 
-Se aplica la [resolución neutral 6709455572](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6709455572): puede revisar una persona o IA independiente de la autoría; debe documentar SHA, métodos, hallazgos y límites. Codex autor de este expediente no cuenta como su propio revisor independiente. Un resultado favorable no autoriza por sí mismo la fase; Fernando decide expresamente con riesgos y alcance.
+Se aplica la [resolución neutral 6709455572](https://github.com/xolosArmy/tonalli-memo/pull/40#issuecomment-6709455572): puede revisar una persona o IA independiente de la elaboración; debe documentar SHA completo, métodos, hallazgos, participación y límites. **No se exige revisión humana adicional por el solo hecho de utilizar IA.** El rol de autor técnico atribuido a Antigravity y la participación material de una sesión redactora deben distinguirse de la ejecución de Codex que revise independientemente. Tepoztli puede complementar esa revisión cuando exista evidencia identificada. Un recibo favorable sobre un HEAD anterior no cubre estas correcciones ni una futura integración; se requiere nueva revisión del SHA resultante. Solo Fernando decide y autoriza expresamente avances, con riesgos y alcance; ningún revisor concede ese permiso.
 
 ### 5. Suspensión, rollback y evidencia
 

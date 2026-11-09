@@ -23,8 +23,8 @@
     },
     {
       "path": "references-and-decisions.md",
-      "bytes": 10132,
-      "sha256": "76c7c7ec4edd6ece5a63702d7197321dac95b355e4afcc2ef9c43dc8935cc2af"
+      "bytes": 19918,
+      "sha256": "47634856f1b4bc03c4457c11ba58f79a5f33e4008b5bcd1c45949899ea39fce4"
     },
     {
       "path": "reg11b-matrix.md",
@@ -33,8 +33,8 @@
     },
     {
       "path": "seventh-act-proposal.md",
-      "bytes": 8679,
-      "sha256": "7d1ab666aeea05f41d2af3727198ad16b0e7a206f1a8c98e31a8adffa2e74cbd"
+      "bytes": 12033,
+      "sha256": "1249e2dafa628465a056da4f90fac2bddce65bbe96925cd69c842b73587dab3e"
     },
     {
       "path": "sources.json",
