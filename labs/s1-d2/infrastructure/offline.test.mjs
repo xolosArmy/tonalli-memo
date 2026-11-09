@@ -100,6 +100,46 @@ test("missing, extra, proxy, and accessor fields are rejected", () => {
   assert.equal(validateClosedSchema(accessor).code, "MALFORMED");
 });
 
+test("revoked proxies fail closed in descriptors and nested fields", () => {
+  const revoked = (target) => {
+    const { proxy, revoke } = Proxy.revocable(target, {});
+    revoke();
+    return proxy;
+  };
+  const cases = [
+    ["descriptor", () => revoked(offlineDescriptorFixture())],
+    ["env", () => ({ ...offlineDescriptorFixture(), env: revoked({}) })],
+    ["permissions", () => ({ ...offlineDescriptorFixture(), permissions: revoked({}) })],
+    ["flags", () => ({ ...offlineDescriptorFixture(), flags: revoked({}) })],
+    ["fallbackEndpoints", () => ({ ...offlineDescriptorFixture(), fallbackEndpoints: revoked([]) })],
+  ];
+  for (const [label, make] of cases) {
+    const result = validateClosedSchema(make());
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, "MALFORMED", label);
+    assert.equal(result.permission, "NOT_AUTHORIZED", label);
+    assert.equal(result.operational, false, label);
+  }
+});
+
+test("revoked proxies in preflight plans and lists return structured rejection", () => {
+  const revoked = (target) => {
+    const { proxy, revoke } = Proxy.revocable(target, {});
+    revoke();
+    return proxy;
+  };
+  const cases = [
+    ["plan", () => revoked(inertPreflightFixture())],
+    ["listeners", () => ({ ...inertPreflightFixture(), listeners: revoked([]) })],
+    ["peers", () => ({ ...inertPreflightFixture(), peers: revoked([]) })],
+  ];
+  for (const [label, make] of cases) {
+    const result = validatePreflightPlan(make());
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, "MALFORMED", label);
+  }
+});
+
 test("omitted security is not treated as safe and pending decisions stay pending", () => {
   const coerced = offlineDescriptorFixture();
   coerced.followRedirects = "false";

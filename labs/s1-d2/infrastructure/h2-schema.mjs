@@ -45,11 +45,15 @@ export const DESCRIPTOR_FIELDS = Object.freeze([
 ]);
 
 function readClosed(input, label, requiredKeys) {
-  if (input === null || typeof input !== "object" || Array.isArray(input)) {
+  if (input === null || typeof input !== "object") {
     return reject("MALFORMED", `${label} must be a plain object`);
   }
+  // Node's Array.isArray throws on a revoked Proxy: inspect its identity first.
   const opaque = rejectProxy(input, label);
   if (opaque) return opaque;
+  if (Array.isArray(input)) {
+    return reject("MALFORMED", `${label} must be a plain object`);
+  }
   if (Object.getPrototypeOf(input) !== Object.prototype) {
     return reject("MALFORMED", `${label} prototype is not Object.prototype`);
   }

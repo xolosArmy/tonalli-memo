@@ -36,11 +36,15 @@ function requireEmptyList(value, label) {
 }
 
 export function validatePreflightPlan(input) {
-  if (input === null || typeof input !== "object" || Array.isArray(input)) {
+  if (input === null || typeof input !== "object") {
     return reject("MALFORMED", "plan must be a plain object");
   }
+  // Guard against revoked Proxies before Array.isArray can throw.
   const opaque = rejectProxy(input, "plan");
   if (opaque) return opaque;
+  if (Array.isArray(input)) {
+    return reject("MALFORMED", "plan must be a plain object");
+  }
   if (Object.getPrototypeOf(input) !== Object.prototype) {
     return reject("MALFORMED", "plan prototype is not Object.prototype");
   }
